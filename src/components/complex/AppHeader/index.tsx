@@ -1,0 +1,103 @@
+import React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+    WP,
+    PFColors,
+    PFFontSize,
+    PFFonts,
+} from '../../../shared/exporter';
+import { svgIcon } from '../../../assets/svg';
+import { useNavigation } from '@react-navigation/native';
+
+interface AppHeaderProps {
+    title?: string;
+    leftIcon?: boolean;
+    rightIcon?: boolean;
+    clickBackIcon?: () => void;
+    desc?: string;
+    subtitle?: string;
+}
+const AppHeader: React.FC<AppHeaderProps> = ({
+    title,
+    clickBackIcon,
+    leftIcon = true,
+    rightIcon = false,
+    subtitle,
+    desc
+}) => {
+    const navigation = useNavigation();
+
+    return (
+        <>
+            <View style={styles.container}>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => (clickBackIcon ? clickBackIcon() : navigation.goBack())}>
+                    {leftIcon ? svgIcon.BackArrow : <View style={styles.emptyView} />}
+                </TouchableOpacity>
+                <Text style={styles.textStyle}>{title}</Text>
+
+                {rightIcon ? (
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => { }}>
+                        {/* {svgIcon.NotifyIcon} */}
+                    </TouchableOpacity>
+                ) : (
+                    <View style={styles.emptyView} />
+                )}
+            </View>
+            <Text style={styles.subtitle}>{subtitle}</Text>
+            <Text style={styles.desc}>{desc}</Text>
+
+
+        </>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: WP('2'),
+        paddingHorizontal: WP('4'),
+        justifyContent: 'space-between',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.17,
+        shadowRadius: 3.05,
+        elevation: 4,
+        backgroundColor: PFColors.Standard.White,
+        height: WP('12')
+    },
+    textStyle: {
+        color: PFColors.Standard.Black,
+        fontSize: PFFontSize.FONT_SIZE_16,
+        fontFamily: PFFonts.Foundation.Regular,
+    },
+    logoStyle: {
+        width: WP('25'),
+        height: WP('6'),
+    },
+    emptyView: {
+        width: WP('6'),
+        height: WP('6'),
+    },
+    subtitle: {
+        color: PFColors.Standard.Black,
+        fontSize: PFFontSize.FONT_SIZE_16,
+        fontFamily: PFFonts.Foundation.SemiBold,
+        paddingHorizontal: WP('4'),
+        paddingVertical: WP('2'),
+        paddingTop: WP('4')
+
+    },
+    desc: {
+        color: PFColors.Standard.Black,
+        fontSize: PFFontSize.FONT_SIZE_14,
+        fontFamily: PFFonts.Foundation.Regular,
+        paddingHorizontal: WP('4'),
+    }
+});
+
+export { AppHeader };
