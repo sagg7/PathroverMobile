@@ -4,19 +4,20 @@ import styles from './styles';
 import { AppButton, AppHeader, AppInput, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Formik } from 'formik';
-import { loginInitialObj, loginValidation } from '../../../shared/utils/validations';
-import { Routes, formatPhoneNumber, isIOS, useKeyboardListener } from '../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
+import { forgotPassValidation, forgotPasswordInitialObject, useKeyboardListener, isIOS, formatPhoneNumber } from '../../../shared/exporter';
 
-const LoginScreen = ({ }) => {
+const ForgotPassword = ({ }) => {
   const keyboardVisible = useKeyboardListener()
   const route = useRoute()
-  const navigation = useNavigation()
   const { isEmail } = route?.params
 
   return (
     <MainWrapper>
-      <AppHeader title="Login" subtitle="Login" desc="Enter your email and password" />
+      <AppHeader title="Forgot Password"
+        subtitle='Forgot Password'
+        desc='Enter your email address to recover your password'
+      />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
         enableOnAndroid={true}
@@ -29,8 +30,8 @@ const LoginScreen = ({ }) => {
         <View >
           <View style={styles.formikContainer}>
             <Formik
-              initialValues={loginInitialObj}
-              validationSchema={loginValidation(isEmail)}
+              initialValues={forgotPasswordInitialObject}
+              validationSchema={forgotPassValidation(isEmail)}
               onSubmit={values => {
                 // Handle login submission
               }}>
@@ -57,18 +58,9 @@ const LoginScreen = ({ }) => {
 
                     />
                   }
-                  <AppInput
-                    placeholder="Password"
-                    value={values.password}
-                    onChangeText={handleChange('password')}
-                    touched={touched.password}
-                    errorMessage={errors.password}
-                    rightIcon
-                    secureTextEntry
-                  />
-                  <Text onPress={() => navigation.navigate(Routes.ForgotPassword, { isEmail: isEmail })} style={styles.forgotText}>Forgot Password?</Text>
+
                   <View style={styles.divider} >
-                    <AppButton title="Login" handleClick={handleSubmit}
+                    <AppButton title="Continue" handleClick={handleSubmit}
                       // disabled={!(dirty && isValid)}
                       buttonStyle={styles.btnContainer(keyboardVisible)} />
                   </View>
@@ -83,4 +75,4 @@ const LoginScreen = ({ }) => {
   );
 };
 
-export default LoginScreen;
+export default ForgotPassword;

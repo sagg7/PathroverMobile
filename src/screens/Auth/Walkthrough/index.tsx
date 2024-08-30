@@ -1,14 +1,16 @@
-import { Alert, ImageBackground, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, StatusBar, Text, View } from 'react-native';
 import React, { useState } from 'react';
 import styles from './styles';
-import { MainWrapper } from '../../../components';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { APP_INTRO_SLIDES } from '../../../shared/utils/constant';
 import { svgIcon } from '../../../assets/svg';
+import { useDispatch } from 'react-redux';
+import { setIswalkthrough } from '../../../redux/auth/authSlice';
 
 
 const Walkthrough = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(null)
+  const dispatch = useDispatch()
 
   const renderItem = ({ item }: { item: (typeof APP_INTRO_SLIDES)[0] }) => (
     <ImageBackground style={styles.imageStyles} source={item.image}>
@@ -20,10 +22,10 @@ const Walkthrough = ({ navigation }) => {
   );
 
   const onDone = () => {
-    // dispatch(setIsWalkthrough());
+    dispatch(setIswalkthrough());
     // navigation.navigate(Routes.AuthStack);
     console.log("working done");
-    navigation.navigate("GetStarted")
+    // navigation.navigate("GetStarted")
 
   };
 

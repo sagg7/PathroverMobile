@@ -3,6 +3,12 @@ export const Routes = {
     LoginScreen: "Login",
     Walkthrough: "Walkthrough",
     GetStarted: "GetStarted",
-    ContinueAs: "ContinueAs"
+    ContinueAs: "ContinueAs",
+    SignupScreen: "SignupScreen",
+    SetPassword: "SetPassword",
+    ResetPassword: "ResetPassword",
+    ForgotPassword: "ForgotPassword",
+    VerifyOtp: "VerifyOtp",
+    AccountCreationSuccess: "AccountCreationSuccess"
 
 }

@@ -1,4 +1,11 @@
+import { Alert } from "react-native";
 import { appImages } from "../exporter";
+
+export function showAlert(type: string, des: string) {
+    Alert.alert(type, des);
+}
+
+export const BASE_URL = ""
 
 type IntroSlidesTypes = {
     key: number;
@@ -26,3 +33,15 @@ export const APP_INTRO_SLIDES: IntroSlidesTypes[] = [
         image: appImages.appIntroThree,
     },
 ];
+export const AuthSheetLoginObj = {
+    headerTitle: "Login",
+    btnEmailText: "Login With Email",
+    btnPhoneText: "Login With Phone",
+    isLogin: true
+}
+export const AuthSheetSignupObj = {
+    headerTitle: "Create new account",
+    btnEmailText: "Signup With Email",
+    btnPhoneText: "Signup With Phone",
+    isLogin: false
+}

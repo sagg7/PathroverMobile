@@ -43,7 +43,6 @@ const AppInput: React.FC<AppInputProps> = ({
   placeholder,
   value,
   onChangeText,
-  leftIcon,
   editable,
   errorMessage,
   touched,
@@ -82,7 +81,7 @@ const AppInput: React.FC<AppInputProps> = ({
     left: WP('3'),
     top: animatedIsFocused.interpolate({
       inputRange: [0, 2],
-      outputRange: [isIOS() ? 12 : 10, isIOS() ? -8 : 1],
+      outputRange: [isIOS() ? 17 : 10, isIOS() ? -8 : 1],
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
@@ -106,7 +105,7 @@ const AppInput: React.FC<AppInputProps> = ({
           inputContainerStyle,
         ]}>
 
-        <Animated.Text style={labelStyle}> {placeholder}</Animated.Text>
+        <Animated.Text style={labelStyle}>{placeholder}</Animated.Text>
         <TextInput
           value={value}
           editable={editable}
@@ -123,13 +122,14 @@ const AppInput: React.FC<AppInputProps> = ({
           onBlur={() => setFocused(false)}
           textAlignVertical={textAlignVertical}
         />
-        {rightIcon && (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => (icon ? rightIconPress() : setShowPass(!showPass))}>
-            {icon ? icon : showPass ? svgIcon.EyeIconOf : svgIcon.EyeIconOn}
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => (icon ? rightIconPress() : setShowPass(!showPass))}>
+          {rightIcon && focused && (
+            icon ? icon : showPass ? svgIcon.EyeIconOf : svgIcon.EyeIconOn
+          )}
+
+        </TouchableOpacity>
       </View>
       {touched && errorMessage && (
         <Text style={styles.errorTxtStyle}>{errorMessage}</Text>

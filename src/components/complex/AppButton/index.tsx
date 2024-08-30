@@ -34,9 +34,8 @@ function AppButton({
       activeOpacity={0.7}
       onPress={handleClick}
       style={[styles.buttonContainer(disabled, isSmall), buttonStyle]}>
-      {isEmpty && <View style={styles.emptyViewStyle} />}
-      <Text style={[styles.typeTextStyle, textStyle]}>{title}</Text>
       {icon ? icon : <View style={styles.emptyViewStyle} />}
+      <Text style={[styles.typeTextStyle, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -49,13 +48,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: WP('10'),
     paddingHorizontal: WP('5'),
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     backgroundColor: isDisabled ? PFColors.Standard.Disable : PFColors.Blue.Dark,
   }),
   typeTextStyle: {
     color: PFColors.Standard.White,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
+    paddingHorizontal: 10
   },
   emptyViewStyle: {
     width: WP('7'),

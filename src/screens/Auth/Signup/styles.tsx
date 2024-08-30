@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { PFColors, PFFontSize, PFFonts, WP, scrHeight } from '../../../shared/exporter';
+import { WP, scrHeight } from '../../../shared/exporter';
 
 const styles = StyleSheet.create({
     container: {
@@ -22,12 +22,5 @@ const styles = StyleSheet.create({
     heightStyle: {
         minHeight: scrHeight,
     },
-    forgotText: {
-        fontFamily: PFFonts.Foundation.SemiBold,
-        fontSize: PFFontSize.FONT_SIZE_14,
-        color: PFColors.Blue.Dark,
-        textAlign: "right",
-        paddingTop: 10
-    }
 });
 export default styles;

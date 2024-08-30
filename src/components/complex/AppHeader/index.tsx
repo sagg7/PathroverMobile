@@ -45,8 +45,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                     <View style={styles.emptyView} />
                 )}
             </View>
-            <Text style={styles.subtitle}>{subtitle}</Text>
-            <Text style={styles.desc}>{desc}</Text>
+            {subtitle &&
+                <>
+                    <Text style={styles.subtitle}>{subtitle}</Text>
+                    <Text style={styles.desc}>{desc}</Text>
+                </>
+            }
 
 
         </>
@@ -73,7 +77,7 @@ const styles = StyleSheet.create({
     textStyle: {
         color: PFColors.Standard.Black,
         fontSize: PFFontSize.FONT_SIZE_16,
-        fontFamily: PFFonts.Foundation.Regular,
+        fontFamily: PFFonts.Foundation.SemiBold,
     },
     logoStyle: {
         width: WP('25'),

@@ -2,11 +2,17 @@ import * as yup from 'yup';
 
 export const loginInitialObj = {
     email: "",
-    password: ""
+    password: "",
+    phone: ""
 }
 export const signupInitialObject = {
     email: "",
-    name: ""
+    name: "",
+    phone: ""
+}
+export const signupPasswordObj = {
+    password: "",
+    confirmPassword: ""
 }
 export const EditInitialObject = {
     username: "",
@@ -16,11 +22,10 @@ export const EditInitialObject = {
     zipcode: ""
 }
 export const forgotPasswordInitialObject = {
-    email: ""
+    email: "",
+    phone: ""
 }
-export const forgotUsernameInitialObject = {
-    mobileNo: ""
-}
+
 export const resetUsernameInitialObject = {
     username: "",
     confirmUsername: "",
@@ -43,42 +48,65 @@ export const deleteAccountInitial = {
     reason: ""
 }
 
-export const createValidationSchema = (role: any) => {
+export const createValidationSchema = (isEmail: boolean) => {
     const baseSchema = {
-        email: yup
+        name: yup
+            .string()
+            .required('Name Required')
+            .max(25, 'Maximum 25 Characters Allowed'),
+    };
+    if (isEmail) {
+        baseSchema.email = yup
             .string()
             .required('Email Required')
-            .email('Please provide a valid email address'),
+            .email('Please provide a valid email address')
+    } else {
+        baseSchema.phone = yup
+            .string()
+            .required('Phone No Required').max(14, 'Phone number must be exactly 10 digits.').min(14, "Phone number must be exactly 10 digits.")
+
+    }
+    return yup.object().shape(baseSchema);
+};
+export const loginValidation = (isEmail: boolean) => {
+    const loginScheme = {
         password: yup
             .string()
             .min(6, 'Password must be at least 6 characters')
-            .required('Password Required')
-            .max(25, 'Maximum 25 Characters Allowed'),
+            .required('Password Required').max(25, "Maximum 25 Characters Allowed"),
+    }
+    if (isEmail) {
+        loginScheme.email = yup
+            .string()
+            .required('Email Required')
+            .email('Please provide a valid email address')
+    } else {
+        loginScheme.phone = yup
+            .string()
+            .required('Phone No Required').max(14, 'Phone number must be exactly 10 digits.').min(14, "Phone number must be exactly 10 digits.")
 
-    };
-    return yup.object().shape(baseSchema);
-};
-export const loginValidation = yup.object().shape({
-    email: yup
-        .string()
-        .required('Email Required')
-        .email('Please provide a valid email address'),
-    password: yup
-        .string()
-        .min(6, 'Password must be at least 6 characters')
-        .required('Password Required').max(25, "Maximum 25 Characters Allowed"),
-});
+    }
+    return yup.object().shape(loginScheme)
+}
+export const forgotPassValidation = (isEmail: boolean) => {
+    const loginScheme = {
 
-export const forgotPassEmailValidation = yup.object().shape({
-    email: yup
-        .string()
-        .required('Email Required')
-        .email('Please provide a valid email address'),
-});
+    }
+    if (isEmail) {
+        loginScheme.email = yup
+            .string()
+            .required('Email Required')
+            .email('Please provide a valid email address')
+    } else {
+        loginScheme.phone = yup
+            .string()
+            .required('Phone No Required').max(14, 'Phone number must be exactly 10 digits.').min(14, "Phone number must be exactly 10 digits.")
 
-export const forgotPassNumValidation = yup.object().shape({
-    mobileNo: yup.string().required("Mobile Number Required").min(10, 'Mobile number must have atleast 10 digits').matches(/^\d+$/, 'Only Digits Allowed')
-});
+    }
+    return yup.object().shape(loginScheme)
+}
+
+
 
 export const resetPasswordVal = yup.object().shape({
     password: yup
@@ -98,7 +126,6 @@ export const deleteAccountValidation = yup.object().shape({
     reason: yup
         .string()
         .required('Reason Required'),
-
 });
 
 

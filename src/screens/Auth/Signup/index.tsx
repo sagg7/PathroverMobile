@@ -1,22 +1,23 @@
-import { Alert, Text, View } from 'react-native';
+import { View } from 'react-native';
 import React, { useRef } from 'react';
 import styles from './styles';
 import { AppButton, AppHeader, AppInput, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Formik } from 'formik';
-import { loginInitialObj, loginValidation } from '../../../shared/utils/validations';
-import { Routes, formatPhoneNumber, isIOS, useKeyboardListener } from '../../../shared/exporter';
+import { Routes, createValidationSchema, formatPhoneNumber, isIOS, signupInitialObject, useKeyboardListener } from '../../../shared/exporter';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const LoginScreen = ({ }) => {
+const SignupScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener()
-  const route = useRoute()
   const navigation = useNavigation()
+  const route = useRoute()
   const { isEmail } = route?.params
+  const formik = useRef()
+
 
   return (
     <MainWrapper>
-      <AppHeader title="Login" subtitle="Login" desc="Enter your email and password" />
+      <AppHeader title="Signup" subtitle="Create New Account" desc="Enter your name and email" />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
         enableOnAndroid={true}
@@ -29,13 +30,25 @@ const LoginScreen = ({ }) => {
         <View >
           <View style={styles.formikContainer}>
             <Formik
-              initialValues={loginInitialObj}
-              validationSchema={loginValidation(isEmail)}
+              innerRef={formik}
+              enableReinitialize
+              initialValues={signupInitialObject}
+              validationSchema={createValidationSchema(isEmail)}
               onSubmit={values => {
                 // Handle login submission
+                navigation.navigate(Routes.SetPassword, { values: values })
+
               }}>
               {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty, setFieldValue }) => (
                 <View style={{ alignSelf: 'center' }}>
+
+                  <AppInput
+                    placeholder="Full Name"
+                    value={values.name}
+                    onChangeText={handleChange('name')}
+                    touched={touched.name}
+                    errorMessage={errors.name}
+                  />
                   {isEmail ?
                     <AppInput
                       placeholder="Email"
@@ -48,6 +61,7 @@ const LoginScreen = ({ }) => {
                     <AppInput
                       placeholder="Phone No"
                       value={values.phone}
+                      // onChangeText={handleChange('phone')}
                       onChangeText={(text) => {
                         const formatted = formatPhoneNumber(text);
                         setFieldValue('phone', formatted);
@@ -57,18 +71,8 @@ const LoginScreen = ({ }) => {
 
                     />
                   }
-                  <AppInput
-                    placeholder="Password"
-                    value={values.password}
-                    onChangeText={handleChange('password')}
-                    touched={touched.password}
-                    errorMessage={errors.password}
-                    rightIcon
-                    secureTextEntry
-                  />
-                  <Text onPress={() => navigation.navigate(Routes.ForgotPassword, { isEmail: isEmail })} style={styles.forgotText}>Forgot Password?</Text>
                   <View style={styles.divider} >
-                    <AppButton title="Login" handleClick={handleSubmit}
+                    <AppButton title="Continue" handleClick={handleSubmit}
                       // disabled={!(dirty && isValid)}
                       buttonStyle={styles.btnContainer(keyboardVisible)} />
                   </View>
@@ -83,4 +87,4 @@ const LoginScreen = ({ }) => {
   );
 };
 
-export default LoginScreen;
+export default SignupScreen;

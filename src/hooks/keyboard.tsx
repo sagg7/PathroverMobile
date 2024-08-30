@@ -21,4 +21,4 @@ const useKeyboardListener = () => {
     return keyboardVisible;
 };
 
-export default useKeyboardListener;
+export { useKeyboardListener };
