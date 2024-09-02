@@ -5,6 +5,7 @@ import { appImages } from '../../../assets/images';
 import { AppButton, AuthBottomSheet } from '../../../components';
 import { useNavigation } from '@react-navigation/native';
 import { AuthSheetLoginObj, AuthSheetSignupObj, Routes } from '../../../shared/exporter';
+import { useSelector } from 'react-redux';
 
 const ContinueAs = ({ }) => {
   const navigation = useNavigation()
@@ -21,6 +22,7 @@ const ContinueAs = ({ }) => {
       setShowSheet(true)
     }, 500);
   }
+  const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
 
   const handleNavigationBtn = (isEmail: boolean) => {
     setShowSheet(false)
@@ -29,9 +31,7 @@ const ContinueAs = ({ }) => {
     } else {
       navigation.navigate(Routes.SignupScreen, { isEmail: isEmail })
     }
-
   }
-
 
   const renderItem = () => (
     <ImageBackground style={styles.imageStyles} source={appImages.continueAs}>

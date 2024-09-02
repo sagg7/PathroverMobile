@@ -9,11 +9,15 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 const SignupScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener()
+  let isValidForm = true;
   const navigation = useNavigation()
   const route = useRoute()
   const { isEmail } = route?.params
   const formik = useRef()
 
+  const handleContinueBtn = (values) => {
+    navigation.navigate(Routes.SetPassword, { values: values })
+  }
 
   return (
     <MainWrapper>
@@ -35,49 +39,52 @@ const SignupScreen = ({ }) => {
               initialValues={signupInitialObject}
               validationSchema={createValidationSchema(isEmail)}
               onSubmit={values => {
-                // Handle login submission
-                navigation.navigate(Routes.SetPassword, { values: values })
-
+                handleContinueBtn(values)
               }}>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty, setFieldValue }) => (
-                <View style={{ alignSelf: 'center' }}>
+              {({ handleChange, handleSubmit, values, errors, touched, isValid, setFieldValue }) => {
+                if (isValidForm) {
+                  isValid = false;
+                  isValidForm = false;
+                }
+                return (
+                  <View style={{ alignSelf: 'center' }}>
 
-                  <AppInput
-                    placeholder="Full Name"
-                    value={values.name}
-                    onChangeText={handleChange('name')}
-                    touched={touched.name}
-                    errorMessage={errors.name}
-                  />
-                  {isEmail ?
                     <AppInput
-                      placeholder="Email"
-                      value={values.email}
-                      onChangeText={handleChange('email')}
-                      touched={touched.email}
-                      errorMessage={errors.email}
+                      placeholder="Full Name"
+                      value={values.name}
+                      onChangeText={handleChange('name')}
+                      touched={touched.name}
+                      errorMessage={errors.name}
                     />
-                    :
-                    <AppInput
-                      placeholder="Phone No"
-                      value={values.phone}
-                      // onChangeText={handleChange('phone')}
-                      onChangeText={(text) => {
-                        const formatted = formatPhoneNumber(text);
-                        setFieldValue('phone', formatted);
-                      }}
-                      touched={touched.phone}
-                      errorMessage={errors.phone}
+                    {isEmail ?
+                      <AppInput
+                        placeholder="Email"
+                        value={values.email}
+                        onChangeText={handleChange('email')}
+                        touched={touched.email}
+                        errorMessage={errors.email}
+                      />
+                      :
+                      <AppInput
+                        placeholder="Phone No"
+                        value={values.phone}
+                        onChangeText={(text) => {
+                          const formatted = formatPhoneNumber(text);
+                          setFieldValue('phone', formatted);
+                        }}
+                        touched={touched.phone}
+                        errorMessage={errors.phone}
 
-                    />
-                  }
-                  <View style={styles.divider} >
-                    <AppButton title="Continue" handleClick={handleSubmit}
-                      // disabled={!(dirty && isValid)}
-                      buttonStyle={styles.btnContainer(keyboardVisible)} />
+                      />
+                    }
+                    <View style={styles.divider} >
+                      <AppButton title="Continue" handleClick={handleSubmit}
+                        disabled={!isValid}
+                        buttonStyle={styles.btnContainer(keyboardVisible)} />
+                    </View>
                   </View>
-                </View>
-              )}
+                );
+              }}
             </Formik>
 
           </View>

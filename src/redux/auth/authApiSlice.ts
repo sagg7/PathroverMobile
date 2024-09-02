@@ -1,4 +1,5 @@
-import {apiSlice} from '../api/apiSlice';
+import { apiSlice } from '../api/apiSlice';
+
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
@@ -20,8 +21,8 @@ export const authApiSlice = apiSlice.injectEndpoints({
   
     resetPassword: builder.mutation({
       query: data => ({
-        url: 'registrations/reset_password',
-        method: 'POST',
+        url: 'passwords/reset_password',
+        method: 'PUT',
         body: data,
       }),
     }),
@@ -33,7 +34,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
     }),
   
-     verifyOtpNum: builder.mutation({
+     verifyOtp: builder.mutation({
       query: data => ({
         url: 'otps/verify_otp',
         method: 'POST',
@@ -64,11 +65,6 @@ export const {
   useSignUpMutation,
   useRefreshTokenMutation,
 	useLogoutUserMutation,
-	useForgotUsernameMutation,
-  useGoogleLoginMutation,
-  useVerifyOtpEmailMutation,
-  useVerifyOtpNumMutation,
+  useVerifyOtpMutation,
   useResetPasswordMutation,
-  useResetUsernameMutation,
-  useHelpCenterQueryMutation
 } = authApiSlice;

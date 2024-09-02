@@ -4,8 +4,8 @@ import { appImages } from "../exporter";
 export function showAlert(type: string, des: string) {
     Alert.alert(type, des);
 }
-
-export const BASE_URL = ""
+export const UNEXPECTED_ERROR = "something went wrong, Please try later."
+export const BASE_URL = "https://d77c-125-209-73-146.ngrok-free.app/api/v1/"
 
 type IntroSlidesTypes = {
     key: number;
@@ -44,4 +44,8 @@ export const AuthSheetSignupObj = {
     btnEmailText: "Signup With Email",
     btnPhoneText: "Signup With Phone",
     isLogin: false
+}
+export const LOGIN_TYPE_TEXT = {
+    EMAIL: "email address",
+    PHONE: "phone number"
 }

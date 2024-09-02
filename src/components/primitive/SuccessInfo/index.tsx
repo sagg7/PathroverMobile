@@ -36,6 +36,7 @@ const SuccessInfo: React.FC<SuccessInfoProps> = ({
       <AppButton
         title={buttonText || ''}
         handleClick={() => navigation.replace(Routes.ContinueAs)}
+        buttonStyle={styles.bottomButton}
       />
     </View>
   );
@@ -63,6 +64,9 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_20,
     fontFamily: PFFonts.Foundation.Medium
   },
+  bottomButton: {
+    bottom: 40
+  }
 
 });
 

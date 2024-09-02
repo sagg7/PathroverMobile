@@ -1,80 +1,65 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import {
   AppHeader,
+  AppLoader,
   MainWrapper,
 } from '../../../components';
 import styles from './styles';
 import {
-  Routes, showAlert,
+  Routes, UNEXPECTED_ERROR, removeNonNumbers, showAlert,
 } from '../../../shared/exporter';
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
-// import {
-//   useForgotPasswordMutation,
-//   useForgotUsernameMutation,
-//   useVerifyOtpEmailMutation,
-//   useVerifyOtpNumMutation,
-// } from '../../../redux/auth/authApiSlice';
+import { useVerifyOtpMutation } from '../../../redux/auth/authApiSlice';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-const VerifyOtpScreen = ({ route }) => {
+
+const VerifyOtpScreen = ({ }) => {
   const [value, setValue] = useState('');
+  const [verifyOtp, { isLoading, data }] = useVerifyOtpMutation()
+  const navigation = useNavigation()
   const CELL_COUNT = 4;
   const [codeFieldProps, getCellOnLayoutHandler] = useClearByFocusCell({
     value,
     setValue,
   });
   const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
-  const [seconds, setSeconds] = useState(30);
-  // const { isEmail } = route?.params; || false
+  const route = useRoute()
+  const { isEmail, selectedValue } = route?.params
 
   useEffect(() => {
     if (value.length > 3) {
-      // onPressVerify();
+      onPressVerify();
     }
   }, [value]);
 
-  useEffect(() => {
-    if (seconds > 0) {
-      const timerId = setTimeout(() => {
-        setSeconds(seconds - 1);
-      }, 1000);
-
-      return () => clearTimeout(timerId);
-    }
-  }, [seconds]);
-
-
 
   const onPressVerify = async () => {
-    if (value === '') {
-      showAlert('Alert', 'Please enter code.');
-    } else {
-      try {
-        const data = new FormData();
-        data.append(isNumber ? 'phone_no' : 'email', userValue);
-        data.append('otp', value);
-        console.log('Value', data);
-        const resp = isNumber
-          ? await verifyOtpNum(data)
-          : await verifyOtpEmail(data);
-
-        if (resp?.data) {
-          const routeName = isPassword
-            ? Routes.ResetPassword
-            : Routes.ResetUsername;
-          navigation.navigate(routeName, {
-            value: userValue,
-          });
-        } else {
-          showAlert('Error', resp?.error?.data?.message);
+    try {
+      const obj = {
+        user: {
+          ...(isEmail && { email: selectedValue }),
+          ...(!isEmail && { phone_number: removeNonNumbers(selectedValue) }),
+          otp: value
         }
-      } catch (e) {
-        showAlert('Error', UNEXPECTED_ERROR);
       }
+
+      const resp = await verifyOtp(obj);
+      if (resp?.data) {
+        navigation.replace(Routes.ResetPassword, {
+          value: selectedValue,
+          isEmail: isEmail
+        });
+      } else {
+        showAlert("Error", resp?.error?.data?.error || UNEXPECTED_ERROR)
+      }
+
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
     }
   };
 
@@ -108,6 +93,7 @@ const VerifyOtpScreen = ({ route }) => {
           )}
         />
       </View>
+      {isLoading && <AppLoader />}
 
     </MainWrapper>
   );

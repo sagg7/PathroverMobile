@@ -9,7 +9,7 @@ const AccountCreationSuccess = () => {
       <SuccessInfo
         icon={svgIcon.GreenCheck}
         // title="Successfully Created"
-        buttonText="Continue"
+        buttonText="Next"
         description={`Your account is registered\nsuccessfully`}
       />
     </MainWrapper>

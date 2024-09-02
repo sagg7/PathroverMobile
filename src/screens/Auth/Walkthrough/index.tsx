@@ -9,7 +9,6 @@ import { setIswalkthrough } from '../../../redux/auth/authSlice';
 
 
 const Walkthrough = ({ navigation }) => {
-  const [currentIndex, setCurrentIndex] = useState(null)
   const dispatch = useDispatch()
 
   const renderItem = ({ item }: { item: (typeof APP_INTRO_SLIDES)[0] }) => (
@@ -22,11 +21,8 @@ const Walkthrough = ({ navigation }) => {
   );
 
   const onDone = () => {
+    navigation.navigate("GetStarted")
     dispatch(setIswalkthrough());
-    // navigation.navigate(Routes.AuthStack);
-    console.log("working done");
-    // navigation.navigate("GetStarted")
-
   };
 
   const renderNextButton = () => (
@@ -41,9 +37,6 @@ const Walkthrough = ({ navigation }) => {
   );
 
   const keyExtractor = (item: object | any) => item?.key;
-  const handleSlide = (index) => {
-  }
-
 
   return (
     <View style={styles.container}>
@@ -63,7 +56,6 @@ const Walkthrough = ({ navigation }) => {
         renderNextButton={renderNextButton}
         dotStyle={styles.inActiveDotStyle}
         activeDotStyle={styles.activeDotStyle}
-        onSlideChange={handleSlide}
 
       />
     </View>

@@ -12,3 +12,6 @@ export const formatPhoneNumber = (phoneNumber: string) => {
 export function isIOS() {
   return Platform.OS === 'ios';
 }
+export function removeNonNumbers(number: string) {
+  return number.replace(/\D/g, '');
+}

@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignSelf: 'center',
         justifyContent: 'space-around',
-        width: WP('50'),
+        width: WP('40'),
         marginVertical: WP('5'),
     } as ViewStyle,
 });

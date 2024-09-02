@@ -6,17 +6,23 @@ import {BASE_URL} from '../../shared/exporter';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  prepareHeaders: (headers, {getState}) => {
+  prepareHeaders: (headers, { getState }) => {
     const token = getState()?.auth?.accessToken;
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
     headers.set('Accept', '*/*');
-    headers.set('Content-Type', 'multipart/form-data');
+    headers.set('Content-Type', 'application/json');
     return headers;
   },
-  
+  fetchFn: async (url, options, ...args) => {
+    const response = await fetch(url, options);
+    const headers = response.headers;
+    console.log('Response Headers: Tokens', headers?.map?.authorization);
+    return response; 
+  },
 });
+
 
 let refreshingToken = false;
 let tokenRefreshPromise: Promise<void> | null = null;

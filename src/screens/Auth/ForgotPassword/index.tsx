@@ -1,22 +1,65 @@
-import { Alert, Text, View } from 'react-native';
-import React, { useRef } from 'react';
+import { View } from 'react-native';
+import React from 'react';
 import styles from './styles';
-import { AppButton, AppHeader, AppInput, MainWrapper } from '../../../components';
+import {
+  AppButton,
+  AppHeader,
+  AppInput,
+  AppLoader,
+  MainWrapper,
+} from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Formik } from 'formik';
-import { useRoute } from '@react-navigation/native';
-import { forgotPassValidation, forgotPasswordInitialObject, useKeyboardListener, isIOS, formatPhoneNumber } from '../../../shared/exporter';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  forgotPassValidation,
+  forgotPasswordInitialObject,
+  useKeyboardListener,
+  isIOS,
+  formatPhoneNumber,
+  showAlert,
+  UNEXPECTED_ERROR,
+  Routes,
+  LOGIN_TYPE_TEXT,
+} from '../../../shared/exporter';
+import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
 
 const ForgotPassword = ({ }) => {
-  const keyboardVisible = useKeyboardListener()
-  const route = useRoute()
-  const { isEmail } = route?.params
+  const keyboardVisible = useKeyboardListener();
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const route = useRoute();
+  const { isEmail } = route?.params;
+  const navigation = useNavigation();
+  let isValidForm = true;
 
+  const handleContinueBtn = async (val: any) => {
+    const { email, phone } = val;
+    const obj = {
+      user: {
+        ...(email && { email: email }),
+        ...(phone && { phone_number: phone }),
+      },
+    };
+
+    const resp = await forgotPassword(obj);
+    if (resp?.data) {
+      navigation.navigate(Routes.VerifyOtp, {
+        selectedValue: isEmail ? email : phone,
+        isEmail: isEmail,
+      });
+      console.log('CODE', resp?.data?.data?.otp);
+    } else {
+      showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+    }
+  };
+
+  const text = isEmail ? LOGIN_TYPE_TEXT.EMAIL : LOGIN_TYPE_TEXT.PHONE;
   return (
     <MainWrapper>
-      <AppHeader title="Forgot Password"
-        subtitle='Forgot Password'
-        desc='Enter your email address to recover your password'
+      <AppHeader
+        title="Forgot Password"
+        subtitle="Forgot Password"
+        desc={`Enter your ${text} to recover your password`}
       />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
@@ -27,50 +70,66 @@ const ForgotPassword = ({ }) => {
           styles.scrollViewStyle,
           !isIOS() && styles.heightStyle,
         ]}>
-        <View >
+        <View>
           <View style={styles.formikContainer}>
             <Formik
               initialValues={forgotPasswordInitialObject}
               validationSchema={forgotPassValidation(isEmail)}
-              onSubmit={values => {
-                // Handle login submission
-              }}>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty, setFieldValue }) => (
-                <View style={{ alignSelf: 'center' }}>
-                  {isEmail ?
-                    <AppInput
-                      placeholder="Email"
-                      value={values.email}
-                      onChangeText={handleChange('email')}
-                      touched={touched.email}
-                      errorMessage={errors.email}
-                    />
-                    :
-                    <AppInput
-                      placeholder="Phone No"
-                      value={values.phone}
-                      onChangeText={(text) => {
-                        const formatted = formatPhoneNumber(text);
-                        setFieldValue('phone', formatted);
-                      }}
-                      touched={touched.phone}
-                      errorMessage={errors.phone}
+              validateOnMount={true}
+              onSubmit={values => handleContinueBtn(values)}>
+              {({
+                handleChange,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+                isValid,
+                setFieldValue,
+              }) => {
+                if (isValidForm) {
+                  isValid = false;
+                  isValidForm = false;
+                }
+                return (
+                  <View style={{ alignSelf: 'center' }}>
+                    {isEmail ? (
+                      <AppInput
+                        placeholder="Email"
+                        value={values.email}
+                        onChangeText={handleChange('email')}
+                        touched={touched.email}
+                        errorMessage={errors.email}
 
-                    />
-                  }
+                      />
+                    ) : (
+                      <AppInput
+                        placeholder="Phone No"
+                        value={values.phone}
+                        onChangeText={text => {
+                          const formatted = formatPhoneNumber(text);
+                          setFieldValue('phone', formatted);
+                        }}
+                        touched={touched.phone}
+                        errorMessage={errors.phone}
+                      />
+                    )}
 
-                  <View style={styles.divider} >
-                    <AppButton title="Continue" handleClick={handleSubmit}
-                      // disabled={!(dirty && isValid)}
-                      buttonStyle={styles.btnContainer(keyboardVisible)} />
+                    <View style={styles.divider}>
+                      <AppButton
+                        title="Continue"
+                        handleClick={handleSubmit}
+                        disabled={!isValid}
+                        buttonStyle={styles.btnContainer(keyboardVisible)}
+                      />
+                    </View>
                   </View>
-                </View>
-              )}
+                );
+              }}
             </Formik>
-
           </View>
         </View>
       </KeyboardAwareScrollView>
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };
