@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-app-intro-slider/.DS_Store b/node_modules/react-native-app-intro-slider/.DS_Store
+new file mode 100644
+index 0000000..c88a062
+Binary files /dev/null and b/node_modules/react-native-app-intro-slider/.DS_Store differ
+diff --git a/node_modules/react-native-app-intro-slider/dist/index.js b/node_modules/react-native-app-intro-slider/dist/index.js
+index 0935c97..004a266 100644
+--- a/node_modules/react-native-app-intro-slider/dist/index.js
++++ b/node_modules/react-native-app-intro-slider/dist/index.js
+@@ -83,10 +83,10 @@ class AppIntroSlider extends React.Component {
+                 ? this.props.onSkip()
+                 : this.goToSlide(this.props.data.length - 1), this.props.renderSkipButton);
+         this._renderPagination = () => {
+-            const isLastSlide = this.state.activeIndex === this.props.data.length - 1;
++            const isLastSlide = this.state.activeIndex === this.props.data.length-1 ;
+             const isFirstSlide = this.state.activeIndex === 0;
+             const secondaryButton = (!isFirstSlide && this._renderPrevButton()) ||
+-                (!isLastSlide && this._renderSkipButton());
++                (this._renderSkipButton());
+             const primaryButton = isLastSlide
+                 ? this._renderDoneButton()
+                 : this._renderNextButton();
