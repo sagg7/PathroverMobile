@@ -47,9 +47,8 @@ const ForgotPassword = ({ }) => {
         selectedValue: isEmail ? email : phone,
         isEmail: isEmail,
       });
-      console.log('CODE', resp?.data?.data?.otp);
     } else {
-      showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 

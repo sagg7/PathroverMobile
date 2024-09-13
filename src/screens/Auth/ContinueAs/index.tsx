@@ -25,12 +25,17 @@ const ContinueAs = ({ }) => {
   const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
 
   const handleNavigationBtn = (isEmail: boolean) => {
+
     setShowSheet(false)
-    if (data?.isLogin) {
-      navigation.navigate(Routes.LoginScreen, { isEmail: isEmail })
-    } else {
-      navigation.navigate(Routes.SignupScreen, { isEmail: isEmail })
-    }
+
+    setTimeout(() => {
+      if (data?.isLogin) {
+        navigation.navigate(Routes.LoginScreen, { isEmail: isEmail })
+      } else {
+        navigation.navigate(Routes.SignupScreen, { isEmail: isEmail })
+      }
+    }, 500);
+
   }
 
   const renderItem = () => (

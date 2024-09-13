@@ -81,7 +81,7 @@ const AppInput: React.FC<AppInputProps> = ({
     left: WP('3'),
     top: animatedIsFocused.interpolate({
       inputRange: [0, 2],
-      outputRange: [isIOS() ? 17 : 10, isIOS() ? -8 : 1],
+      outputRange: [isIOS() ? 17 : 10, isIOS() ? -8 : -8],
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],

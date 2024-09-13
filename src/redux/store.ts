@@ -3,16 +3,19 @@ import { persistReducer, persistStore } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiSlice } from './api/apiSlice';
 import authReducer from './auth/authSlice';
+import driverSlice from './driver/driverSlice';
 
 const rootReduer = combineReducers({
 	[apiSlice.reducerPath]: apiSlice.reducer,
 	auth: authReducer,
+	driver:driverSlice
+
 });
 
 const persistConfig = {
 	key: 'root',
 	storage: AsyncStorage,
-	whitelist: ['auth'],
+	whitelist: ['auth', 'driver'],
 	blacklist: [],
 };
 
@@ -27,7 +30,6 @@ const root = (state, action) => {
 };
 export const store = configureStore({
 	reducer: root,
-
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
 			serializableCheck: false,

@@ -24,11 +24,14 @@ import {
 } from '../../../shared/exporter';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLoginMutation } from '../../../redux/auth/authApiSlice';
+import { useDispatch } from 'react-redux';
+import { setLoginUser } from '../../../redux/auth/authSlice';
 
 const LoginScreen = ({ }) => {
   let isValidForm = true;
   const keyboardVisible = useKeyboardListener();
   const [login, { data, isLoading }] = useLoginMutation();
+  const dispatch = useDispatch()
   const route = useRoute();
   const navigation = useNavigation();
   const { isEmail } = route?.params;
@@ -44,10 +47,12 @@ const LoginScreen = ({ }) => {
     };
 
     const resp = await login(obj);
+    dispatch(setLoginUser(resp?.data?.user))
+
     if (resp?.data) {
-      showAlert('Alert', 'You have logged in successfully.');
+      navigation.replace('Home')
     } else {
-      showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 
@@ -119,6 +124,9 @@ const LoginScreen = ({ }) => {
                       errorMessage={errors.password}
                       rightIcon
                       secureTextEntry
+                      onSubmitEditing={() => console.log("ok")
+                      }
+
                     />
                     <Text
                       onPress={() =>

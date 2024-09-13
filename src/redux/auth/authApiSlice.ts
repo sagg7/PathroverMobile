@@ -55,6 +55,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    switchRole: builder.mutation({
+      query: data => ({
+        url: `profiles/user_profile?role=${data}`,
+        method: 'GET',
+        // body: data,
+      }),
+    }),
   }),
   overrideExisting: true,
 });
@@ -67,4 +74,5 @@ export const {
 	useLogoutUserMutation,
   useVerifyOtpMutation,
   useResetPasswordMutation,
+  useSwitchRoleMutation
 } = authApiSlice;

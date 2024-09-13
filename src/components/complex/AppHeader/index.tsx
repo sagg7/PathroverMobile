@@ -5,6 +5,7 @@ import {
     PFColors,
     PFFontSize,
     PFFonts,
+    isIOS,
 } from '../../../shared/exporter';
 import { svgIcon } from '../../../assets/svg';
 import { useNavigation } from '@react-navigation/native';
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.17,
         shadowRadius: 3.05,
         elevation: 4,
-        backgroundColor: PFColors.Standard.White,
+        backgroundColor: isIOS() ? null : PFColors.Standard.White,
         height: WP('12')
     },
     textStyle: {

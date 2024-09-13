@@ -1,11 +1,82 @@
+// buildscript {
+//     ext {
+//         buildToolsVersion = "34.0.0"
+//         minSdkVersion = 23
+//         compileSdkVersion = 34
+//         targetSdkVersion = 34
+//         ndkVersion = "26.1.10909125"
+//         kotlinVersion = "1.9.22"
+//         //  RNMapboxMapsImpl = 'mapbox'
+//         //  RNMapboxMapsVersion = '11.4.1'
+//     }
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+//     dependencies {
+//         classpath("com.android.tools.build:gradle")
+//         classpath("com.facebook.react:react-native-gradle-plugin")
+//         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+//         classpath('com.google.gms:google-services:4.4.0')
+//     }
+// }
+
+// allprojects {
+//     repositories {
+//         maven {
+//             url 'https://api.mapbox.com/downloads/v2/releases/maven'
+//             authentication {
+//                 basic(BasicAuthentication)
+//             }
+//             credentials {
+//                 // Do not change the username below.
+//                 // This should always be `mapbox` (not your username).
+//                 username = 'mapbox'
+//                 // Use the secret token you stored in gradle.properties as the password
+//                 password = "pk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNseXowMmk5bDJoejEyaXB5Nm43ZzN4OTMifQ.uiO6BX51I9umZzjAK2Ox6g"
+//             }
+//         }
+//     }
+// }
+// apply plugin: "com.facebook.react.rootproject"
+
+
 buildscript {
     ext {
+        RNMapboxMapsImpl = "mapbox"
+
+        useCustomMapbox = false
+
+        if (System.getenv('CI_MAP_IMPL').equals('mapbox')) {
+            RNMapboxMapsImpl = "mapbox"
+            kotlinVersion = '1.6.21'
+        } else if (System.getenv('CI_MAP_IMPL').equals('mapbox11')) {
+            RNMapboxMapsVersion = '11.4.1'
+            RNMapboxMapsImpl = "mapbox"
+        } else if (project.hasProperty('RNMBX11') && project.getProperty('RNMBX11').toBoolean()) {
+            RNMapboxMapsVersion = '11.4.1'
+        }
+
+        // Mapbox deps
+        if (useCustomMapbox) {
+            RNMapboxMapsLibs = {
+                implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
+                implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.8.0'
+                implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.8.0'
+                implementation 'com.mapbox.mapboxsdk:mapbox-android-gestures:0.7.0'
+
+                implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.8.0'
+                implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-localization-v9:0.14.0'
+                implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-markerview-v9:0.4.0'
+            }
+        }
+
         buildToolsVersion = "34.0.0"
         minSdkVersion = 23
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
-        kotlinVersion = "1.9.22"
+        kotlinVersion = "1.9.24"
     }
     repositories {
         google()
@@ -18,4 +89,23 @@ buildscript {
     }
 }
 
+allprojects {
+    repositories {
+                maven {
+            url 'https://api.mapbox.com/downloads/v2/releases/maven'
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                // Do not change the username below.
+                // This should always be `mapbox` (not your username).
+                username = 'mapbox'
+                // Use the secret token you stored in gradle.properties as the password
+                password = "sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q"
+            }
+        }
+    }
+}
+
 apply plugin: "com.facebook.react.rootproject"
+

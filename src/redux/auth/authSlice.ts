@@ -24,10 +24,7 @@ const authSlice = createSlice({
 		},
 		
 		setIswalkthrough: (state) => {
-			console.log("STATE=-=>", state);
 			state.isWalkthrough = true;
-			console.log("STATE=-=> after", state.isWalkthrough);
-
 		},
 		
 		logOut: (state) => {

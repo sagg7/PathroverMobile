@@ -9,15 +9,22 @@ import { Routes } from '../../shared/exporter';
 const Splash = ({ }) => {
   const navigation = useNavigation()
   const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
-
+  const loginUser = useSelector(state => state?.auth?.loginUser);
   useEffect(() => {
     setTimeout(() => {
-      if (isWalkthrough) {
+      if (loginUser) {
+        if (loginUser?.role === "end_user" || loginUser?.role === "driver") {
+          navigation.replace("Home")
+        } else {
+          navigation.replace("AuthStack")
+        }
+
+      } else if (isWalkthrough) {
         navigation.navigate(Routes.GetStarted)
       } else {
         navigation.navigate(Routes.Walkthrough)
       }
-    }, 3000);
+    }, 4000);
 
   }, [isWalkthrough])
 

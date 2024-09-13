@@ -9,6 +9,13 @@ export const Routes = {
     ResetPassword: "ResetPassword",
     ForgotPassword: "ForgotPassword",
     VerifyOtp: "VerifyOtp",
-    AccountCreationSuccess: "AccountCreationSuccess"
-
+    AccountCreationSuccess: "AccountCreationSuccess",
+    UploadMedicalDocument: "UploadMedicalDocument",
+    UploadLicense: "UploadLicense",
+    UploadIdentity: "UploadIdentity",
+    DriverProfile: "DriverProfile",
+    VehicleDetail: "VehicleDetail",
+    VehicleRegistration: "VehicleRegistration",
+    CompanyDetail: "CompanyDetail",
+    RequestList: "RequestList"
 }

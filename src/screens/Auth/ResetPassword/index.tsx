@@ -31,7 +31,7 @@ const ResetPassword = ({ }) => {
       navigation.replace(Routes.AccountCreationSuccess)
 
     } else {
-      showAlert("Error", resp?.error?.data?.error || UNEXPECTED_ERROR)
+      showAlert("Error", resp?.error?.data?.error[0] || UNEXPECTED_ERROR)
 
     }
   }

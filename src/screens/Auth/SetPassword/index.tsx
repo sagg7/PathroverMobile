@@ -11,7 +11,7 @@ import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
 const SetPassword = ({ }) => {
   const route = useRoute()
   const { values } = route?.params
-  const { email, phone, name } = values
+  const { email, phone, name, firstName, lastName } = values
   const [signup, { isLoading, }] = useSignUpMutation()
   let isValidForm = true;
   const navigation = useNavigation()
@@ -22,7 +22,8 @@ const SetPassword = ({ }) => {
       user: {
         ...(email && { email: email }),
         ...(phone && { phone_number: removeNonNumbers(phone) }),
-        full_name: name,
+        first_name: firstName,
+        last_name: lastName,
         password: val.password
       }
     }
@@ -31,7 +32,7 @@ const SetPassword = ({ }) => {
     if (resp?.data) {
       navigation.navigate(Routes.AccountCreationSuccess)
     } else {
-      showAlert("Error", resp?.error?.data?.error || UNEXPECTED_ERROR)
+      showAlert("Error", resp?.error?.data?.errors[0] || UNEXPECTED_ERROR)
     }
   }
 
@@ -82,7 +83,7 @@ const SetPassword = ({ }) => {
                     />
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        disabled={!isValid}
+                        // disabled={{}}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>

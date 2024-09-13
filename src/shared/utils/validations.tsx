@@ -8,7 +8,9 @@ export const loginInitialObj = {
 export const signupInitialObject = {
     email: "",
     name: "",
-    phone: ""
+    phone: "",
+    firstName: "",
+    lastName: ""
 }
 export const signupPasswordObj = {
     password: "",
@@ -50,10 +52,14 @@ export const deleteAccountInitial = {
 
 export const createValidationSchema = (isEmail: boolean) => {
     const baseSchema = {
-        name: yup
+        firstName: yup
             .string()
-            .required('Name Required')
-            .max(25, 'Maximum 25 Characters Allowed'),
+            .required('First Name Required')
+            .max(25, 'Maximum 15 Characters Allowed'),
+        lastName: yup
+            .string()
+            .required('Last Name Required')
+            .max(25, 'Maximum 15 Characters Allowed'),
     };
     if (isEmail) {
         baseSchema.email = yup

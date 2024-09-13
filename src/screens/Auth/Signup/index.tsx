@@ -35,7 +35,6 @@ const SignupScreen = ({ }) => {
           <View style={styles.formikContainer}>
             <Formik
               innerRef={formik}
-              enableReinitialize
               initialValues={signupInitialObject}
               validationSchema={createValidationSchema(isEmail)}
               onSubmit={values => {
@@ -48,13 +47,19 @@ const SignupScreen = ({ }) => {
                 }
                 return (
                   <View style={{ alignSelf: 'center' }}>
-
                     <AppInput
-                      placeholder="Full Name"
-                      value={values.name}
-                      onChangeText={handleChange('name')}
-                      touched={touched.name}
-                      errorMessage={errors.name}
+                      placeholder="First Name"
+                      value={values.firstName}
+                      onChangeText={handleChange('firstName')}
+                      touched={touched.firstName}
+                      errorMessage={errors.firstName}
+                    />
+                    <AppInput
+                      placeholder="Last Name"
+                      value={values.lastName}
+                      onChangeText={handleChange('lastName')}
+                      touched={touched.lastName}
+                      errorMessage={errors.lastName}
                     />
                     {isEmail ?
                       <AppInput
