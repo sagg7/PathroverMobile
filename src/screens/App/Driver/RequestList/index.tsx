@@ -1,14 +1,50 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React, { useRef, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, Keyboard, BackHandler, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import { ItemInfoCard, MainWrapper, OfferRequestCard, SendOfferModal } from '../../../../components';
 import styles from './styles';
-import { HP, PFColors, Routes, WP, appIcons } from '../../../../shared/exporter';
+import { HP, PFColors, Routes, WP, appIcons, useKeyboardListener } from '../../../../shared/exporter';
 import SwitchToggle from "react-native-switch-toggle";
 import RBSheet from 'react-native-raw-bottom-sheet';
 import OfferSheet from './OfferSheet';
+useKeyboardListener
+
 
 const RequestList = ({ navigation }) => {
     const [on, seton] = useState(false)
+    const isKeyboardOpen = useKeyboardListener()
+    const keyboardDidShowListener = useRef(null);
+    const keyboardDidHideListener = useRef(null);
+
+
+    useEffect(() => {
+        const handleBackButtonPress = () => {
+            if (Keyboard.isVisible()) {
+                Keyboard.dismiss();
+                return true;
+            }
+            return false;
+        };
+
+        BackHandler.addEventListener('hardwareBackPress', handleBackButtonPress);
+
+        keyboardDidShowListener.current = Keyboard.addListener('keyboardDidShow', () => {
+
+        });
+
+        keyboardDidHideListener.current = Keyboard.addListener('keyboardDidHide', () => {
+            sheetRef.current.close()
+        });
+
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackButtonPress);
+            keyboardDidShowListener.current.remove();
+            keyboardDidHideListener.current.remove();
+        };
+    }, []);
+
+
+
+
     const sheetRef = useRef()
     return (
         <MainWrapper>
