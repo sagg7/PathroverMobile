@@ -30,7 +30,6 @@ const ForgotPassword = ({ }) => {
   const route = useRoute();
   const { isEmail } = route?.params;
   const navigation = useNavigation();
-  let isValidForm = true;
 
   const handleContinueBtn = async (val: any) => {
     const { email, phone } = val;
@@ -82,13 +81,9 @@ const ForgotPassword = ({ }) => {
                 values,
                 errors,
                 touched,
-                isValid,
                 setFieldValue,
               }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
@@ -110,6 +105,7 @@ const ForgotPassword = ({ }) => {
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
+                        keyboardType={"numeric"}
                       />
                     )}
 
@@ -117,7 +113,6 @@ const ForgotPassword = ({ }) => {
                       <AppButton
                         title="Continue"
                         handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)}
                       />
                     </View>

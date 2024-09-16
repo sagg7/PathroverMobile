@@ -46,7 +46,7 @@ const OfferSheet = ({ onPressCancel }) => {
                 <BubleView title={"$ 120"} />
                 <BubleView title={"$ 420"} />
             </View>
-            <AppInput placeholder='Your Offer Price' value='' />
+            <AppInput placeholder='Your Offer Price' keyboardType={"numeric"} maxLength={5} />
             <AppButton title='Send my Offer' buttonStyle={styles.offerBtnStyle} />
         </View>
     );

@@ -17,5 +17,9 @@ export const Routes = {
     VehicleDetail: "VehicleDetail",
     VehicleRegistration: "VehicleRegistration",
     CompanyDetail: "CompanyDetail",
-    RequestList: "RequestList"
+    RequestList: "RequestList",
+    MapScreen: "MapScreen",
+    FilterScreen: "FilterScreen",
+    OrderDetails: "OrderDetails"
+
 }

@@ -24,7 +24,6 @@ const AuthStack: React.FC = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name={Routes.Splash} component={Splash} />
-      <Stack.Screen name={Routes.ContinueAs} component={ContinueAs} />
       <Stack.Screen name={Routes.Walkthrough} component={Walkthrough} />
       <Stack.Screen name={Routes.LoginScreen} component={LoginScreen} />
       <Stack.Screen name={Routes.VerifyOtp} component={VerifyOtpScreen} />
@@ -34,6 +33,7 @@ const AuthStack: React.FC = () => {
       <Stack.Screen name={Routes.ResetPassword} component={ResetPassword} />
       <Stack.Screen name={Routes.ForgotPassword} component={ForgotPassword} />
       <Stack.Screen name={Routes.AccountCreationSuccess} component={AccountCreationSuccess} />
+      <Stack.Screen name={Routes.ContinueAs} component={ContinueAs} />
 
     </Stack.Navigator>
   );

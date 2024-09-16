@@ -28,7 +28,6 @@ import { useDispatch } from 'react-redux';
 import { setLoginUser } from '../../../redux/auth/authSlice';
 
 const LoginScreen = ({ }) => {
-  let isValidForm = true;
   const keyboardVisible = useKeyboardListener();
   const [login, { data, isLoading }] = useLoginMutation();
   const dispatch = useDispatch()
@@ -61,7 +60,7 @@ const LoginScreen = ({ }) => {
       <AppHeader
         title="Login"
         subtitle="Login"
-        desc="Enter your email and password"
+        desc={`Enter your ${isEmail ? "email" : "phone number"} and password`}
       />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
@@ -86,14 +85,8 @@ const LoginScreen = ({ }) => {
                 values,
                 errors,
                 touched,
-                isValid,
-                dirty,
                 setFieldValue,
               }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
@@ -107,6 +100,7 @@ const LoginScreen = ({ }) => {
                     ) : (
                       <AppInput
                         placeholder="Phone No"
+                        keyboardType={"numeric"}
                         value={values.phone}
                         onChangeText={text => {
                           const formatted = formatPhoneNumber(text);
@@ -124,9 +118,6 @@ const LoginScreen = ({ }) => {
                       errorMessage={errors.password}
                       rightIcon
                       secureTextEntry
-                      onSubmitEditing={() => console.log("ok")
-                      }
-
                     />
                     <Text
                       onPress={() =>
@@ -141,7 +132,6 @@ const LoginScreen = ({ }) => {
                       <AppButton
                         title="Login"
                         handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)}
                       />
                     </View>

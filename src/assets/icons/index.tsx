@@ -14,5 +14,9 @@ export const appIcons = {
     phoneIcon: require('../icons/phoneIcon.png'),
     settingIcon: require('../icons/settingIcon.png'),
     switchAccount: require('../icons/switchAccount.png'),
-    greenCheck: require('../icons/greenCheck.png')
+    greenCheck: require('../icons/greenCheck.png'),
+    balanceIcon: require('../icons/balanceIcon.png'),
+    filterIcon: require('../icons/Filter.png'),
+    orderItem: require('../icons/itemOrder.png'),
+    chevron: require('../icons/chevron.png')
 }

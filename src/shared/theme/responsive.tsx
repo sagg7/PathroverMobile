@@ -1,7 +1,8 @@
-import {Dimensions, PixelRatio} from 'react-native';
+import { Dimensions, PixelRatio } from 'react-native';
 
 const scrWidth = Dimensions.get('window').width;
 const scrHeight = Dimensions.get('window').height;
+
 
 const widthPercentageToDP = (widthPercent: string) => {
   const elemWidth = parseFloat(widthPercent);

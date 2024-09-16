@@ -56,7 +56,7 @@ const SetPassword = ({ }) => {
               onSubmit={values =>
                 handleContinueBtn(values)
               }>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty }) => {
+              {({ handleChange, handleSubmit, values, errors, touched }) => {
                 if (isValidForm) {
                   isValid = false;
                   isValidForm = false;
@@ -83,7 +83,6 @@ const SetPassword = ({ }) => {
                     />
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        // disabled={{}}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>

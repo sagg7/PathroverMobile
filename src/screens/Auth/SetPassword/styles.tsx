@@ -9,11 +9,11 @@ const styles = StyleSheet.create({
         marginTop: WP('4'),
     },
     divider: {
-        flexGrow: isIOS() ? .98 : .92,
+        flexGrow: isIOS() ? .98 : .96,
         justifyContent: "flex-end",
     },
     btnContainer: isOpen => ({
-        marginBottom: isOpen ? 100 : 10,
+        // marginBottom: isOpen ? 100 : WP('20'),
 
     }),
     scrollViewStyle: {

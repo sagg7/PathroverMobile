@@ -2,11 +2,11 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomTab} from '../../components';
 import RequestList from '../../screens/App/Driver/RequestList';
-import DummyScreen2 from '../../screens/App/DummyScreen';
 import DummyScreen3 from '../../screens/App/DummyScreen';
 import DummyScreen4 from '../../screens/App/DummyScreen';
-
-
+import DummyScreen5 from '../../screens/App/DummyScreen';
+import DriverWallet from '../../screens/App/Driver/DriverWallet'; 
+import OrderHistory from '../../screens/App/Driver/OrderHistory';
 
 const Tab = createBottomTabNavigator();
 const AppStack = () => {
@@ -29,7 +29,7 @@ const AppStack = () => {
       />
        <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={DummyScreen2}
+        component={DummyScreen5}
         name={'Order History'}
       />
        <Tab.Screen

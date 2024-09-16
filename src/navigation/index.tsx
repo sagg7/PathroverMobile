@@ -10,12 +10,13 @@ import UploadMedicalDocument from '../screens/App/DriverRegistrationFlow/UploadM
 import VehicleDetail from '../screens/App/DriverRegistrationFlow/VehicleDetail';
 import VehicleRegistration from '../screens/App/DriverRegistrationFlow/VehicleRegistration';
 import CompanyDetail from '../screens/App/DriverRegistrationFlow/CompanyDetail';
-import { BottomTab } from '../components/primitive/BottomTab/BottomTab';
 import { AppStack } from './BottomTabs';
 import RequestList from '../screens/App/Driver/RequestList';
 import MapScreen from '../screens/App/Driver/MapScreen';
 import Home from '../screens/App/EndUser/Home';
 import Settings from '../screens/App/EndUser/Settings';
+import OrderDetails from '../screens/App/Driver/OrderDetails';
+import FilterScreen from '../screens/App/Driver/FltterScreen';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -24,20 +25,22 @@ const AppNavigation = () => {
       <Stack.Navigator
         initialRouteName={Routes.Splash}
         screenOptions={{ headerShown: false, }}>
+        <Stack.Screen name="AppStack" component={AppStack} />
         <Stack.Screen name="AuthStack" component={AuthStack} />
+        <Stack.Screen name={Routes.CompanyDetail} component={CompanyDetail} />
+        <Stack.Screen name={Routes.VehicleDetail} component={VehicleDetail} />
         <Stack.Screen name={Routes.DriverProfile} component={DriverProfile} />
         <Stack.Screen name={Routes.VehicleRegistration} component={VehicleRegistration} />
-        <Stack.Screen name="AppStack" component={AppStack} />
-        <Stack.Screen name={Routes.CompanyDetail} component={CompanyDetail} />
         <Stack.Screen name={"Settings"} component={Settings} />
-
         <Stack.Screen name={"Home"} component={Home} />
-        <Stack.Screen name={Routes.VehicleDetail} component={VehicleDetail} />
         <Stack.Screen name={Routes.UploadMedicalDocument} component={UploadMedicalDocument} />
         <Stack.Screen name={Routes.UploadLicense} component={UploadLicense} />
         <Stack.Screen name={Routes.UploadIdentity} component={UploadIdentity} />
         <Stack.Screen name={Routes.RequestList} component={RequestList} />
         <Stack.Screen name={"MapScreen"} component={MapScreen} />
+        <Stack.Screen name={Routes.OrderDetails} component={OrderDetails} />
+        <Stack.Screen name={Routes.FilterScreen} component={FilterScreen} />
+
 
       </Stack.Navigator>
     </NavigationContainer>

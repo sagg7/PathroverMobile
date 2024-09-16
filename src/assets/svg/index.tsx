@@ -27,6 +27,7 @@ import OrderHistory from '../svg/orderHistory.svg'
 import CrossCirlce from '../svg/crossCircle.svg'
 import RightChevron from '../svg/rightChevron.svg'
 import LeftChevron from '../svg/leftChevron.svg'
+import BlueMarker from '../svg/blueMarker.svg'
 
 export const svgIcon = {
     Forward: <Forward />,
@@ -56,6 +57,7 @@ export const svgIcon = {
     OrderHistory: <OrderHistory />,
     CrossCirlce: <CrossCirlce />,
     RightChevron: <RightChevron />,
-    LeftChevron: <LeftChevron />
+    LeftChevron: <LeftChevron />,
+    BlueMarker: <BlueMarker />
 
 };

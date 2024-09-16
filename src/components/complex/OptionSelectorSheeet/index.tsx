@@ -24,10 +24,11 @@ interface OptionSelectorSheetProps {
     data: any;
     onPressModel?: (v: any) => void;
     onPressWeight?: (v: any) => void;
+    isCompany?: boolean
 }
 
 const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
-    ({ data, onPressWeight, onPressModel }, ref) => {
+    ({ data, onPressWeight, onPressModel, isCompany = false }, ref) => {
         const refScrollable = useRef(null);
         const modelArr = data?.find(item => item.isWeightSelected)?.model;
         const itemInfo = modelArr?.find(item => item.isModelSelected);
@@ -67,7 +68,7 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
                 <ScrollView>
                     <View style={styles.container}>
                         <View style={styles.sheetHeader}>
-                            <Text style={styles.selectOptionText}>Select Option</Text>
+                            <Text style={styles.selectOptionText}>{isCompany ? "Choose Company Type" : "Select Option"}</Text>
                             <TouchableOpacity
                                 onPress={() => refScrollable.current.close()}
                                 style={{ right: 10 }}>
@@ -77,7 +78,7 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
                         {trailerObj?.standardLengths?.length > 0 ? (
                             <Text style={styles.previousTextStyle}>Choose Type</Text>
                         ) : (
-                            <Text style={styles.previousTextStyle}>Choose Weight</Text>
+                            <Text style={styles.previousTextStyle}>{isCompany ? "Choose Company Type" : "Choose Weight"}</Text>
                         )}
                         <FlatList
                             data={data}

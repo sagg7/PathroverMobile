@@ -200,6 +200,7 @@ const CompanyDetail = () => {
                     ref={sheetRef}
                     data={companyType}
                     onPressWeight={handleCompanyType}
+                    isCompany
                 />
 
                 <AppButton title="Next" buttonStyle={styles.buttonStyle} handleClick={() => handleSubmit(true)} />

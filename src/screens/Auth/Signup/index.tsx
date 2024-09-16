@@ -9,7 +9,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 const SignupScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener()
-  let isValidForm = true;
   const navigation = useNavigation()
   const route = useRoute()
   const { isEmail } = route?.params
@@ -21,7 +20,7 @@ const SignupScreen = ({ }) => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Signup" subtitle="Create New Account" desc="Enter your name and email" />
+      <AppHeader title="Signup" subtitle="Create New Account" desc={`Enter your name and ${isEmail ? "email" : "phone number"}`} />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
         enableOnAndroid={true}
@@ -40,11 +39,8 @@ const SignupScreen = ({ }) => {
               onSubmit={values => {
                 handleContinueBtn(values)
               }}>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, setFieldValue }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+              {({ handleChange, handleSubmit, values, errors, touched, setFieldValue }) => {
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     <AppInput
@@ -79,12 +75,12 @@ const SignupScreen = ({ }) => {
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
+                        keyboardType={"numeric"}
 
                       />
                     }
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>

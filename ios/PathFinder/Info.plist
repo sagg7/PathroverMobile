@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>PathFinder</string>
+	<string>PathRover</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -37,6 +37,8 @@
 	<string>We need your location to show your current position on the map</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show nearby places</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PathRover requires photo library permission</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>PlusJakartaSans-Bold.ttf</string>

@@ -5,7 +5,6 @@ import { appImages } from '../../../assets/images';
 import { AppButton, AuthBottomSheet } from '../../../components';
 import { useNavigation } from '@react-navigation/native';
 import { AuthSheetLoginObj, AuthSheetSignupObj, Routes } from '../../../shared/exporter';
-import { useSelector } from 'react-redux';
 
 const ContinueAs = ({ }) => {
   const navigation = useNavigation()
@@ -22,12 +21,9 @@ const ContinueAs = ({ }) => {
       setShowSheet(true)
     }, 500);
   }
-  const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
 
   const handleNavigationBtn = (isEmail: boolean) => {
-
     setShowSheet(false)
-
     setTimeout(() => {
       if (data?.isLogin) {
         navigation.navigate(Routes.LoginScreen, { isEmail: isEmail })
@@ -41,10 +37,8 @@ const ContinueAs = ({ }) => {
   const renderItem = () => (
     <ImageBackground style={styles.imageStyles} source={appImages.continueAs}>
       <View style={styles.textContainer}>
-
         <AppButton title='Login' buttonStyle={styles.loginBtn} isSmall={"48%"} handleClick={() => handleBtn(true)} />
         <AppButton title='Sign up' isSmall={"48%"} handleClick={() => handleBtn(false)} />
-
       </View>
       {showSheet &&
         <AuthBottomSheet

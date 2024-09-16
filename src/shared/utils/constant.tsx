@@ -415,6 +415,15 @@ export const USER_PROFILE = [
     { title: "Driver", isSelected: false, id: 1, role: "driver" }
 
 ]
-
+export const DurationArr = [
+    { title: 'Week', isSelected: true },
+    { title: ' Month', isSelected: false },
+    { title: 'Year', isSelected: false },
+];
+export const OrderHistoryOptions = [
+    { title: 'Total Ride', isSelected: true },
+    { title: ' Ride Completed', isSelected: false },
+    { title: 'Cancelled', isSelected: false },
+];
 
 
