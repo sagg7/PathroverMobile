@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './styles';
 import { AppButton, AppHeader, AppInput, AppLoader, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -11,11 +11,11 @@ import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
 const SetPassword = ({ }) => {
   const route = useRoute()
   const { values } = route?.params
-  const { email, phone, name, firstName, lastName } = values
-  const [signup, { isLoading, }] = useSignUpMutation()
-  let isValidForm = true;
+  const { email, phone, firstName, lastName } = values
+  const [signup, { isLoading }] = useSignUpMutation()
   const navigation = useNavigation()
   const keyboardVisible = useKeyboardListener()
+  const ref = useRef()
 
   const handleContinueBtn = async (val: any) => {
     const obj = {
@@ -30,7 +30,7 @@ const SetPassword = ({ }) => {
 
     const resp = await signup(obj);
     if (resp?.data) {
-      navigation.navigate(Routes.AccountCreationSuccess)
+      navigation.replace(Routes.AccountCreationSuccess)
     } else {
       showAlert("Error", resp?.error?.data?.errors[0] || UNEXPECTED_ERROR)
     }
@@ -51,16 +51,16 @@ const SetPassword = ({ }) => {
         <View >
           <View style={styles.formikContainer}>
             <Formik
+              innerRef={ref}
+              enableReinitialize
               initialValues={signupPasswordObj}
               validationSchema={resetPasswordVal}
-              onSubmit={values =>
+              onSubmit={(values, { resetForm }) => {
                 handleContinueBtn(values)
+              }
               }>
               {({ handleChange, handleSubmit, values, errors, touched }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     <AppInput
@@ -97,7 +97,7 @@ const SetPassword = ({ }) => {
         }
 
       </KeyboardAwareScrollView>
-    </MainWrapper>
+    </MainWrapper >
   );
 };
 

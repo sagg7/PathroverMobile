@@ -20,6 +20,9 @@ export const Routes = {
     RequestList: "RequestList",
     MapScreen: "MapScreen",
     FilterScreen: "FilterScreen",
-    OrderDetails: "OrderDetails"
+    OrderDetails: "OrderDetails",
+    ManageProfile: "ManageProfile",
+    EditProfile: "EditProfile",
+    SupportScreen: "SupportScreen"
 
 }

@@ -1,4 +1,4 @@
-import { View, Text, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { BottomTabScreenHeader, DynamicSelector, MainWrapper, RideHistoryCard } from '../../../../components';
 import styles from './styles';
@@ -34,13 +34,10 @@ const OrderHistory = ({ }) => {
             </View>
 
             <FlatList
-                data={[0, 3, 4, 5, 6, 7, 8]}
+                data={[0, 2, 3]}
                 renderItem={({ item }) => <RideHistoryCard item={item} onPressCard={() => navigation.navigate(Routes.OrderDetails)} />}
                 keyExtractor={(item) => item.id}
             />
-
-
-
         </MainWrapper>
     );
 };

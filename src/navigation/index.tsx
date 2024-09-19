@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AuthStack from './stacks/authStack';
 import { Routes } from '../shared/exporter';
 import DriverProfile from '../screens/App/DriverRegistrationFlow/DriverProfile';
 import UploadIdentity from '../screens/App/DriverRegistrationFlow/UploadIdentity';
@@ -17,6 +16,10 @@ import Home from '../screens/App/EndUser/Home';
 import Settings from '../screens/App/EndUser/Settings';
 import OrderDetails from '../screens/App/Driver/OrderDetails';
 import FilterScreen from '../screens/App/Driver/FltterScreen';
+import ManageProfile from '../screens/App/Driver/ManageProfile';
+import EditProfile from '../screens/App/Driver/EditProfile';
+import SupportScreen from '../screens/App/Driver/SupportScreen';
+import AuthStack from './stacks/authStack';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -25,11 +28,11 @@ const AppNavigation = () => {
       <Stack.Navigator
         initialRouteName={Routes.Splash}
         screenOptions={{ headerShown: false, }}>
-        <Stack.Screen name="AppStack" component={AppStack} />
         <Stack.Screen name="AuthStack" component={AuthStack} />
+        <Stack.Screen name="AppStack" component={AppStack} />
+        <Stack.Screen name={Routes.DriverProfile} component={DriverProfile} />
         <Stack.Screen name={Routes.CompanyDetail} component={CompanyDetail} />
         <Stack.Screen name={Routes.VehicleDetail} component={VehicleDetail} />
-        <Stack.Screen name={Routes.DriverProfile} component={DriverProfile} />
         <Stack.Screen name={Routes.VehicleRegistration} component={VehicleRegistration} />
         <Stack.Screen name={"Settings"} component={Settings} />
         <Stack.Screen name={"Home"} component={Home} />
@@ -40,7 +43,9 @@ const AppNavigation = () => {
         <Stack.Screen name={"MapScreen"} component={MapScreen} />
         <Stack.Screen name={Routes.OrderDetails} component={OrderDetails} />
         <Stack.Screen name={Routes.FilterScreen} component={FilterScreen} />
-
+        <Stack.Screen name={Routes.ManageProfile} component={ManageProfile} />
+        <Stack.Screen name={Routes.EditProfile} component={EditProfile} />
+        <Stack.Screen name={Routes.SupportScreen} component={SupportScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

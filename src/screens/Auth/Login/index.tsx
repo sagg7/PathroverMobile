@@ -19,6 +19,7 @@ import {
   UNEXPECTED_ERROR,
   formatPhoneNumber,
   isIOS,
+  removeNonNumbers,
   showAlert,
   useKeyboardListener,
 } from '../../../shared/exporter';
@@ -40,7 +41,7 @@ const LoginScreen = ({ }) => {
     const obj = {
       user: {
         ...(email && { email: email }),
-        ...(phone && { phone_number: phone }),
+        ...(phone && { phone_number: removeNonNumbers(phone) }),
         password: password,
       },
     };

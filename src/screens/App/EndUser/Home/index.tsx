@@ -1,6 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
-import { PFColors, PFFontSize, PFFonts, WP, appIcons } from '../../../../shared/exporter'
+import { PFColors, PFFontSize, PFFonts, appIcons } from '../../../../shared/exporter'
 import { MainWrapper } from '../../../../components'
 
 const Home = ({ navigation }) => {
@@ -12,7 +12,6 @@ const Home = ({ navigation }) => {
                     <Image source={appIcons.settingIcon} style={styles.settingIcon} resizeMode='contain' />
                 </TouchableOpacity>
             </View>
-
         </MainWrapper>
     )
 }

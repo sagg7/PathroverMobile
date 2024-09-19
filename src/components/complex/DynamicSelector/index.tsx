@@ -28,7 +28,10 @@ const DynamicSelector = ({
           onPress={() => onPressItem(index)}>
           <Text style={buttonText(index === selectedIndex)}>{item.title}</Text>
           {index === selectedIndex && count &&
-            <Text style={styles.countStyles}>5</Text>
+
+            <View style={styles.whiteDigit}>
+              <Text style={styles.countStyles}>5</Text>
+            </View>
           }
         </TouchableOpacity>
       ))}
@@ -51,7 +54,6 @@ const button = (isSelected: boolean): TextStyle => ({
   borderColor: isSelected ? PFColors.Blue.Dark : PFColors.Gray.AshGray,
   marginRight: 15,
   flexDirection: "row",
-  // marginHorizontal: 5
 
 })
 
@@ -61,19 +63,19 @@ const styles = StyleSheet.create({
     height: HP('4'),
     alignItems: 'center',
     borderColor: "pink",
-    borderRadius: 25,
     marginVertical: WP('2'),
     marginHorizontal: WP('5')
   },
   countStyles: {
     fontFamily: PFFonts.Foundation.Medium,
-    fontSize: PFFontSize.FONT_SIZE_14,
+    fontSize: PFFontSize.FONT_SIZE_12,
     color: PFColors.Blue.Dark,
-    backgroundColor: "#fff",
-    height: 22,
-    width: 22,
-    textAlign: "center",
-    borderRadius: 30,
+  },
+  whiteDigit: {
+    backgroundColor: PFColors.Standard.White,
+    borderRadius: 30, height: 25,
+    width: 25, justifyContent: "center",
+    alignItems: "center",
     marginLeft: 5
   }
 });

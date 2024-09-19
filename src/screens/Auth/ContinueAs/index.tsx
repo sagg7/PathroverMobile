@@ -31,7 +31,6 @@ const ContinueAs = ({ }) => {
         navigation.navigate(Routes.SignupScreen, { isEmail: isEmail })
       }
     }, 500);
-
   }
 
   const renderItem = () => (
@@ -49,7 +48,6 @@ const ContinueAs = ({ }) => {
           handleClickEmail={() => handleNavigationBtn(true)}
           handleClickPhone={() => handleNavigationBtn(false)}
           onPressClose={() => setShowSheet(false)}
-
         />
       }
     </ImageBackground>

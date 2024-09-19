@@ -17,15 +17,23 @@ export const signupPasswordObj = {
     confirmPassword: ""
 }
 export const EditInitialObject = {
-    username: "",
-    profession: "",
-    mobileNo: "",
+    email: "",
     name: "",
-    zipcode: ""
+    phone: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    confirmPassword: ""
 }
 export const forgotPasswordInitialObject = {
     email: "",
     phone: ""
+}
+export const supportInitialObj = {
+    email: "",
+    firstName: "",
+    lastName: "",
+    message: ""
 }
 
 export const resetUsernameInitialObject = {
@@ -70,10 +78,47 @@ export const createValidationSchema = (isEmail: boolean) => {
         baseSchema.phone = yup
             .string()
             .required('Phone No Required').max(14, 'Phone number must be exactly 10 digits.').min(14, "Phone number must be exactly 10 digits.")
-
     }
     return yup.object().shape(baseSchema);
 };
+
+export const EditProfileValidation = (id: number) => {
+    let baseSchema: any = {};
+    if (id === 0) {
+        baseSchema.firstName = yup
+            .string()
+            .required('First Name Required')
+            .max(25, 'Maximum 25 Characters Allowed');
+        baseSchema.lastName = yup
+            .string()
+            .required('Last Name Required')
+            .max(25, 'Maximum 25 Characters Allowed');
+    } else if (id === 1) {
+        baseSchema.email = yup
+            .string()
+            .required('Email Required')
+            .email('Please provide a valid email address');
+    } else if (id === 3) {
+        baseSchema.phone = yup
+            .string()
+            .required('Phone No Required')
+            .max(14, 'Phone number must be exactly 10 digits.')
+            .min(14, 'Phone number must be exactly 10 digits.');
+    } else if (id === 2) {
+        baseSchema.password = yup
+            .string()
+            .min(6, 'Password must be at least 6 characters')
+            .required('Password Required')
+            .max(25, 'Maximum 25 Characters Allowed');
+        baseSchema.confirmPassword = yup
+            .string()
+            .min(6, 'Password must be at least 6 characters')
+            .required('Confirm Password Required')
+            .oneOf([yup.ref('password')], 'Passwords do not match');
+    }
+    return yup.object().shape(baseSchema);
+};
+
 export const loginValidation = (isEmail: boolean) => {
     const loginScheme = {
         password: yup
@@ -134,36 +179,24 @@ export const deleteAccountValidation = yup.object().shape({
         .required('Reason Required'),
 });
 
+export const supportValidation = yup.object().shape({
+    firstName: yup
+        .string()
+        .required('First Name Required')
+        .max(25, 'Maximum 15 Characters Allowed'),
+    lastName: yup
+        .string()
+        .required('Last Name Required')
+        .max(25, 'Maximum 15 Characters Allowed'),
+    email: yup
+        .string()
+        .required('Email Required')
+        .email('Please provide a valid email address'),
+    message: yup
+        .string()
+        .required('Message Required')
+        .max(2000, 'Maximum limit reached'),
+});
 
-
-export const editValidationSchema = (role: any) => {
-    const baseSchema = {
-        username: yup
-            .string()
-            .required('Username Required')
-            .matches(/^\S*$/, 'Space Not Allowed')
-            .matches(/^[a-zA-Z0-9]*$/, 'Special Characters Are Not Allowed')
-            .max(25, 'Maximum 25 Characters Allowed'),
-        name: yup
-            .string()
-            .required('Name Required')
-            .max(25, 'Maximum 25 Characters Allowed'),
-        mobileNo: yup.string()
-            .required('Mobile Number Required')
-            .matches(/^\d+$/, 'Only Digits Allowed')
-            .min(10, 'Mobile number must have at least 10 digits')
-            .max(15, 'Maximum 15 digits allowed'),
-        zipcode: yup
-            .string()
-            .min(4, 'Zipcode must have at least 4 characters').max(10, 'Maximum 10 Digits Allowed')
-            .required('Zipcode Required'),
-    };
-
-    if (role === 'creator') {
-        baseSchema.profession = yup.string().required('Profession Required');
-    }
-
-    return yup.object().shape(baseSchema);
-};
 
 

@@ -18,5 +18,17 @@ export const appIcons = {
     balanceIcon: require('../icons/balanceIcon.png'),
     filterIcon: require('../icons/Filter.png'),
     orderItem: require('../icons/itemOrder.png'),
-    chevron: require('../icons/chevron.png')
+    chevron: require('../icons/chevron.png'),
+    car: require('../icons/car.png'),
+    refresh: require('../icons/Refresh.png'),
+    logout: require('../icons/logout.png'),
+    terms: require('../icons/terms.png'),
+    support: require('../icons/support.png'),
+    faq: require('../icons/faq.png'),
+    settings: require('../icons/settings.png'),
+    safety: require('../icons/Safety.png'),
+    privacy: require('../icons/privacy.png'),
+    starFill: require('../icons/starFill.png'),
+    starEmpty: require('../icons/starEmpty.png')
+
 }

@@ -21,6 +21,7 @@ import {
   UNEXPECTED_ERROR,
   Routes,
   LOGIN_TYPE_TEXT,
+  removeNonNumbers,
 } from '../../../shared/exporter';
 import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
 
@@ -36,7 +37,7 @@ const ForgotPassword = ({ }) => {
     const obj = {
       user: {
         ...(email && { email: email }),
-        ...(phone && { phone_number: phone }),
+        ...(phone && { phone_number: removeNonNumbers(phone) }),
       },
     };
 

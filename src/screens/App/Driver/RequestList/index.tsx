@@ -1,55 +1,19 @@
-import { View, Text, Image, TouchableOpacity, Keyboard, BackHandler, Alert } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import { ItemInfoCard, MainWrapper, OfferRequestCard, SendOfferModal } from '../../../../components';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { MainWrapper, OfferRequestCard, OfferSheetModal, ReviewsListSheet, SendOfferModal } from '../../../../components';
 import styles from './styles';
-import { HP, PFColors, Routes, WP, appIcons, useKeyboardListener } from '../../../../shared/exporter';
+import { PFColors, appIcons } from '../../../../shared/exporter';
 import SwitchToggle from "react-native-switch-toggle";
-import RBSheet from 'react-native-raw-bottom-sheet';
-import OfferSheet from './OfferSheet';
-useKeyboardListener
-
 
 const RequestList = ({ navigation }) => {
     const [on, seton] = useState(false)
-    const isKeyboardOpen = useKeyboardListener()
-    const keyboardDidShowListener = useRef(null);
-    const keyboardDidHideListener = useRef(null);
+    const [showReviewSheet, setShowReviewSheet] = useState(false)
+    const [offerSheetshow, setofferSheetshow] = useState(false)
 
-
-    useEffect(() => {
-        const handleBackButtonPress = () => {
-            if (Keyboard.isVisible()) {
-                Keyboard.dismiss();
-                return true;
-            }
-            return false;
-        };
-
-        BackHandler.addEventListener('hardwareBackPress', handleBackButtonPress);
-
-        keyboardDidShowListener.current = Keyboard.addListener('keyboardDidShow', () => {
-
-        });
-
-        keyboardDidHideListener.current = Keyboard.addListener('keyboardDidHide', () => {
-            sheetRef.current.close()
-        });
-
-        return () => {
-            BackHandler.removeEventListener('hardwareBackPress', handleBackButtonPress);
-            keyboardDidShowListener.current.remove();
-            keyboardDidHideListener.current.remove();
-        };
-    }, []);
-
-
-
-
-    const sheetRef = useRef()
     return (
         <MainWrapper>
             <View style={styles.container}>
-                <TouchableOpacity style={styles.bellContainer} onPress={() => navigation.navigate('MapScreen')}>
+                <TouchableOpacity style={styles.bellContainer} onPress={() => setShowReviewSheet(true)}>
                     <Image source={appIcons.bellIcon} style={styles.bellIcon} />
                 </TouchableOpacity>
 
@@ -68,34 +32,21 @@ const RequestList = ({ navigation }) => {
                 </View>
             </View>
 
-            <RBSheet
-                ref={sheetRef}
-                customModalProps={{
-                    animationType: 'slide',
-                    statusBarTranslucent: true,
-                }}
-                customStyles={{
-                    container: {
-                        height: HP('60'),
-                        borderTopLeftRadius: WP('5'),
-                        borderTopRightRadius: WP('5'),
-                    },
-                }}>
-                <OfferSheet onPressCancel={() => sheetRef.current.close()} />
-            </RBSheet>
+            <OfferSheetModal modalVisible={offerSheetshow} onPressCancel={() => setofferSheetshow(false)} />
+
 
             {on ?
-                <OfferRequestCard onPressAccept={() => sheetRef.current.open()}
+                <OfferRequestCard onPressAccept={() => setofferSheetshow(true)}
                 /> :
                 <>
                     <View style={styles.onOffContainer}>
                         <Text style={styles.turnOnOfText}>{"Please Turn on Your\nAvailable Status"}</Text>
-
                     </View>
                 </>
             }
 
             <SendOfferModal isModalVisible={false} />
+            <ReviewsListSheet modalVisible={showReviewSheet} onPressCross={() => setShowReviewSheet(false)} onPressDone={() => setShowReviewSheet(false)} />
 
         </MainWrapper>
     );

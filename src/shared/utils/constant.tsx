@@ -1,5 +1,5 @@
 import { Alert } from "react-native";
-import { PFColors, PFFontSize, PFFonts, appImages } from "../exporter";
+import { PFColors, PFFontSize, PFFonts, appIcons, appImages } from "../exporter";
 import { svgIcon } from "../../assets/svg";
 
 export function showAlert(type: string, des: string) {
@@ -27,24 +27,6 @@ type VehicleTypes = {
     title: string,
     icon: any
 }
-
-
-export const CALENDAR_THEME = {
-    dayTextColor: PFColors.Standard.Black,
-    textDayFontSize: PFFontSize.FONT_SIZE_12,
-    textSectionTitleColor: PFColors.Gray.DarkGray,
-    textMonthFontSize: PFFontSize.FONT_SIZE_16,
-    textDayHeaderFontSize: PFFontSize.FONT_SIZE_14,
-    textDayFontFamily: PFFonts.Foundation.Medium,
-    textMonthFontFamily: PFFonts.Foundation.Medium,
-    textDayHeaderFontFamily: PFFonts.Foundation.Medium,
-    textDisabledColor: PFColors.Gray.DarkGray,
-    todayTextColor: PFColors.Blue.Dark,
-};
-
-export const DAY_NAME_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
 
 export const APP_INTRO_SLIDES: IntroSlidesTypes[] = [
@@ -425,5 +407,80 @@ export const OrderHistoryOptions = [
     { title: ' Ride Completed', isSelected: false },
     { title: 'Cancelled', isSelected: false },
 ];
+export const DriverProfileMenu = [
+    {
+        id: 0,
+        title: "Vehicle Registration",
+        icon: appIcons.car
+    },
+    {
+        id: 1,
+        title: "Manage Profile",
+        icon: appIcons.settingIcon
+    },
+    {
+        id: 2,
+        title: "Notifications",
+        icon: appIcons.bellIcon
+    },
+    {
+        id: 3,
+        title: "FAQ's",
+        icon: appIcons.faq
+    },
+    {
+        id: 4,
+        title: "Support",
+        icon: appIcons.safety
+    },
+    {
+        id: 5,
+        title: "Safety",
+        icon: appIcons.safety
+    },
+    {
+        id: 6,
+        title: "Terms & Condition",
+        icon: appIcons.terms
+    },
+    {
+        id: 7,
+        title: "Privacy Policy",
+        icon: appIcons.privacy
+    },
+    {
+        id: 8,
+        title: "Logout",
+        icon: appIcons.logout
+    },
 
+    {
+        id: 9,
+        title: "Delete",
+        icon: appIcons.logout
+    },
+    {
+        id: 10,
+        title: "Switch Account",
+        icon: appIcons.logout
+    },
+]
+export const ManageProfileArr = [
+    {
+        id: 0,
+        title: "Name"
+    },
+    {
+        id: 1,
+        title: "Email"
+    },
+    {
+        id: 2,
+        title: "Password"
+    },
+    {
+        id: 3,
+        title: "Phone Number"
+    },
 
+]

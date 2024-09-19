@@ -2,10 +2,14 @@ import { View, Text, Image, TouchableOpacity, } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { AppButton, AppInput, FromAndToCard } from '../../../../components';
 import styles from './styles';
-import { HP, PFColors, WP, appIcons, isIOS } from '../../../../shared/exporter';
-import { svgIcon } from '../../../../assets/svg';
+import { appIcons } from '../../../../shared/exporter';
 
-const OfferSheet = ({ onPressCancel }) => {
+interface OfferSheetProp {
+    onPressCancel: () => void
+    handleSendOfferBtn: () => void
+}
+
+const OfferSheet = ({ onPressCancel, handleSendOfferBtn }: OfferSheetProp) => {
 
     const BubleView = ({ icon, iconStyle, title }) => {
         return (

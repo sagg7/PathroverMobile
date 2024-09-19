@@ -19,7 +19,7 @@ type AuthStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
-const AuthStack: React.FC = () => {
+const AuthStack = () => {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

@@ -2,6 +2,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import {
     AppButton,
+    DatePicker,
     MainWrapper,
     MiniProgressBar,
     UploaderInput,
@@ -9,29 +10,27 @@ import {
 import styles from './styles';
 import { IMAGE_OPTIONS, Routes, appIcons, showAlert } from '../../../../shared/exporter';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { DateRangePicker } from '../../../../components/complex/DatePicker';
 import { useDispatch } from 'react-redux';
 import { setDriverProfile } from '../../../../redux/driver/driverSlice';
 import { useNavigation } from '@react-navigation/native';
 
 const DriverProfile = () => {
     const [profileImage, setProfileImage] = useState(null);
-    const [showCalendar, setShowCalendar] = useState(false)
-    const [dob, setDob] = useState(null)
-    const [birthDate, setBirthDate] = useState(null)
-    let disabled = profileImage?.fileName && birthDate || false
+    let disabled = profileImage?.fileName && date || false
     const dispatch = useDispatch()
     const navigation = useNavigation()
+    const [date, setDate] = useState("");
+    const [show, setShow] = useState(false);
 
     const uploadFromGallery = async () => {
         const result = await launchImageLibrary(IMAGE_OPTIONS);
         setProfileImage(result?.assets[0]);
     };
     const onPressContinue = () => {
-        if (birthDate && profileImage) {
+        if (date && profileImage) {
             const obj = {
                 profile: profileImage,
-                dob: birthDate
+                dob: date
             }
             dispatch(setDriverProfile(obj))
             navigation.navigate(Routes.UploadIdentity)
@@ -40,9 +39,16 @@ const DriverProfile = () => {
         }
     }
 
-    const handleDob = (i) => {
-        setBirthDate(i)
-    }
+    const showDatePicker = () => {
+        setShow(true);
+    };
+    const onConfirm = dates => {
+        const dateTimeString = dates;
+        setDate(dateTimeString?.toISOString().split('T')[0])
+        setShow(false);
+    };
+    const onChange = dates => {
+    };
 
     return (
         <MainWrapper>
@@ -77,15 +83,16 @@ const DriverProfile = () => {
                         <Text style={styles.uploadText}>Upload Image</Text>
                     </>
                 )}
-
                 <View style={styles.height} />
                 <UploaderInput
-                    value={birthDate}
+                    value={date || ""}
                     placeholder="DOB"
-                    onPress={() => setShowCalendar(true)}
+                    onPress={showDatePicker}
                 />
-                <DateRangePicker modalVisible={showCalendar} onPressDone={() => setShowCalendar(false)} setDob={handleDob} onPressCancel={() => setShowCalendar(false)} />
-                <AppButton title="Continue" buttonStyle={styles.buttonStyle} handleClick={() => onPressContinue()} disabled={!disabled} />
+
+                <DatePicker show={show} onCancel={() => setShow(false)} onConfirm={onConfirm} onChange={onChange} />
+
+                <AppButton title="Continue" buttonStyle={styles.buttonStyle} handleClick={() => onPressContinue()} disabled={disabled} />
                 <View style={styles.height} />
             </ScrollView>
         </MainWrapper>

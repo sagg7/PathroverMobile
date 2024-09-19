@@ -42,10 +42,30 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    edtProfile: builder.mutation({
+      query: (data) => {
+        return {
+          url: 'profiles/manage_profile',
+          method: 'put',
+          body: data,
+        };
+      },
+    }),
+    supportContact: builder.mutation({
+      query: (data) => {
+        return {
+          url: '',
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
 
 
   }),
   overrideExisting: true,
 });
 
-export const { useCreateDriverProfileMutation, useGetAllRideRequestMutation, useAcceptRejectRideRideRequestMutation, useSendRideOfferMutation } = driverApiSlice;
+export const { useCreateDriverProfileMutation, useGetAllRideRequestMutation,
+  useAcceptRejectRideRideRequestMutation, useSendRideOfferMutation,useSupportContactMutation,
+  useEdtProfileMutation } = driverApiSlice;

@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './styles';
 import { AppButton, AppHeader, AppInput, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -13,10 +13,18 @@ const SignupScreen = ({ }) => {
   const route = useRoute()
   const { isEmail } = route?.params
   const formik = useRef()
+  const [initialValues, setinitialValues] = useState(signupInitialObject)
+  useEffect(() => {
+    console.log("working formik");
+
+    setinitialValues(signupInitialObject)
+  }, [])
+
 
   const handleContinueBtn = (values) => {
     navigation.navigate(Routes.SetPassword, { values: values })
   }
+
 
   return (
     <MainWrapper>
@@ -34,10 +42,13 @@ const SignupScreen = ({ }) => {
           <View style={styles.formikContainer}>
             <Formik
               innerRef={formik}
-              initialValues={signupInitialObject}
+              initialValues={initialValues}
+              enableReinitialize
               validationSchema={createValidationSchema(isEmail)}
-              onSubmit={values => {
+              onSubmit={(values, { resetForm }) => {
                 handleContinueBtn(values)
+                // resetForm();
+
               }}>
               {({ handleChange, handleSubmit, values, errors, touched, setFieldValue }) => {
 

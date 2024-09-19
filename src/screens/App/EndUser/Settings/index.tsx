@@ -9,7 +9,6 @@ import { useSwitchRoleMutation } from '../../../../redux/auth/authApiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Routes } from '../../../../shared/exporter';
 import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { retry } from '@reduxjs/toolkit/query';
 
 const Settings = ({ navigation }) => {
     const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);

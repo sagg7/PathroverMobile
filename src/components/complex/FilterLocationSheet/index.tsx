@@ -83,7 +83,7 @@ const FilterLocationSheet = ({ modalVisible, setModalVisible, onPressDone, onPre
                     />
                 </MapboxGL.MapView>
             </View>
-            <AppButton title='Done' buttonStyle={styles.btnStyles} handleClick={() => onPressDone()} />
+            <AppButton title='Done' buttonStyle={styles.btnStyles} handleClick={onPressDone} />
         </Modal>
     )
 }

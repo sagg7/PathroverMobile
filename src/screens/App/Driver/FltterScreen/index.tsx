@@ -8,7 +8,7 @@ import {
 } from '../../../../components';
 import styles from './styles';
 import { appIcons } from '../../../../shared/exporter';
-import { DateRangePicker } from '../../../../components/complex/DatePicker';
+import { DatePicker, DateRangePicker } from '../../../../components/complex/DatePicker';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { svgIcon } from '../../../../assets/svg';
@@ -22,6 +22,9 @@ const FilterScreen = () => {
     const [showCalendar, setShowCalendar] = useState(false)
     const [showLocationSheet, setShowLocationSheet] = useState(false)
     const dispatch = useDispatch()
+    const [show, setShow] = useState(false);
+    const [date, setDate] = useState("");
+
     const navigation = useNavigation()
 
     const handleDob = (i) => {
@@ -42,17 +45,28 @@ const FilterScreen = () => {
         )
     }
 
+    const showDatePicker = () => {
+        setShow(true);
+    };
+    const onConfirm = dates => {
+        const dateTimeString = dates;
+        setDate(dateTimeString?.toISOString().split('T')[0])
+        setShow(false);
+    };
+    const onChange = dates => {
+    };
 
     return (
         <MainWrapper>
             <AppHeader title='Filter' />
             <View style={styles.height} />
 
-            <ClickableView title={"Date"} icon={svgIcon.Calendar} onPress={() => setShowCalendar(true)} />
+            <ClickableView title={"Date"} icon={svgIcon.Calendar} onPress={() => setShow(true)} />
             <View style={styles.height} />
             <ClickableView title={"Location"} icon={svgIcon.BlueMarker} onPress={() => setShowLocationSheet(true)} />
             <FilterLocationSheet modalVisible={showLocationSheet} onPressCancel={() => setShowLocationSheet(false)} />
-            <DateRangePicker modalVisible={showCalendar} onPressDone={() => setShowCalendar(false)} setDob={handleDob} onPressCancel={() => setShowCalendar(false)} />
+            <DatePicker show={show} onCancel={() => setShow(false)} onConfirm={onConfirm} onChange={onChange} />
+
             <AppButton title="Done" buttonStyle={styles.buttonStyle} />
             <View style={styles.height} />
         </MainWrapper>

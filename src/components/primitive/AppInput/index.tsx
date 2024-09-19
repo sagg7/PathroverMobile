@@ -155,12 +155,11 @@ const styles = StyleSheet.create({
   }),
 
   inputContainerStyle: (rightIcon: any) => ({
-    height: WP('12'),
+    height: "100%",
     color: PFColors.Standard.Black,
     width: rightIcon ? '90%' : '100%',
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.Regular,
-
   }),
   errorTxtStyle: {
     marginVertical: WP('1'),

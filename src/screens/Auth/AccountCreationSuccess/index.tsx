@@ -7,8 +7,6 @@ const AccountCreationSuccess = () => {
     <MainWrapper>
       <AppHeader title='Path Finder' clickBackIcon={() => { }} />
       <SuccessInfo
-
-
         icon={svgIcon.GreenCheck}
         // title="Successfully Created"
         buttonText="Next"
