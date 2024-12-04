@@ -1,5 +1,4 @@
-import { apiSlice } from '../api/apiSlice';
-
+import {apiSlice} from '../api/apiSlice';
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
@@ -9,7 +8,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
-	}),
+    }),
 
     forgotPassword: builder.mutation({
       query: data => ({
@@ -18,7 +17,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-  
+
     resetPassword: builder.mutation({
       query: data => ({
         url: 'passwords/reset_password',
@@ -33,13 +32,20 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-  
-     verifyOtp: builder.mutation({
+
+    verifyOtp: builder.mutation({
       query: data => ({
         url: 'otps/verify_otp',
         method: 'POST',
         body: data,
-       }),
+      }),
+    }),
+    sociallLogin: builder.mutation({
+      query: data => ({
+        url: 'social_login/social_login',
+        method: 'POST',
+        body: data,
+      }),
     }),
     refreshToken: builder.mutation({
       query: data => ({
@@ -71,8 +77,9 @@ export const {
   useForgotPasswordMutation,
   useSignUpMutation,
   useRefreshTokenMutation,
-	useLogoutUserMutation,
+  useLogoutUserMutation,
   useVerifyOtpMutation,
   useResetPasswordMutation,
-  useSwitchRoleMutation
+  useSwitchRoleMutation,
+  useSociallLoginMutation,
 } = authApiSlice;

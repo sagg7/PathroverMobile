@@ -1210,6 +1210,8 @@ PODS:
     - React-logger (= 0.74.5)
     - React-perflogger (= 0.74.5)
     - React-utils (= 0.74.5)
+  - RNAppleAuthentication (2.4.0):
+    - React-Core
   - RNCAsyncStorage (1.24.0):
     - React-Core
   - RNDateTimePicker (8.2.0):
@@ -1400,6 +1402,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -1535,6 +1538,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNAppleAuthentication:
+    :path: "../node_modules/@invertase/react-native-apple-authentication"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNDateTimePicker:
@@ -1618,6 +1623,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: cfbe85c3510c541ec6dc815c7729b41304b67961
   React-utils: f242eb7e7889419d979ca0e1c02ccc0ea6e43b29
   ReactCommon: f7da14a8827b72704169a48c929bcde802698361
+  RNAppleAuthentication: e00c76acb03351f5544373c78fa7f359bef6d5d3
   RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNGestureHandler: efed690b8493a00b99654043daeb1335276ac4a2
