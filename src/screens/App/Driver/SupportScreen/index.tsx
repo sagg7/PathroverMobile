@@ -1,5 +1,5 @@
-import { View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import {View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
 import styles from './styles';
 import {
   AppButton,
@@ -8,31 +8,27 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {Formik} from 'formik';
 import {
   supportInitialObj,
   supportValidation,
 } from '../../../../shared/exporter';
-import {
-  UNEXPECTED_ERROR,
-  isIOS,
-  showAlert,
-} from '../../../../shared/exporter';
-import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { useSupportContactMutation } from '../../../../redux/driver/driverApiSlice';
+import {UNEXPECTED_ERROR, isIOS, showAlert} from '../../../../shared/exporter';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import {useSupportContactMutation} from '../../../../redux/driver/driverApiSlice';
 
 const SupportScreen = () => {
-  const [supportContact, { isLoading }] = useSupportContactMutation();
+  const [supportContact, {isLoading}] = useSupportContactMutation();
   const navigation = useNavigation();
-  const formikRef = useRef()
+  const formikRef = useRef();
   const loginUser = useSelector(state => state?.auth?.loginUser);
 
   useEffect(() => {
     if (formikRef.current) {
-      const { setFieldValue } = formikRef.current;
-      const { last_name, first_name, phone_number, email } = loginUser
+      const {setFieldValue} = formikRef.current;
+      const {last_name, first_name, phone_number, email} = loginUser;
       first_name && setFieldValue('firstName', first_name);
       last_name && setFieldValue('lastName', last_name);
       email && setFieldValue('email', email);
@@ -40,7 +36,7 @@ const SupportScreen = () => {
   }, []);
 
   const handleContinueBtn = async (val: any) => {
-    const { email, firstName, lastName, message } = val;
+    const {email, firstName, lastName, message} = val;
     const obj = {
       message: {
         email: email,
@@ -50,18 +46,19 @@ const SupportScreen = () => {
       },
     };
     const resp = await supportContact(obj);
+    console.log('RESP', resp);
+
     if (resp?.data) {
-      showAlert("Alert", "Your message has been sent.")
+      showAlert('Alert', 'Your message has been sent.');
       navigation.goBack();
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 
-
   return (
     <MainWrapper>
-      <AppHeader title={"Support"} />
+      <AppHeader title={'Support'} />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
         enableOnAndroid={true}
@@ -79,15 +76,8 @@ const SupportScreen = () => {
               initialValues={supportInitialObj}
               validationSchema={supportValidation}
               onSubmit={handleContinueBtn}>
-              {({
-                handleChange,
-                handleSubmit,
-                values,
-                errors,
-                touched,
-              }) => (
-                <View style={{ alignSelf: 'center' }}>
-
+              {({handleChange, handleSubmit, values, errors, touched}) => (
+                <View style={{alignSelf: 'center'}}>
                   <AppInput
                     placeholder="First Name"
                     value={values.firstName}
@@ -121,10 +111,7 @@ const SupportScreen = () => {
                   />
 
                   <View style={styles.divider}>
-                    <AppButton
-                      title="Save"
-                      handleClick={handleSubmit}
-                    />
+                    <AppButton title="Save" handleClick={handleSubmit} />
                   </View>
                 </View>
               )}

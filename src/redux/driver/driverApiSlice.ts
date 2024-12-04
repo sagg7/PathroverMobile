@@ -3,29 +3,27 @@ import {apiSlice} from '../api/apiSlice';
 export const driverApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
     createDriverProfile: builder.mutation({
-      query: (data) => {
+      query: data => {
         return {
           url: 'profiles',
           method: 'post',
           body: data,
-          headers:{}
-         
+          headers: {},
         };
       },
     }),
-    getAllRideRequest: builder.mutation({
-      query: (data) => {
+    getAllRideRequest: builder.query({
+      query: data => {
         return {
           url: 'ride_requests',
           method: 'gt',
           // body: data,
           // headers:{}
-         
         };
       },
     }),
     acceptRejectRideRideRequest: builder.mutation({
-      query: (data) => {
+      query: data => {
         return {
           url: 'offers/accept_offer',
           method: 'put',
@@ -34,7 +32,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
       },
     }),
     sendRideOffer: builder.mutation({
-      query: (data) => {
+      query: data => {
         return {
           url: 'offers',
           method: 'put',
@@ -43,7 +41,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
       },
     }),
     edtProfile: builder.mutation({
-      query: (data) => {
+      query: data => {
         return {
           url: 'profiles/manage_profile',
           method: 'put',
@@ -52,7 +50,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
       },
     }),
     supportContact: builder.mutation({
-      query: (data) => {
+      query: data => {
         return {
           url: '',
           method: 'post',
@@ -60,12 +58,15 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
-
-
   }),
   overrideExisting: true,
 });
 
-export const { useCreateDriverProfileMutation, useGetAllRideRequestMutation,
-  useAcceptRejectRideRideRequestMutation, useSendRideOfferMutation,useSupportContactMutation,
-  useEdtProfileMutation } = driverApiSlice;
+export const {
+  useCreateDriverProfileMutation,
+  useGetAllRideRequestQuery,
+  useAcceptRejectRideRideRequestMutation,
+  useSendRideOfferMutation,
+  useSupportContactMutation,
+  useEdtProfileMutation,
+} = driverApiSlice;

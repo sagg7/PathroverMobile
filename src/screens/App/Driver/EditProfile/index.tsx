@@ -1,5 +1,5 @@
-import { Text, View } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {Text, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import styles from './styles';
 import {
   AppButton,
@@ -8,8 +8,8 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {Formik} from 'formik';
 import {
   EditInitialObject,
   EditProfileValidation,
@@ -22,26 +22,26 @@ import {
   showAlert,
   useKeyboardListener,
 } from '../../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { useEdtProfileMutation } from '../../../../redux/driver/driverApiSlice';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {useEdtProfileMutation} from '../../../../redux/driver/driverApiSlice';
 
 const EditProfile = () => {
   const keyboardVisible = useKeyboardListener();
-  const [editProfile, { data, isLoading }] = useEdtProfileMutation();
+  const [editProfile, {data, isLoading}] = useEdtProfileMutation();
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
-  const { key } = route?.params;
-  const formikRef = useRef()
+  const {key} = route?.params;
+  const formikRef = useRef();
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [values, setValues] = useState({ title: "", desc: "" })
+  const [values, setValues] = useState({title: '', desc: ''});
 
   useEffect(() => {
     if (formikRef.current) {
-      const { setFieldValue } = formikRef.current;
-      const { last_name, first_name, phone_number, email } = loginUser
+      const {setFieldValue} = formikRef.current;
+      const {last_name, first_name, phone_number, email} = loginUser;
       first_name && setFieldValue('firstName', first_name);
       last_name && setFieldValue('lastName', last_name);
       email && setFieldValue('email', email);
@@ -49,32 +49,42 @@ const EditProfile = () => {
     }
   }, []);
 
-  const handleContinueBtn = useCallback(async (val) => {
-    const { email, phone, password, firstName, lastName } = val;
-    const obj = {
-      profile: {
-        ...(email && { email: email }),
-        ...(firstName && { first_name: firstName }),
-        ...(lastName && { last_name: lastName }),
-        ...(password && { password: password }),
-        ...(phone && { phone_number: removeNonNumbers(phone) }),
+  const handleContinueBtn = useCallback(
+    async val => {
+      const {email, phone, password, firstName, lastName} = val;
+      const obj = {
+        profile: {
+          ...(email && {email: email}),
+          ...(firstName && {first_name: firstName}),
+          ...(lastName && {last_name: lastName}),
+          ...(password && {password: password}),
+          ...(phone && {phone_number: removeNonNumbers(phone)}),
+        },
+      };
 
-      },
-    };
+      const resp = await editProfile(obj);
+      dispatch(setLoginUser(resp?.data?.profile));
 
-    const resp = await editProfile(obj);
-    dispatch(setLoginUser(resp?.data?.profile));
+      if (resp?.data) {
+        console.log('TITLE ALERT', values);
 
-    if (resp?.data) {
-      showAlert("Alert", "Your profile has been updated.")
-      navigation.goBack();
-    } else {
-      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
-    }
-  }, [dispatch, navigation]);
+        showAlert('Alert', `Profile has been updated.`);
+        navigation.goBack();
+      } else {
+        showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
+      }
+    },
+    [dispatch, navigation],
+  );
 
-  const renderFormFields = (key, values, handleChange, touched, errors, setFieldValue) => {
-
+  const renderFormFields = (
+    key,
+    values,
+    handleChange,
+    touched,
+    errors,
+    setFieldValue,
+  ) => {
     switch (key) {
       case 0:
         return (
@@ -110,7 +120,7 @@ const EditProfile = () => {
           <AppInput
             placeholder="Phone No"
             value={values.phone}
-            onChangeText={(text) => {
+            onChangeText={text => {
               const formatted = formatPhoneNumber(text);
               setFieldValue('phone', formatted);
             }}
@@ -149,22 +159,21 @@ const EditProfile = () => {
   useEffect(() => {
     switch (key) {
       case 0:
-        setValues({ title: "Name", desc: "Change Name" });
+        setValues({title: 'Name', desc: 'Change Name'});
         break;
       case 1:
-        setValues({ title: "Email", desc: "Change Email" });
+        setValues({title: 'Email', desc: 'Change Email'});
         break;
       case 2:
-        setValues({ title: "Password", desc: "Change Password" });
+        setValues({title: 'Password', desc: 'Change Password'});
         break;
       case 3:
-        setValues({ title: "Phone", desc: "Change Phone Number" });
+        setValues({title: 'Phone', desc: 'Change Phone Number'});
         break;
       default:
-        setValues({ title: '', desc: '' });
+        setValues({title: '', desc: ''});
     }
   }, [key]);
-
   return (
     <MainWrapper>
       <AppHeader title={values.title} />
@@ -194,8 +203,15 @@ const EditProfile = () => {
                 touched,
                 setFieldValue,
               }) => (
-                <View style={{ alignSelf: 'center' }}>
-                  {renderFormFields(key, values, handleChange, touched, errors, setFieldValue)}
+                <View style={{alignSelf: 'center'}}>
+                  {renderFormFields(
+                    key,
+                    values,
+                    handleChange,
+                    touched,
+                    errors,
+                    setFieldValue,
+                  )}
                   <View style={styles.divider}>
                     <AppButton
                       title="Save"

@@ -57,7 +57,7 @@ buildscript {
             RNMapboxMapsVersion = '11.4.1'
         }
 
-        // Mapbox deps
+        // Mapbox deps  
         if (useCustomMapbox) {
             RNMapboxMapsLibs = {
                 implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
