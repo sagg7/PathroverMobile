@@ -21,14 +21,17 @@ import {TruckTypeList} from '../../../DriverRegistrationFlow/VehicleDetail/Truck
 import SelectRoute from '../SelectRoute';
 import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
+import CargoSheet from '../../../../../components/complex/CargoSheet';
 
 const VehicleRequest = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
   const [selectedVehicleDetails, setSelectedVehicleDetails] = useState(null);
   const [selectedOption, setSelectedOption] = useState('Choose Route');
+  const [cargoDescriptionDetails, setCargoDescriptionDetails] =
+    useState<null | {image: any; description: any}>(null);
   const [vehicleData, setVehicleData] = useState(PickupTruck);
-  const [selectedKey, setSelectedKey] = useState(null);
-  const sheetRef = useRef();
+  const sheetRef = useRef(null);
+  const cargoSheetRef = useRef(null);
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
@@ -86,7 +89,6 @@ const VehicleRequest = () => {
   };
 
   const handleClearBtn = () => {
-    setSelectedKey(null);
     setSelectedVehicleDetails(null);
     let reSetVehicleData = vehicleData.map((item: any) => {
       if (item.isWeightSelected) {
@@ -101,7 +103,9 @@ const VehicleRequest = () => {
 
     setVehicleData(reSetVehicleData);
   };
-
+  const onPressCargoCard = () => {
+    cargoSheetRef?.current.open();
+  };
   return (
     <MainWrapper>
       <AppHeader leftIcon={false} title="Request Vehicle" />
@@ -150,7 +154,10 @@ const VehicleRequest = () => {
           style={styles.routeCardStyle}
           title={selectedOption === 'Choose Location' ? 'Location' : 'Route'}
         />
-        <CargoDescriptionCard style={styles.cargoCardStyle} />
+        <CargoDescriptionCard
+          style={styles.cargoCardStyle}
+          onPressCard={onPressCargoCard}
+        />
         <RecipientDetailCard style={styles.cargoCardStyle} />
       </ScrollView>
       <OptionSelectorSheet
@@ -158,6 +165,11 @@ const VehicleRequest = () => {
         data={vehicleData}
         onPressWeight={handlePressWeight}
         onPressModel={handlePressModel}
+      />
+      <CargoSheet
+        ref={cargoSheetRef}
+        cargoDescriptionDetails={cargoDescriptionDetails}
+        setCargoDescriptionDetails={setCargoDescriptionDetails}
       />
     </MainWrapper>
   );
