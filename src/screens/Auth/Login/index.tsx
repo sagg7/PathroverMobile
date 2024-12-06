@@ -26,7 +26,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLoginMutation } from '../../../redux/auth/authApiSlice';
 import { useDispatch } from 'react-redux';
-import { setLoginUser } from '../../../redux/auth/authSlice';
+import { setLoginUser, setUserRole } from '../../../redux/auth/authSlice';
 
 const LoginScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener();
@@ -48,6 +48,7 @@ const LoginScreen = ({ }) => {
 
     const resp = await login(obj);
     dispatch(setLoginUser(resp?.data?.user))
+    dispatch(setUserRole('endUser'))
 
     if (resp?.data) {
       navigation.replace('Home')

@@ -28,6 +28,10 @@ import CrossCirlce from '../svg/crossCircle.svg'
 import RightChevron from '../svg/rightChevron.svg'
 import LeftChevron from '../svg/leftChevron.svg'
 import BlueMarker from '../svg/blueMarker.svg'
+import MyRequest from '../svg/MyRequest.svg'
+import CreateRoute from '../svg/CreateRoute.svg'
+import RequestHistory from '../svg/RequestHistory.svg'
+import RadioButtonBlue from '../svg/RadioButtonBlue.svg'
 
 export const svgIcon = {
     Forward: <Forward />,
@@ -48,6 +52,7 @@ export const svgIcon = {
     Trailer: <Trailer />,
     PickupTruck: <PickupTruck />,
     RadioActive: <RadioActive />,
+    RadioButtonBlue: <RadioButtonBlue />,
     RadioInactive: <RadioInactive />,
     LeftArrow: <LeftArrow />,
     MapPin: <MapPin />,
@@ -58,6 +63,9 @@ export const svgIcon = {
     CrossCirlce: <CrossCirlce />,
     RightChevron: <RightChevron />,
     LeftChevron: <LeftChevron />,
-    BlueMarker: <BlueMarker />
+    BlueMarker: <BlueMarker />,
+    MyRequest: <MyRequest />,
+    CreateRoute: <CreateRoute />,
+    RequestHistory: <RequestHistory />,
 
 };

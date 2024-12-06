@@ -31,7 +31,8 @@ export const PFColors = {
         AshGray: "#bdbdbd",
         FrostedGray: "#e9e6e6",
         CloudWhite: "#f2f2f2",
-        CharcoalGray: "#4d4d4d"
+        CharcoalGray: "#4d4d4d",
+        borderGray : '#D9D9D9'
     },
     Green: {
         LeafGreen: "#0e924b",

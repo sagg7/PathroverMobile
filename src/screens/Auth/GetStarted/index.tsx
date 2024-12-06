@@ -2,9 +2,9 @@ import { ImageBackground, StatusBar, Text, View } from 'react-native';
 import React from 'react';
 import styles from './styles';
 import { appImages } from '../../../assets/images';
-import { AppButton } from '../../../components';
 import { Routes } from '../../../shared/exporter';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import {  useNavigation } from '@react-navigation/native';
+import { AppButton } from '../../../components';
 
 const GetStarted = () => {
   const navigation = useNavigation()

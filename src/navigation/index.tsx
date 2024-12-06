@@ -20,6 +20,7 @@ import ManageProfile from '../screens/App/Driver/ManageProfile';
 import EditProfile from '../screens/App/Driver/EditProfile';
 import SupportScreen from '../screens/App/Driver/SupportScreen';
 import AuthStack from './stacks/authStack';
+import SelectRoute from '../screens/App/Manager/Vehicle/SelectRoute';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -52,6 +53,7 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.ManageProfile} component={ManageProfile} />
         <Stack.Screen name={Routes.EditProfile} component={EditProfile} />
         <Stack.Screen name={Routes.SupportScreen} component={SupportScreen} />
+        <Stack.Screen name={Routes.SelectRoute} component={SelectRoute} />
       </Stack.Navigator>
     </NavigationContainer>
   );

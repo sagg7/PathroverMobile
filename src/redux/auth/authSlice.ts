@@ -4,6 +4,7 @@ const authSlice = createSlice({
 	name: 'auth',
 	initialState: {
 		loginUser: null,
+		userRole : null,
 		accessToken: null,
 		refreshToken: {},
 		isTokenValid: false,
@@ -18,6 +19,9 @@ const authSlice = createSlice({
 		},
 		setLoginUser: (state, action) => {
 			state.loginUser = action?.payload;
+		},
+		setUserRole: (state, action) => {
+			state.userRole = action?.payload;
 		},
 		setIsTokenValid: (state, action) => {
 			state.isTokenValid = action?.payload;
@@ -40,6 +44,7 @@ export const {
 	logOut,
 	setAccessToken,
 	setLoginUser,
+	setUserRole,
 	setIsTokenValid,
 	setIswalkthrough
 } = authSlice.actions;
