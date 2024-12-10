@@ -17,14 +17,14 @@ const SelectRoute = ({
       <Pressable style={[styles.mainContainer, style]} onPress={onPressCard}>
         <View style={styles.container}>
           <Text style={styles.titleStyle}>Select {title}</Text>
-          {!selectedRouteDetails && (
+          {selectedRouteDetails && (
             <Pressable onPress={onPressClear}>
               <Text style={styles.clearTextStyle}>Clear</Text>
             </Pressable>
           )}
           {svgIcon.LeftArrow}
         </View>
-        {!selectedRouteDetails && (
+        {selectedRouteDetails && (
           <>
             <Text style={styles.routeTitleText}>Wapdatown</Text>
             <FromAndToCard />

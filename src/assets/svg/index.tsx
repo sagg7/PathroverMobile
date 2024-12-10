@@ -32,8 +32,14 @@ import MyRequest from '../svg/MyRequest.svg';
 import CreateRoute from '../svg/CreateRoute.svg';
 import RequestHistory from '../svg/RequestHistory.svg';
 import RadioButtonBlue from '../svg/RadioButtonBlue.svg';
-import CameraBlue from '../svg/cameraBlue.svg';
-import GalleryBlue from '../svg/galleryBlue.svg';
+import CameraBlue from '../svg/CameraBlue.svg';
+import GalleryBlue from '../svg/GalleryBlue.svg';
+import RouteBlue from '../svg/RouteBlue.svg';
+import RouteBlack from '../svg/RouteBlack.svg';
+import DownChaveron from '../svg/DownChaveron.svg';
+import UpChaveron from '../svg/UpChaveron.svg';
+import Clock from '../svg/clock.svg';
+import RatingStar from '../svg/ratingStar.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -71,4 +77,10 @@ export const svgIcon = {
   RequestHistory: <RequestHistory />,
   CameraBlue: <CameraBlue />,
   GalleryBlue: <GalleryBlue />,
+  RouteBlue: <RouteBlue />,
+  RouteBlack: <RouteBlack />,
+  DownChaveron: <DownChaveron />,
+  UpChaveron: <UpChaveron />,
+  ClockRed: <Clock />,
+  RatingStar: <RatingStar />,
 };

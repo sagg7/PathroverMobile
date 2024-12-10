@@ -14,14 +14,14 @@ const RecipientDetailCard = ({
     <Pressable style={[styles.mainContainer, style]} onPress={onPressCard}>
       <View style={styles.container}>
         <Text style={styles.titleStyle}>Recipent Detail</Text>
-        {!recipientDetail && (
+        {recipientDetail && (
           <Pressable onPress={onPressClear}>
             <Text style={styles.clearTextStyle}>Clear</Text>
           </Pressable>
         )}
         {svgIcon.LeftArrow}
       </View>
-      {!recipientDetail && (
+      {recipientDetail && (
         <View style={styles.recipentInfoView}>
           <Text style={styles.titleStyle}>Name</Text>
           <Text style={styles.recipentDataText}>Sara</Text>

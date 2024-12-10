@@ -43,27 +43,35 @@ export const styles = StyleSheet.create({
     marginTop: scale(16),
   },
   radioBtnContainer: {
-    flexDirection:'row',
-    alignItems:'center',
-    marginBottom:scale(24)
-
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: scale(24),
   },
   radioBtn: {
-     flexDirection:'row',
-     alignItems:'center'
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  radioBtnInactive:{
-     flexDirection:'row',
-     alignItems:'center',
-     marginLeft:scale(27),
+  radioBtnInactive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: scale(27),
   },
   radioBtnText: {
     fontSize: scale(14),
     color: PFColors.Standard.Black,
     fontFamily: PFFonts.Foundation.Medium,
-    marginLeft:scale(12)
+    marginLeft: scale(12),
   },
-  cargoCardStyle:{
-    marginTop:scale(12)
-  }
+  cargoCardStyle: {
+    marginTop: scale(12),
+  },
+  recipentCardStyle: {
+    marginVertical: scale(12),
+  },
+  btn: {
+    marginBottom: scale(16),
+    marginHorizontal:scale(16),
+    width:'92%',
+    alignSelf:'center'
+  },
 });

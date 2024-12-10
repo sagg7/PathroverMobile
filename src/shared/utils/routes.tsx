@@ -29,4 +29,7 @@ export const Routes = {
   RequestHistory: 'RequestHistory',
   more: 'more',
   SelectRoute: 'SelectRoute',
+  CustomizeRoute: 'CustomizeRoute',
+  Locations: 'Locations',
+  VehiclesOffer: 'VehiclesOffer',
 };

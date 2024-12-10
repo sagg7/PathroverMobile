@@ -1,6 +1,7 @@
 import {View, Text, Pressable, ScrollView} from 'react-native';
 import React, {useRef, useState} from 'react';
 import {
+  AppButton,
   AppHeader,
   MainWrapper,
   OptionSelectorSheet,
@@ -13,25 +14,30 @@ import {
   VehicleTypes,
 } from '../../../../../shared/utils/constant';
 import {scale} from '../../../../../shared/theme/responsive';
-import VehicleDetail from '../../../DriverRegistrationFlow/VehicleDetail';
 import VehicleDetailCard from '../VehicleDetailCard';
 import {svgIcon} from '../../../../../assets/svg';
-import {PFColors} from '../../../../../shared/exporter';
-import {TruckTypeList} from '../../../DriverRegistrationFlow/VehicleDetail/TruckTypeLiist';
+import {PFColors, Routes} from '../../../../../shared/exporter';
 import SelectRoute from '../SelectRoute';
 import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
 import CargoSheet from '../../../../../components/complex/CargoSheet';
+import RecipentSheet from '../../../../../components/complex/RecipenntSheet';
 
-const VehicleRequest = () => {
+const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
   const [selectedVehicleDetails, setSelectedVehicleDetails] = useState(null);
+  const [selectedRouteDetails, setSelectedRouteDetails] = useState(null);
   const [selectedOption, setSelectedOption] = useState('Choose Route');
   const [cargoDescriptionDetails, setCargoDescriptionDetails] =
     useState<null | {image: any; description: any}>(null);
+  const [recipentDetails, setRecipentDetails] = useState<null | {
+    name: string;
+    phone: string;
+  }>(null);
   const [vehicleData, setVehicleData] = useState(PickupTruck);
   const sheetRef = useRef(null);
   const cargoSheetRef = useRef(null);
+  const recipentSheetRef = useRef(null);
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
@@ -99,13 +105,42 @@ const VehicleRequest = () => {
       );
       return item;
     });
-    console.log(reSetVehicleData[0]);
 
     setVehicleData(reSetVehicleData);
   };
+  const onPressSelectRouteCard = () => {
+    if (selectedOption === 'Choose Route') {
+      navigation.navigate(Routes.CustomizeRoute, {
+        selectedRouteDetails: selectedRouteDetails,
+        setSelectedRouteDetails: setSelectedRouteDetails,
+      });
+    } else {
+      navigation.navigate('Locations');
+    }
+  };
+
   const onPressCargoCard = () => {
     cargoSheetRef?.current.open();
   };
+
+  const onPressRecipentCard = () => {
+    recipentSheetRef?.current.open();
+  };
+
+  const handleClearDetails = (type: string) => () => {
+    if (type === 'route') {
+      setSelectedRouteDetails(null);
+    } else if (type === 'cargo') {
+      setCargoDescriptionDetails(null);
+    } else if (type === 'recipent') {
+      setRecipentDetails(null);
+    }
+  };
+
+const handleCreateRequest=()=>{
+  navigation.navigate(Routes.VehiclesOffer)
+}
+
   return (
     <MainWrapper>
       <AppHeader leftIcon={false} title="Request Vehicle" />
@@ -151,15 +186,26 @@ const VehicleRequest = () => {
 
         <Text style={styles.commonHeading}>{selectedOption}</Text>
         <SelectRoute
+          selectedRouteDetails={selectedRouteDetails}
           style={styles.routeCardStyle}
           title={selectedOption === 'Choose Location' ? 'Location' : 'Route'}
+          onPressCard={onPressSelectRouteCard}
+          onPressClear={handleClearDetails('route')}
         />
         <CargoDescriptionCard
           style={styles.cargoCardStyle}
           onPressCard={onPressCargoCard}
+          CargoDescriptionDetails={cargoDescriptionDetails}
+          onPressClear={handleClearDetails('cargo')}
         />
-        <RecipientDetailCard style={styles.cargoCardStyle} />
+        <RecipientDetailCard
+          style={styles.recipentCardStyle}
+          recipientDetail={recipentDetails}
+          onPressCard={onPressRecipentCard}
+          onPressClear={handleClearDetails('recipent')}
+        />
       </ScrollView>
+        <AppButton title="Create Request" buttonStyle={styles.btn} handleClick={handleCreateRequest} />
       <OptionSelectorSheet
         ref={sheetRef}
         data={vehicleData}
@@ -170,6 +216,11 @@ const VehicleRequest = () => {
         ref={cargoSheetRef}
         cargoDescriptionDetails={cargoDescriptionDetails}
         setCargoDescriptionDetails={setCargoDescriptionDetails}
+      />
+      <RecipentSheet
+        ref={recipentSheetRef}
+        recipentDetails={recipentDetails}
+        setrecipentDetails={setRecipentDetails}
       />
     </MainWrapper>
   );

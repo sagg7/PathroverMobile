@@ -1251,6 +1251,8 @@ PODS:
     - React
     - React-Core
     - Turf
+  - RNPermissions (5.2.1):
+    - React-Core
   - RNReanimated (3.16.3):
     - DoubleConversion
     - glog
@@ -1430,6 +1432,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - "rnmapbox-maps (from `../node_modules/@rnmapbox/maps`)"
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -1572,6 +1575,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-google-signin/google-signin"
   rnmapbox-maps:
     :path: "../node_modules/@rnmapbox/maps"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -1651,6 +1656,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 6fee3422fd8c81c5ee756fa72e3d1780e9943d9d
   RNGoogleSignin: 9e68b9bcc3888219357924e32ee563624745647d
   rnmapbox-maps: 334654168efcdc29584a9af1519d890a07a4a28e
+  RNPermissions: 29f757b2e88f8f5c03a434d1d3036172b183e029
   RNReanimated: e1c250aeb93d6738eaf51e3d93871873a0c41b81
   RNScreens: 6b641f232990a9d505a6d139fd18c3c759c9d290
   RNSVG: 58bad41c581b62cac6265c2899f8f943db527159
@@ -1658,6 +1664,6 @@ SPEC CHECKSUMS:
   Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
   Yoga: 950bbfd7e6f04790fdb51149ed51df41f329fcc8
 
-PODFILE CHECKSUM: 7106ad41313a9f3a7a33073e9d024f626e5abcee
+PODFILE CHECKSUM: e29209c244cf5c539eefaba8bf530eb0ad92a04f
 
 COCOAPODS: 1.16.2

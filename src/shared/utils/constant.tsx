@@ -509,20 +509,4 @@ export const ManageProfileArr = [
     title: 'Phone Number',
   },
 ];
-export const Vehicles = [
-  {
-    id: 1,
-    name: 'Pickup Trucks',
-    icon: svgIcon.PickupTruck,
-  },
-  {
-    id: 2,
-    name: 'Semi Trucks',
-    icon: svgIcon.SemiTruck,
-  },
-  {
-    id: 3,
-    name: 'Trailers',
-    icon: svgIcon.Trailer,
-  },
-];
+

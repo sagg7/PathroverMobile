@@ -14,14 +14,14 @@ const CargoDescriptionCard = ({
     <Pressable style={[styles.mainContainer, style]} onPress={onPressCard}>
       <View style={styles.container}>
         <Text style={styles.titleStyle}>Cargo Description</Text>
-        {!CargoDescriptionDetails && (
+        {CargoDescriptionDetails && (
           <Pressable onPress={onPressClear}>
             <Text style={styles.clearTextStyle}>Clear</Text>
           </Pressable>
         )}
         {svgIcon.LeftArrow}
       </View>
-      {!CargoDescriptionDetails && (
+      {CargoDescriptionDetails && (
         <Text style={styles.subTitleStyle}>
           It involves various packaging types, specific handling requirements,
           and regulatory documentation to ensure safe and compliant transit.
