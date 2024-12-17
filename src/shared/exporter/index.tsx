@@ -9,7 +9,7 @@ export { WP, HP, scrWidth, scrHeight } from '../theme/responsive';
 export {
     AuthSheetLoginObj, AuthSheetSignupObj, APP_INTRO_SLIDES, showAlert, BASE_URL, UNEXPECTED_ERROR,
     LOGIN_TYPE_TEXT, IMAGE_OPTIONS, VehicleTypes, CompanyTypes, SemiTruckData, TrailerLoadingCapacity,
-    PickupTruck, DurationArr, OrderHistoryOptions, DriverProfileMenu, ManageProfileArr
+    PickupTruck, DurationArr, OrderHistoryOptions, DriverProfileMenu, ManageProfileArr,APP_ROLE
 } from '../utils/constant.tsx'
 export { useKeyboardListener } from '../../hooks/keyboard.tsx'
 export {

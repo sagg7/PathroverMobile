@@ -21,7 +21,9 @@ export const PFColors = {
         Dark: "#13488A",
         DisableBlue: "#b8c8dc",
         SoftGlacier: "#e7edf3",
-        SoftSkyBlue: "#b9c9dc"
+        SoftSkyBlue: "#b9c9dc",
+        SelectedBlue : "#13488A1A",
+        lightBlue : "#EAEFF5"
     },
     Gray: {
         SoftGray: "#efefef",
@@ -31,7 +33,8 @@ export const PFColors = {
         AshGray: "#bdbdbd",
         FrostedGray: "#e9e6e6",
         CloudWhite: "#f2f2f2",
-        CharcoalGray: "#4d4d4d"
+        CharcoalGray: "#4d4d4d",
+        borderGray : '#D9D9D9'
     },
     Green: {
         LeafGreen: "#0e924b",

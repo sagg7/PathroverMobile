@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { APP_ROLE } from '../../shared/exporter';
 
 const authSlice = createSlice({
 	name: 'auth',

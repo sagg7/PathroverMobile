@@ -1,22 +1,24 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import {View, StyleSheet, Text} from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
-import { PFColors, PFFontSize, PFFonts, WP } from '../../../shared/exporter';
+import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 
 interface MiniProgressBarProps {
   currentStep: number;
-  onPressSkip?: () => void,
-  desciption?: string
-  heading?: string
+  onPressSkip?: () => void;
+  desciption?: string;
+  heading?: string;
+  totalSetps: number;
 }
 
 function MiniProgressBar({
+  totalSetps = 7,
   currentStep,
   onPressSkip,
   desciption,
-  heading
+  heading,
 }: MiniProgressBarProps) {
-  const maxSteps = 7;
+  const maxSteps = totalSetps;
   const progressValue = (currentStep / maxSteps) * 100;
 
   return (
@@ -35,14 +37,15 @@ function MiniProgressBar({
           title={`${currentStep}/${maxSteps}`}
           titleStyle={styles.titleStyles}
         />
-        {onPressSkip &&
-          <Text style={styles.skip} onPress={onPressSkip}> Skip</Text>
-        }
+        {onPressSkip && (
+          <Text style={styles.skip} onPress={onPressSkip}>
+            {' '}
+            Skip
+          </Text>
+        )}
       </View>
-      {heading &&
-        <Text style={styles.heading}>{heading}</Text>}
-      {desciption &&
-        <Text style={styles.description}>{desciption}</Text>}
+      {heading && <Text style={styles.heading}>{heading}</Text>}
+      {desciption && <Text style={styles.description}>{desciption}</Text>}
     </View>
   );
 }
@@ -52,39 +55,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    paddingVertical: WP('5')
+    paddingVertical: WP('5'),
   },
   titleStyles: {
     fontFamily: PFFonts.Foundation.SemiBold,
     color: PFColors.Standard.Black,
-    fontSize: PFFontSize.FONT_SIZE_10
+    fontSize: PFFontSize.FONT_SIZE_10,
   },
   heading: {
     fontFamily: PFFonts.Foundation.SemiBold,
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_20,
-    paddingVertical: WP("3"),
-    textAlign: "center"
+    paddingVertical: WP('3'),
+    textAlign: 'center',
   },
   skip: {
     fontFamily: PFFonts.Foundation.Medium,
     color: PFColors.Orange.Dark,
     fontSize: PFFontSize.FONT_SIZE_16,
-    right: WP('5')
+    right: WP('5'),
   },
   innnerContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     width: WP('53'),
-    alignSelf: "flex-end",
-    justifyContent: "space-between"
+    alignSelf: 'flex-end',
+    justifyContent: 'space-between',
   },
   description: {
     fontFamily: PFFonts.Foundation.Regular,
     color: PFColors.Gray.DarkGray,
     fontSize: PFFontSize.FONT_SIZE_14,
     width: WP('90'),
-    textAlign: "center"
-  }
+    textAlign: 'center',
+  },
 });
 
-export { MiniProgressBar };
+export {MiniProgressBar};

@@ -1,10 +1,11 @@
 import {View, Text, Image, TouchableOpacity, FlatList} from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
 import {AppLoader, MainWrapper, SwitchRoleSheet} from '../../../../components';
 import {
+  APP_ROLE,
   DriverProfileMenu,
   UNEXPECTED_ERROR,
   USER_PROFILE,
@@ -16,14 +17,24 @@ import {Routes} from '../../../../shared/exporter';
 import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
 import {RatingStars} from '../../../../components';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {setUserRole} from '../../../../redux/auth/appRoleSlice';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import {
+  useCreateManagerVehicleRequestMutation,
+  useDeleteUserAccountMutation,
+} from '../../../../redux/manager/managerApiSlice';
 
-const Settings = ({navigation}) => {
+const Settings = ({navigation}: any) => {
+  const consentSheetRef = useRef(null);
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
+  const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(USER_PROFILE);
   const [switchProfile, {isLoading}] = useSwitchRoleMutation();
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const dispatch = useDispatch();
-
+  const userRole = useSelector(state => state?.appRole.userRole);
+  const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
+    useDeleteUserAccountMutation();
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
       if (v.id === i.id) {
@@ -39,12 +50,26 @@ const Settings = ({navigation}) => {
       }
     });
     setProfiles(arr);
-    if (loginUser?.is_driver) {
-      switchRoleApi(v.role);
-    } else {
-      navigation.navigate(Routes.DriverProfile);
-      setshowSwitchRoleSheet(false);
+    if (userRole !== v.role) {
+      dispatch(setUserRole(v.role));
     }
+    setTimeout(() => {
+      switch (v.role) {
+        case APP_ROLE.DRIVER:
+          loginUser?.is_driver
+            ? navigation.replace('AppStack')
+            : navigation.navigate(Routes.DriverProfile);
+          break;
+        case APP_ROLE.MANAGER:
+          loginUser?.is_manager
+            ? navigation.replace('AppStack')
+            : navigation.navigate(Routes.DriverProfile);
+        default:
+          break;
+      }
+    }, 5);
+
+    setshowSwitchRoleSheet(false);
   };
 
   const switchRoleApi = async (role: string) => {
@@ -62,8 +87,8 @@ const Settings = ({navigation}) => {
   const handleLogout = async () => {
     dispatch(setAccessToken(null));
     dispatch(setLoginUser(null));
+    dispatch(setUserRole(APP_ROLE.END_USER));
     await GoogleSignin.signOut();
-    navigation.replace('AuthStack');
   };
 
   const settingOption = ({item}) => {
@@ -92,19 +117,49 @@ const Settings = ({navigation}) => {
       case 1:
         screenName = Routes.ManageProfile;
         break;
+      case 2:
+        screenName = Routes.Notification;
+        break;
       case 4:
         screenName = Routes.SupportScreen;
         break;
+      case 6:
+        screenName = Routes.TermsAndConditions;
+        break;
+      case 7:
+        screenName = Routes.PrivacyPolicy;
+        break;
       case 8:
-        handleLogout();
+        {
+          consentSheetRef?.current.open(), setSheetToOpen('logout');
+        }
+        break;
+      case 9:
+        {
+          consentSheetRef?.current.open(), setSheetToOpen('delete');
+        }
         break;
       case 10:
-        screenName = '';
+        setshowSwitchRoleSheet(true);
         break;
     }
     if (screenName) {
       navigation.navigate(screenName);
     }
+  };
+
+  const handelCancel = () => {
+    consentSheetRef?.current.close();
+  };
+  const handleSuccess = async () => {
+    if (sheetToOpen === 'logout') {
+      consentSheetRef?.current.close();
+      handleLogout();
+    } else {
+    }
+    let res = await deleteUserAccount(undefined);
+    consentSheetRef?.current.close();
+    handleLogout();
   };
 
   return (
@@ -130,7 +185,19 @@ const Settings = ({navigation}) => {
         onPressCard={handleCard}
         setModalVisible={() => setshowSwitchRoleSheet(false)}
       />
-      {isLoading && <AppLoader />}
+      <ConsentSheet
+        ref={consentSheetRef}
+        message={
+          sheetToOpen === 'logout'
+            ? 'Do you want to Logout?'
+            : 'Do you want to delete your account?'
+        }
+        cancelBtnText="Cancel"
+        successBtnText={sheetToOpen === 'logout' ? 'Logout' : 'Delete'}
+        onPressCancel={handelCancel}
+        onPressSuccess={handleSuccess}
+      />
+      {isLoading || (isLoadingDeleteAccounnt && <AppLoader />)}
     </MainWrapper>
   );
 };

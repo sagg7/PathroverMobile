@@ -7,8 +7,8 @@ import {
   Text,
 } from 'react-native';
 import React from 'react';
-import { svgIcon } from '../../../assets/svg';
-import { PFColors, PFFonts, isIOS } from '../../../shared/exporter';
+import {svgIcon} from '../../../assets/svg';
+import {PFColors, PFFonts, isIOS} from '../../../shared/exporter';
 
 type BottomTabProps = {
   state: any;
@@ -26,21 +26,24 @@ export const BottomTab: React.FC<BottomTabProps> = ({
   descriptors,
   navigation,
 }) => {
-  const renderIcon = (index: number) => {
+  const renderIcon = (index: number, name: string) => {
+
     switch (index) {
       case 0:
-        return svgIcon.RequestList;
+        return name === 'Request Life'
+          ? svgIcon.RequestList
+          : svgIcon.MyRequest;
       case 1:
-        return svgIcon.Wallet;
+        return name === 'Wallet' ? svgIcon.Wallet : svgIcon.CreateRoute;
       case 2:
-        return svgIcon.OrderHistory;
+        return name === 'Order History' ? svgIcon.OrderHistory : svgIcon.RequestHistory;
       default:
         return svgIcon.More;
     }
   };
 
-  const renderItem = ({ item, index }: ListRenderItemInfo<Route>) => {
-    const { options } = descriptors[item.key];
+  const renderItem = ({item, index}: ListRenderItemInfo<Route>) => {
+    const {options} = descriptors[item.key];
     const label = options.tabBarLabel || options.title || item.name;
     const isFocused = state.index === index;
 
@@ -52,14 +55,14 @@ export const BottomTab: React.FC<BottomTabProps> = ({
       });
 
       if (!isFocused && !event.defaultPrevented) {
-        navigation.navigate({ name: item.name, merge: true });
+        navigation.navigate({name: item.name, merge: true});
       }
     };
 
     return (
       <View style={styles.itemContainer(isFocused)}>
         <TouchableOpacity onPress={onPress} style={styles.tabContent}>
-          {renderIcon(index)}
+          {renderIcon(index, item.name)}
           <Text style={styles.tabName(isFocused)}>{label}</Text>
         </TouchableOpacity>
       </View>
@@ -73,7 +76,7 @@ export const BottomTab: React.FC<BottomTabProps> = ({
         numColumns={4}
         data={state?.routes}
         renderItem={renderItem}
-        keyExtractor={(item) => item.key}
+        keyExtractor={item => item.key}
       />
     </View>
   );
@@ -99,9 +102,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: focused ? PFColors.Standard.White : PFColors.Blue.SoftSkyBlue,
+    backgroundColor: focused
+      ? PFColors.Standard.White
+      : PFColors.Blue.SoftSkyBlue,
     borderBottomRightRadius: focused ? 30 : 0,
-
   }),
   tabContent: {
     alignItems: 'center',
@@ -116,6 +120,6 @@ const styles = StyleSheet.create({
     color: isFocused ? PFColors.Standard.Black : PFColors.Gray.DarkGray,
     textAlign: 'center',
     paddingTop: 7,
-    fontFamily: PFFonts.Foundation.Regular
+    fontFamily: PFFonts.Foundation.Regular,
   }),
 });

@@ -2,8 +2,10 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { PFColors, PFFontSize, PFFonts, appIcons } from '../../../../shared/exporter'
 import { MainWrapper } from '../../../../components'
+import { useSelector } from 'react-redux'
 
 const Home = ({ navigation }) => {
+    const loginUser = useSelector(state => state?.auth?.loginUser);
     return (
         <MainWrapper >
             <View style={styles.headderContainer}>

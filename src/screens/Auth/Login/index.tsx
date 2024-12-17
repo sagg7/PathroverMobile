@@ -15,6 +15,7 @@ import {
   loginValidation,
 } from '../../../shared/utils/validations';
 import {
+  APP_ROLE,
   Routes,
   UNEXPECTED_ERROR,
   formatPhoneNumber,
@@ -27,6 +28,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLoginMutation } from '../../../redux/auth/authApiSlice';
 import { useDispatch } from 'react-redux';
 import { setLoginUser } from '../../../redux/auth/authSlice';
+import { setUserRole } from '../../../redux/auth/appRoleSlice';
 
 const LoginScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener();
@@ -48,9 +50,10 @@ const LoginScreen = ({ }) => {
 
     const resp = await login(obj);
     dispatch(setLoginUser(resp?.data?.user))
+    dispatch(setUserRole(APP_ROLE.END_USER))
 
     if (resp?.data) {
-      navigation.replace('Home')
+      navigation.replace('AppStack')
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }

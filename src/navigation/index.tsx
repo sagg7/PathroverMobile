@@ -20,6 +20,18 @@ import ManageProfile from '../screens/App/Driver/ManageProfile';
 import EditProfile from '../screens/App/Driver/EditProfile';
 import SupportScreen from '../screens/App/Driver/SupportScreen';
 import AuthStack from './stacks/authStack';
+import SelectRoute from '../screens/App/Manager/Vehicle/SelectRoute';
+import CustomizeRoute from '../screens/App/Manager/Vehicle/CustomizeReoute';
+import Locations from '../screens/App/Manager/Vehicle/Locations';
+import VehiclesOffer from '../screens/App/Manager/Vehicle/VehcilesOffer';
+import Splash from '../screens/Splash';
+import ManagerProfile from '../screens/App/ManagerRegistrationFlow/ManagerProfile';
+import ManagerCompanyDetail from '../screens/App/DriverRegistrationFlow/ManagerCompanyDetail';
+import TermsAndConditions from '../screens/App/TermsAndConditions';
+import PrivacyPolicy from '../screens/App/PrivacyPolicy';
+import PickUp from '../screens/App/Manager/Vehicle/Locations/PickUp';
+import Destination from '../screens/App/Manager/Vehicle/Locations/Destination';
+import Notification from '../screens/App/Notification';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -28,7 +40,7 @@ const AppNavigation = () => {
       <Stack.Navigator
         initialRouteName={Routes.Splash}
         screenOptions={{headerShown: false}}>
-        <Stack.Screen name="AuthStack" component={AuthStack} />
+        <Stack.Screen name={Routes.Splash} component={Splash} />
         <Stack.Screen name="AppStack" component={AppStack} />
         <Stack.Screen name={Routes.DriverProfile} component={DriverProfile} />
         <Stack.Screen name={Routes.CompanyDetail} component={CompanyDetail} />
@@ -38,7 +50,6 @@ const AppNavigation = () => {
           component={VehicleRegistration}
         />
         <Stack.Screen name={'Settings'} component={Settings} />
-        <Stack.Screen name={'Home'} component={Home} />
         <Stack.Screen
           name={Routes.UploadMedicalDocument}
           component={UploadMedicalDocument}
@@ -52,6 +63,21 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.ManageProfile} component={ManageProfile} />
         <Stack.Screen name={Routes.EditProfile} component={EditProfile} />
         <Stack.Screen name={Routes.SupportScreen} component={SupportScreen} />
+        <Stack.Screen name={Routes.CustomizeRoute} component={CustomizeRoute} />
+        <Stack.Screen name={Routes.Locations} component={Locations} />
+        <Stack.Screen name={Routes.VehiclesOffer} component={VehiclesOffer} />
+        <Stack.Screen
+          name={Routes.ManagerCompanyDetail}
+          component={ManagerCompanyDetail}
+        />
+        <Stack.Screen name={Routes.PrivacyPolicy} component={PrivacyPolicy} />
+        <Stack.Screen
+          name={Routes.TermsAndConditions}
+          component={TermsAndConditions}
+        />
+        <Stack.Screen name={Routes.PickUp} component={PickUp} />
+        <Stack.Screen name={Routes.Destination} component={Destination} />
+        <Stack.Screen name={Routes.Notification} component={Notification} />
       </Stack.Navigator>
     </NavigationContainer>
   );

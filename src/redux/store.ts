@@ -4,11 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiSlice } from './api/apiSlice';
 import authReducer from './auth/authSlice';
 import driverSlice from './driver/driverSlice';
+import appRoleReduces from './auth/appRoleSlice';
 
 const rootReduer = combineReducers({
 	[apiSlice.reducerPath]: apiSlice.reducer,
 	auth: authReducer,
-	driver:driverSlice
+	driver:driverSlice,
+	appRole:appRoleReduces,
 
 });
 
