@@ -64,6 +64,11 @@ export const LOGIN_TYPE_TEXT = {
   EMAIL: 'email address',
   PHONE: 'phone number',
 };
+export const APP_ROLE = {
+  END_USER: 'endUser',
+  DRIVER: 'driver',
+  MANAGER: 'manager',
+};
 
 export const VehicleTypes: VehicleTypes[] = [
   {
@@ -420,7 +425,8 @@ export const PickupTruck = [
 ];
 
 export const USER_PROFILE = [
-  // { title: "Manager", isSelected: false, id: 12, role: "manager" },
+  {title: 'End User', isSelected: true, id: 13, role: 'endUser'},
+  {title: 'Manager', isSelected: false, id: 12, role: 'manager'},
   {title: 'Driver', isSelected: false, id: 1, role: 'driver'},
 ];
 export const DurationArr = [
@@ -509,4 +515,3 @@ export const ManageProfileArr = [
     title: 'Phone Number',
   },
 ];
-

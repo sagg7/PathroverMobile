@@ -1,16 +1,24 @@
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
-import {AppButton, AppHeader, MainWrapper} from '../../../../../components';
+import {
+  AppButton,
+  AppHeader,
+  AppLoader,
+  MainWrapper,
+} from '../../../../../components';
 import {PFColors, PFFonts} from '../../../../../shared/exporter';
 import {scale} from '../../../../../shared/theme/responsive';
 import CustomizeRouteCard from './CustomizeRouteCard';
 import {svgIcon} from '../../../../../assets/svg';
+import {useGetAllRoutesQuery} from '../../../../../redux/manager/managerApiSlice';
 
 const CustomizeRoute = ({navigation, route}: any) => {
   const {selectedRouteDetails, setSelectedRouteDetails} = route?.params;
   const [selectedRoute, setSelectRoute] = useState(
     selectedRouteDetails ? selectedRouteDetails : null,
   );
+  const {data: allRoutes, isLoading} = useGetAllRoutesQuery(undefined);
+
   const onPressCard = (item: any) => () => {
     setSelectRoute(item);
   };
@@ -24,21 +32,34 @@ const CustomizeRoute = ({navigation, route}: any) => {
       <AppHeader title="Customize Save Routes" />
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>Choose Route</Text>
-        <FlatList
-          contentContainerStyle={styles.flatListContainerStyle}
-          showsVerticalScrollIndicator={false}
-          data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-          renderItem={({item}) => (
-            <CustomizeRouteCard
-              icon={
-                selectedRoute === item ? svgIcon.RouteBlue : svgIcon.RouteBlack
-              }
-              style={selectedRoute === item ? styles.cardStyle : null}
-              onPressCard={onPressCard(item)}
-            />
-          )}
-          keyExtractor={item => item.toString()}
-        />
+        {!!allRoutes?.user_routes?.length ? (
+          <FlatList
+            contentContainerStyle={styles.flatListContainerStyle}
+            showsVerticalScrollIndicator={false}
+            data={allRoutes?.user_routes}
+            renderItem={({item}) => (
+              <CustomizeRouteCard
+                item={item}
+                icon={
+                  selectedRoute === item
+                    ? svgIcon.RouteBlue
+                    : svgIcon.RouteBlack
+                }
+                style={selectedRoute === item ? styles.cardStyle : null}
+                onPressCard={onPressCard(item)}
+              />
+            )}
+            keyExtractor={item => item.id.toString()}
+          />
+        ) : isLoading ? (
+          <View style={styles.noDataView}>
+            <AppLoader />
+          </View>
+        ) : (
+          <View style={styles.noDataView}>
+            <Text> No Data </Text>
+          </View>
+        )}
         <AppButton
           disabled={!selectedRoute}
           buttonStyle={!selectedRoute ? styles.disableButtonStyle : null}
@@ -71,5 +92,10 @@ const styles = StyleSheet.create({
   },
   disableButtonStyle: {
     backgroundColor: PFColors.Blue.DisableBlue,
+  },
+  noDataView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

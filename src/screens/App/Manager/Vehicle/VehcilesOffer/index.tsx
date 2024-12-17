@@ -11,7 +11,7 @@ const VehiclesOffer = () => {
     <MainWrapper>
       <AppHeader title="Request Vehicle" leftIcon={false} />
       <View style={styles.bodyConntainer}>
-        <View style={styles.expireCard}>
+        {/* <View style={styles.expireCard}>
           <View style={styles.expireTimeView}>
             {svgIcon.ClockRed}
             <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
@@ -22,11 +22,24 @@ const VehiclesOffer = () => {
           <Pressable style={styles.cancelBtn}>
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </Pressable>
-        </View>
+        </View> */}
         <FlatList
+        contentContainerStyle={styles.flatlistContainerStyle}
           showsVerticalScrollIndicator={false}
           data={[1, 2, 3]}
           renderItem={({item}) => <OfferCard style={styles.OfferCard} />}
+          ListHeaderComponent={()=> <View style={styles.expireCard}>
+          <View style={styles.expireTimeView}>
+            {svgIcon.ClockRed}
+            <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
+          </View>
+          <Text style={styles.expireMessageText}>
+            Your request has been been sent, You will receive offers shortly
+          </Text>
+          <Pressable style={styles.cancelBtn}>
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </Pressable>
+        </View>}
         />
       </View>
     </MainWrapper>
@@ -38,8 +51,6 @@ export default VehiclesOffer;
 const styles = StyleSheet.create({
   bodyConntainer: {
     flex: 1,
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(24),
   },
   expireCard: {
     backgroundColor: PFColors.Blue.lightBlue,
@@ -47,6 +58,7 @@ const styles = StyleSheet.create({
     borderRadius: scale(12),
     alignItems: 'center',
     marginBottom: scale(16),
+    marginTop:scale(24),
     shadowOffset: {
       width: 0,
       height: 1,
@@ -97,4 +109,7 @@ const styles = StyleSheet.create({
   OfferCard: {
     marginBottom: scale(12),
   },
+  flatlistContainerStyle:{
+    paddingHorizontal:scale(16),
+  }
 });

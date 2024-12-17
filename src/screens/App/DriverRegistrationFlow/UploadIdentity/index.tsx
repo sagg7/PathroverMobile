@@ -7,10 +7,10 @@ import {
     MiniProgressBar,
 } from '../../../../components';
 import styles from './styles';
-import { IMAGE_OPTIONS, Routes, showAlert } from '../../../../shared/exporter';
+import { APP_ROLE, IMAGE_OPTIONS, Routes, showAlert } from '../../../../shared/exporter';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { setDriverProfile } from '../../../../redux/driver/driverSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 
 const UploadIdentity = () => {
@@ -19,6 +19,7 @@ const UploadIdentity = () => {
     const dispatch = useDispatch();
     let isDisabled = frontSide?.fileName && backSide?.fileName ? false : true;
     const navigation = useNavigation();
+    const userRole = useSelector(state => state?.appRole.userRole);
 
     const uploadFromGallery = async (isFront: boolean) => {
         const result = await launchImageLibrary(IMAGE_OPTIONS);
@@ -41,7 +42,7 @@ const UploadIdentity = () => {
                     Identity: identityArr,
                 }),
             );
-            navigation.navigate(Routes.UploadLicense);
+            navigation.navigate(Routes.ManagerCompanyDetail);
         } else {
             showAlert('Alert', 'Please select required data to proceed further.');
         }
@@ -51,10 +52,11 @@ const UploadIdentity = () => {
         <MainWrapper>
             <ScrollView>
                 <MiniProgressBar
+                  totalSetps={userRole === APP_ROLE.DRIVER ? 7 : 3}
                     currentStep={2}
                     heading={'Upload your identity\ncard'}
                     desciption="Write details about feature D here. Write details about feature D here. Write details about feature D here."
-                    onPressSkip={() => navigation.navigate(Routes.UploadLicense)}
+                    onPressSkip={() => navigation.navigate(Routes.ManagerCompanyDetail)}
                 />
                 <ImageFileUploader
                     title="Front Side"

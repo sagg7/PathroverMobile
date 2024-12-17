@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_14,
     color: PFColors.Standard.Black,
     paddingLeft: WP('3'),
-    // backgroundColor: 'pink',
   },
   iconContainer: {
     backgroundColor: PFColors.Blue.SoftGlacier,

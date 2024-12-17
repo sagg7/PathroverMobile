@@ -5,14 +5,14 @@ import {PFColors, PFFonts} from '../../../../../shared/exporter';
 import {scale} from '../../../../../shared/theme/responsive';
 import {FromAndToCard} from '../../../../../components';
 
-const CustomizeRouteCard = ({onPressCard,style,icon}: any) => {
+const CustomizeRouteCard = ({onPressCard,style,icon,item}: any) => {
   const [isExpand, setIsExpand] = useState<boolean>(false);
   return (
     <Pressable style={[styles.cardContainer,style]} onPress={onPressCard}>
       <View style={styles.cardInfoView}>
         <View style={styles.routeNameView}>
           {icon}
-          <Text style={styles.routeName}>Bahria Home Route</Text>
+          <Text style={styles.routeName}>{item.name}</Text>
         </View>
         <Pressable onPress={() => setIsExpand(!isExpand)}>
           {isExpand ? svgIcon.UpChaveron : svgIcon.DownChaveron}
@@ -20,8 +20,7 @@ const CustomizeRouteCard = ({onPressCard,style,icon}: any) => {
       </View>
       {isExpand && (
         <View>
-          <Text style={styles.routeTitleStyle}>Wapda Town</Text>
-          <FromAndToCard />
+          <FromAndToCard  style={styles.innerComponentStyle}/>
         </View>
       )}
     </Pressable>
@@ -60,4 +59,7 @@ const styles = StyleSheet.create({
     marginTop: scale(20),
     marginBottom: scale(8),
   },
+  innerComponentStyle:{
+    marginTop: scale(8),
+  }
 });

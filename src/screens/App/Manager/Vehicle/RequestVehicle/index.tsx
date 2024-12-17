@@ -3,6 +3,7 @@ import React, {useRef, useState} from 'react';
 import {
   AppButton,
   AppHeader,
+  AppLoader,
   MainWrapper,
   OptionSelectorSheet,
 } from '../../../../../components';
@@ -10,6 +11,7 @@ import {styles} from './Styles';
 import {
   PickupTruck,
   SemiTruckData,
+  showAlert,
   TrailerLoadingCapacity,
   VehicleTypes,
 } from '../../../../../shared/utils/constant';
@@ -21,7 +23,8 @@ import SelectRoute from '../SelectRoute';
 import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
 import CargoSheet from '../../../../../components/complex/CargoSheet';
-import RecipentSheet from '../../../../../components/complex/RecipenntSheet';
+import RecipentSheet from '../../../../../components/complex/RecipentSheet';
+import {useCreateManagerVehicleRequestMutation} from '../../../../../redux/manager/managerApiSlice';
 
 const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
@@ -30,14 +33,16 @@ const VehicleRequest = ({navigation}: any) => {
   const [selectedOption, setSelectedOption] = useState('Choose Route');
   const [cargoDescriptionDetails, setCargoDescriptionDetails] =
     useState<null | {image: any; description: any}>(null);
-  const [recipentDetails, setRecipentDetails] = useState<null | {
-    name: string;
-    phone: string;
-  }>(null);
+  const [recipentDetails, setRecipentDetails] = useState<null | any>(null);
   const [vehicleData, setVehicleData] = useState(PickupTruck);
   const sheetRef = useRef(null);
   const cargoSheetRef = useRef(null);
+  const [showCargoSheet, setShowCargoSheet] = useState(false);
+  const [showRecipentSheet, setShowRecipentSheet] = useState(false);
+
   const recipentSheetRef = useRef(null);
+  const [createManagerVehicleRequest, {isLoading}] =
+    useCreateManagerVehicleRequestMutation();
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
@@ -48,6 +53,10 @@ const VehicleRequest = ({navigation}: any) => {
     } else if (item.key === 3) {
       setVehicleData(TrailerLoadingCapacity);
     }
+    setSelectedVehicleDetails(null);
+    setSelectedRouteDetails(null);
+    setCargoDescriptionDetails(null);
+    setRecipentDetails(null);
   };
 
   const handlePressWeight = i => {
@@ -115,16 +124,19 @@ const VehicleRequest = ({navigation}: any) => {
         setSelectedRouteDetails: setSelectedRouteDetails,
       });
     } else {
-      navigation.navigate('Locations');
+      navigation.navigate('Locations', {
+        selectedRouteDetails: selectedRouteDetails,
+        setSelectedRouteDetails: setSelectedRouteDetails,
+      });
     }
   };
 
   const onPressCargoCard = () => {
-    cargoSheetRef?.current.open();
+    setShowCargoSheet(true);
   };
 
   const onPressRecipentCard = () => {
-    recipentSheetRef?.current.open();
+    setShowRecipentSheet(true)
   };
 
   const handleClearDetails = (type: string) => () => {
@@ -137,10 +149,74 @@ const VehicleRequest = ({navigation}: any) => {
     }
   };
 
-const handleCreateRequest=()=>{
-  navigation.navigate(Routes.VehiclesOffer)
-}
+  const handleCreateRequest = async () => {
+    const formData = new FormData();
+    formData.append('ride_request[vehicle_type]', selectedVehicle?.title);
+    formData.append(
+      'ride_request[pickup_latitude]',
+      selectedRouteDetails?.pickup_latitude,
+    );
+    formData.append(
+      'ride_request[pickup_longitude]',
+      selectedRouteDetails?.pickup_longitude,
+    );
+    formData.append(
+      'ride_request[dropoff_latitude]',
+      selectedRouteDetails?.dropoff_latitude,
+    );
+    formData.append(
+      'ride_request[dropoff_longitude]',
+      selectedRouteDetails?.dropoff_longitude,
+    );
+    formData.append('ride_request[cargo_images][]', {
+      uri: cargoDescriptionDetails?.image.uri,
+      type: cargoDescriptionDetails?.image?.type,
+      name: cargoDescriptionDetails?.image.fileName,
+    });
+    formData.append(
+      'ride_request[cargo_description]',
+      cargoDescriptionDetails?.description,
+    );
+    formData.append('ride_request[recipient_name]', recipentDetails?.name);
+    formData.append('ride_request[recipient_number]', recipentDetails?.phone);
 
+    const res = await createManagerVehicleRequest(formData);
+    if (res?.data) {
+      showAlert('Alert', 'Ride Request has been created');
+      setSelectedVehicle(VehicleTypes[0]);
+      setSelectedVehicleDetails(null);
+      setSelectedRouteDetails(null);
+      setCargoDescriptionDetails(null);
+      setRecipentDetails(null);
+      let reSetVehicleData = vehicleData.map((item: any) => {
+        if (item.isWeightSelected) {
+          item.isWeightSelected = false;
+        }
+        item.model.forEach(
+          (modelItem: any) => (modelItem.isModelSelected = false),
+        );
+        return item;
+      });
+
+      setVehicleData(reSetVehicleData);
+    } else {
+      showAlert('Error', res?.error?.data?.errors[0]);
+    }
+
+    // navigation.navigate(Routes.VehiclesOffer);
+  };
+
+  const isDisable =
+    !selectedVehicle ||
+    !selectedVehicleDetails ||
+    !selectedRouteDetails ||
+    !cargoDescriptionDetails ||
+    !recipentDetails;
+
+  const switchOption = (val: string) => () => {
+    setSelectedOption(val);
+    setSelectedRouteDetails(null);
+  };
   return (
     <MainWrapper>
       <AppHeader leftIcon={false} title="Request Vehicle" />
@@ -166,7 +242,7 @@ const handleCreateRequest=()=>{
 
         <View style={styles.radioBtnContainer}>
           <View style={styles.radioBtn}>
-            <Pressable onPress={() => setSelectedOption('Choose Route')}>
+            <Pressable onPress={switchOption('Choose Route')}>
               {selectedOption === 'Choose Route'
                 ? svgIcon.RadioButtonBlue
                 : svgIcon.RadioInactive}
@@ -175,7 +251,7 @@ const handleCreateRequest=()=>{
           </View>
 
           <View style={styles.radioBtnInactive}>
-            <Pressable onPress={() => setSelectedOption('Choose Location')}>
+            <Pressable onPress={switchOption('Choose Location')}>
               {selectedOption === 'Choose Location'
                 ? svgIcon.RadioButtonBlue
                 : svgIcon.RadioInactive}
@@ -205,7 +281,12 @@ const handleCreateRequest=()=>{
           onPressClear={handleClearDetails('recipent')}
         />
       </ScrollView>
-        <AppButton title="Create Request" buttonStyle={styles.btn} handleClick={handleCreateRequest} />
+      <AppButton
+        title="Create Request"
+        buttonStyle={styles.btn}
+        handleClick={handleCreateRequest}
+        disabled={isDisable}
+      />
       <OptionSelectorSheet
         ref={sheetRef}
         data={vehicleData}
@@ -216,12 +297,17 @@ const handleCreateRequest=()=>{
         ref={cargoSheetRef}
         cargoDescriptionDetails={cargoDescriptionDetails}
         setCargoDescriptionDetails={setCargoDescriptionDetails}
+        showCargoSheet={showCargoSheet}
+        setShowCargoSheet={setShowCargoSheet}
       />
       <RecipentSheet
         ref={recipentSheetRef}
         recipentDetails={recipentDetails}
         setrecipentDetails={setRecipentDetails}
+        showRecipentSheet={showRecipentSheet}
+        setShowRecipentSheet={setShowRecipentSheet}
       />
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };

@@ -24,9 +24,9 @@ const RecipientDetailCard = ({
       {recipientDetail && (
         <View style={styles.recipentInfoView}>
           <Text style={styles.titleStyle}>Name</Text>
-          <Text style={styles.recipentDataText}>Sara</Text>
+          <Text style={styles.recipentDataText}>{recipientDetail?.name}</Text>
           <Text style={styles.titleStyle}>Phone N0.</Text>
-          <Text style={[styles.recipentDataText,{marginBottom:scale(0)}]}>{`(555)555−1234`}</Text>
+          <Text style={[styles.recipentDataText,{marginBottom:scale(0)}]}>{recipientDetail?.phone}</Text>
         </View>
       )}
     </Pressable>

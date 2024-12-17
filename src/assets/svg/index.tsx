@@ -40,6 +40,10 @@ import DownChaveron from '../svg/DownChaveron.svg';
 import UpChaveron from '../svg/UpChaveron.svg';
 import Clock from '../svg/clock.svg';
 import RatingStar from '../svg/ratingStar.svg';
+import Search from '../svg/search.svg';
+import Location from '../svg/Location.svg';
+import Save from '../svg/Save.svg';
+import ClockBlack from '../svg/ClockBlack.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -83,4 +87,8 @@ export const svgIcon = {
   UpChaveron: <UpChaveron />,
   ClockRed: <Clock />,
   RatingStar: <RatingStar />,
+  Search: <Search />,
+  Location: <Location />,
+  Save: <Save />,
+  ClockBlack: <ClockBlack />,
 };

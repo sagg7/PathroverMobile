@@ -52,6 +52,9 @@
 	<string>We need your location to show nearby places</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>PathRover requires photo library permission</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PathRover requires camera permission</string>
+	
 	<key>UIAppFonts</key>
 	<array>
 		<string>PlusJakartaSans-Bold.ttf</string>

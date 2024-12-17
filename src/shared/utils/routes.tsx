@@ -17,6 +17,7 @@ export const Routes = {
   VehicleDetail: 'VehicleDetail',
   VehicleRegistration: 'VehicleRegistration',
   CompanyDetail: 'CompanyDetail',
+  ManagerCompanyDetail: 'ManagerCompanyDetail',
   RequestList: 'RequestList',
   MapScreen: 'MapScreen',
   FilterScreen: 'FilterScreen',
@@ -32,4 +33,9 @@ export const Routes = {
   CustomizeRoute: 'CustomizeRoute',
   Locations: 'Locations',
   VehiclesOffer: 'VehiclesOffer',
+  PrivacyPolicy: 'PrivacyPolicy',
+  TermsAndConditions: 'TermsAndConditions',
+  PickUp: 'PickUp',
+  Destination: 'Destination',
+  Notification: 'Notification',
 };

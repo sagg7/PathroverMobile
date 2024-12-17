@@ -23,8 +23,7 @@ const CargoDescriptionCard = ({
       </View>
       {CargoDescriptionDetails && (
         <Text style={styles.subTitleStyle}>
-          It involves various packaging types, specific handling requirements,
-          and regulatory documentation to ensure safe and compliant transit.
+         {CargoDescriptionDetails?.description}
         </Text>
       )}
     </Pressable>

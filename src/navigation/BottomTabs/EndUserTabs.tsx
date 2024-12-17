@@ -8,36 +8,36 @@ import Settings from '../../screens/App/Driver/Settings';
 import { Routes } from '../../shared/exporter';
 import DummyScreen from '../../screens/App/DummyScreen';
 import VehicleRequest from '../../screens/App/Manager/Vehicle/RequestVehicle';
+import Home from '../../screens/App/EndUser/Home';
 
 const Tab = createBottomTabNavigator();
-const ManagerTabs = () => {
+const EndUserTabs = () => {
 
   return (
     <Tab.Navigator
       initialRouteName={Routes.myRequest}
-      screenOptions={{headerShown: false,}}
-      tabBar={props => <BottomTab {...props} />}
-      >
+      screenOptions={{headerShown: false}}
+      tabBar={props => <BottomTab {...props} />}>
       
       <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={VehicleRequest}
-        name={'My request'}
+        component={Home}
+        name={'Home'}
       />
       <Tab.Screen
         options={{unmountOnBlur: true}}
         component={DummyScreen}
-        name={'Create route'}
+        name={'Hiking'}
       />
        <Tab.Screen
         options={{unmountOnBlur: true}}
         component={DummyScreen}
-        name={'Request History'}
+        name={'WellPath'}
       />
        <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={Settings}
-        name={'More'}
+        component={DummyScreen}
+        name={'Chat'}
       />
 
       
@@ -45,4 +45,4 @@ const ManagerTabs = () => {
   );
 };
 
-export {ManagerTabs};
+export {EndUserTabs};

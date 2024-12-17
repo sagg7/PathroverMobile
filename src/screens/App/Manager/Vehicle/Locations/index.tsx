@@ -1,22 +1,144 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import {AppHeader, MainWrapper} from '../../../../../components';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  AppButton,
+  AppHeader,
+  AppInput,
+  MainWrapper,
+} from '../../../../../components';
 import MapboxGL from '@rnmapbox/maps';
+import {svgIcon} from '../../../../../assets/svg';
+import {PFColors, PFFonts, Routes} from '../../../../../shared/exporter';
+import {scale} from '../../../../../shared/theme/responsive';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
-const Locations = () => {
+const Locations = ({navigation, route}: any) => {
+  const {selectedRouteDetails, setSelectedRouteDetails} = route.params || {};
+
+  const [search, setSearch] = useState<string>('');
+  const [pickUpAddress, setPickUpAddress] = useState(null);
+  const [destinationAddress, setDestinationAddress] = useState(null);
+
+  const [permissionGranted, setPermissionGranted] = useState(false);
+
+    useEffect(() => {
+      const getLocationPermission = async () => {
+        try {
+          const permission =
+            Platform.OS === 'android'
+              ? PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
+              : PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+  
+          const result = await check(permission);
+  
+          if (result === RESULTS.GRANTED) {
+            setPermissionGranted(true);
+          } else if (result === RESULTS.DENIED || result === RESULTS.LIMITED) {
+            const requestResult = await request(permission);
+            if (requestResult === RESULTS.GRANTED) {
+              setPermissionGranted(true);
+            } else {
+              Alert.alert('Permission Denied', 'Please enable location permissions.');
+            }
+          } else {
+            Alert.alert('Permission Error', 'Unable to access location.');
+          }
+        } catch (error) {
+          console.error('Permission error:', error);
+        }
+      };
+  
+      getLocationPermission();
+    }, []);
+  
+
+  const handleSave = () => {
+    setSelectedRouteDetails({
+      pickup_latitude: pickUpAddress?.latitude,
+      pickup_longitude: pickUpAddress?.longitude,
+      dropoff_latitude: destinationAddress?.latitude,
+      dropoff_longitude: destinationAddress?.longitude,
+    });
+    navigation.goBack()
+  };
+
+  const navigateToPickup = () => {
+    navigation.navigate(Routes.PickUp, {pickUpAddress, setPickUpAddress});
+  };
+  const navigateToDestination = () => {
+    navigation.navigate(Routes.Destination, {
+      destinationAddress,
+      setDestinationAddress,
+    });
+  };
+  const isDisable = !pickUpAddress || !destinationAddress;
   return (
     <MainWrapper>
       <AppHeader title="Locations" />
       <MapboxGL.MapView style={styles.map}>
+        <View style={styles.searchBox}>
+          {svgIcon.Search}
+          <TextInput
+            placeholder="Search"
+            placeholderTextColor={PFColors.Gray.DarkGray}
+            value={search}
+            onChangeText={setSearch}
+            style={styles.input}
+          />
+        </View>
         <MapboxGL.Camera
           zoomLevel={12}
           centerCoordinate={[74.2753883, 31.4541112]}
         />
-         <MapboxGL.UserLocation
-            visible
-            onUpdate={()=>{}} // Automatically updates current location
-          />
+        <MapboxGL.UserLocation
+          visible
+          showsUserHeadingIndicator
+          onUpdate={() => {}} // Automatically updates current location
+        />
       </MapboxGL.MapView>
+      <View style={styles.sheetStyle}>
+        <ScrollView contentContainerStyle={styles.scrollViewStyle}>
+          <Pressable style={styles.itemStyle} onPress={navigateToPickup}>
+            <View style={styles.itemInnerView}>
+              <Text style={styles.titleText}>Pickup Location</Text>
+              <View style={styles.addressView}>
+                {svgIcon.MapPin}
+                <Text style={styles.addressText}>My current location</Text>
+              </View>
+            </View>
+            {svgIcon.LeftArrow}
+          </Pressable>
+          <Pressable style={styles.itemStyle} onPress={navigateToDestination}>
+            <View style={styles.itemInnerView}>
+              <Text style={styles.titleText}>Destination Location</Text>
+              <View style={styles.addressView}>
+                {svgIcon.Location}
+                <Text style={styles.addressText}>
+                  {destinationAddress?.placeName
+                    ? destinationAddress?.placeName
+                    : 'choose desitination address'}
+                </Text>
+              </View>
+            </View>
+            {svgIcon.LeftArrow}
+          </Pressable>
+          <AppButton
+            disabled={isDisable}
+            title="Save"
+            buttonStyle={styles.btnStyle}
+            handleClick={handleSave}
+          />
+        </ScrollView>
+      </View>
     </MainWrapper>
   );
 };
@@ -25,10 +147,70 @@ export default Locations;
 
 const styles = StyleSheet.create({
   map: {
-    flex:1
+    flex: 1,
+  },
+  searchBox: {
+    position: 'absolute',
+    top: scale(16),
+    backgroundColor: PFColors.Standard.White,
+    width: scale(343),
+    height: scale(44),
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(12),
+  },
+  input: {
+    flex: 1,
+    marginLeft: scale(12),
+    fontSize: scale(16),
+    fontFamily: PFFonts.Foundation.SemiBold,
+    color: PFColors.Standard.Black,
+  },
+  sheetStyle: {
+    backgroundColor: PFColors.Standard.White,
+    flex: 0.5,
+    borderTopLeftRadius: scale(24),
+    borderTopRightRadius: scale(24),
+  },
+  scrollViewStyle: {
+    padding: scale(16),
+  },
+  itemStyle: {
+    backgroundColor: PFColors.Gray.WhisperGray,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(12),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: scale(12),
+    marginBottom: scale(16),
+  },
+  titleText: {
+    fontSize: scale(10),
+    fontFamily: PFFonts.Foundation.Regular,
+    color: PFColors.Gray.DarkGray,
+    marginBottom: scale(8),
+  },
+  itemInnerView: {
+    flex: 1,
+  },
+  addressView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addressText: {
+    fontSize: scale(12),
+    fontFamily: PFFonts.Foundation.Regular,
+    color: PFColors.Standard.Black,
+    marginLeft: scale(4),
+  },
+  btnStyle: {
+    marginTop: scale(16),
   },
 });
-
 
 // import React, {useEffect, useState} from 'react';
 // import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, Platform} from 'react-native';
@@ -223,5 +405,3 @@ const styles = StyleSheet.create({
 //     fontWeight: 'bold',
 //   },
 // });
-
-

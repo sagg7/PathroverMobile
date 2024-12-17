@@ -2,9 +2,9 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { PFColors, PFFontSize, PFFonts, WP, appIcons, isIOS } from '../../../shared/exporter'
 
-const FromAndToCard = () => {
+const FromAndToCard = ({style} : any) => {
     return (
-        <View style={styles.fromAndToCard}>
+        <View style={[styles.fromAndToCard,style]}>
             <View style={styles.markerContainer}>
                 <View style={styles.markerAndLineContainer}>
                     <Image source={appIcons.locationMarker} style={styles.locationMarker("red")} resizeMode='contain' />
