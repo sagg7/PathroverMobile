@@ -8,18 +8,14 @@ import { Routes } from '../../shared/exporter';
 
 const Splash = ({ }) => {
   const navigation = useNavigation()
-  const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
 
   useEffect(() => {
     setTimeout(() => {
-      if (isWalkthrough) {
-        navigation.navigate(Routes.GetStarted)
-      } else {
-        navigation.navigate(Routes.Walkthrough)
-      }
-    }, 3000);
+        navigation.replace("AppStack")
+     
+    }, 4000);
 
-  }, [isWalkthrough])
+  }, [])
 
   return (
     <View style={styles.container}>

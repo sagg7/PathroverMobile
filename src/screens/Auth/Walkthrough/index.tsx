@@ -21,7 +21,7 @@ const Walkthrough = ({ navigation }) => {
   );
 
   const onDone = () => {
-    navigation.navigate("GetStarted")
+    navigation.replace("GetStarted")
     dispatch(setIswalkthrough());
   };
 

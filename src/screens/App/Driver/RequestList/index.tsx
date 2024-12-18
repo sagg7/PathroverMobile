@@ -1,0 +1,92 @@
+import {View, Text, Image, TouchableOpacity, FlatList} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  MainWrapper,
+  OfferRequestCard,
+  OfferSheetModal,
+  ReviewsListSheet,
+  SendOfferModal,
+} from '../../../../components';
+import styles from './styles';
+import {PFColors, appIcons} from '../../../../shared/exporter';
+import SwitchToggle from 'react-native-switch-toggle';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+
+const RequestList = ({}) => {
+  const [on, seton] = useState(false);
+  const [showReviewSheet, setShowReviewSheet] = useState(false);
+  const [offerSheetshow, setofferSheetshow] = useState(false);
+  const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isOfferSent) {
+      setTimeout(() => {
+        setIsOfferSent(false);
+      }, 2000);
+    }
+  }, [isOfferSent]);
+
+  return (
+    <MainWrapper>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.bellContainer}
+          onPress={() => setShowReviewSheet(true)}>
+          <Image source={appIcons.bellIcon} style={styles.bellIcon} />
+        </TouchableOpacity>
+
+        <View style={styles.centerSwitchWrapper}>
+          <SwitchToggle
+            switchOn={on}
+            onPress={() => seton(!on)}
+            circleColorOff={PFColors.Gray.AshGray}
+            circleColorOn={PFColors.Green.LeafGreen}
+            backgroundColorOn={PFColors.Green.MintLight}
+            backgroundColorOff={PFColors.Gray.FrostedGray}
+            circleStyle={styles.circleStyle}
+            containerStyle={styles.toggleContainer}
+          />
+          <Text style={styles.headerText}>
+            {on ? 'Available' : 'Unavailable'}{' '}
+          </Text>
+        </View>
+      </View>
+
+      {on ? (
+        <FlatList
+          data={[1, 2]}
+          keyExtractor={item => item.id}
+          renderItem={() => (
+            <OfferRequestCard onPressAccept={() => setofferSheetshow(true)} />
+          )}
+        />
+      ) : (
+        <>
+          <View style={styles.onOffContainer}>
+            <Text style={styles.turnOnOfText}>
+              {'Please Turn on Your\nAvailable Status'}
+            </Text>
+          </View>
+        </>
+      )}
+      <OfferSheetModal
+        modalVisible={offerSheetshow}
+        onPressCancel={() => setofferSheetshow(false)}
+        onPressSend={() => {
+          setofferSheetshow(false);
+          setTimeout(() => {
+            setIsOfferSent(true);
+          }, 1000);
+        }}
+      />
+      <SendOfferModal isModalVisible={isOfferSent} />
+      <ReviewsListSheet
+        modalVisible={showReviewSheet}
+        onPressCross={() => setShowReviewSheet(false)}
+        onPressDone={() => setShowReviewSheet(false)}
+      />
+    </MainWrapper>
+  );
+};
+
+export default RequestList;

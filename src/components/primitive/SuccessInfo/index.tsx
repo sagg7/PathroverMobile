@@ -35,7 +35,10 @@ const SuccessInfo: React.FC<SuccessInfoProps> = ({
 
       <AppButton
         title={buttonText || ''}
-        handleClick={() => navigation.replace(Routes.ContinueAs)}
+        handleClick={() => navigation.reset({
+          index: 0,
+          routes: [{ name: 'ContinueAs' }],
+        })}
         buttonStyle={styles.bottomButton}
       />
     </View>

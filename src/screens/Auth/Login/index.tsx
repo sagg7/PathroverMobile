@@ -15,20 +15,25 @@ import {
   loginValidation,
 } from '../../../shared/utils/validations';
 import {
+  APP_ROLE,
   Routes,
   UNEXPECTED_ERROR,
   formatPhoneNumber,
   isIOS,
+  removeNonNumbers,
   showAlert,
   useKeyboardListener,
 } from '../../../shared/exporter';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLoginMutation } from '../../../redux/auth/authApiSlice';
+import { useDispatch } from 'react-redux';
+import { setLoginUser } from '../../../redux/auth/authSlice';
+import { setUserRole } from '../../../redux/auth/appRoleSlice';
 
 const LoginScreen = ({ }) => {
-  let isValidForm = true;
   const keyboardVisible = useKeyboardListener();
   const [login, { data, isLoading }] = useLoginMutation();
+  const dispatch = useDispatch()
   const route = useRoute();
   const navigation = useNavigation();
   const { isEmail } = route?.params;
@@ -38,16 +43,19 @@ const LoginScreen = ({ }) => {
     const obj = {
       user: {
         ...(email && { email: email }),
-        ...(phone && { phone_number: phone }),
+        ...(phone && { phone_number: removeNonNumbers(phone) }),
         password: password,
       },
     };
 
     const resp = await login(obj);
+    dispatch(setLoginUser(resp?.data?.user))
+    dispatch(setUserRole(APP_ROLE.END_USER))
+
     if (resp?.data) {
-      showAlert('Alert', 'You have logged in successfully.');
+      navigation.replace('AppStack')
     } else {
-      showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 
@@ -56,7 +64,7 @@ const LoginScreen = ({ }) => {
       <AppHeader
         title="Login"
         subtitle="Login"
-        desc="Enter your email and password"
+        desc={`Enter your ${isEmail ? "email" : "phone number"} and password`}
       />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
@@ -81,14 +89,8 @@ const LoginScreen = ({ }) => {
                 values,
                 errors,
                 touched,
-                isValid,
-                dirty,
                 setFieldValue,
               }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
@@ -102,6 +104,7 @@ const LoginScreen = ({ }) => {
                     ) : (
                       <AppInput
                         placeholder="Phone No"
+                        keyboardType={"numeric"}
                         value={values.phone}
                         onChangeText={text => {
                           const formatted = formatPhoneNumber(text);
@@ -133,7 +136,6 @@ const LoginScreen = ({ }) => {
                       <AppButton
                         title="Login"
                         handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)}
                       />
                     </View>

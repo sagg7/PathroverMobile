@@ -56,7 +56,6 @@ const styles = StyleSheet.create({
         backgroundColor: PFColors.Standard.BackdropLightColor,
     },
     nextContainer: {
-        // bottom: WP('2'),
         marginRight: WP('1'),
         backgroundColor: PFColors.Orange.Dark,
         height: WP('10'),

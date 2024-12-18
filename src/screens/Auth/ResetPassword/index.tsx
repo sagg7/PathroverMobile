@@ -14,10 +14,8 @@ const ResetPassword = ({ }) => {
   const route = useRoute()
   const { value, isEmail } = route?.params
   const navigation = useNavigation()
-  let isValidForm = true;
 
   const handleContinueBtn = async (val: any) => {
-    const { email, phone } = val
     const obj = {
       user: {
         ...(isEmail && { email: value }),
@@ -31,7 +29,7 @@ const ResetPassword = ({ }) => {
       navigation.replace(Routes.AccountCreationSuccess)
 
     } else {
-      showAlert("Error", resp?.error?.data?.error || UNEXPECTED_ERROR)
+      showAlert("Error", resp?.error?.data?.error[0] || UNEXPECTED_ERROR)
 
     }
   }
@@ -57,11 +55,7 @@ const ResetPassword = ({ }) => {
               onSubmit={values =>
                 handleContinueBtn(values)
               }>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+              {({ handleChange, handleSubmit, values, errors, touched }) => {
                 return (
                   <View style={{ alignSelf: 'center' }}>
 
@@ -86,7 +80,6 @@ const ResetPassword = ({ }) => {
                     />
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>

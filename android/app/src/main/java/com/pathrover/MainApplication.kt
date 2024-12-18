@@ -1,4 +1,4 @@
-package com.pathfinder
+package com.pathrover
 
 import android.app.Application
 import com.facebook.react.PackageList

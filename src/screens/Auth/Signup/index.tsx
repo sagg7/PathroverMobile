@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './styles';
 import { AppButton, AppHeader, AppInput, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -9,19 +9,26 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 const SignupScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener()
-  let isValidForm = true;
   const navigation = useNavigation()
   const route = useRoute()
   const { isEmail } = route?.params
   const formik = useRef()
+  const [initialValues, setinitialValues] = useState(signupInitialObject)
+  useEffect(() => {
+    console.log("working formik");
+
+    setinitialValues(signupInitialObject)
+  }, [])
+
 
   const handleContinueBtn = (values) => {
     navigation.navigate(Routes.SetPassword, { values: values })
   }
 
+
   return (
     <MainWrapper>
-      <AppHeader title="Signup" subtitle="Create New Account" desc="Enter your name and email" />
+      <AppHeader title="Signup" subtitle="Create New Account" desc={`Enter your name and ${isEmail ? "email" : "phone number"}`} />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
         enableOnAndroid={true}
@@ -35,26 +42,31 @@ const SignupScreen = ({ }) => {
           <View style={styles.formikContainer}>
             <Formik
               innerRef={formik}
+              initialValues={initialValues}
               enableReinitialize
-              initialValues={signupInitialObject}
               validationSchema={createValidationSchema(isEmail)}
-              onSubmit={values => {
+              onSubmit={(values, { resetForm }) => {
                 handleContinueBtn(values)
+                // resetForm();
+
               }}>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, setFieldValue }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+              {({ handleChange, handleSubmit, values, errors, touched, setFieldValue }) => {
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
-
                     <AppInput
-                      placeholder="Full Name"
-                      value={values.name}
-                      onChangeText={handleChange('name')}
-                      touched={touched.name}
-                      errorMessage={errors.name}
+                      placeholder="First Name"
+                      value={values.firstName}
+                      onChangeText={handleChange('firstName')}
+                      touched={touched.firstName}
+                      errorMessage={errors.firstName}
+                    />
+                    <AppInput
+                      placeholder="Last Name"
+                      value={values.lastName}
+                      onChangeText={handleChange('lastName')}
+                      touched={touched.lastName}
+                      errorMessage={errors.lastName}
                     />
                     {isEmail ?
                       <AppInput
@@ -74,12 +86,12 @@ const SignupScreen = ({ }) => {
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
+                        keyboardType={"numeric"}
 
                       />
                     }
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>

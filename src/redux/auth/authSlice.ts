@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { APP_ROLE } from '../../shared/exporter';
 
 const authSlice = createSlice({
 	name: 'auth',
@@ -24,10 +25,7 @@ const authSlice = createSlice({
 		},
 		
 		setIswalkthrough: (state) => {
-			console.log("STATE=-=>", state);
 			state.isWalkthrough = true;
-			console.log("STATE=-=> after", state.isWalkthrough);
-
 		},
 		
 		logOut: (state) => {

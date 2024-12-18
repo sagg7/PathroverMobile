@@ -21,6 +21,7 @@ import {
   UNEXPECTED_ERROR,
   Routes,
   LOGIN_TYPE_TEXT,
+  removeNonNumbers,
 } from '../../../shared/exporter';
 import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
 
@@ -30,14 +31,13 @@ const ForgotPassword = ({ }) => {
   const route = useRoute();
   const { isEmail } = route?.params;
   const navigation = useNavigation();
-  let isValidForm = true;
 
   const handleContinueBtn = async (val: any) => {
     const { email, phone } = val;
     const obj = {
       user: {
         ...(email && { email: email }),
-        ...(phone && { phone_number: phone }),
+        ...(phone && { phone_number: removeNonNumbers(phone) }),
       },
     };
 
@@ -47,9 +47,8 @@ const ForgotPassword = ({ }) => {
         selectedValue: isEmail ? email : phone,
         isEmail: isEmail,
       });
-      console.log('CODE', resp?.data?.data?.otp);
     } else {
-      showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 
@@ -83,13 +82,9 @@ const ForgotPassword = ({ }) => {
                 values,
                 errors,
                 touched,
-                isValid,
                 setFieldValue,
               }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
@@ -111,6 +106,7 @@ const ForgotPassword = ({ }) => {
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
+                        keyboardType={"numeric"}
                       />
                     )}
 
@@ -118,7 +114,6 @@ const ForgotPassword = ({ }) => {
                       <AppButton
                         title="Continue"
                         handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)}
                       />
                     </View>

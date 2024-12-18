@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './styles';
 import { AppButton, AppHeader, AppInput, AppLoader, MainWrapper } from '../../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -11,27 +11,28 @@ import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
 const SetPassword = ({ }) => {
   const route = useRoute()
   const { values } = route?.params
-  const { email, phone, name } = values
-  const [signup, { isLoading, }] = useSignUpMutation()
-  let isValidForm = true;
+  const { email, phone, firstName, lastName } = values
+  const [signup, { isLoading }] = useSignUpMutation()
   const navigation = useNavigation()
   const keyboardVisible = useKeyboardListener()
+  const ref = useRef()
 
   const handleContinueBtn = async (val: any) => {
     const obj = {
       user: {
         ...(email && { email: email }),
         ...(phone && { phone_number: removeNonNumbers(phone) }),
-        full_name: name,
+        first_name: firstName,
+        last_name: lastName,
         password: val.password
       }
     }
 
     const resp = await signup(obj);
     if (resp?.data) {
-      navigation.navigate(Routes.AccountCreationSuccess)
+      navigation.replace(Routes.AccountCreationSuccess)
     } else {
-      showAlert("Error", resp?.error?.data?.error || UNEXPECTED_ERROR)
+      showAlert("Error", resp?.error?.data?.errors[0] || UNEXPECTED_ERROR)
     }
   }
 
@@ -50,16 +51,16 @@ const SetPassword = ({ }) => {
         <View >
           <View style={styles.formikContainer}>
             <Formik
+              innerRef={ref}
+              enableReinitialize
               initialValues={signupPasswordObj}
               validationSchema={resetPasswordVal}
-              onSubmit={values =>
+              onSubmit={(values, { resetForm }) => {
                 handleContinueBtn(values)
+              }
               }>
-              {({ handleChange, handleSubmit, values, errors, touched, isValid, dirty }) => {
-                if (isValidForm) {
-                  isValid = false;
-                  isValidForm = false;
-                }
+              {({ handleChange, handleSubmit, values, errors, touched }) => {
+
                 return (
                   <View style={{ alignSelf: 'center' }}>
                     <AppInput
@@ -82,7 +83,6 @@ const SetPassword = ({ }) => {
                     />
                     <View style={styles.divider} >
                       <AppButton title="Continue" handleClick={handleSubmit}
-                        disabled={!isValid}
                         buttonStyle={styles.btnContainer(keyboardVisible)} />
                     </View>
                   </View>
@@ -97,7 +97,7 @@ const SetPassword = ({ }) => {
         }
 
       </KeyboardAwareScrollView>
-    </MainWrapper>
+    </MainWrapper >
   );
 };
 
