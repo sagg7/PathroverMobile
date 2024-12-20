@@ -44,6 +44,18 @@ import Search from '../svg/search.svg';
 import Location from '../svg/Location.svg';
 import Save from '../svg/Save.svg';
 import ClockBlack from '../svg/ClockBlack.svg';
+import SafetyGreen from '../svg/safetyGreen.svg';
+import Safety from '../svg/Safety.svg';
+import BluePhone from '../svg/phone.svg';
+import RedPin from '../svg/redpin.svg';
+import RouteBlueBg from '../svg/route.svg';
+import PencilBlue from '../svg/pencilBlue.svg';
+import Redo from '../svg/pencilBlue.svg';
+import Undo from '../svg/Undo.svg';
+import Navigator from '../svg/navigator.svg';
+import MapWhiteBg from '../svg/Map.svg';
+import MapLayer from '../svg/maplayers.svg';
+import StartPoint from './greenMarker.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -91,4 +103,16 @@ export const svgIcon = {
   Location: <Location />,
   Save: <Save />,
   ClockBlack: <ClockBlack />,
+  SafetyGreen: <SafetyGreen />,
+  Safety: <Safety />,
+  BluePhone: <BluePhone />,
+  RedPin: <RedPin />,
+  RouteBlueBg: <RouteBlueBg />,
+  PencilBlue: <PencilBlue />,
+  Redo: <Redo />,
+  Undo: <Undo />,
+  Navigator: <Navigator />,
+  MapWhiteBg: <MapWhiteBg />,
+  MapLayer: <MapLayer />,
+  StartPoint: <StartPoint />,
 };

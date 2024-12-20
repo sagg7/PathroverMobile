@@ -6,7 +6,7 @@ import {svgIcon} from '../../../../assets/svg';
 import {AppLoader, MainWrapper, SwitchRoleSheet} from '../../../../components';
 import {
   APP_ROLE,
-  DriverProfileMenu,
+  ManagerProfileMenu,
   UNEXPECTED_ERROR,
   USER_PROFILE,
   showAlert,
@@ -19,12 +19,9 @@ import {RatingStars} from '../../../../components';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {setUserRole} from '../../../../redux/auth/appRoleSlice';
 import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import {
-  useCreateManagerVehicleRequestMutation,
-  useDeleteUserAccountMutation,
-} from '../../../../redux/manager/managerApiSlice';
+import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
 
-const Settings = ({navigation}: any) => {
+const ManagerSettings = ({navigation}: any) => {
   const consentSheetRef = useRef<any>(null);
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
@@ -73,18 +70,6 @@ const Settings = ({navigation}: any) => {
     setshowSwitchRoleSheet(false);
   };
 
-  const switchRoleApi = async (role: string) => {
-    const resp = await switchProfile(role);
-    if (resp?.data) {
-      if (resp?.data?.user?.is_driver) {
-        navigation.navigate('AppStack');
-      }
-      dispatch(setLoginUser(resp?.data?.user));
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
-    }
-    setshowSwitchRoleSheet(false);
-  };
   const handleLogout = async () => {
     dispatch(setAccessToken(null));
     dispatch(setLoginUser(null));
@@ -176,7 +161,7 @@ const Settings = ({navigation}: any) => {
         </View>
       </View>
       <FlatList
-        data={DriverProfileMenu}
+        data={ManagerProfileMenu}
         renderItem={settingOption}
         keyExtractor={(index, item) => item?.toString()}
         contentContainerStyle={styles.contentContainerStyle}
@@ -206,4 +191,4 @@ const Settings = ({navigation}: any) => {
   );
 };
 
-export default Settings;
+export default ManagerSettings;

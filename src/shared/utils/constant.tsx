@@ -7,6 +7,8 @@ export function showAlert(type: string, des: string) {
 }
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+const mapBoxToken =
+  'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 
 type IntroSlidesTypes = {
   key: number;
@@ -497,6 +499,68 @@ export const DriverProfileMenu = [
     icon: appIcons.logout,
   },
 ];
+
+export const ManagerProfileMenu = [
+  {
+    id: 0,
+    title: 'Payment History',
+    icon: appIcons.car,
+  },
+  {
+    id: 1,
+    title: 'Manage Profile',
+    icon: appIcons.settingIcon,
+  },
+  {
+    id: 11,
+    title: 'Saved Library',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 2,
+    title: 'Notifications',
+    icon: appIcons.bellIcon,
+  },
+
+  {
+    id: 7,
+    title: 'Privacy Policy',
+    icon: appIcons.privacy,
+  },
+  {
+    id: 6,
+    title: 'Terms & Condition',
+    icon: appIcons.terms,
+  },
+  {
+    id: 4,
+    title: 'Support',
+    icon: appIcons.safety,
+  },
+  {
+    id: 3,
+    title: 'FAQ',
+    icon: appIcons.faq,
+  },
+
+  {
+    id: 8,
+    title: 'Logout',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 9,
+    title: 'Delete',
+    icon: appIcons.logout,
+  },
+  {
+    id: 10,
+    title: 'Switch Account',
+    icon: appIcons.logout,
+  },
+];
+
 export const ManageProfileArr = [
   {
     id: 0,
@@ -514,4 +578,14 @@ export const ManageProfileArr = [
     id: 3,
     title: 'Phone Number',
   },
+];
+export const SafetyArr = [
+  {id: 0, title: 'Ambulance', icon: svgIcon.BluePhone},
+  {id: 1, title: 'Police', icon: svgIcon.BluePhone},
+  {id: 2, title: 'Safety Tips', icon: svgIcon.Safety},
+];
+export const SafetytipsArr = [
+  {id: 0, title: 'Safety tips for drivers'},
+  {id: 1, title: 'Road Safety'},
+  {id: 2, title: 'In App Safety Feature'},
 ];
