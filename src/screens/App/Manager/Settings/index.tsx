@@ -106,6 +106,9 @@ const ManagerSettings = ({navigation}: any) => {
       case 2:
         screenName = Routes.Notification;
         break;
+      case 3:
+        screenName = Routes.Faqs;
+        break;
       case 4:
         screenName = Routes.SupportScreen;
         break;
@@ -130,6 +133,9 @@ const ManagerSettings = ({navigation}: any) => {
         break;
       case 10:
         setshowSwitchRoleSheet(true);
+        break;
+      case 11:
+        screenName = Routes.SavedLibrary;
         break;
     }
     if (screenName) {

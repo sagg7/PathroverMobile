@@ -41,4 +41,6 @@ export const Routes = {
   SafetyMenu: 'SafetyMenu',
   SafetyTips: 'SafetyTips',
   SearchLatLng: 'SearchLatLng',
+  Faqs: 'Faqs',
+  SavedLibrary: 'SavedLibrary',
 };

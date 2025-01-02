@@ -50,12 +50,18 @@ import BluePhone from '../svg/phone.svg';
 import RedPin from '../svg/redpin.svg';
 import RouteBlueBg from '../svg/route.svg';
 import PencilBlue from '../svg/pencilBlue.svg';
-import Redo from '../svg/pencilBlue.svg';
+import Redo from '../svg/redo.svg';
 import Undo from '../svg/Undo.svg';
 import Navigator from '../svg/navigator.svg';
 import MapWhiteBg from '../svg/Map.svg';
 import MapLayer from '../svg/maplayers.svg';
 import StartPoint from './greenMarker.svg';
+import DefaultMarker from './default.svg';
+import Terrain from './terrain.svg';
+import Sattelite from './sattelite.svg';
+import DragablePin from './dragablePin.svg';
+import CurrentLocation from './currentLocation.svg';
+import Edit from './Edit.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -115,4 +121,10 @@ export const svgIcon = {
   MapWhiteBg: <MapWhiteBg />,
   MapLayer: <MapLayer />,
   StartPoint: <StartPoint />,
+  DefaultMarker: <DefaultMarker />,
+  Terrain: <Terrain />,
+  Sattelite: <Sattelite />,
+  DragablePin: <DragablePin />,
+  CurrentLocation: <CurrentLocation />,
+  Edit: <Edit />,
 };

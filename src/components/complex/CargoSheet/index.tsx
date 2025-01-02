@@ -3,14 +3,12 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
-import RBSheet from 'react-native-raw-bottom-sheet';
+import React, {forwardRef, useState} from 'react';
 import {scale, WP} from '../../../shared/theme/responsive';
 import {svgIcon} from '../../../assets/svg';
 import {IMAGE_OPTIONS, PFColors, PFFonts} from '../../../shared/exporter';
@@ -46,8 +44,6 @@ const CargoSheet: React.FC<cargoSheetProps> = forwardRef(
       cargoDescriptionDetails?.image ? cargoDescriptionDetails?.image : null,
     );
 
-    
-
     const uploadFromGallery = async () => {
       const result = await launchImageLibrary(IMAGE_OPTIONS);
       setCargoImage(result?.assets[0]);
@@ -70,7 +66,7 @@ const CargoSheet: React.FC<cargoSheetProps> = forwardRef(
       setCargoDescription('');
       setCargoImage(null);
       // refScrollable.current.close();
-      setShowCargoSheet(false)
+      setShowCargoSheet(false);
     };
 
     const isDisable = !cargoImage || !cargoDescription;
@@ -138,64 +134,64 @@ const CargoSheet: React.FC<cargoSheetProps> = forwardRef(
       <Modal visible={showCargoSheet} animationType="slide">
         {/* <ScrollView contentContainerStyle={styles.bodyContainer}> */}
         <Pressable style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.2)'}}>
-          <KeyboardAvoidingView style={{flex:1}}
-          behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
-          >
-          <View
-            style={{
-              backgroundColor: PFColors.Standard.White,
-              position: 'absolute',
-              bottom: 0,
-              width: scale(375),
-              paddingBottom:scale(20),
-              paddingHorizontal:scale(16),
-              borderTopRightRadius:scale(24),
-              borderTopLeftRadius:scale(24)
-            }}>
-            <View style={styles.headingContainer}>
-              <Text style={styles.headingText}>
-                Upload picture of your cargo
-              </Text>
-              <Pressable
-                onPress={() => setShowCargoSheet(false)}
-                // onPress={() => refScrollable.current.close()}
-              >
-                {svgIcon.CrossCirlce}
-              </Pressable>
+          <KeyboardAvoidingView
+            style={{flex: 1}}
+            behavior={Platform.OS === 'ios' ? 'height' : 'padding'}>
+            <View
+              style={{
+                backgroundColor: PFColors.Standard.White,
+                position: 'absolute',
+                bottom: 0,
+                width: scale(375),
+                paddingBottom: scale(20),
+                paddingHorizontal: scale(16),
+                borderTopRightRadius: scale(24),
+                borderTopLeftRadius: scale(24),
+              }}>
+              <View style={styles.headingContainer}>
+                <Text style={styles.headingText}>
+                  Upload picture of your cargo
+                </Text>
+                <Pressable
+                  onPress={() => setShowCargoSheet(false)}
+                  // onPress={() => refScrollable.current.close()}
+                >
+                  {svgIcon.CrossCirlce}
+                </Pressable>
+              </View>
+              <View style={styles.uploadOptionsContainer}>
+                <Pressable
+                  style={styles.uploadOptionsItem}
+                  onPress={uploadFromCamer}>
+                  {svgIcon.CameraBlue}
+                  <Text style={styles.optionText}>Camera</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.uploadOptionsItem}
+                  onPress={uploadFromGallery}>
+                  {svgIcon.GalleryBlue}
+                  <Text style={styles.optionText}>Choose from Gallery</Text>
+                </Pressable>
+                {cargoImage && (
+                  <Text style={styles.imageName}>{cargoImage?.fileName}</Text>
+                )}
+              </View>
+              <Text style={styles.headingText}>Description of the Cargo</Text>
+              <TextInput
+                multiline
+                placeholder="Description from Transport Manager "
+                placeholderTextColor={PFColors.Gray.DarkGray}
+                style={styles.inputStyle}
+                textAlignVertical="top"
+                value={cargoDescription}
+                onChangeText={setCargoDescription}
+              />
+              <AppButton
+                title="Save"
+                handleClick={handleSave}
+                disabled={isDisable}
+              />
             </View>
-            <View style={styles.uploadOptionsContainer}>
-              <Pressable
-                style={styles.uploadOptionsItem}
-                onPress={uploadFromCamer}>
-                {svgIcon.CameraBlue}
-                <Text style={styles.optionText}>Camera</Text>
-              </Pressable>
-              <Pressable
-                style={styles.uploadOptionsItem}
-                onPress={uploadFromGallery}>
-                {svgIcon.GalleryBlue}
-                <Text style={styles.optionText}>Choose from Gallery</Text>
-              </Pressable>
-              {cargoImage && (
-                <Text style={styles.imageName}>{cargoImage?.fileName}</Text>
-              )}
-            </View>
-            <Text style={styles.headingText}>Description of the Cargo</Text>
-            <TextInput
-              multiline
-              placeholder="Description from Transport Manager "
-              placeholderTextColor={PFColors.Gray.DarkGray}
-              style={styles.inputStyle}
-              textAlignVertical="top"
-              value={cargoDescription}
-              onChangeText={setCargoDescription}
-            />
-            <AppButton
-              title="Save"
-              handleClick={handleSave}
-              disabled={isDisable}
-            />
-          </View>
           </KeyboardAvoidingView>
         </Pressable>
         {/* </ScrollView> */}
@@ -204,7 +200,7 @@ const CargoSheet: React.FC<cargoSheetProps> = forwardRef(
   },
 );
 
-export default CargoSheet;
+export {CargoSheet};
 
 const styles = StyleSheet.create({
   bodyContainer: {

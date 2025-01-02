@@ -32,4 +32,5 @@ export const appIcons = {
   starEmpty: require('../icons/starEmpty.png'),
   searchIconBlack: require('../icons/search.png'),
   redMarker: require('../icons/redPin.png'),
+  routeLine: require('../icons/routeLine.png'),
 };

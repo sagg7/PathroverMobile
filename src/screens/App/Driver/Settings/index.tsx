@@ -19,10 +19,11 @@ import {RatingStars} from '../../../../components';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {setUserRole} from '../../../../redux/auth/appRoleSlice';
 import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
 import {
-  useCreateManagerVehicleRequestMutation,
-  useDeleteUserAccountMutation,
-} from '../../../../redux/manager/managerApiSlice';
+  setManagerRoute,
+  setManagerRouteEmpty,
+} from '../../../../redux/manager/managerSlice';
 
 const Settings = ({navigation}: any) => {
   const consentSheetRef = useRef<any>(null);
@@ -73,22 +74,12 @@ const Settings = ({navigation}: any) => {
     setshowSwitchRoleSheet(false);
   };
 
-  const switchRoleApi = async (role: string) => {
-    const resp = await switchProfile(role);
-    if (resp?.data) {
-      if (resp?.data?.user?.is_driver) {
-        navigation.navigate('AppStack');
-      }
-      dispatch(setLoginUser(resp?.data?.user));
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
-    }
-    setshowSwitchRoleSheet(false);
-  };
   const handleLogout = async () => {
     dispatch(setAccessToken(null));
     dispatch(setLoginUser(null));
     dispatch(setUserRole(APP_ROLE.END_USER));
+    dispatch(setManagerRouteEmpty({}));
+
     await GoogleSignin.signOut();
   };
 
@@ -121,6 +112,7 @@ const Settings = ({navigation}: any) => {
       case 2:
         screenName = Routes.Notification;
         break;
+
       case 4:
         screenName = Routes.SupportScreen;
         break;

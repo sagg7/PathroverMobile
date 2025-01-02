@@ -6,8 +6,10 @@ export function showAlert(type: string, des: string) {
   Alert.alert(type, des);
 }
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
+export const INVALID_COORDINATE_ERROR =
+  'Not valid coordinates, Please try with correct coordinates.';
 export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
-const mapBoxToken =
+export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 
 type IntroSlidesTypes = {
@@ -71,6 +73,7 @@ export const APP_ROLE = {
   DRIVER: 'driver',
   MANAGER: 'manager',
 };
+export const Default_Map_Style = 'mapbox://styles/mapbox/streets-v12';
 
 export const VehicleTypes: VehicleTypes[] = [
   {
@@ -588,4 +591,27 @@ export const SafetytipsArr = [
   {id: 0, title: 'Safety tips for drivers'},
   {id: 1, title: 'Road Safety'},
   {id: 2, title: 'In App Safety Feature'},
+];
+export const MapTypes = [
+  {
+    id: 0,
+    title: 'Terrain Map',
+    icon: svgIcon.Terrain,
+    type: 'mapbox://styles/mapbox/navigation-day-v1',
+    isSelected: false,
+  },
+  {
+    id: 2,
+    title: 'Satellite Map',
+    icon: svgIcon.Sattelite,
+    type: 'mapbox://styles/mapbox/satellite-v9',
+    isSelected: false,
+  },
+  {
+    id: 3,
+    title: 'Default Map',
+    icon: svgIcon.DefaultMarker,
+    type: 'mapbox://styles/mapbox/streets-v12',
+    isSelected: true,
+  },
 ];

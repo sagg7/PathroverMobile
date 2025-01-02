@@ -26,6 +26,7 @@ const CustomizeRoute = ({navigation, route}: any) => {
     setSelectedRouteDetails(selectedRoute);
     navigation.goBack();
   };
+  console.log(allRoutes);
 
   return (
     <MainWrapper>

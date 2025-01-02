@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, TextInput, View} from 'react-native';
+import {Image, StyleSheet, TextInput, View} from 'react-native';
 import React from 'react';
 import {appIcons, PFColors, scale, WP} from '../../../shared/exporter';
 
