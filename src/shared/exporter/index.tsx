@@ -37,14 +37,11 @@ export {
   SafetyArr,
   SafetytipsArr,
   ManagerProfileMenu,
-<<<<<<< HEAD
   REQ_LIST_SOCKET_URL,
-=======
   mapBoxToken,
   MapTypes,
   Default_Map_Style,
   INVALID_COORDINATE_ERROR,
->>>>>>> ffe91d8352b33957532c1f7dba45bd40d23a121a
 } from '../utils/constant.tsx';
 export {useKeyboardListener} from '../../hooks/keyboard.tsx';
 export {
