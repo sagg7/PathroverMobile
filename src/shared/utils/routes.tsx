@@ -38,4 +38,9 @@ export const Routes = {
   PickUp: 'PickUp',
   Destination: 'Destination',
   Notification: 'Notification',
+  SafetyMenu: 'SafetyMenu',
+  SafetyTips: 'SafetyTips',
+  SearchLatLng: 'SearchLatLng',
+  Faqs: 'Faqs',
+  SavedLibrary: 'SavedLibrary',
 };

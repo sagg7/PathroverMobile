@@ -5,10 +5,10 @@ import {PFColors, PFFonts} from '../../../../../shared/exporter';
 import {scale} from '../../../../../shared/theme/responsive';
 import {FromAndToCard} from '../../../../../components';
 
-const CustomizeRouteCard = ({onPressCard,style,icon,item}: any) => {
+const CustomizeRouteCard = ({onPressCard, style, icon, item}: any) => {
   const [isExpand, setIsExpand] = useState<boolean>(false);
   return (
-    <Pressable style={[styles.cardContainer,style]} onPress={onPressCard}>
+    <Pressable style={[styles.cardContainer, style]} onPress={onPressCard}>
       <View style={styles.cardInfoView}>
         <View style={styles.routeNameView}>
           {icon}
@@ -20,7 +20,11 @@ const CustomizeRouteCard = ({onPressCard,style,icon,item}: any) => {
       </View>
       {isExpand && (
         <View>
-          <FromAndToCard  style={styles.innerComponentStyle}/>
+          <FromAndToCard
+            pickup={item?.pickup_location.name}
+            dropOff={item?.dropoff_location?.name}
+            style={styles.innerComponentStyle}
+          />
         </View>
       )}
     </Pressable>
@@ -31,7 +35,7 @@ export default CustomizeRouteCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor:PFColors.Gray.WhisperGray,
+    backgroundColor: PFColors.Gray.WhisperGray,
     marginBottom: scale(12),
     padding: scale(16),
     borderRadius: scale(12),
@@ -59,7 +63,7 @@ const styles = StyleSheet.create({
     marginTop: scale(20),
     marginBottom: scale(8),
   },
-  innerComponentStyle:{
+  innerComponentStyle: {
     marginTop: scale(8),
-  }
+  },
 });

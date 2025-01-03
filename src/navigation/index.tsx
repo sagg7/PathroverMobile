@@ -25,13 +25,18 @@ import CustomizeRoute from '../screens/App/Manager/Vehicle/CustomizeReoute';
 import Locations from '../screens/App/Manager/Vehicle/Locations';
 import VehiclesOffer from '../screens/App/Manager/Vehicle/VehcilesOffer';
 import Splash from '../screens/Splash';
-import ManagerProfile from '../screens/App/ManagerRegistrationFlow/ManagerProfile';
+// import ManagerProfile from '../screens/App/ManagerRegistrationFlow/ManagerProfile';
 import ManagerCompanyDetail from '../screens/App/DriverRegistrationFlow/ManagerCompanyDetail';
 import TermsAndConditions from '../screens/App/TermsAndConditions';
 import PrivacyPolicy from '../screens/App/PrivacyPolicy';
 import PickUp from '../screens/App/Manager/Vehicle/Locations/PickUp';
 import Destination from '../screens/App/Manager/Vehicle/Locations/Destination';
 import Notification from '../screens/App/Notification';
+import SafetyMenu from '../screens/App/Driver/SafetyMenu';
+import SafetyTips from '../screens/App/Driver/SafetyTips';
+import SearchLatLng from '../screens/App/Manager/SearchLatLng';
+import Faqs from '../screens/App/FAQs';
+import SavedLibrary from '../screens/App/Manager/SavedLibrary';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -78,6 +83,11 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.PickUp} component={PickUp} />
         <Stack.Screen name={Routes.Destination} component={Destination} />
         <Stack.Screen name={Routes.Notification} component={Notification} />
+        <Stack.Screen name={Routes.SafetyMenu} component={SafetyMenu} />
+        <Stack.Screen name={Routes.SafetyTips} component={SafetyTips} />
+        <Stack.Screen name={Routes.SearchLatLng} component={SearchLatLng} />
+        <Stack.Screen name={Routes.Faqs} component={Faqs} />
+        <Stack.Screen name={Routes.SavedLibrary} component={SavedLibrary} />
       </Stack.Navigator>
     </NavigationContainer>
   );

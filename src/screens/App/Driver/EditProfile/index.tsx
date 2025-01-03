@@ -66,8 +66,6 @@ const EditProfile = () => {
       dispatch(setLoginUser(resp?.data?.profile));
 
       if (resp?.data) {
-        console.log('TITLE ALERT', values);
-
         showAlert('Alert', `Profile has been updated.`);
         navigation.goBack();
       } else {

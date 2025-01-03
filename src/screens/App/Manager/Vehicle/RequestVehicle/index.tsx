@@ -6,6 +6,8 @@ import {
   AppLoader,
   MainWrapper,
   OptionSelectorSheet,
+  CargoSheet,
+  RecipentSheet,
 } from '../../../../../components';
 import {styles} from './Styles';
 import {
@@ -22,8 +24,6 @@ import {PFColors, Routes} from '../../../../../shared/exporter';
 import SelectRoute from '../SelectRoute';
 import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
-import CargoSheet from '../../../../../components/complex/CargoSheet';
-import RecipentSheet from '../../../../../components/complex/RecipentSheet';
 import {useCreateManagerVehicleRequestMutation} from '../../../../../redux/manager/managerApiSlice';
 
 const VehicleRequest = ({navigation}: any) => {
@@ -136,7 +136,7 @@ const VehicleRequest = ({navigation}: any) => {
   };
 
   const onPressRecipentCard = () => {
-    setShowRecipentSheet(true)
+    setShowRecipentSheet(true);
   };
 
   const handleClearDetails = (type: string) => () => {

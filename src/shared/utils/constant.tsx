@@ -6,7 +6,11 @@ export function showAlert(type: string, des: string) {
   Alert.alert(type, des);
 }
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
+export const INVALID_COORDINATE_ERROR =
+  'Not valid coordinates, Please try with correct coordinates.';
 export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+export const mapBoxToken =
+  'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 
 type IntroSlidesTypes = {
   key: number;
@@ -69,6 +73,7 @@ export const APP_ROLE = {
   DRIVER: 'driver',
   MANAGER: 'manager',
 };
+export const Default_Map_Style = 'mapbox://styles/mapbox/streets-v12';
 
 export const VehicleTypes: VehicleTypes[] = [
   {
@@ -497,6 +502,68 @@ export const DriverProfileMenu = [
     icon: appIcons.logout,
   },
 ];
+
+export const ManagerProfileMenu = [
+  {
+    id: 0,
+    title: 'Payment History',
+    icon: appIcons.car,
+  },
+  {
+    id: 1,
+    title: 'Manage Profile',
+    icon: appIcons.settingIcon,
+  },
+  {
+    id: 11,
+    title: 'Saved Library',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 2,
+    title: 'Notifications',
+    icon: appIcons.bellIcon,
+  },
+
+  {
+    id: 7,
+    title: 'Privacy Policy',
+    icon: appIcons.privacy,
+  },
+  {
+    id: 6,
+    title: 'Terms & Condition',
+    icon: appIcons.terms,
+  },
+  {
+    id: 4,
+    title: 'Support',
+    icon: appIcons.safety,
+  },
+  {
+    id: 3,
+    title: 'FAQ',
+    icon: appIcons.faq,
+  },
+
+  {
+    id: 8,
+    title: 'Logout',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 9,
+    title: 'Delete',
+    icon: appIcons.logout,
+  },
+  {
+    id: 10,
+    title: 'Switch Account',
+    icon: appIcons.logout,
+  },
+];
+
 export const ManageProfileArr = [
   {
     id: 0,
@@ -513,5 +580,38 @@ export const ManageProfileArr = [
   {
     id: 3,
     title: 'Phone Number',
+  },
+];
+export const SafetyArr = [
+  {id: 0, title: 'Ambulance', icon: svgIcon.BluePhone},
+  {id: 1, title: 'Police', icon: svgIcon.BluePhone},
+  {id: 2, title: 'Safety Tips', icon: svgIcon.Safety},
+];
+export const SafetytipsArr = [
+  {id: 0, title: 'Safety tips for drivers'},
+  {id: 1, title: 'Road Safety'},
+  {id: 2, title: 'In App Safety Feature'},
+];
+export const MapTypes = [
+  {
+    id: 0,
+    title: 'Terrain Map',
+    icon: svgIcon.Terrain,
+    type: 'mapbox://styles/mapbox/navigation-day-v1',
+    isSelected: false,
+  },
+  {
+    id: 2,
+    title: 'Satellite Map',
+    icon: svgIcon.Sattelite,
+    type: 'mapbox://styles/mapbox/satellite-v9',
+    isSelected: false,
+  },
+  {
+    id: 3,
+    title: 'Default Map',
+    icon: svgIcon.DefaultMarker,
+    type: 'mapbox://styles/mapbox/streets-v12',
+    isSelected: true,
   },
 ];

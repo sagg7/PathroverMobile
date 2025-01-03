@@ -24,7 +24,7 @@ const DriverProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
   let disabled = (profileImage?.fileName && date) || false;
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [date, setDate] = useState('');
   const [show, setShow] = useState(false);
   const userRole = useSelector(state => state?.appRole.userRole);

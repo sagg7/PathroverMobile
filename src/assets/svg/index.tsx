@@ -44,6 +44,26 @@ import Search from '../svg/search.svg';
 import Location from '../svg/Location.svg';
 import Save from '../svg/Save.svg';
 import ClockBlack from '../svg/ClockBlack.svg';
+import SafetyGreen from '../svg/safetyGreen.svg';
+import Safety from '../svg/Safety.svg';
+import BluePhone from '../svg/phone.svg';
+import RedPin from '../svg/redpin.svg';
+import RouteBlueBg from '../svg/route.svg';
+import PencilBlue from '../svg/pencilBlue.svg';
+import Redo from '../svg/redo.svg';
+import Undo from '../svg/Undo.svg';
+import RedoActive from '../svg/RedoActive.svg';
+import UndoActive from '../svg/UndoActive.svg';
+import Navigator from '../svg/navigator.svg';
+import MapWhiteBg from '../svg/Map.svg';
+import MapLayer from '../svg/maplayers.svg';
+import StartPoint from './greenMarker.svg';
+import DefaultMarker from './default.svg';
+import Terrain from './terrain.svg';
+import Sattelite from './sattelite.svg';
+import DragablePin from './dragablePin.svg';
+import CurrentLocation from './currentLocation.svg';
+import Edit from './Edit.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -91,4 +111,24 @@ export const svgIcon = {
   Location: <Location />,
   Save: <Save />,
   ClockBlack: <ClockBlack />,
+  SafetyGreen: <SafetyGreen />,
+  Safety: <Safety />,
+  BluePhone: <BluePhone />,
+  RedPin: <RedPin />,
+  RouteBlueBg: <RouteBlueBg />,
+  PencilBlue: <PencilBlue />,
+  Redo: <Redo />,
+  Undo: <Undo />,
+  RedoActive: <RedoActive />,
+  UndoActive: <UndoActive />,
+  Navigator: <Navigator />,
+  MapWhiteBg: <MapWhiteBg />,
+  MapLayer: <MapLayer />,
+  StartPoint: <StartPoint />,
+  DefaultMarker: <DefaultMarker />,
+  Terrain: <Terrain />,
+  Sattelite: <Sattelite />,
+  DragablePin: <DragablePin />,
+  CurrentLocation: <CurrentLocation />,
+  Edit: <Edit />,
 };

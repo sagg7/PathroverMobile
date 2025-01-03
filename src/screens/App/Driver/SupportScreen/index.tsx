@@ -46,8 +46,6 @@ const SupportScreen = () => {
       },
     };
     const resp = await supportContact(obj);
-    console.log('RESP', resp);
-
     if (resp?.data) {
       showAlert('Alert', 'Your message has been sent.');
       navigation.goBack();
