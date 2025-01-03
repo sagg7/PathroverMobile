@@ -60,9 +60,6 @@ const VehicleRequest = ({navigation}: any) => {
   };
 
   const handlePressWeight = i => {
-    // console.log('\nvehicleData==>', vehicleData);
-    // console.log('i==>', i?.id);
-
     let temp = vehicleData?.map(val => {
       if (i.id === val.id) {
         const obj = {
