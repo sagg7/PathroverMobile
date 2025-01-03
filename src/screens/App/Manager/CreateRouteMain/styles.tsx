@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   },
   inputStyles: {
     position: 'absolute',
-    zIndex: 11,
+    zIndex: 1111,
     top: isIOS() ? WP('12') : 1,
   },
   maplayerStyles: {

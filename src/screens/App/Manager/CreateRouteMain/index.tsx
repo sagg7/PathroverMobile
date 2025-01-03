@@ -38,6 +38,7 @@ const CreateRoute = () => {
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [waypoints, setWaypoints] = useState<any>([]);
+  const [isTouchablePressed, setIsTouchablePressed] = useState<boolean>(false);
   const [showCreateRouteSheet, setShowCreateRouteSheet] =
     useState<boolean>(false);
   const {location} = useLocation();
@@ -61,23 +62,27 @@ const CreateRoute = () => {
   }, [location]);
 
   const onPressMap = event => {
-    if ('destination' in managerRoute) {
-      const {geometry} = event;
-      const [longitude, latitude] = geometry.coordinates;
-      setWaypoints(prevWaypoints => {
-        const newWaypoints = [...prevWaypoints, [longitude, latitude]];
-        setUndoStack([...undoStack, prevWaypoints]);
-        setRedoStack([]);
-        return newWaypoints;
-      });
+    if (!isTouchablePressed) {
+      if ('destination' in managerRoute) {
+        const {geometry} = event;
+        const [longitude, latitude] = geometry.coordinates;
+        setWaypoints(prevWaypoints => {
+          const newWaypoints = [...prevWaypoints, [longitude, latitude]];
+          setUndoStack([...undoStack, prevWaypoints]);
+          setRedoStack([]);
+          return newWaypoints;
+        });
 
-      if (managerRoute?.pickup?.coords && managerRoute?.destination?.coords) {
-        updateRoute(
-          managerRoute?.pickup?.coords,
-          managerRoute?.destination?.coords,
-          [...waypoints, [longitude, latitude]],
-        );
+        if (managerRoute?.pickup?.coords && managerRoute?.destination?.coords) {
+          updateRoute(
+            managerRoute?.pickup?.coords,
+            managerRoute?.destination?.coords,
+            [...waypoints, [longitude, latitude]],
+          );
+        }
       }
+    } else {
+      setIsTouchablePressed(false);
     }
   };
   const updateRoute = async ({start, end, updatedWaypoints}: any) => {
@@ -267,8 +272,11 @@ const CreateRoute = () => {
     <MainWrapper style={styles.container}>
       <TouchableOpacity
         style={styles.inputStyles}
-        activeOpacity={0.7}
-        onPress={() => navigation.navigate(Routes.SearchLatLng)}>
+        activeOpacity={1}
+        onPress={() => {
+          setIsTouchablePressed(true);
+          navigation.navigate(Routes.SearchLatLng);
+        }}>
         <SearchInput />
       </TouchableOpacity>
 
@@ -330,7 +338,6 @@ const CreateRoute = () => {
         style={styles.maplayerStyles}
         onPress={() => {
           setMapLayerSheeet(true);
-          dispatch(setManagerRouteEmpty({}));
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
@@ -353,13 +360,13 @@ const CreateRoute = () => {
             style={[styles.button]}
             onPress={handleRedo}
             disabled={redoStack.length === 0}>
-            {svgIcon.Redo}
+            {redoStack.length === 0 ? svgIcon.Redo : svgIcon.RedoActive}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button]}
             onPress={handleUndo}
             disabled={undoStack.length === 0}>
-            {svgIcon.Undo}
+            {undoStack.length === 0 ? svgIcon.Undo : svgIcon.UndoActive}
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button]} onPress={() => centerMap()}>
             {svgIcon.MapWhiteBg}

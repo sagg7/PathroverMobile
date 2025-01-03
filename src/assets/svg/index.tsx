@@ -52,6 +52,8 @@ import RouteBlueBg from '../svg/route.svg';
 import PencilBlue from '../svg/pencilBlue.svg';
 import Redo from '../svg/redo.svg';
 import Undo from '../svg/Undo.svg';
+import RedoActive from '../svg/RedoActive.svg';
+import UndoActive from '../svg/UndoActive.svg';
 import Navigator from '../svg/navigator.svg';
 import MapWhiteBg from '../svg/Map.svg';
 import MapLayer from '../svg/maplayers.svg';
@@ -117,6 +119,8 @@ export const svgIcon = {
   PencilBlue: <PencilBlue />,
   Redo: <Redo />,
   Undo: <Undo />,
+  RedoActive: <RedoActive />,
+  UndoActive: <UndoActive />,
   Navigator: <Navigator />,
   MapWhiteBg: <MapWhiteBg />,
   MapLayer: <MapLayer />,

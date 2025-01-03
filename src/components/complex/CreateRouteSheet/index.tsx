@@ -5,6 +5,7 @@ import {PFColors, PFFonts, PFFontSize, WP} from '../../../shared/exporter';
 import {AppInput} from '../../primitive/AppInput';
 import {FromAndToCard} from '../FromAndToCard';
 import {AppButton} from '../AppButton';
+import {svgIcon} from '../../../assets/svg';
 
 interface CreateRouteSheetProps {
   modalVisible: boolean;
@@ -34,6 +35,8 @@ const CreateRouteSheet = ({
       onBackdropPress={onPressCross}
       style={styles.modalContainer}>
       <View>
+        <View style={styles.dragablePin}>{svgIcon.DragablePin}</View>
+
         <Text style={styles.titleStyles}>{title ? 'Edit ' : ''}Route Name</Text>
         <AppInput
           placeholder="Name"
@@ -75,5 +78,9 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.SemiBold,
     fontSize: PFFontSize.FONT_SIZE_14,
     color: PFColors.Standard.Black,
+  },
+  dragablePin: {
+    alignSelf: 'center',
+    marginBottom: 10,
   },
 });

@@ -53,8 +53,6 @@ const FilterLocationSheet = ({
 
     debounceTimeout.current = setTimeout(async () => {
       const fetchData = await fetchSuggestions(text);
-      console.log('fetchData', fetchData);
-
       setSuggestions(fetchData?.features);
     }, 2000);
   };

@@ -29,9 +29,9 @@ const SavedLibrary = () => {
   const [route, setRoute] = useState<any>(null);
 
   const onPressEdit = async (item: any) => {
-    const endIndex = item?.locations?.length - 1;
-    const endItem = item?.locations[endIndex];
-    const firstItem = item?.locations[0];
+    const endItem = item?.dropoff_location;
+    const firstItem = item?.pickup_location;
+
     setEndData({
       latitude: endItem?.latitude,
       longitude: endItem?.longitude,
@@ -50,13 +50,14 @@ const SavedLibrary = () => {
 
   const onPressUpdate = async (item: any) => {
     const id = route?.id;
-
+    const formatedArr = [startData, ...route?.middle_location_points, endData];
     const data = {
       user_route: {
         name: item,
-        locations_attributes: route?.locations,
+        locations_attributes: formatedArr,
       },
     };
+
     const resp = await updateRoute({data, id});
     if (resp?.data) {
       setShowCreateRouteSheet(false);
