@@ -60,6 +60,9 @@ const VehicleRequest = ({navigation}: any) => {
   };
 
   const handlePressWeight = i => {
+    // console.log('\nvehicleData==>', vehicleData);
+    // console.log('i==>', i?.id);
+
     let temp = vehicleData?.map(val => {
       if (i.id === val.id) {
         const obj = {
@@ -73,7 +76,6 @@ const VehicleRequest = ({navigation}: any) => {
           ...val,
           isWeightSelected: false,
         };
-        setSelectedVehicleDetails(obj);
         return obj;
       }
     });
@@ -109,7 +111,7 @@ const VehicleRequest = ({navigation}: any) => {
       if (item.isWeightSelected) {
         item.isWeightSelected = false;
       }
-      item.model.forEach(
+      item.model?.forEach(
         (modelItem: any) => (modelItem.isModelSelected = false),
       );
       return item;
@@ -225,7 +227,7 @@ const VehicleRequest = ({navigation}: any) => {
         <View style={styles.vehiclesContainer}>
           {VehicleTypes.map((item, index) => (
             <VehicleCard
-              key={item.key}
+              key={index}
               item={item}
               index={index}
               onPress={onPressVehicle(item)}
@@ -239,7 +241,7 @@ const VehicleRequest = ({navigation}: any) => {
           onPressCard={openSheet}
           onPressClear={handleClearBtn}
         />
-
+        {console.log('selectedVehicleDetails', selectedVehicleDetails)}
         <View style={styles.radioBtnContainer}>
           <View style={styles.radioBtn}>
             <Pressable onPress={switchOption('Choose Route')}>

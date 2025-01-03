@@ -156,8 +156,6 @@ const CompanyDetail = () => {
     }
 
     const resp = await createDriverProfile(data);
-    console.log('RES', resp);
-
     if (resp?.data) {
       navigation.replace('AppStack');
       const obj = {
