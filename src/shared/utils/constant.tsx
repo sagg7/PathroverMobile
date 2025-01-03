@@ -5,6 +5,8 @@ import {svgIcon} from '../../assets/svg';
 export function showAlert(type: string, des: string) {
   Alert.alert(type, des);
 }
+
+export const REQ_LIST_SOCKET_URL = 'https://staging.pathfinder-app.com/api/v1/';
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
 const mapBoxToken =
