@@ -1,10 +1,12 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   appIcons,
+  INVALID_COORDINATE_ERROR,
   PFColors,
   PFFonts,
   PFFontSize,
+  Routes,
   scale,
   showAlert,
   verticalScale,
@@ -12,6 +14,9 @@ import {
 } from '../../../shared/exporter';
 import {svgIcon} from '../../../assets/svg';
 import {AppInput, AppButton} from './../../../components';
+import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {setManagerRoute} from '../../../redux/manager/managerSlice';
 
 interface SelectionBoxProps {
   isSelected: boolean;
@@ -30,13 +35,55 @@ const locationInitial = {
   dropoffLatitude: '',
   dropoffLongitude: '',
 };
-const SearchAddressSelector = () => {
+const SearchAddressSelector = ({setRouteData}) => {
   const [isAddressSelected, setIsAddressSelected] = useState(true);
+  const {managerRoute} = useSelector(state => state?.manager);
   const [isDropOffSelected, setIsDropOffSelected] = useState(false);
   const [isFieldsVisible, setIsFieldsVisible] = useState(false);
   const [showSelectedLocationBox, setShowSelectedLocationBox] =
     useState<boolean>(false);
-  const [locations, setLocations] = useState<any>(locationInitial);
+  const [locations, setLocations] = useState<any>({
+    pickupLatitude: managerRoute?.pickup?.coords[0]
+      ? managerRoute?.pickup?.coords[0]
+      : '',
+    pickupLongitude: managerRoute?.pickup?.coords[1]
+      ? managerRoute?.pickup?.coords[1]
+      : '',
+    dropoffLatitude: managerRoute?.destination?.coords[1]
+      ? managerRoute?.destination?.coords[1]
+      : '',
+    dropoffLongitude: managerRoute?.destination?.coords[0]
+      ? managerRoute?.destination?.coords[0]
+      : '',
+  });
+  const [pickUpAddress, setPickUpAddress] = useState<any>(null);
+  const [destinationAddress, setDestinationAddress] = useState(null);
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const isValidNumber = (value: string): boolean => {
+    const regex = /^-?\d*\.?\d*$/;
+    return regex.test(value);
+  };
+
+  useEffect(() => {
+    if (!isAddressSelected) {
+      setLocations({
+        pickupLatitude: managerRoute?.pickup?.coords[0]
+          ? managerRoute?.pickup?.coords[0]
+          : '',
+        pickupLongitude: managerRoute?.pickup?.coords[1]
+          ? managerRoute?.pickup?.coords[1]
+          : '',
+        dropoffLatitude: managerRoute?.destination?.coords[1]
+          ? managerRoute?.destination?.coords[1]
+          : '',
+        dropoffLongitude: managerRoute?.destination?.coords[0]
+          ? managerRoute?.destination?.coords[0]
+          : '',
+      });
+    }
+  }, [managerRoute, isAddressSelected]);
 
   const handleLocationPress = (isDropOff: boolean) => {
     setIsDropOffSelected(isDropOff);
@@ -54,6 +101,18 @@ const SearchAddressSelector = () => {
       </View>
     </TouchableOpacity>
   );
+  const isValidLatLng = (latitude: any, longitude: any) => {
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    return (
+      !isNaN(lat) &&
+      !isNaN(lng) &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180
+    );
+  };
 
   const LocationBox = ({
     title,
@@ -72,14 +131,22 @@ const SearchAddressSelector = () => {
       locations;
     if (!isDropOffSelected) {
       if (pickupLatitude && pickupLongitude) {
-        setIsDropOffSelected(true);
+        if (isValidLatLng(pickupLatitude, pickupLongitude)) {
+          setIsDropOffSelected(true);
+        } else {
+          showAlert('Alert', INVALID_COORDINATE_ERROR);
+        }
       } else {
         showAlert('Alert', 'Please fill pickup data to continue');
       }
     } else {
       if (dropoffLatitude && dropoffLongitude) {
-        setShowSelectedLocationBox(true);
-        setIsDropOffSelected(false);
+        if (isValidLatLng(dropoffLatitude, dropoffLongitude)) {
+          setShowSelectedLocationBox(true);
+          setIsDropOffSelected(false);
+        } else {
+          showAlert('Alert', INVALID_COORDINATE_ERROR);
+        }
       } else {
         showAlert('Alert', 'Please fill drop-off data to continue');
       }
@@ -93,6 +160,7 @@ const SearchAddressSelector = () => {
         <AppInput
           maxLength={10}
           placeholder="Latitude"
+          keyboardType={'numeric'}
           inputContainerStyle={styles.inputContainerStyle}
           value={
             title === LOCATIONS.DROP_OFF
@@ -100,7 +168,7 @@ const SearchAddressSelector = () => {
               : locations.pickupLatitude
           }
           onChangeText={(value: any) => {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
               showAlert('Invalid Input', 'Please enter a valid number');
               return;
             }
@@ -116,6 +184,7 @@ const SearchAddressSelector = () => {
         <AppInput
           maxLength={10}
           placeholder="Longitude"
+          keyboardType={'numeric'}
           inputContainerStyle={styles.inputContainerStyle}
           value={
             title === LOCATIONS.DROP_OFF
@@ -123,7 +192,7 @@ const SearchAddressSelector = () => {
               : locations.pickupLongitude
           }
           onChangeText={(value: any) => {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
               showAlert('Invalid Input', 'Please enter a valid number');
               return;
             }
@@ -174,6 +243,31 @@ const SearchAddressSelector = () => {
     );
   };
 
+  const onPressAddressPickup = () => {
+    navigation.navigate(Routes.PickUp, {pickUpAddress, setPickUpAddress});
+  };
+
+  const onPressApply = () => {
+    const drop = {
+      latitude: locations?.dropoffLatitude,
+      longitude: locations?.dropoffLongitude,
+      coords: [locations?.dropoffLongitude, locations?.dropoffLatitude],
+      placeName: 'Custom Location',
+    };
+    const pickup = {
+      coords: [locations?.pickupLongitude, locations?.pickupLatitude],
+      placeName: 'Custom Location',
+    };
+    const coords = {
+      pickup: pickup,
+      destination: drop,
+    };
+
+    dispatch(setManagerRoute(coords));
+    // navigation.goBack();
+    navigation.navigate('AppStack');
+  };
+
   return (
     <View>
       <View style={styles.selectorMainView}>
@@ -197,8 +291,19 @@ const SearchAddressSelector = () => {
             <Image source={appIcons.redMarker} style={styles.redMarkerStyles} />
           </View>
           <View>
-            <LocationBox title="Your Pickup Location" />
-            <LocationBox title="Your Drop off Location" />
+            <LocationBox
+              title="Your Pickup Location"
+              onPress={onPressAddressPickup}
+            />
+            <LocationBox
+              title="Your Drop off Location"
+              onPress={() =>
+                navigation.navigate(Routes.Destination, {
+                  destinationAddress,
+                  setDestinationAddress,
+                })
+              }
+            />
           </View>
         </View>
       ) : (
@@ -237,7 +342,7 @@ const SearchAddressSelector = () => {
             />
           </View>
           <View style={styles.btnContainer}>
-            <AppButton title={'Apply'} handleClick={() => {}} />
+            <AppButton title={'Apply'} handleClick={() => onPressApply()} />
           </View>
         </>
       )}

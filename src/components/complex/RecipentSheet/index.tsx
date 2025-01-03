@@ -52,7 +52,7 @@ const RecipentSheet: React.FC<RecipentSheetProps> = forwardRef(
       setRecipentName('');
       setRecipentPhone('');
       // refScrollable.current.close();
-      setShowRecipentSheet(false)
+      setShowRecipentSheet(false);
     };
 
     const isDisable = !recipentName || !recipentPhone;
@@ -72,34 +72,34 @@ const RecipentSheet: React.FC<RecipentSheetProps> = forwardRef(
       //     },
       //   }}>
       //   <ScrollView contentContainerStyle={styles.bodyContainer}>
-          // <View style={styles.headingContainer}>
-          //   <Text style={styles.headingText}>Recipient Detail</Text>
-          //   <Pressable
-          //     onPress={() => refScrollable.current.close()}
-          //     style={styles.crossBtnStyle}>
-          //     {svgIcon.CrossCirlce}
-          //   </Pressable>
-          // </View>
+      // <View style={styles.headingContainer}>
+      //   <Text style={styles.headingText}>Recipient Detail</Text>
+      //   <Pressable
+      //     onPress={() => refScrollable.current.close()}
+      //     style={styles.crossBtnStyle}>
+      //     {svgIcon.CrossCirlce}
+      //   </Pressable>
+      // </View>
 
-          // <AppInput
-          //   placeholder="Full Name"
-          //   value={recipentName}
-          //   onChangeText={setRecipentName}
-          //   inputStyle={styles.inputStyle}
-          // />
-          // <AppInput
-          //   placeholder="Phone No"
-          //   value={recipentPhone}
-          //   onChangeText={setRecipentPhone}
-          //   inputStyle={styles.inputStyle}
-          //   keyboardType={'number-pad'}
-          // />
-          // <AppButton
-          // disabled={isDisable}
-          //   title="Save"
-          //   handleClick={handleSave}
-          //   buttonStyle={styles.btnStyle}
-          // />
+      // <AppInput
+      //   placeholder="Full Name"
+      //   value={recipentName}
+      //   onChangeText={setRecipentName}
+      //   inputStyle={styles.inputStyle}
+      // />
+      // <AppInput
+      //   placeholder="Phone No"
+      //   value={recipentPhone}
+      //   onChangeText={setRecipentPhone}
+      //   inputStyle={styles.inputStyle}
+      //   keyboardType={'number-pad'}
+      // />
+      // <AppButton
+      // disabled={isDisable}
+      //   title="Save"
+      //   handleClick={handleSave}
+      //   buttonStyle={styles.btnStyle}
+      // />
       //   </ScrollView>
       // </RBSheet>
       <Modal visible={showRecipentSheet} animationType="slide">
@@ -119,36 +119,37 @@ const RecipentSheet: React.FC<RecipentSheetProps> = forwardRef(
                 borderTopRightRadius: scale(24),
                 borderTopLeftRadius: scale(24),
               }}>
-            <View style={styles.headingContainer}>
-            <Text style={styles.headingText}>Recipient Detail</Text>
-            <Pressable
-              onPress={() => setShowRecipentSheet(false)}
-              style={styles.crossBtnStyle}>
-              {svgIcon.CrossCirlce}
-            </Pressable>
-          </View>
+              <View style={styles.headingContainer}>
+                <Text style={styles.headingText}>Recipient Detail</Text>
+                <Pressable
+                  onPress={() => setShowRecipentSheet(false)}
+                  style={styles.crossBtnStyle}>
+                  {svgIcon.CrossCirlce}
+                </Pressable>
+              </View>
 
-          <AppInput
-            placeholder="Full Name"
-            value={recipentName}
-            onChangeText={setRecipentName}
-            inputStyle={styles.inputStyle}
-          />
-          <AppInput
-            placeholder="Phone No"
-            value={recipentPhone}
-            onChangeText={(val)=>{
-              const formatted = formatPhoneNumber(val);
-              setRecipentPhone(formatted)}}
-            inputStyle={styles.inputStyle}
-            keyboardType={'number-pad'}
-          />
-          <AppButton
-          disabled={isDisable}
-            title="Save"
-            handleClick={handleSave}
-            buttonStyle={styles.btnStyle}
-          />
+              <AppInput
+                placeholder="Full Name"
+                value={recipentName}
+                onChangeText={setRecipentName}
+                inputStyle={styles.inputStyle}
+              />
+              <AppInput
+                placeholder="Phone No"
+                value={recipentPhone}
+                onChangeText={val => {
+                  const formatted = formatPhoneNumber(val);
+                  setRecipentPhone(formatted);
+                }}
+                inputStyle={styles.inputStyle}
+                keyboardType={'number-pad'}
+              />
+              <AppButton
+                disabled={isDisable}
+                title="Save"
+                handleClick={handleSave}
+                buttonStyle={styles.btnStyle}
+              />
             </View>
           </KeyboardAvoidingView>
         </Pressable>
@@ -158,7 +159,7 @@ const RecipentSheet: React.FC<RecipentSheetProps> = forwardRef(
   },
 );
 
-export default RecipentSheet;
+export {RecipentSheet};
 
 const styles = StyleSheet.create({
   bodyContainer: {

@@ -47,7 +47,7 @@ const PrivacyPolicy = () => {
         <Image source={appImages.privacyBanner} style={styles.bannerImage} />
         <View style={styles.bodyContainer}>
           <RenderHTML
-              contentWidth={scrWidth}
+            contentWidth={scrWidth}
             source={source}
             baseStyle={styles.htmlBaseStyle}
           />

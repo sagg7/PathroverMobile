@@ -70,11 +70,11 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.Medium,
     fontSize: scale(14),
   },
-  routeTitleText:{
+  routeTitleText: {
     color: PFColors.Standard.Black,
     fontFamily: PFFonts.Foundation.Regular,
     fontSize: scale(12),
-    marginBottom:scale(9),
+    marginBottom: scale(9),
     marginTop: scale(16),
-  }
+  },
 });

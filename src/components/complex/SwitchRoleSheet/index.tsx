@@ -1,7 +1,6 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import Modal from 'react-native-modal';
-import {AppButton} from '../AppButton';
 import {
   PFColors,
   PFFontSize,
@@ -9,7 +8,6 @@ import {
   WP,
   appIcons,
 } from '../../../shared/exporter';
-import {svgIcon} from '../../../assets/svg';
 import {useSelector} from 'react-redux';
 
 interface SwitchRoleSheetProps {

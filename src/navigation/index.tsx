@@ -35,6 +35,8 @@ import Notification from '../screens/App/Notification';
 import SafetyMenu from '../screens/App/Driver/SafetyMenu';
 import SafetyTips from '../screens/App/Driver/SafetyTips';
 import SearchLatLng from '../screens/App/Manager/SearchLatLng';
+import Faqs from '../screens/App/FAQs';
+import SavedLibrary from '../screens/App/Manager/SavedLibrary';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -84,6 +86,8 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.SafetyMenu} component={SafetyMenu} />
         <Stack.Screen name={Routes.SafetyTips} component={SafetyTips} />
         <Stack.Screen name={Routes.SearchLatLng} component={SearchLatLng} />
+        <Stack.Screen name={Routes.Faqs} component={Faqs} />
+        <Stack.Screen name={Routes.SavedLibrary} component={SavedLibrary} />
       </Stack.Navigator>
     </NavigationContainer>
   );
