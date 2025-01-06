@@ -31,7 +31,7 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
     };
   }, []);
 
-  const subscribe = (data: SubscriptionData, callbacks: Callbacks) => {
+  const subscribe = (data: SubscriptionData, callbacks?: Callbacks) => {
     const cable = new Cable({});
     const channel = cable.setChannel(
       data.channel,
