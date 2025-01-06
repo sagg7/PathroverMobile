@@ -90,14 +90,17 @@ const CompanyDetail = () => {
         name: element.fileName,
       });
     });
-
     driverData?.licence &&
-      driverData?.licence?.forEach(element => {
-        data.append('profile[driving_license]', {
-          uri: element.uri,
-          type: element?.type,
-          name: element.fileName,
-        });
+      data.append('profile[driving_license_front_side]', {
+        uri: driverData?.licence?.[0].uri,
+        type: driverData?.licence?.[0]?.type,
+        name: driverData?.licence?.[0].fileName,
+      });
+    driverData?.licence &&
+      data.append('profile[driving_license_back_side]', {
+        uri: driverData?.licence?.[1].uri,
+        type: driverData?.licence?.[1]?.type,
+        name: driverData?.licence?.[1].fileName,
       });
     driverData?.medicalDocument &&
       driverData?.medicalDocument?.forEach(element => {
@@ -108,14 +111,17 @@ const CompanyDetail = () => {
         });
       });
     driverData?.Identity &&
-      driverData?.Identity?.forEach(element => {
-        data.append('profile[id_card]', {
-          uri: element.uri,
-          type: element?.type,
-          name: element.fileName,
-        });
+      data.append('profile[id_card_front_side]', {
+        uri: driverData?.Identity[0].uri,
+        type: driverData?.Identity[0]?.type,
+        name: driverData?.Identity[0].fileName,
       });
-
+    driverData?.Identity &&
+      data.append('profile[id_card_back_side]', {
+        uri: driverData?.Identity[1].uri,
+        type: driverData?.Identity[1]?.type,
+        name: driverData?.Identity[1].fileName,
+      });
     driverData?.vehiclePhoto &&
       data.append('profile[vehicle_detail_attributes][vehicle_document]', {
         uri: driverData?.vehiclePhoto?.uri,

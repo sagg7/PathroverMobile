@@ -2,8 +2,8 @@ import React, {useState, useEffect, useRef} from 'react';
 import {Cable, Channel} from '@kesha-antonov/react-native-action-cable';
 
 interface SubscriptionData {
-  channel_key: string;
   channel: string;
+  channel_key?: string;
   [key: string]: any; // Additional properties for dynamic data
 }
 
@@ -14,7 +14,7 @@ interface Callbacks {
 }
 
 interface UseChannelReturn {
-  subscribe: (data: SubscriptionData, callbacks: Callbacks) => void;
+  subscribe: (data: SubscriptionData, callbacks?: Callbacks) => void;
   unsubscribe: () => void;
   send: (type: string, payload: any) => void;
   connected: boolean;
@@ -34,7 +34,7 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
   const subscribe = (data: SubscriptionData, callbacks: Callbacks) => {
     const cable = new Cable({});
     const channel = cable.setChannel(
-      data.channel_key,
+      data.channel,
       actionCable.subscriptions.create(data),
     );
 

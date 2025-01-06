@@ -13,6 +13,7 @@ import {
   appIcons,
   REQ_LIST_SOCKET_URL,
 } from '../../../../shared/exporter';
+import {useSelector} from 'react-redux';
 import SwitchToggle from 'react-native-switch-toggle';
 import {useChannel} from '../../../../hooks/socket/useChannel';
 import {useActionCable} from '../../../../hooks/socket/useActionCable';
@@ -22,9 +23,12 @@ const RequestList = ({}) => {
   const [showReviewSheet, setShowReviewSheet] = useState(false);
   const [offerSheetshow, setofferSheetshow] = useState(false);
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
+  const {accessToken} = useSelector((state: any) => state?.auth);
+
+  const cleanedToken = accessToken.replace('Bearer ', '');
 
   // Socket
-  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, 'userInfo?.token');
+  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
   const {subscribe, unsubscribe} = useChannel(actionCable);
 
   useEffect(() => {
@@ -39,8 +43,7 @@ const RequestList = ({}) => {
     try {
       subscribe(
         {
-          channel: 'ChannelName',
-          channel_key: 'ChannelKey',
+          channel: 'RideOffersChannel',
         },
         {
           received: res => {
@@ -50,7 +53,7 @@ const RequestList = ({}) => {
         },
       );
     } catch (err) {
-      console.log('err', err);
+      console.log('Error => ', err);
     }
     return () => {
       unsubscribe();
