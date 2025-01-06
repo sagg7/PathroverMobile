@@ -6,9 +6,9 @@ import OfferSheet from '../../../screens/App/Driver/RequestList/OfferSheet';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 interface OfferSheetModalProps {
   modalVisible: boolean;
-  setModalVisible: () => void;
+  setModalVisible?: () => void;
   onPressSend: () => void;
-  onPressCross: () => void;
+  onPressCross?: () => void;
   onPressCancel: () => void;
 }
 const OfferSheetModal = ({

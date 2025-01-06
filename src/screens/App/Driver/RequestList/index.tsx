@@ -24,6 +24,7 @@ const RequestList = ({}) => {
   const [offerSheetshow, setofferSheetshow] = useState(false);
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
   const {accessToken} = useSelector((state: any) => state?.auth);
+  const [offersList, setOffersList] = useState<any>([]);
 
   const cleanedToken = accessToken.replace('Bearer ', '');
 
@@ -88,10 +89,14 @@ const RequestList = ({}) => {
 
       {on ? (
         <FlatList
-          data={[1, 2]}
+          data={offersList}
           keyExtractor={item => item.id}
-          renderItem={() => (
-            <OfferRequestCard onPressAccept={() => setofferSheetshow(true)} />
+          renderItem={({item, index}) => (
+            <OfferRequestCard
+              onPressAccept={() => setofferSheetshow(true)}
+              item={item}
+              index={index}
+            />
           )}
         />
       ) : (

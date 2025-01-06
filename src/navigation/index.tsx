@@ -11,21 +11,16 @@ import VehicleRegistration from '../screens/App/DriverRegistrationFlow/VehicleRe
 import CompanyDetail from '../screens/App/DriverRegistrationFlow/CompanyDetail';
 import {AppStack} from './BottomTabs';
 import RequestList from '../screens/App/Driver/RequestList';
-import MapScreen from '../screens/App/Driver/MapScreen';
-import Home from '../screens/App/EndUser/Home';
 import Settings from '../screens/App/EndUser/Settings';
 import OrderDetails from '../screens/App/Driver/OrderDetails';
 import FilterScreen from '../screens/App/Driver/FltterScreen';
 import ManageProfile from '../screens/App/Driver/ManageProfile';
 import EditProfile from '../screens/App/Driver/EditProfile';
 import SupportScreen from '../screens/App/Driver/SupportScreen';
-import AuthStack from './stacks/authStack';
-import SelectRoute from '../screens/App/Manager/Vehicle/SelectRoute';
 import CustomizeRoute from '../screens/App/Manager/Vehicle/CustomizeReoute';
 import Locations from '../screens/App/Manager/Vehicle/Locations';
 import VehiclesOffer from '../screens/App/Manager/Vehicle/VehcilesOffer';
 import Splash from '../screens/Splash';
-// import ManagerProfile from '../screens/App/ManagerRegistrationFlow/ManagerProfile';
 import ManagerCompanyDetail from '../screens/App/DriverRegistrationFlow/ManagerCompanyDetail';
 import TermsAndConditions from '../screens/App/TermsAndConditions';
 import PrivacyPolicy from '../screens/App/PrivacyPolicy';
@@ -37,6 +32,7 @@ import SafetyTips from '../screens/App/Driver/SafetyTips';
 import SearchLatLng from '../screens/App/Manager/SearchLatLng';
 import Faqs from '../screens/App/FAQs';
 import SavedLibrary from '../screens/App/Manager/SavedLibrary';
+import OrderPickup from '../screens/App/Driver/OrderPickup';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -62,7 +58,6 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.UploadLicense} component={UploadLicense} />
         <Stack.Screen name={Routes.UploadIdentity} component={UploadIdentity} />
         <Stack.Screen name={Routes.RequestList} component={RequestList} />
-        <Stack.Screen name={'MapScreen'} component={MapScreen} />
         <Stack.Screen name={Routes.OrderDetails} component={OrderDetails} />
         <Stack.Screen name={Routes.FilterScreen} component={FilterScreen} />
         <Stack.Screen name={Routes.ManageProfile} component={ManageProfile} />
@@ -88,6 +83,7 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.SearchLatLng} component={SearchLatLng} />
         <Stack.Screen name={Routes.Faqs} component={Faqs} />
         <Stack.Screen name={Routes.SavedLibrary} component={SavedLibrary} />
+        <Stack.Screen name={Routes.OrderPickup} component={OrderPickup} />
       </Stack.Navigator>
     </NavigationContainer>
   );

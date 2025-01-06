@@ -1,45 +1,61 @@
-import {FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import {AppHeader, MainWrapper} from '../../../../../components';
-import {scale} from '../../../../../shared/theme/responsive';
-import {PFColors, PFFonts} from '../../../../../shared/exporter';
-import {svgIcon} from '../../../../../assets/svg';
+import {FlatList, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {useSelector} from 'react-redux';
+import {
+  AppHeader,
+  MainWrapper,
+  OfferExpireCard,
+} from '../../../../../components';
 import OfferCard from './OfferCard';
+import styles from './styles';
+import {useActionCable} from '../../../../../hooks/socket/useActionCable';
+import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import {useChannel} from '../../../../../hooks/socket/useChannel';
+import {useIsFocused} from '@react-navigation/native';
 
-const VehiclesOffer = () => {
+const VehiclesOffer = ({route}) => {
+  const {accessToken} = useSelector((state: any) => state?.auth);
+  const cleanedToken = accessToken.replace('Bearer ', '');
+  const isFocused = useIsFocused();
+
+  // Socket
+  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
+  const {subscribe, unsubscribe} = useChannel(actionCable);
+
+  useEffect(() => {
+    try {
+      subscribe(
+        {
+          channel: 'RideOffersChannel',
+        },
+
+        {
+          received: res => {
+            console.log('Res => ', res);
+          },
+          connected: () => {
+            console.log('CONNECTED!');
+          },
+        },
+      );
+    } catch (err) {
+      console.log('Error => ', route);
+    }
+    return () => {
+      if (route?.name !== 'VehiclesOffer') unsubscribe();
+    };
+  }, []);
+
   return (
     <MainWrapper>
       <AppHeader title="Request Vehicle" leftIcon={false} />
       <View style={styles.bodyConntainer}>
-        {/* <View style={styles.expireCard}>
-          <View style={styles.expireTimeView}>
-            {svgIcon.ClockRed}
-            <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
-          </View>
-          <Text style={styles.expireMessageText}>
-            Your request has been been sent, You will receive offers shortly
-          </Text>
-          <Pressable style={styles.cancelBtn}>
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </Pressable>
-        </View> */}
         <FlatList
-        contentContainerStyle={styles.flatlistContainerStyle}
+          contentContainerStyle={styles.flatlistContainerStyle}
           showsVerticalScrollIndicator={false}
           data={[1, 2, 3]}
           renderItem={({item}) => <OfferCard style={styles.OfferCard} />}
-          ListHeaderComponent={()=> <View style={styles.expireCard}>
-          <View style={styles.expireTimeView}>
-            {svgIcon.ClockRed}
-            <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
-          </View>
-          <Text style={styles.expireMessageText}>
-            Your request has been been sent, You will receive offers shortly
-          </Text>
-          <Pressable style={styles.cancelBtn}>
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </Pressable>
-        </View>}
+          ListHeaderComponent={() => <OfferExpireCard time={'4:55'} />}
         />
       </View>
     </MainWrapper>
@@ -47,69 +63,3 @@ const VehiclesOffer = () => {
 };
 
 export default VehiclesOffer;
-
-const styles = StyleSheet.create({
-  bodyConntainer: {
-    flex: 1,
-  },
-  expireCard: {
-    backgroundColor: PFColors.Blue.lightBlue,
-    padding: scale(16),
-    borderRadius: scale(12),
-    alignItems: 'center',
-    marginBottom: scale(16),
-    marginTop:scale(24),
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.17,
-    shadowRadius: 3.05,
-    elevation: 4,
-  },
-  expireTimeView: {
-    flexDirection: 'row',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(8),
-    borderRadius: scale(20),
-    backgroundColor: PFColors.Standard.White,
-    marginBottom: scale(18),
-    alignItems: 'center',
-  },
-  expireTimeText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(10),
-    color: PFColors.Standard.Black,
-    marginLeft: scale(4),
-  },
-  expireMessageText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(14),
-    color: PFColors.Standard.Black,
-    lineHeight: scale(18),
-    textAlign: 'center',
-    marginBottom: scale(18),
-  },
-  cancelBtn: {
-    height: scale(28),
-    width: scale(118),
-    borderRadius: scale(20),
-    borderColor: PFColors.Blue.Dark,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtnText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(12),
-    color: PFColors.Standard.Black,
-    lineHeight: scale(16),
-    textAlign: 'center',
-  },
-  OfferCard: {
-    marginBottom: scale(12),
-  },
-  flatlistContainerStyle:{
-    paddingHorizontal:scale(16),
-  }
-});

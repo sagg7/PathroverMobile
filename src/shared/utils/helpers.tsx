@@ -1,4 +1,5 @@
 import {Platform} from 'react-native';
+import {mapBoxToken} from './constant';
 
 export const formatPhoneNumber = (phoneNumber: string) => {
   const cleaned = ('' + phoneNumber).replace(/\D/g, '');
@@ -27,8 +28,7 @@ export function removeNonNumbers(number: string) {
   return number.replace(/\D/g, '');
 }
 export const fetchSuggestions = async (text: string) => {
-  const MAPBOX_TOKEN =
-    'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
+  const MAPBOX_TOKEN = mapBoxToken;
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${text}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5`;
 
   try {
@@ -40,25 +40,68 @@ export const fetchSuggestions = async (text: string) => {
   }
 };
 
-// const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+export const getTimeAndDistance = async (start, end, profile = 'driving') => {
+  if (
+    !Array.isArray(start) ||
+    !Array.isArray(end) ||
+    start.length !== 2 ||
+    end.length !== 2
+  ) {
+    throw new Error(
+      'Invalid coordinates. Provide [longitude, latitude] for both start and end.',
+    );
+  }
 
-// // Haversine formula to calculate distance between two coordinates
-// export const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
-//   const R = 6371000; // Earth's radius in meters
-//   const [lon1, lat1] = coord1;
-//   const [lon2, lat2] = coord2;
+  const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${start[0]},${start[1]};${end[0]},${end[1]}?annotations=distance,duration&overview=false&access_token=${mapBoxToken}`;
 
-//   const deltaLat = toRadians(lat2 - lat1);
-//   const deltaLon = toRadians(lon2 - lon1);
+  /**
+   * Formats duration into hours and minutes.
+   * @param {number} minutes - Duration in minutes.
+   * @returns {string} - Formatted duration.
+   */
+  const formatDuration = minutes => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = Math.round(minutes % 60);
+      return `${hours} hr${hours > 1 ? 's' : ''} ${
+        remainingMinutes > 0
+          ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+          : ''
+      }`;
+    }
+    return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+  };
 
-//   const a =
-//     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-//     Math.cos(toRadians(lat1)) *
-//       Math.cos(toRadians(lat2)) *
-//       Math.sin(deltaLon / 2) *
-//       Math.sin(deltaLon / 2);
+  /**
+   * Formats distance into kilometers or meters.
+   * @param {number} meters - Distance in meters.
+   * @returns {string} - Formatted distance.
+   */
+  const formatDistance = meters => {
+    if (meters < 1000) {
+      return `${Math.round(meters)} meters`;
+    }
+    return `${(meters / 1000).toFixed(2)} km`;
+  };
 
-//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//   const distance = R * c; // Distance in meters
-//   return distance;
-// };
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const durationMinutes = route.duration / 60; // Convert seconds to minutes
+      const distanceMeters = route.distance; // Keep distance in meters
+
+      return {
+        duration: formatDuration(durationMinutes),
+        distance: formatDistance(distanceMeters),
+      };
+    } else {
+      throw new Error('No routes found');
+    }
+  } catch (error) {
+    console.error('Error fetching time and distance:', error);
+    throw error;
+  }
+};

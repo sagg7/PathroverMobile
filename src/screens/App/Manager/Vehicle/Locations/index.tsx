@@ -69,11 +69,15 @@ const Locations = ({navigation, route}: any) => {
 
   const handleSave = () => {
     setSelectedRouteDetails({
-      pickup_latitude: pickUpAddress?.latitude,
-      pickup_longitude: pickUpAddress?.longitude,
+      pickup_latitude:
+        pickUpAddress?.latitude || pickUpAddress?.pickup_latitude,
+
+      pickup_longitude:
+        pickUpAddress?.longitude || pickUpAddress?.pickup_longitude,
       dropoff_latitude: destinationAddress?.latitude,
       dropoff_longitude: destinationAddress?.longitude,
     });
+
     navigation.goBack();
   };
 
@@ -105,6 +109,7 @@ const Locations = ({navigation, route}: any) => {
         <View style={styles.searchBox}>
           {svgIcon.Search}
           <TextInput
+            editable={false}
             placeholder="Search"
             placeholderTextColor={PFColors.Gray.DarkGray}
             value={search}

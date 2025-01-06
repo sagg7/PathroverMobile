@@ -9,7 +9,7 @@ import {
   RideActionCard,
 } from '../../../../components';
 
-const MapScreen = () => {
+const OrderPickup = () => {
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Pickup Address" />
@@ -27,4 +27,4 @@ const MapScreen = () => {
   );
 };
 
-export default MapScreen;
+export default OrderPickup;

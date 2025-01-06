@@ -344,7 +344,6 @@ const CreateRoute = () => {
 
       {'destination' in managerRoute && 'pickup' && (
         <AppButton
-          // disabled={}
           title="Create Route"
           buttonStyle={styles.createRouteBtn}
           handleClick={() =>

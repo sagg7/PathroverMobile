@@ -10,20 +10,32 @@ import {
 import {FromAndToCard} from '../FromAndToCard';
 import {PickAndDropTimeCard} from '../PickAndDropTimeCard';
 import {AppButton} from '../AppButton';
+import {getDistance} from 'geolib';
+import useLocation from '../../../hooks/getLocation';
 
 interface OfferRequestCardProps {
   onPressDecline?: () => void;
   onPressAccept?: () => void;
   item?: any;
+  index: number;
 }
 
 const OfferRequestCard = ({
   onPressAccept,
   onPressDecline,
   item,
+  index,
 }: OfferRequestCardProps) => {
+  const {location} = useLocation();
+
+  const distanceFromCurrent = getDistance(
+    {latitude: location?.latitude, longitude: location?.longitude},
+    {latitude: item?.pickup_latitude, longitude: item.pickup_longitude},
+    100,
+  );
+
   return (
-    <View style={styles.mainContainer}>
+    <View style={styles.mainContainer} key={index}>
       <View style={styles.blueHeader}>
         <Text style={styles.blueHeaderText}>Per Mile $1220.00</Text>
         <Text style={styles.blueHeaderText}>|</Text>
@@ -34,10 +46,10 @@ const OfferRequestCard = ({
         <View style={styles.requestByContainer}>
           <View style={styles.row}>
             <Image
-              source={appIcons.userPlaceholder}
+              source={{uri: item?.manager_profile_image}}
               style={styles.userProfile}
             />
-            <Text style={styles.username}>Philip Smith</Text>
+            <Text style={styles.username}>{item?.user_name}</Text>
           </View>
           <View style={styles.row}>
             <Image
@@ -50,11 +62,14 @@ const OfferRequestCard = ({
         </View>
         <View style={styles.horizontalBar} />
         {/* From and to Card */}
-        <FromAndToCard />
+        <FromAndToCard
+          dropOff={item?.dropoff_location_name}
+          pickup={item?.pickup_location_name}
+        />
         <View style={styles.horizontalBar} />
         {/* Pickup & Drop Time Card */}
-        <PickAndDropTimeCard type={'pickup'} />
-        <PickAndDropTimeCard type={'delivery'} />
+        <PickAndDropTimeCard type={'pickup'} value={`${item?.distance}`} />
+        <PickAndDropTimeCard type={'delivery'} value={item?.estimated_time} />
         <View style={styles.horizontalBar} />
 
         <View style={styles.cardFooter}>
@@ -63,11 +78,7 @@ const OfferRequestCard = ({
             style={styles.clockIcon}
             resizeMode="contain"
           />
-          <Text style={styles.descriptionText}>
-            Finish by loading the smaller items like the coffee table, armchair,
-            bookshelf, dresser, nightstand, and desk, taking care to arrange
-            them efficiently to maximize space.
-          </Text>
+          <Text style={styles.descriptionText}>{item?.cargo_description}</Text>
         </View>
         <View style={styles.butonContainer}>
           <AppButton

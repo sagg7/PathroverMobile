@@ -19,7 +19,6 @@ export const Routes = {
   CompanyDetail: 'CompanyDetail',
   ManagerCompanyDetail: 'ManagerCompanyDetail',
   RequestList: 'RequestList',
-  MapScreen: 'MapScreen',
   FilterScreen: 'FilterScreen',
   OrderDetails: 'OrderDetails',
   ManageProfile: 'ManageProfile',
@@ -43,4 +42,5 @@ export const Routes = {
   SearchLatLng: 'SearchLatLng',
   Faqs: 'Faqs',
   SavedLibrary: 'SavedLibrary',
+  OrderPickup: 'OrderPickup',
 };
