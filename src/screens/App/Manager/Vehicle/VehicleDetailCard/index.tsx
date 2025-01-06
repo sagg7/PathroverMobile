@@ -1,8 +1,14 @@
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {svgIcon} from '../../../../../assets/svg';
 import {scale} from '../../../../../shared/theme/responsive';
-import {PFColors, PFFonts,} from '../../../../../shared/exporter';
+import {PFColors, PFFonts} from '../../../../../shared/exporter';
 
 const VehicleDetailCard = ({
   selectedVehicleDetails,
@@ -10,15 +16,21 @@ const VehicleDetailCard = ({
   onPressClear,
   style,
 }: any) => {
-    
+  const selectedModel =
+    selectedVehicleDetails?.model?.length > 0 &&
+    selectedVehicleDetails?.model?.find((item: any) => item?.isModelSelected)
+      ?.title;
+
   return (
-    <Pressable style={[styles.mainContainer,style]} onPress={onPressCard}>
+    <Pressable style={[styles.mainContainer, style]} onPress={onPressCard}>
       <View style={styles.container}>
         <Text style={styles.titleStyle}>Vehicle Details</Text>
         {selectedVehicleDetails && (
-          <Pressable onPress={onPressClear}>
+          <TouchableOpacity
+            hitSlop={{top: 10, bottom: 10, left: 20, right: 20}}
+            onPress={onPressClear}>
             <Text style={styles.clearTextStyle}>Clear</Text>
-          </Pressable>
+          </TouchableOpacity>
         )}
         {svgIcon.LeftArrow}
       </View>
@@ -26,6 +38,12 @@ const VehicleDetailCard = ({
         <>
           <Text style={styles.subTitleStyle}>Weight</Text>
           <Text style={styles.weightStyle}>{selectedVehicleDetails.title}</Text>
+        </>
+      )}
+      {selectedModel && (
+        <>
+          <Text style={styles.subTitleStyle}>Model</Text>
+          <Text style={styles.weightStyle}>{selectedModel}</Text>
         </>
       )}
     </Pressable>

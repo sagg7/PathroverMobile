@@ -42,6 +42,7 @@ const FromAndToCard = ({item, pickup, dropOff}: FromAndToCardProps) => {
         <View style={styles.locationContainerDivider} />
         <Text style={styles.locationTitle}>Drop off Location</Text>
         <Text style={styles.locationName} numberOfLines={2}>
+          {/* Street 5, Block RLahore, Punjab 54000{' '} */}
           {dropOff || 'Test name'}{' '}
         </Text>
       </View>
@@ -51,7 +52,7 @@ const FromAndToCard = ({item, pickup, dropOff}: FromAndToCardProps) => {
 
 export {FromAndToCard};
 
-const styles = StyleSheet.create({
+const styles: any = StyleSheet.create({
   fromAndToCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: isIOS() ? 0.9 : 0.8,
   },
-  locationMarker: color => ({
+  locationMarker: (color: string) => ({
     tintColor:
       color === 'green' ? PFColors.Green.LeafGreen : PFColors.Standard.Red,
     height: WP('5'),

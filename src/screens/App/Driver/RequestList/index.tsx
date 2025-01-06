@@ -8,15 +8,28 @@ import {
   SendOfferModal,
 } from '../../../../components';
 import styles from './styles';
-import {PFColors, appIcons} from '../../../../shared/exporter';
+import {
+  PFColors,
+  appIcons,
+  REQ_LIST_SOCKET_URL,
+} from '../../../../shared/exporter';
+import {useSelector} from 'react-redux';
 import SwitchToggle from 'react-native-switch-toggle';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {useChannel} from '../../../../hooks/socket/useChannel';
+import {useActionCable} from '../../../../hooks/socket/useActionCable';
 
 const RequestList = ({}) => {
   const [on, seton] = useState(false);
   const [showReviewSheet, setShowReviewSheet] = useState(false);
   const [offerSheetshow, setofferSheetshow] = useState(false);
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
+  const {accessToken} = useSelector((state: any) => state?.auth);
+
+  const cleanedToken = accessToken.replace('Bearer ', '');
+
+  // Socket
+  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
+  const {subscribe, unsubscribe} = useChannel(actionCable);
 
   useEffect(() => {
     if (isOfferSent) {
@@ -25,6 +38,27 @@ const RequestList = ({}) => {
       }, 2000);
     }
   }, [isOfferSent]);
+
+  useEffect(() => {
+    try {
+      subscribe(
+        {
+          channel: 'RideOffersChannel',
+        },
+        {
+          received: res => {
+            console.log('Res => ', res);
+          },
+          connected: () => {},
+        },
+      );
+    } catch (err) {
+      console.log('Error => ', err);
+    }
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <MainWrapper>

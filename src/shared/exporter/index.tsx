@@ -37,6 +37,7 @@ export {
   SafetyArr,
   SafetytipsArr,
   ManagerProfileMenu,
+  REQ_LIST_SOCKET_URL,
   mapBoxToken,
   MapTypes,
   Default_Map_Style,

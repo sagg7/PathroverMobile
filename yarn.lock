@@ -2086,6 +2086,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kesha-antonov/react-native-action-cable@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "@kesha-antonov/react-native-action-cable@npm:1.1.5"
+  dependencies:
+    eventemitter3: 5.0.1
+  checksum: b683b723fce6b0a55653ee5311c54e940eaf7da75991a3b0bca986a6730359ee6f892715e405ab20044c4eb8e101989532f82aecaf72d51f046cecaf24b40068
+  languageName: node
+  linkType: hard
+
 "@native-html/css-processor@npm:1.11.0":
   version: 1.11.0
   resolution: "@native-html/css-processor@npm:1.11.0"
@@ -5548,6 +5557,7 @@ __metadata:
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
     "@invertase/react-native-apple-authentication": ^2.4.0
+    "@kesha-antonov/react-native-action-cable": ^1.1.5
     "@react-native-async-storage/async-storage": ^1.23.1
     "@react-native-community/datetimepicker": ^8.2.0
     "@react-native-google-signin/google-signin": ^13.1.0
@@ -7781,6 +7791,13 @@ __metadata:
   version: 5.0.1
   resolution: "event-target-shim@npm:5.0.1"
   checksum: 1ffe3bb22a6d51bdeb6bf6f7cf97d2ff4a74b017ad12284cc9e6a279e727dc30a5de6bb613e5596ff4dc3e517841339ad09a7eec44266eccb1aa201a30448166
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:5.0.1":
+  version: 5.0.1
+  resolution: "eventemitter3@npm:5.0.1"
+  checksum: 543d6c858ab699303c3c32e0f0f47fc64d360bf73c3daf0ac0b5079710e340d6fe9f15487f94e66c629f5f82cd1a8678d692f3dbb6f6fcd1190e1b97fcad36f8
   languageName: node
   linkType: hard
 
