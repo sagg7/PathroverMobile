@@ -1,5 +1,5 @@
 import {FlatList, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {
   AppHeader,
@@ -9,42 +9,98 @@ import {
 import OfferCard from './OfferCard';
 import styles from './styles';
 import {useActionCable} from '../../../../../hooks/socket/useActionCable';
-import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import {
+  OFFER_STATUS,
+  REQ_LIST_SOCKET_URL,
+  Routes,
+  showAlert,
+  UNEXPECTED_ERROR,
+} from '../../../../../shared/exporter';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useAcceptDeclineDriverOfferMutation} from '../../../../../redux/manager/managerApiSlice';
 
-const VehiclesOffer = ({route}) => {
+const VehiclesOffer = ({route}: any) => {
+  const [rideOffersFromDriver, setRideOffersFromDriver] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
   const cleanedToken = accessToken.replace('Bearer ', '');
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
+  const [seconds, setSeconds] = useState(300);
+  const [acceptDeclineDriverOffer, {isLoading}] =
+    useAcceptDeclineDriverOfferMutation();
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
   const {subscribe, unsubscribe} = useChannel(actionCable);
 
   useEffect(() => {
-    try {
-      subscribe(
-        {
-          channel: 'RideOffersChannel',
-        },
+    if (seconds > 0) {
+      const timerId = setTimeout(() => {
+        setSeconds(prevSeconds => prevSeconds - 1);
+      }, 1000);
 
-        {
-          received: res => {
-            console.log('Res => ', res);
-          },
-          connected: () => {
-            console.log('CONNECTED!');
-          },
-        },
-      );
-    } catch (err) {
-      console.log('Error => ', route);
+      return () => clearTimeout(timerId);
+    } else {
+      navigation.goBack();
     }
-    return () => {
-      if (route?.name !== 'VehiclesOffer') unsubscribe();
-    };
+  }, [seconds]);
+
+  // Format seconds into MM:SS
+  const formatTime = (totalSeconds: any) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${minutes}:${secs < 10 ? `0${secs}` : secs}`;
+  };
+
+  useEffect(() => {
+    subscribe(
+      {
+        channel: 'RideOffersChannel',
+      },
+      {
+        received: res => {
+          console.log('Received Data Vehicle Offer => ', res);
+          setRideOffersFromDriver(prev => [...prev, res?.data]);
+        },
+        connected: () => {
+          console.log('Connected!');
+        },
+      },
+    );
+
+    return () => unsubscribe();
   }, []);
+
+  const updateStatus = async ({status, item}: any) => {
+    if (status === OFFER_STATUS.ACCEPTED) {
+      try {
+        const obj = {
+          offer_data: {
+            status: status,
+            driver_id: item?.driver_id,
+            ride_request_id: item?.ride_request_id,
+            amount: item?.amount,
+          },
+        };
+
+        const resp = await acceptDeclineDriverOffer(obj);
+        if (resp?.data) {
+          navigation.navigate(Routes.OrderPickup, {item: item});
+        } else {
+          showAlert('Error', resp?.error?.data?.error);
+        }
+      } catch (e) {
+        showAlert('Error', UNEXPECTED_ERROR);
+      }
+    } else {
+      setRideOffersFromDriver((prev: any) =>
+        prev.filter(
+          (item: any) => item.ride_request_id !== item.ride_request_id,
+        ),
+      );
+    }
+  };
 
   return (
     <MainWrapper>
@@ -53,9 +109,28 @@ const VehiclesOffer = ({route}) => {
         <FlatList
           contentContainerStyle={styles.flatlistContainerStyle}
           showsVerticalScrollIndicator={false}
-          data={[1, 2, 3]}
-          renderItem={({item}) => <OfferCard style={styles.OfferCard} />}
-          ListHeaderComponent={() => <OfferExpireCard time={'4:55'} />}
+          data={rideOffersFromDriver}
+          renderItem={({item, index}) => (
+            <OfferCard
+              style={styles.OfferCard}
+              item={item}
+              index={index}
+              onPressAccept={() =>
+                updateStatus({item, status: OFFER_STATUS.ACCEPTED})
+              }
+              onPressDecline={() =>
+                updateStatus({item, status: OFFER_STATUS.REJECTED})
+              }
+            />
+          )}
+          ListHeaderComponent={() => (
+            <OfferExpireCard
+              time={formatTime(seconds)}
+              onPressCancel={() => {
+                navigation.goBack();
+              }}
+            />
+          )}
         />
       </View>
     </MainWrapper>

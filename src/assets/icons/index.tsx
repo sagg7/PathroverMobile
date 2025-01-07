@@ -33,4 +33,5 @@ export const appIcons = {
   searchIconBlack: require('../icons/search.png'),
   redMarker: require('../icons/redPin.png'),
   routeLine: require('../icons/routeLine.png'),
+  checked: require('../icons/checked.png'),
 };

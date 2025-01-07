@@ -6,12 +6,14 @@ import {
   PFFonts,
   WP,
   appIcons,
+  appImages,
 } from '../../../shared/exporter';
 import {FromAndToCard} from '../FromAndToCard';
 import {PickAndDropTimeCard} from '../PickAndDropTimeCard';
 import {AppButton} from '../AppButton';
 import {getDistance} from 'geolib';
 import useLocation from '../../../hooks/getLocation';
+import {getTimeAndDistance} from '../../../shared/utils/helpers';
 
 interface OfferRequestCardProps {
   onPressDecline?: () => void;
@@ -26,13 +28,14 @@ const OfferRequestCard = ({
   item,
   index,
 }: OfferRequestCardProps) => {
-  const {location} = useLocation();
+  // const {location} = useLocation();
 
-  const distanceFromCurrent = getDistance(
-    {latitude: location?.latitude, longitude: location?.longitude},
-    {latitude: item?.pickup_latitude, longitude: item.pickup_longitude},
-    100,
-  );
+  // const result = await getTimeAndDistance(startPoint, endPoint);
+  // const distanceFromCurrent = getDistance(
+  //   {latitude: location?.latitude, longitude: location?.longitude},
+  //   {latitude: item?.pickup_latitude, longitude: item.pickup_longitude},
+  //   100,
+  // );
 
   return (
     <View style={styles.mainContainer} key={index}>
@@ -42,11 +45,14 @@ const OfferRequestCard = ({
         <Text style={styles.blueHeaderText}>Expected Earning $371.00 </Text>
       </View>
       <View style={styles.innerContainer}>
-        {/* requestByComponent */}
         <View style={styles.requestByContainer}>
           <View style={styles.row}>
             <Image
-              source={{uri: item?.manager_profile_image}}
+              source={
+                item?.manager_profile_image
+                  ? {uri: item?.manager_profile_image}
+                  : appImages.userPlaceholder
+              }
               style={styles.userProfile}
             />
             <Text style={styles.username}>{item?.user_name}</Text>
@@ -57,17 +63,15 @@ const OfferRequestCard = ({
               style={styles.truckIcon}
               resizeMode="contain"
             />
-            <Text style={styles.truckName}>Semi Truck</Text>
+            <Text style={styles.truckName}>{item?.vehicle_type}</Text>
           </View>
         </View>
         <View style={styles.horizontalBar} />
-        {/* From and to Card */}
         <FromAndToCard
           dropOff={item?.dropoff_location_name}
           pickup={item?.pickup_location_name}
         />
         <View style={styles.horizontalBar} />
-        {/* Pickup & Drop Time Card */}
         <PickAndDropTimeCard type={'pickup'} value={`${item?.distance}`} />
         <PickAndDropTimeCard type={'delivery'} value={item?.estimated_time} />
         <View style={styles.horizontalBar} />

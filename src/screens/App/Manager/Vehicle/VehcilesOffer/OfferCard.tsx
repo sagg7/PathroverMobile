@@ -4,6 +4,7 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
@@ -15,20 +16,40 @@ import {PFColors, PFFonts} from '../../../../../shared/exporter';
 
 interface OfferCardProps {
   style: StyleProp<ViewStyle>;
+  item?: any;
+  index: number;
+  onPressDecline: () => void;
+  onPressAccept: () => void;
 }
 
-const OfferCard = ({style}: OfferCardProps) => {
+const OfferCard = ({
+  style,
+  item,
+  index,
+  onPressDecline,
+  onPressAccept,
+}: OfferCardProps) => {
   return (
-    <View style={[styles.cardContainer, style]}>
+    <View style={[styles.cardContainer, style]} key={index}>
       <View style={styles.cardInnerContainer}>
         <View style={styles.userView}>
-          <Image source={appImages.continueAs} style={styles.userImage} />
+          <Image
+            source={
+              item?.profile_image
+                ? {uri: item?.profile_image}
+                : appImages.userPlaceholder
+            }
+            style={styles.userImage}
+          />
           <View style={styles.userInfoView}>
-            <Text style={styles.userName}>Smith</Text>
-            <Text style={styles.vehicleType}>Semi Truck</Text>
+            <Text style={styles.userName}>{item?.user_name}</Text>
+            <Text style={styles.vehicleType}>{item?.vehicle_type}</Text>
             <View style={styles.ratingView}>
               {svgIcon.RatingStar}
-              <Text style={styles.ratingFigure}>{`5.0(847)`}</Text>
+              <Text
+                style={
+                  styles.ratingFigure
+                }>{`${item?.rating}(${item?.ride_completed})`}</Text>
             </View>
           </View>
         </View>
@@ -37,16 +58,23 @@ const OfferCard = ({style}: OfferCardProps) => {
             {svgIcon.ClockRed}
             <Text style={styles.arriveTimeText}>Arrives in 3 mins</Text>
           </View>
-          <Text style={styles.priceText}>$1500</Text>
+          <Text style={styles.priceText}>${item?.amount}</Text>
         </View>
       </View>
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.declineBtn}>
+        <TouchableOpacity
+          disabled
+          activeOpacity={0.7}
+          style={styles.declineBtn}
+          onPress={onPressDecline}>
           <Text style={styles.declineBtnText}>Decline</Text>
-        </Pressable>
-        <Pressable style={styles.acceptBtn}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.acceptBtn}
+          onPress={onPressAccept}>
           <Text style={styles.acceptBtnText}>Accept</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -134,16 +162,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop:scale(20)
+    marginTop: scale(20),
   },
   declineBtn: {
     height: scale(32),
     width: scale(144),
-    borderRadius:scale(20),
-    borderWidth:1,
-    borderColor:PFColors.Blue.Dark,
-    alignItems:'center',
-    justifyContent:'center'
+    borderRadius: scale(20),
+    borderWidth: 1,
+    borderColor: PFColors.Blue.Dark,
+    alignItems: 'center',
   },
   declineBtnText: {
     fontFamily: PFFonts.Foundation.Medium,
@@ -153,10 +180,9 @@ const styles = StyleSheet.create({
   acceptBtn: {
     height: scale(32),
     width: scale(144),
-    borderRadius:scale(20),
-    backgroundColor:PFColors.Blue.Dark,
-    alignItems:'center',
-    justifyContent:'center'
+    borderRadius: scale(20),
+    backgroundColor: PFColors.Blue.Dark,
+    alignItems: 'center',
   },
   acceptBtnText: {
     fontFamily: PFFonts.Foundation.Medium,

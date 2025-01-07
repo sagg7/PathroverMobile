@@ -34,6 +34,11 @@ type VehicleTypes = {
   icon: any;
 };
 
+export const OFFER_STATUS = {
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+};
+
 export const APP_INTRO_SLIDES: IntroSlidesTypes[] = [
   {
     key: 1,

@@ -11,6 +11,9 @@ import {
 interface OfferSheetProp {
   onPressCancel: () => void;
   handleSendOfferBtn: () => void;
+  item: any;
+  priceValue: any;
+  onChangeText: any;
 }
 interface BubleViewProp {
   icon?: any;
@@ -18,7 +21,13 @@ interface BubleViewProp {
   title: string;
 }
 
-const OfferSheet = ({onPressCancel, handleSendOfferBtn}: OfferSheetProp) => {
+const OfferSheet = ({
+  onPressCancel,
+  handleSendOfferBtn,
+  item,
+  priceValue,
+  onChangeText,
+}: OfferSheetProp) => {
   const BubleView = ({icon, iconStyle, title}: BubleViewProp) => {
     return (
       <TouchableOpacity disabled>
@@ -55,7 +64,10 @@ const OfferSheet = ({onPressCancel, handleSendOfferBtn}: OfferSheetProp) => {
           </TouchableOpacity>
         </View>
         <View style={styles.horizontalBar} />
-        <FromAndToCard />
+        <FromAndToCard
+          dropOff={item?.dropoff_location_name}
+          pickup={item?.pickup_location_name}
+        />
         <View style={styles.horizontalBar} />
         <Text style={styles.totalRideHeading}>Offer Your total ride</Text>
         <View style={styles.offerFaresContainer}>
@@ -75,12 +87,24 @@ const OfferSheet = ({onPressCancel, handleSendOfferBtn}: OfferSheetProp) => {
             placeholder="Your Offer Price"
             style={[styles.inputContainerStyle(true)]}
             maxLength={4}
+            value={priceValue}
+            onChangeText={text => {
+              const numericText = text.replace(/[^0-9]/g, '');
+              if (
+                numericText === '' ||
+                (parseInt(numericText, 10) > 0 &&
+                  parseInt(numericText, 10) <= 9999)
+              ) {
+                onChangeText(numericText);
+              }
+            }}
           />
         </View>
         <AppButton
           title="Send my Offer"
           buttonStyle={styles.offerBtnStyle}
           handleClick={handleSendOfferBtn}
+          disabled={!priceValue}
         />
       </KeyboardAwareScrollView>
     </View>

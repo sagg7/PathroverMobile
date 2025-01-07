@@ -48,6 +48,13 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
     }),
+    acceptDeclineDriverOffer: builder.mutation({
+      query: (data: any) => ({
+        url: 'offers/update_offer_status',
+        method: 'PUT',
+        body: data,
+      }),
+    }),
   }),
   overrideExisting: true,
 });
@@ -60,4 +67,5 @@ export const {
   useGetAllSaveRouteQuery,
   useUpdateRouteMutation,
   useDeleteRouteMutation,
+  useAcceptDeclineDriverOfferMutation,
 } = managerApiSlice;

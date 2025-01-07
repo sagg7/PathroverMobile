@@ -4,9 +4,10 @@ import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, scale} from '../../../shared/exporter';
 interface OfferExpireCardType {
   time: any;
+  onPressCancel?: () => void;
 }
 
-const OfferExpireCard = ({time}: OfferExpireCardType) => {
+const OfferExpireCard = ({time, onPressCancel}: OfferExpireCardType) => {
   return (
     <View style={styles.expireCard}>
       <View style={styles.expireTimeView}>
@@ -16,7 +17,7 @@ const OfferExpireCard = ({time}: OfferExpireCardType) => {
       <Text style={styles.expireMessageText}>
         Your request has been been sent, You will receive offers shortly
       </Text>
-      <Pressable style={styles.cancelBtn}>
+      <Pressable style={styles.cancelBtn} onPress={onPressCancel}>
         <Text style={styles.cancelBtnText}>Cancel</Text>
       </Pressable>
     </View>

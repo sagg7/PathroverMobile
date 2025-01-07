@@ -10,12 +10,18 @@ interface OfferSheetModalProps {
   onPressSend: () => void;
   onPressCross?: () => void;
   onPressCancel: () => void;
+  item: any;
+  priceValue: any;
+  onChangeText: any;
 }
 const OfferSheetModal = ({
   modalVisible,
   setModalVisible,
   onPressCancel,
   onPressSend,
+  item,
+  priceValue,
+  onChangeText,
 }: OfferSheetModalProps) => {
   return (
     <Modal
@@ -27,6 +33,9 @@ const OfferSheetModal = ({
         <OfferSheet
           handleSendOfferBtn={onPressSend}
           onPressCancel={onPressCancel}
+          item={item}
+          priceValue={priceValue}
+          onChangeText={onChangeText}
         />
       </View>
     </Modal>

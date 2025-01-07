@@ -16,7 +16,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
       query: data => {
         return {
           url: 'ride_requests',
-          method: 'gt',
+          method: 'get',
           // body: data,
           // headers:{}
         };
@@ -58,6 +58,24 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getProfileStatus: builder.query({
+      query: (userRole: string) => {
+        return {
+          url: `profiles/document_status?role=${userRole}`,
+          method: 'get',
+        };
+      },
+    }),
+
+    sendOfferToManager: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `offers`,
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -69,4 +87,6 @@ export const {
   useSendRideOfferMutation,
   useSupportContactMutation,
   useEdtProfileMutation,
+  useLazyGetProfileStatusQuery,
+  useSendOfferToManagerMutation,
 } = driverApiSlice;
