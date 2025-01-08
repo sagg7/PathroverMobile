@@ -17,8 +17,6 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         return {
           url: 'ride_requests',
           method: 'get',
-          // body: data,
-          // headers:{}
         };
       },
     }),

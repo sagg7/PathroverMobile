@@ -41,7 +41,6 @@ const OrderPickup = (route: any) => {
           setTimeout(() => {
             setShowCancelSheet(true);
           }, 1000);
-          // navigation.goBack();
         }}
       />
       <CancelRideSheet

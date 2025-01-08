@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -30,7 +30,26 @@ const SendOfferModal: React.FC<SendOfferModalProps> = ({
   isModalVisible,
   onPressClose,
   type = 'accepted',
+  time,
 }) => {
+  const [seconds, setSeconds] = useState(300);
+
+  useEffect(() => {
+    if (seconds > 0) {
+      const timerId = setTimeout(() => {
+        setSeconds(prevSeconds => prevSeconds - 1);
+      }, 1000);
+
+      return () => clearTimeout(timerId);
+    } else {
+    }
+  }, [seconds]);
+  const formatTime = (totalSeconds: any) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${minutes}:${secs < 10 ? `0${secs}` : secs}`;
+  };
+
   return (
     <View style={styles.container}>
       <Modal
@@ -57,7 +76,8 @@ const SendOfferModal: React.FC<SendOfferModalProps> = ({
                       resizeMode="contain"
                     />
                     <Text style={styles.text}>
-                      Expires in : <Text style={styles.timeText}>04:54</Text>
+                      Expires in :{' '}
+                      <Text style={styles.timeText}>{formatTime(seconds)}</Text>
                     </Text>
                   </View>
                   <Text style={styles.offerSentText}>

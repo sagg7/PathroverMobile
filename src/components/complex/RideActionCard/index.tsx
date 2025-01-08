@@ -48,7 +48,7 @@ const RideActionCard = ({
               style={styles.userPic}
             />
             <Text style={styles.userName} numberOfLines={2}>
-              {item?.user_name}
+              {item?.user_name}Adeel Iftikhar
             </Text>
           </View>
           <View style={styles.bubleViewContainer}>
@@ -126,9 +126,8 @@ const styles = StyleSheet.create({
   userName: {
     fontFamily: PFFonts.Foundation.Regular,
     color: PFColors.Standard.EclipseBlack,
-    fontSize: PFFontSize.FONT_SIZE_14,
+    fontSize: PFFontSize.FONT_SIZE_12,
     paddingLeft: 10,
-    // width: WP('30'),
   },
   userNameContainer: {
     flexDirection: 'row',
@@ -137,16 +136,16 @@ const styles = StyleSheet.create({
   bubleViewContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
   },
 
   expandingView: {
     alignSelf: 'flex-start',
     backgroundColor: PFColors.Gray.CloudWhite,
-    padding: 10,
+    padding: 5,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
   },
   text: {
     fontSize: PFFontSize.FONT_SIZE_14,

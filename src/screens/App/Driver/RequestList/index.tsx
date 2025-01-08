@@ -15,24 +15,32 @@ import {
   REQ_LIST_SOCKET_URL,
   showAlert,
   UNEXPECTED_ERROR,
+  Routes,
 } from '../../../../shared/exporter';
 import {useDispatch, useSelector} from 'react-redux';
 import SwitchToggle from 'react-native-switch-toggle';
 import {useChannel} from '../../../../hooks/socket/useChannel';
 import {useActionCable} from '../../../../hooks/socket/useActionCable';
-import {setIsProfileVerified} from '../../../../redux/driver/driverSlice';
+import {
+  setIsDriverAvailable,
+  setIsProfileVerified,
+} from '../../../../redux/driver/driverSlice';
 
 // APIs
 import {
   useLazyGetProfileStatusQuery,
   useSendOfferToManagerMutation,
 } from '../../../../redux/driver/driverApiSlice';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 
 const RequestList = ({route}: any) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [on, seton] = useState(false);
+
+  const {isProfileVerified, isDriverAvailable} = useSelector(
+    (state: any) => state?.driver,
+  );
+  const [on, seton] = useState(isDriverAvailable);
   const [ridesList, setRidesList] = useState<any[]>([]);
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
   const [offerSheetShow, setOfferSheetShow] = useState<boolean>(false);
@@ -41,7 +49,7 @@ const RequestList = ({route}: any) => {
   const {userRole} = useSelector((state: any) => state?.appRole);
   const {accessToken} = useSelector((state: any) => state?.auth);
   const [offerPrice, setOfferPrice] = useState<any>('');
-  const {isProfileVerified} = useSelector((state: any) => state?.driver);
+
   const [sendOfferToManager, {isLoading: offerLoading}] =
     useSendOfferToManagerMutation();
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
@@ -127,24 +135,28 @@ const RequestList = ({route}: any) => {
     if (resp?.data) {
       setOfferSheetShow(false);
       setIsOfferSent(true);
+      setOfferPrice('');
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
+  };
+  const onPressToggle = () => {
+    if (profileApproved) seton(!on);
+    // dispatch(setIsDriverAvailable(!isDriverAvailable));
   };
 
   return (
     <MainWrapper>
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.bellContainer}
-          onPress={() => setShowReviewSheet(true)}>
+        <TouchableOpacity style={styles.bellContainer} disabled>
           <Image source={appIcons.bellIcon} style={styles.bellIcon} />
         </TouchableOpacity>
 
         <View style={styles.centerSwitchWrapper}>
           <SwitchToggle
             switchOn={on}
-            onPress={() => profileApproved && seton(!on)}
+            // onPress={() => profileApproved && seton(!on)}
+            onPress={() => onPressToggle()}
             circleColorOff={PFColors.Gray.AshGray}
             circleColorOn={PFColors.Green.LeafGreen}
             backgroundColorOn={PFColors.Green.MintLight}
@@ -219,13 +231,16 @@ const RequestList = ({route}: any) => {
         priceValue={offerPrice}
         onChangeText={text => setOfferPrice(text)}
       />
-      <SendOfferModal isModalVisible={isOfferSent} />
+      <SendOfferModal
+        isModalVisible={isOfferSent}
+        onPressClose={() => setIsOfferSent(false)}
+      />
       <ReviewsListSheet
         modalVisible={showReviewSheet}
         onPressCross={() => setShowReviewSheet(false)}
         onPressDone={() => setShowReviewSheet(false)}
       />
-      {isLoading && <AppLoader />}
+      {isLoading && offerLoading && <AppLoader />}
     </MainWrapper>
   );
 };

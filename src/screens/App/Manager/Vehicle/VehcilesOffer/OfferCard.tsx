@@ -63,7 +63,6 @@ const OfferCard = ({
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          disabled
           activeOpacity={0.7}
           style={styles.declineBtn}
           onPress={onPressDecline}>

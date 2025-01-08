@@ -11,9 +11,8 @@ import {
 import {FromAndToCard} from '../FromAndToCard';
 import {PickAndDropTimeCard} from '../PickAndDropTimeCard';
 import {AppButton} from '../AppButton';
-import {getDistance} from 'geolib';
-import useLocation from '../../../hooks/getLocation';
 import {getTimeAndDistance} from '../../../shared/utils/helpers';
+import useLocation from '../../../hooks/getLocation';
 
 interface OfferRequestCardProps {
   onPressDecline?: () => void;
@@ -28,14 +27,10 @@ const OfferRequestCard = ({
   item,
   index,
 }: OfferRequestCardProps) => {
-  // const {location} = useLocation();
-
-  // const result = await getTimeAndDistance(startPoint, endPoint);
-  // const distanceFromCurrent = getDistance(
-  //   {latitude: location?.latitude, longitude: location?.longitude},
-  //   {latitude: item?.pickup_latitude, longitude: item.pickup_longitude},
-  //   100,
-  // );
+  const {location} = useLocation();
+  const pickupLocation = [item?.pickup_longitude, item?.pickup_latitude];
+  const myLocation = [location?.longitude, location?.latitude];
+  // const result = getTimeAndDistance(myLocation, pickupLocation);
 
   return (
     <View style={styles.mainContainer} key={index}>
