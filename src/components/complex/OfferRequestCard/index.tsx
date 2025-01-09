@@ -1,5 +1,5 @@
+import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
 import {
   PFColors,
   PFFontSize,
@@ -19,6 +19,7 @@ interface OfferRequestCardProps {
   onPressAccept?: () => void;
   item?: any;
   index: number;
+  location?: any;
 }
 
 const OfferRequestCard = ({
@@ -26,11 +27,23 @@ const OfferRequestCard = ({
   onPressDecline,
   item,
   index,
+  location,
 }: OfferRequestCardProps) => {
-  const {location} = useLocation();
-  const pickupLocation = [item?.pickup_longitude, item?.pickup_latitude];
-  const myLocation = [location?.longitude, location?.latitude];
-  // const result = getTimeAndDistance(myLocation, pickupLocation);
+  const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (item) getResults();
+  }, [item, location]);
+
+  const getResults = async () => {
+    const pickupLocation = [
+      Number(item?.pickup_longitude),
+      Number(item?.pickup_latitude),
+    ];
+    const locResults = await getTimeAndDistance(location, pickupLocation);
+
+    setResult(locResults);
+  };
 
   return (
     <View style={styles.mainContainer} key={index}>
@@ -67,7 +80,10 @@ const OfferRequestCard = ({
           pickup={item?.pickup_location_name}
         />
         <View style={styles.horizontalBar} />
-        <PickAndDropTimeCard type={'pickup'} value={`${item?.distance}`} />
+        <PickAndDropTimeCard
+          type={'pickup'}
+          value={`${result?.distance || ''}, ${result?.duration || ''}`}
+        />
         <PickAndDropTimeCard type={'delivery'} value={item?.estimated_time} />
         <View style={styles.horizontalBar} />
 

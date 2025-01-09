@@ -229,8 +229,6 @@ const VehicleRequest = ({navigation}: any) => {
     } else {
       showAlert('Error', res?.error?.data?.errors[0]);
     }
-
-    // navigation.navigate(Routes.VehiclesOffer);
   };
 
   const isDisable =

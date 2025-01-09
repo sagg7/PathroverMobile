@@ -12,13 +12,13 @@ import {useNavigation} from '@react-navigation/native';
 
 const OrderPickup = (route: any) => {
   const item = route?.route?.params?.item;
-  const [showRideActioSheet, setshowRideActioSheet] = useState(false);
+  const [showRideActionSheet, setShowRideActionSheet] = useState(false);
   const [showCancelSheet, setShowCancelSheet] = useState(false);
 
   const navigation = useNavigation();
   useEffect(() => {
     setTimeout(() => {
-      setshowRideActioSheet(true);
+      setShowRideActionSheet(true);
     }, 3000);
   }, []);
 
@@ -33,21 +33,29 @@ const OrderPickup = (route: any) => {
           centerCoordinate={[74.2753883, 31.4541112]}
         />
       </MapboxGL.MapView>
-      <RideActionCard
-        modalVisible={showRideActioSheet}
-        item={item}
-        onPressCancel={() => {
-          setshowRideActioSheet(false);
-          setTimeout(() => {
-            setShowCancelSheet(true);
-          }, 1000);
-        }}
-      />
+      {!showCancelSheet && (
+        <RideActionCard
+          modalVisible={showRideActionSheet}
+          item={item}
+          onPressCancel={() => {
+            setShowRideActionSheet(false);
+            setTimeout(() => {
+              setShowCancelSheet(true);
+            }, 1000);
+          }}
+        />
+      )}
       <CancelRideSheet
         modalVisible={showCancelSheet}
         onPressDone={() => {
           setShowCancelSheet(false);
           navigation.goBack();
+        }}
+        setModalVisible={() => {
+          setShowCancelSheet(false);
+          setTimeout(() => {
+            setShowRideActionSheet(true);
+          }, 1000);
         }}
       />
     </MainWrapper>

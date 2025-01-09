@@ -9,7 +9,9 @@
     "start": "react-native start",
     "test": "jest",
     "release": "react-native run-android --mode=release",
-    "startDebug": "react-native start --experimental-debugger"
+    "startDebug": "react-native start --experimental-debugger",
+    "assembleRelease": "cd android && ./gradlew assembleRelease && open app/build/outputs/apk/release && cd ..",
+    "bundleRelease": "cd android && ./gradlew bundleRelease && open app/build/outputs/bundle/release && cd .."
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.4.0",

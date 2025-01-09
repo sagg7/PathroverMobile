@@ -17,15 +17,14 @@ import {
   UNEXPECTED_ERROR,
 } from '../../../../../shared/exporter';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useAcceptDeclineDriverOfferMutation} from '../../../../../redux/manager/managerApiSlice';
 
 const VehiclesOffer = ({route}: any) => {
   const [rideOffersFromDriver, setRideOffersFromDriver] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
   const cleanedToken = accessToken.replace('Bearer ', '');
-  const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [seconds, setSeconds] = useState(300);
   const [acceptDeclineDriverOffer, {isLoading}] =
     useAcceptDeclineDriverOfferMutation();
@@ -61,7 +60,12 @@ const VehiclesOffer = ({route}: any) => {
       {
         received: res => {
           console.log('Received Data Vehicle Offer => ', res);
-          setRideOffersFromDriver(prev => [...prev, res?.data]);
+          if (
+            res?.message ===
+            'Your offer has been accepted by the transport manager'
+          )
+            return;
+          setRideOffersFromDriver((prev: any) => [...prev, res?.data]);
         },
         connected: () => {
           console.log('Connected!');
@@ -84,22 +88,20 @@ const VehiclesOffer = ({route}: any) => {
           },
         };
 
-        const resp = await acceptDeclineDriverOffer(obj);
+        const resp: any = await acceptDeclineDriverOffer(obj);
         if (resp?.data) {
           navigation.navigate(Routes.OrderPickup, {item: item});
+          setRideOffersFromDriver([]);
         } else {
           showAlert('Error', resp?.error?.data?.error);
         }
       } catch (e) {
         showAlert('Error', UNEXPECTED_ERROR);
       }
-    } else {
-      setRideOffersFromDriver((prev: any) =>
-        prev.filter(
-          (item: any) => item.ride_request_id !== item.ride_request_id,
-        ),
-      );
     }
+    setRideOffersFromDriver((prev: any) =>
+      prev.filter((item: any) => item.ride_request_id !== item.ride_request_id),
+    );
   };
 
   return (

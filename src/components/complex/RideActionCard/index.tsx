@@ -7,7 +7,6 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import Modal from 'react-native-modal';
 import {AppButton} from '../AppButton';
 import {
   PFColors,
@@ -18,25 +17,15 @@ import {
 } from '../../../shared/exporter';
 
 interface RideActionCardProps {
-  modalVisible: boolean;
   handleClick: (dates: {startDate: string; endDate: string}) => void;
   setModalVisible: () => void;
   onPressCancel: () => void;
   item: any;
 }
-const RideActionCard = ({
-  modalVisible,
-  setModalVisible,
-  onPressCancel,
-  item,
-}: RideActionCardProps) => {
+const RideActionCard = ({onPressCancel, item}: RideActionCardProps) => {
   return (
-    <Modal
-      useNativeDriver
-      isVisible={modalVisible}
-      onBackdropPress={setModalVisible}
-      style={styles.modalContainer}>
-      <View>
+    <View style={styles.modalContainer}>
+      <View style={styles.modalViewContainer}>
         <View style={styles.rowContainer}>
           <View style={styles.userNameContainer}>
             <Image
@@ -48,7 +37,7 @@ const RideActionCard = ({
               style={styles.userPic}
             />
             <Text style={styles.userName} numberOfLines={2}>
-              {item?.user_name}Adeel Iftikhar
+              {item?.user_name}
             </Text>
           </View>
           <View style={styles.bubleViewContainer}>
@@ -71,7 +60,9 @@ const RideActionCard = ({
               resizeMode="contain"
             />
           </TouchableOpacity>
-          <Text style={styles.userName}>Call {item?.user_name} </Text>
+          <Text style={[styles.userName, {textAlign: 'center'}]}>
+            Call {item?.user_name}
+          </Text>
           <TouchableOpacity
             disabled
             onPress={() => Linking.openURL(`tel:1111222333`)}>
@@ -88,7 +79,7 @@ const RideActionCard = ({
           />
         </View>
       </View>
-    </Modal>
+    </View>
   );
 };
 
@@ -98,10 +89,14 @@ const styles = StyleSheet.create({
   modalContainer: {
     bottom: 0,
     margin: 0,
+    width: '100%',
     position: 'absolute',
     borderRadius: WP('3'),
     paddingVertical: WP('5'),
     backgroundColor: PFColors.Standard.White,
+  },
+  modalViewContainer: {
+    flex: 1,
   },
   buttonsRow: {
     paddingHorizontal: WP('5'),
@@ -123,15 +118,18 @@ const styles = StyleSheet.create({
     width: WP('10'),
     borderRadius: 20,
   },
+  userNameContainer: {
+    flex: 0.95,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   userName: {
+    width: '75%',
+    flexWrap: 'wrap',
     fontFamily: PFFonts.Foundation.Regular,
     color: PFColors.Standard.EclipseBlack,
     fontSize: PFFontSize.FONT_SIZE_12,
     paddingLeft: 10,
-  },
-  userNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   bubleViewContainer: {
     justifyContent: 'center',

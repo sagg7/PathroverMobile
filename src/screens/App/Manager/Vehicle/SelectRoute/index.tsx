@@ -12,6 +12,8 @@ const SelectRoute = ({
   onPressClear,
   style,
 }: any) => {
+  // console.log('Res => ', selectedRouteDetails);
+
   return (
     <View>
       <Pressable style={[styles.mainContainer, style]} onPress={onPressCard}>
@@ -28,6 +30,7 @@ const SelectRoute = ({
           <>
             <Text style={styles.routeTitleText}>Wapdatown</Text>
             <FromAndToCard />
+            {/* <FromAndToCard from={item.from} to={item.to} /> */}
           </>
         )}
       </Pressable>

@@ -31,16 +31,14 @@ import {
   useLazyGetProfileStatusQuery,
   useSendOfferToManagerMutation,
 } from '../../../../redux/driver/driverApiSlice';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import useLocation from '../../../../hooks/getLocation';
 
-const RequestList = ({route}: any) => {
+const RequestList = ({navigation}: any) => {
   const dispatch = useDispatch();
-  const isFocused = useIsFocused();
+  const {location} = useLocation();
+  const myLocation = [location?.longitude, location?.latitude];
 
-  const {isProfileVerified, isDriverAvailable} = useSelector(
-    (state: any) => state?.driver,
-  );
-  const [on, seton] = useState(isDriverAvailable);
+  const [available, setAvailable] = useState(false);
   const [ridesList, setRidesList] = useState<any[]>([]);
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
   const [offerSheetShow, setOfferSheetShow] = useState<boolean>(false);
@@ -49,14 +47,16 @@ const RequestList = ({route}: any) => {
   const {userRole} = useSelector((state: any) => state?.appRole);
   const {accessToken} = useSelector((state: any) => state?.auth);
   const [offerPrice, setOfferPrice] = useState<any>('');
-
-  const [sendOfferToManager, {isLoading: offerLoading}] =
-    useSendOfferToManagerMutation();
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const {isProfileVerified, isDriverAvailable} = useSelector(
+    (state: any) => state?.driver,
+  );
 
   // API
   const [getProfileStatus, {isLoading}] =
     useLazyGetProfileStatusQuery(undefined);
+  const [sendOfferToManager, {isLoading: offerLoading}] =
+    useSendOfferToManagerMutation();
 
   const cleanedToken = accessToken.replace('Bearer ', '');
 
@@ -65,7 +65,11 @@ const RequestList = ({route}: any) => {
   const {subscribe, unsubscribe} = useChannel(actionCable);
 
   useEffect(() => {
-    if (userRole === 'driver' && !isProfileVerified) {
+    setAvailable(isDriverAvailable);
+  }, [isDriverAvailable]);
+
+  useEffect(() => {
+    if (!isProfileVerified) {
       async function fetchProfileStatus() {
         const res = await getProfileStatus(userRole);
         const status = res?.data?.is_verified;
@@ -73,6 +77,8 @@ const RequestList = ({route}: any) => {
         dispatch(setIsProfileVerified(status));
       }
       fetchProfileStatus();
+    } else {
+      setProfileApproved(isProfileVerified);
     }
   }, [userRole]);
 
@@ -84,6 +90,7 @@ const RequestList = ({route}: any) => {
     }
   }, [isOfferSent]);
 
+  console.log('Connected!');
   useEffect(() => {
     subscribe(
       {
@@ -109,16 +116,19 @@ const RequestList = ({route}: any) => {
     );
   };
 
+  const onPressAccept = (item: any) => {
+    setOfferSheetShow(true);
+    setSelectedOffer(item);
+  };
+
   const renderRideRequest = ({item, index}: any) => {
     return (
       <OfferRequestCard
-        onPressAccept={() => {
-          setOfferSheetShow(true);
-          setSelectedOffer(item);
-        }}
+        onPressAccept={() => onPressAccept(item)}
         onPressDecline={() => onPressDecline()}
         item={item}
         index={index}
+        location={myLocation}
       />
     );
   };
@@ -136,13 +146,14 @@ const RequestList = ({route}: any) => {
       setOfferSheetShow(false);
       setIsOfferSent(true);
       setOfferPrice('');
+      // navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
   const onPressToggle = () => {
-    if (profileApproved) seton(!on);
-    // dispatch(setIsDriverAvailable(!isDriverAvailable));
+    if (profileApproved) setAvailable(!available);
+    dispatch(setIsDriverAvailable(!isDriverAvailable));
   };
 
   return (
@@ -154,8 +165,7 @@ const RequestList = ({route}: any) => {
 
         <View style={styles.centerSwitchWrapper}>
           <SwitchToggle
-            switchOn={on}
-            // onPress={() => profileApproved && seton(!on)}
+            switchOn={available}
             onPress={() => onPressToggle()}
             circleColorOff={PFColors.Gray.AshGray}
             circleColorOn={PFColors.Green.LeafGreen}
@@ -165,7 +175,7 @@ const RequestList = ({route}: any) => {
             containerStyle={styles.toggleContainer}
           />
           <Text style={styles.headerText}>
-            {on ? 'Available' : 'Unavailable'}{' '}
+            {available ? 'Available' : 'Unavailable'}{' '}
           </Text>
         </View>
       </View>
@@ -187,7 +197,7 @@ const RequestList = ({route}: any) => {
         </View>
       )}
 
-      {!on && profileApproved && (
+      {!available && profileApproved && (
         <>
           <View style={styles.approvedContainer}>
             <View style={styles.rowContainer}>
@@ -209,7 +219,7 @@ const RequestList = ({route}: any) => {
           </View>
         </>
       )}
-      {on &&
+      {available &&
         profileApproved &&
         (ridesList?.length > 0 ? (
           <FlatList

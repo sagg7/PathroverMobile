@@ -43,4 +43,5 @@ export const Routes = {
   Faqs: 'Faqs',
   SavedLibrary: 'SavedLibrary',
   OrderPickup: 'OrderPickup',
+  VehicleRequest: 'VehicleRequest',
 };
