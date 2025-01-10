@@ -40,6 +40,7 @@ const RequestList = ({navigation}: any) => {
 
   const [available, setAvailable] = useState(false);
   const [ridesList, setRidesList] = useState<any[]>([]);
+  const [requestStatus, setRequestStatus] = useState<string>('');
   const [isOfferSent, setIsOfferSent] = useState<boolean>(false);
   const [offerSheetShow, setOfferSheetShow] = useState<boolean>(false);
   const [showReviewSheet, setShowReviewSheet] = useState<boolean>(false);
@@ -62,7 +63,7 @@ const RequestList = ({navigation}: any) => {
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
-  const {subscribe, unsubscribe} = useChannel(actionCable);
+  const {subscribe, unsubscribe, connected} = useChannel(actionCable);
 
   useEffect(() => {
     setAvailable(isDriverAvailable);
@@ -83,32 +84,64 @@ const RequestList = ({navigation}: any) => {
   }, [userRole]);
 
   useEffect(() => {
-    if (isOfferSent) {
-      setTimeout(() => {
-        setIsOfferSent(false);
-      }, 5000);
-    }
-  }, [isOfferSent]);
-
-  console.log('Connected!');
-  useEffect(() => {
+    // if (available) {
     subscribe(
       {
         channel: 'RideRequestsChannel',
       },
       {
         received: res => {
-          console.log('Received Data => ', res);
-          setRidesList(prev => [...prev, res.data]);
+          handleBroadcastData(res);
         },
         connected: () => {
           console.log('Connected!');
         },
       },
     );
+    // }
 
-    return () => unsubscribe();
+    return () => {
+      // if (!available && connected)
+      unsubscribe();
+    };
   }, []);
+
+  const handleBroadcastData = (res: any) => {
+    const {status, ride_request_id} = res?.data || {};
+    if (status === 'cancelled') {
+      setRidesList(prev =>
+        prev.filter((item: any) => item?.id !== ride_request_id),
+      );
+      setTimeout(() => {
+        showAlert(
+          'Request Cancelled',
+          'Request has been cancelled by Manager.',
+        );
+      }, 300);
+      if (ride_request_id === selectedOffer?.id && isOfferSent) {
+        setIsOfferSent(false);
+      }
+    } else if (status === 'accepted') {
+      setRequestStatus('accepted');
+      setRidesList(prev =>
+        prev.filter((item: any) => item?.id === ride_request_id),
+      );
+      setIsOfferSent(false);
+      setTimeout(() => {
+        showAlert('Request Accepted', 'Request has been accepted by Manager.');
+      }, 300);
+      // Navigate to pickup order
+      navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
+    } else if (status === 'rejected') {
+      setRequestStatus('rejected');
+      if (ride_request_id === selectedOffer?.id) setIsOfferSent(false);
+      setTimeout(() => {
+        setIsOfferSent(true);
+      }, 300);
+    } else {
+      setRidesList(prev => [...prev, res.data]);
+    }
+  };
 
   const onPressDecline = () => {
     setRidesList((prev: any) =>
@@ -146,7 +179,6 @@ const RequestList = ({navigation}: any) => {
       setOfferSheetShow(false);
       setIsOfferSent(true);
       setOfferPrice('');
-      // navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
@@ -154,6 +186,14 @@ const RequestList = ({navigation}: any) => {
   const onPressToggle = () => {
     if (profileApproved) setAvailable(!available);
     dispatch(setIsDriverAvailable(!isDriverAvailable));
+  };
+
+  const handleExpireRequest = () => {
+    showAlert(
+      'Offer Expired',
+      'Your offer has been expired as no response received from manager.',
+    );
+    setIsOfferSent(false);
   };
 
   return (
@@ -241,10 +281,14 @@ const RequestList = ({navigation}: any) => {
         priceValue={offerPrice}
         onChangeText={text => setOfferPrice(text)}
       />
-      <SendOfferModal
-        isModalVisible={isOfferSent}
-        onPressClose={() => setIsOfferSent(false)}
-      />
+      {isOfferSent && (
+        <SendOfferModal
+          isModalVisible={isOfferSent}
+          requestStatus={requestStatus}
+          handleGoBack={() => setIsOfferSent(false)}
+          handleExpireRequest={() => handleExpireRequest()}
+        />
+      )}
       <ReviewsListSheet
         modalVisible={showReviewSheet}
         onPressCross={() => setShowReviewSheet(false)}

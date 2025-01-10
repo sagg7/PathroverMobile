@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   noRidesContainer: {
     flexGrow: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   noRidesText: {
     bottom: WP('2'),

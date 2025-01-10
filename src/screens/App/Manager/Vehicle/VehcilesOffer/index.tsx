@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {
   AppHeader,
+  AppLoader,
   MainWrapper,
   OfferExpireCard,
 } from '../../../../../components';
@@ -18,7 +19,10 @@ import {
 } from '../../../../../shared/exporter';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
 import {useNavigation} from '@react-navigation/native';
-import {useAcceptDeclineDriverOfferMutation} from '../../../../../redux/manager/managerApiSlice';
+import {
+  useCancelRideRequestMutation,
+  useAcceptDeclineDriverOfferMutation,
+} from '../../../../../redux/manager/managerApiSlice';
 
 const VehiclesOffer = ({route}: any) => {
   const [rideOffersFromDriver, setRideOffersFromDriver] = useState<any>([]);
@@ -26,8 +30,13 @@ const VehiclesOffer = ({route}: any) => {
   const cleanedToken = accessToken.replace('Bearer ', '');
   const navigation: any = useNavigation();
   const [seconds, setSeconds] = useState(300);
+
+  // APIs
   const [acceptDeclineDriverOffer, {isLoading}] =
     useAcceptDeclineDriverOfferMutation();
+
+  const [cancelRideRequest, {isLoading: cancelLoading}] =
+    useCancelRideRequestMutation();
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
@@ -41,7 +50,7 @@ const VehiclesOffer = ({route}: any) => {
 
       return () => clearTimeout(timerId);
     } else {
-      navigation.goBack();
+      // handleCancelRequest();
     }
   }, [seconds]);
 
@@ -59,12 +68,7 @@ const VehiclesOffer = ({route}: any) => {
       },
       {
         received: res => {
-          console.log('Received Data Vehicle Offer => ', res);
-          if (
-            res?.message ===
-            'Your offer has been accepted by the transport manager'
-          )
-            return;
+          console.log('Manager Res => ', res?.data);
           setRideOffersFromDriver((prev: any) => [...prev, res?.data]);
         },
         connected: () => {
@@ -77,31 +81,55 @@ const VehiclesOffer = ({route}: any) => {
   }, []);
 
   const updateStatus = async ({status, item}: any) => {
-    if (status === OFFER_STATUS.ACCEPTED) {
-      try {
-        const obj = {
-          offer_data: {
-            status: status,
-            driver_id: item?.driver_id,
-            ride_request_id: item?.ride_request_id,
-            amount: item?.amount,
-          },
-        };
+    try {
+      const obj = {
+        offer_data: {
+          status: status,
+          driver_id: item?.driver_id,
+          ride_request_id: item?.ride_request_id,
+          amount: item?.amount,
+        },
+      };
 
-        const resp: any = await acceptDeclineDriverOffer(obj);
-        if (resp?.data) {
-          navigation.navigate(Routes.OrderPickup, {item: item});
+      const resp: any = await acceptDeclineDriverOffer(obj);
+      if (resp?.data) {
+        if (status === OFFER_STATUS.ACCEPTED) {
+          // Navigate the Manager to the Ride Arrive Module
+          // navigation.navigate(Routes.RideArrive);
           setRideOffersFromDriver([]);
         } else {
-          showAlert('Error', resp?.error?.data?.error);
+          setRideOffersFromDriver((prev: any) =>
+            prev.filter(
+              (item: any) => item.ride_request_id !== item.ride_request_id,
+            ),
+          );
         }
-      } catch (e) {
-        showAlert('Error', UNEXPECTED_ERROR);
+      } else {
+        showAlert('Error', resp?.error?.data?.error);
       }
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
     }
-    setRideOffersFromDriver((prev: any) =>
-      prev.filter((item: any) => item.ride_request_id !== item.ride_request_id),
-    );
+  };
+
+  const handleCancelRequest = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('reason', '');
+
+      const resp: any = await cancelRideRequest({
+        id: route.params?.id,
+        data: formData,
+      });
+      if (resp?.data) {
+        navigation.goBack();
+        setRideOffersFromDriver([]);
+      } else {
+        showAlert('Error', resp?.error?.data?.error);
+      }
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
   };
 
   return (
@@ -128,13 +156,12 @@ const VehiclesOffer = ({route}: any) => {
           ListHeaderComponent={() => (
             <OfferExpireCard
               time={formatTime(seconds)}
-              onPressCancel={() => {
-                navigation.goBack();
-              }}
+              onPressCancel={() => handleCancelRequest()}
             />
           )}
         />
       </View>
+      {(isLoading || cancelLoading) && <AppLoader />}
     </MainWrapper>
   );
 };

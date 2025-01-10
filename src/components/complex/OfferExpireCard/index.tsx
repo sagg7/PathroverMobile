@@ -1,5 +1,5 @@
-import {Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import {TouchableOpacity, StyleSheet, Text, View} from 'react-native';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, scale} from '../../../shared/exporter';
 interface OfferExpireCardType {
@@ -17,9 +17,12 @@ const OfferExpireCard = ({time, onPressCancel}: OfferExpireCardType) => {
       <Text style={styles.expireMessageText}>
         Your request has been been sent, You will receive offers shortly
       </Text>
-      <Pressable style={styles.cancelBtn} onPress={onPressCancel}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={styles.cancelBtn}
+        onPress={() => onPressCancel && onPressCancel()}>
         <Text style={styles.cancelBtnText}>Cancel</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 };

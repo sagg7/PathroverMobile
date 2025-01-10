@@ -209,12 +209,15 @@ const VehicleRequest = ({navigation}: any) => {
     formData.append('ride_request[distance]', result?.distance);
     const res = await createManagerVehicleRequest(formData);
     if (res?.data) {
-      navigation.navigate(Routes.VehiclesOffer);
-      setSelectedVehicle(VehicleTypes[0]);
-      setSelectedVehicleDetails(null);
-      setSelectedRouteDetails(null);
-      setCargoDescriptionDetails(null);
-      setRecipentDetails(null);
+      navigation.navigate(Routes.VehiclesOffer, {
+        id: res?.data?.ride_request?.id,
+      });
+
+      // setSelectedVehicle(VehicleTypes[0]);
+      // setSelectedVehicleDetails(null);
+      // setSelectedRouteDetails(null);
+      // setCargoDescriptionDetails(null);
+      // setRecipentDetails(null);
       let reSetVehicleData = vehicleData.map((item: any) => {
         if (item.isWeightSelected) {
           item.isWeightSelected = false;
