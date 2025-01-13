@@ -19,10 +19,13 @@ import {
 } from '../../../../../shared/exporter';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
 import {useNavigation} from '@react-navigation/native';
+import {getTimeAndDistance} from '../../../shared/utils/helpers';
+
 import {
   useCancelRideRequestMutation,
   useAcceptDeclineDriverOfferMutation,
 } from '../../../../../redux/manager/managerApiSlice';
+import useLocation from '../../../../../hooks/getLocation';
 
 const VehiclesOffer = ({route}: any) => {
   const [rideOffersFromDriver, setRideOffersFromDriver] = useState<any>([]);
@@ -30,6 +33,9 @@ const VehiclesOffer = ({route}: any) => {
   const cleanedToken = accessToken.replace('Bearer ', '');
   const navigation: any = useNavigation();
   const [seconds, setSeconds] = useState(300);
+  const {location} = useLocation();
+
+  const myLocation = [location?.longitude, location?.latitude];
 
   // APIs
   const [acceptDeclineDriverOffer, {isLoading}] =
@@ -95,7 +101,7 @@ const VehiclesOffer = ({route}: any) => {
       if (resp?.data) {
         if (status === OFFER_STATUS.ACCEPTED) {
           // Navigate the Manager to the Ride Arrive Module
-          // navigation.navigate(Routes.RideArrive);
+          navigation.navigate(Routes.RideArriving);
           setRideOffersFromDriver([]);
         } else {
           setRideOffersFromDriver((prev: any) =>
@@ -142,6 +148,7 @@ const VehiclesOffer = ({route}: any) => {
           data={rideOffersFromDriver}
           renderItem={({item, index}) => (
             <OfferCard
+              myLocation={myLocation}
               style={styles.OfferCard}
               item={item}
               index={index}

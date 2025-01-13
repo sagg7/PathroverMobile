@@ -12,6 +12,7 @@ import {
   PFColors,
   PFFontSize,
   PFFonts,
+  RIDE_STATUS,
   WP,
   appIcons,
 } from '../../../shared/exporter';
@@ -19,10 +20,21 @@ import {
 interface RideActionCardProps {
   handleClick: (dates: {startDate: string; endDate: string}) => void;
   setModalVisible: () => void;
-  onPressCancel: () => void;
-  item: any;
+  onPressCancel?: () => void;
+  data: any;
+  type: string;
+  onPressBtn: (v: any) => void;
 }
-const RideActionCard = ({onPressCancel, item}: RideActionCardProps) => {
+const RideActionCard = ({
+  onPressCancel,
+  data,
+  type,
+  onPressBtn,
+}: RideActionCardProps) => {
+  console.log('TYPE==>', type);
+
+  const item = data;
+
   return (
     <View style={styles.modalContainer}>
       <View style={styles.modalViewContainer}>
@@ -47,7 +59,12 @@ const RideActionCard = ({onPressCancel, item}: RideActionCardProps) => {
                 style={[styles.bubleIcon]}
                 resizeMode="contain"
               />
-              <Text style={styles.text}>5 minutes to delivery</Text>
+
+              <Text style={styles.text}>
+                {type === RIDE_STATUS.ORDER_DELIVERED
+                  ? 'Order Delivered to Drop off location'
+                  : '5 minute to arive'}
+              </Text>
             </View>
           </View>
         </View>
@@ -69,15 +86,54 @@ const RideActionCard = ({onPressCancel, item}: RideActionCardProps) => {
             <Image source={appIcons.phoneIcon} style={styles.actionIcon} />
           </TouchableOpacity>
         </View>
-
-        <View style={styles.buttonsRow}>
-          <AppButton
-            title="Cancel Ride"
-            isEmpty={false}
-            textStyle={styles.yesTextStyle}
-            handleClick={onPressCancel}
-          />
-        </View>
+        {type === 'Initial' && (
+          <View style={styles.doubleButton}>
+            <AppButton
+              title="Cancel"
+              textStyle={styles.yesTextStyle}
+              handleClick={onPressCancel}
+              disabled={type !== 'Initial'}
+              buttonStyle={[
+                styles.cancelButtonStyles,
+                {
+                  backgroundColor: PFColors.Red.RubyRed,
+                },
+              ]}
+            />
+            <AppButton
+              title={"I'm Here"}
+              textStyle={styles.yesTextStyle}
+              handleClick={() => onPressBtn(RIDE_STATUS.I_AM_HERE)}
+              buttonStyle={styles.secondButtonStyles}
+            />
+          </View>
+        )}
+        {type === RIDE_STATUS.I_AM_HERE && (
+          <View style={styles.doubleButton}>
+            <AppButton
+              title="Cancel"
+              textStyle={styles.yesTextStyle}
+              handleClick={onPressCancel}
+              disabled
+              buttonStyle={[styles.cancelButtonStyles]}
+            />
+            <AppButton
+              title={'Start Ride'}
+              textStyle={styles.yesTextStyle}
+              handleClick={() => onPressBtn(RIDE_STATUS.START_RIDE)}
+              buttonStyle={styles.secondButtonStyles}
+            />
+          </View>
+        )}
+        {type === RIDE_STATUS.ORDER_DELIVERED && (
+          <View style={styles.buttonsRow}>
+            <AppButton
+              title="Complete Ride"
+              textStyle={styles.yesTextStyle}
+              handleClick={() => onPressBtn(RIDE_STATUS.COMPLETE_RIDE)}
+            />
+          </View>
+        )}
       </View>
     </View>
   );
@@ -100,7 +156,7 @@ const styles = StyleSheet.create({
   },
   buttonsRow: {
     paddingHorizontal: WP('5'),
-    marginVertical: 10,
+    marginVertical: WP('5'),
   },
   yesTextStyle: {
     width: '100%',
@@ -158,5 +214,17 @@ const styles = StyleSheet.create({
   actionIcon: {
     height: WP('6'),
     width: WP('6'),
+  },
+  cancelButtonStyles: {
+    width: WP('37'),
+  },
+  doubleButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: WP('4'),
+    marginVertical: WP('5'),
+  },
+  secondButtonStyles: {
+    width: WP('52'),
   },
 });

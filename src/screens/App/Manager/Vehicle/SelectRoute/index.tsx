@@ -12,7 +12,12 @@ const SelectRoute = ({
   onPressClear,
   style,
 }: any) => {
-  // console.log('Res => ', selectedRouteDetails);
+  const dropLocName =
+    selectedRouteDetails?.dropoff_location?.name ||
+    selectedRouteDetails?.dropoff_location_name;
+  const pickupName =
+    selectedRouteDetails?.pickup_location?.name ||
+    selectedRouteDetails?.pickup_location_name;
 
   return (
     <View>
@@ -29,8 +34,7 @@ const SelectRoute = ({
         {selectedRouteDetails && (
           <>
             <Text style={styles.routeTitleText}>Wapdatown</Text>
-            <FromAndToCard />
-            {/* <FromAndToCard from={item.from} to={item.to} /> */}
+            <FromAndToCard dropOff={dropLocName} pickup={pickupName} />
           </>
         )}
       </Pressable>

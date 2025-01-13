@@ -63,12 +63,19 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         headers: {},
       }),
     }),
+    //
     cancelInProgressRideRequest: builder.mutation({
-      query: ({id, data}: any) => ({
-        url: `orders/${id}/cancel_order`,
+      query: (data: any) => ({
+        url: `orders/cancel_order`,
         method: 'PUT',
         body: data,
-        headers: {},
+      }),
+    }),
+    updateCurrentRideStatus: builder.mutation({
+      query: (data: any) => ({
+        url: `orders/order_stages`,
+        method: 'POST',
+        body: data,
       }),
     }),
   }),
@@ -86,4 +93,5 @@ export const {
   useAcceptDeclineDriverOfferMutation,
   useCancelRideRequestMutation,
   useCancelInProgressRideRequestMutation,
+  useUpdateCurrentRideStatusMutation,
 } = managerApiSlice;

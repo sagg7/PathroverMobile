@@ -44,4 +44,5 @@ export const Routes = {
   SavedLibrary: 'SavedLibrary',
   OrderPickup: 'OrderPickup',
   VehicleRequest: 'VehicleRequest',
+  RideArriving: 'RideArriving',
 };

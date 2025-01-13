@@ -1,16 +1,24 @@
 import React, {memo} from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
+import {
+  PFColors,
+  PFFontSize,
+  PFFonts,
+  WP,
+  formatDate,
+} from '../../../shared/exporter';
 import {FromAndToCard} from '../FromAndToCard';
 import {RideOfferDscription} from '../RideOfferDscription';
 import {AppButton} from '../AppButton';
 import {svgIcon} from '../../../assets/svg';
+import StarRatingContainer from '../StarRatingContainer';
 
 interface RideOfferHistoryCardProps {
   onPressDel?: () => void;
   onPressAccept?: () => void;
   item?: any;
   onPressCard?: () => void;
+  index: number;
 }
 
 const RideOfferHistoryCard = ({
@@ -18,17 +26,20 @@ const RideOfferHistoryCard = ({
   onPressDel,
   item,
   onPressCard,
+  index,
 }: RideOfferHistoryCardProps) => {
   return (
     <TouchableOpacity
       style={styles.mainContainer}
       activeOpacity={0.7}
       onPress={onPressCard}>
-      <View style={styles.blueHeader}>
-        <Text style={styles.dateText}>Date: {item.date} 06/12/2022</Text>
+      <View style={styles.blueHeader} key={index}>
+        <Text style={styles.dateText}>Date: {formatDate(item.order_date)}</Text>
         <View style={styles.delIconConntainer}>
           <View style={styles.codeView}>
-            <Text style={styles.rideCodeText}>{item.rideCode}RMK-KDF</Text>
+            <Text style={styles.rideCodeText} numberOfLines={1}>
+              {item?.order_number}
+            </Text>
           </View>
           <TouchableOpacity onPress={onPressDel}>
             {svgIcon.Delete}
@@ -36,19 +47,28 @@ const RideOfferHistoryCard = ({
         </View>
       </View>
       <View style={styles.innerContainer}>
-        <FromAndToCard from={item.from} to={item.to} />
+        <FromAndToCard
+          pickup={item.pickup_location?.name}
+          dropOff={item.dropoff_location?.name}
+        />
         <View style={styles.heightContainer} />
-        <RideOfferDscription items={item.descriptionItems} />
+        <RideOfferDscription items={item.description} />
         <View style={styles.horizontalBar} />
+        <StarRatingContainer
+          rating={item?.review_and_feedback?.rating}
+          reviewText={item?.feedback || 'Inprogress'}
+        />
 
-        <View style={styles.butonContainer}>
+        {/* <View style={styles.butonContainer}>
           <AppButton
-            // title={`$ ${item.amount}`}
-            title={`$ 4342`}
+            title={`$ ${item?.total_amount || 0}`}
             buttonStyle={styles.btnStyles}
             handleClick={onPressAccept}
             textStyle={styles.amountBtn}
           />
+        </View> */}
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceStyle}>$ {item?.total_amount || 0}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -102,6 +122,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_10,
     padding: 5,
+    maxWidth: WP('70'),
   },
   codeView: {
     borderWidth: 1,
@@ -118,5 +139,16 @@ const styles = StyleSheet.create({
   },
   heightContainer: {
     height: 15,
+  },
+  priceContainer: {
+    backgroundColor: PFColors.Gray.borderGray,
+    paddingVertical: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  priceStyle: {
+    color: PFColors.Blue.Dark,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_14,
   },
 });

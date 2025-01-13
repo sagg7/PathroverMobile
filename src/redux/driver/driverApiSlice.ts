@@ -74,6 +74,16 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    sendLocation: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `users/update_location`,
+          method: 'put',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -87,4 +97,5 @@ export const {
   useEdtProfileMutation,
   useLazyGetProfileStatusQuery,
   useSendOfferToManagerMutation,
+  useSendLocationMutation,
 } = driverApiSlice;

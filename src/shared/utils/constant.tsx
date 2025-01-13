@@ -2,8 +2,12 @@ import {Alert} from 'react-native';
 import {PFColors, PFFontSize, PFFonts, appIcons, appImages} from '../exporter';
 import {svgIcon} from '../../assets/svg';
 
-export function showAlert(type: string, des: string) {
-  Alert.alert(type, des);
+export function showAlert(type: string, des: string, onPress?: () => void) {
+  Alert.alert(type, des, [
+    {
+      onPress: onPress,
+    },
+  ]);
 }
 
 export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
@@ -447,9 +451,9 @@ export const DurationArr = [
   {title: 'Year', isSelected: false},
 ];
 export const OrderHistoryOptions = [
-  {title: 'Total Ride', isSelected: true},
-  {title: ' Ride Completed', isSelected: false},
-  {title: 'Cancelled', isSelected: false},
+  {title: 'Total Ride', isSelected: true, status: 'all'},
+  {title: ' Ride Completed', isSelected: false, status: 'completed'},
+  {title: 'Cancelled', isSelected: false, status: 'cancelled'},
 ];
 export const DriverProfileMenu = [
   {
@@ -622,3 +626,42 @@ export const MapTypes = [
     isSelected: true,
   },
 ];
+export const CancelReasons = [
+  {
+    id: 0,
+    isSelected: false,
+    title: 'I Changed my mind',
+  },
+  {
+    id: 1,
+    isSelected: false,
+    title: 'The wait was too long',
+  },
+  {
+    id: 2,
+    isSelected: false,
+    title: 'Driver asked to cancel',
+  },
+  {
+    id: 3,
+    isSelected: false,
+    title: 'Driver is unable to contact',
+  },
+  {
+    id: 4,
+    isSelected: false,
+    title: 'Driver  asked for extra money',
+  },
+  {
+    id: 5,
+    isSelected: false,
+    title: 'Driver asked to cancel',
+  },
+];
+export const RIDE_STATUS = {
+  // ['i_am_here', 'start_ride', 'complete_ride', 'order_delivered']
+  I_AM_HERE: 'i_am_here',
+  START_RIDE: 'start_ride',
+  COMPLETE_RIDE: 'complete_ride',
+  ORDER_DELIVERED: 'order_delivered',
+};

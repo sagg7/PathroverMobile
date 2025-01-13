@@ -16,7 +16,7 @@ import useLocation from '../../../hooks/getLocation';
 
 interface OfferRequestCardProps {
   onPressDecline?: () => void;
-  onPressAccept?: () => void;
+  onPressAccept: (item: any) => void;
   item?: any;
   index: number;
   location?: any;
@@ -105,7 +105,7 @@ const OfferRequestCard = ({
           <AppButton
             title="Accept"
             buttonStyle={styles.btnStyles}
-            handleClick={onPressAccept}
+            handleClick={() => onPressAccept(item)}
           />
         </View>
       </View>

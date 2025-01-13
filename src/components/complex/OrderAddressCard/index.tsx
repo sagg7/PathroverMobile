@@ -10,15 +10,18 @@ import {
 
 interface OrderAddressCardProp {
   item: any;
+  type: string;
 }
-const OrderAddressCard = ({item}: OrderAddressCardProp) => {
+const OrderAddressCard = ({item, type}: OrderAddressCardProp) => {
   return (
     <View style={styles.cardView}>
       <View style={styles.innerContainer}>
         <View style={{flexDirection: 'row'}}>
           <Image source={appIcons.letterCircle} style={styles.pointIcon} />
           <View style={styles.bubleTextView}>
-            <Text style={styles.bubleText}>Pick-up point </Text>
+            <Text style={styles.bubleText}>
+              {type === 'initiala' ? 'Pick-up point' : 'Drop off Point'}
+            </Text>
           </View>
         </View>
 
@@ -30,7 +33,7 @@ const OrderAddressCard = ({item}: OrderAddressCardProp) => {
         </TouchableOpacity>
       </View>
       <Text style={styles.locationName} numberOfLines={2}>
-        {item?.pickup_location}{' '}
+        {type === 'initial' ? item?.pickup_location : item?.dropoff_location}{' '}
       </Text>
     </View>
   );

@@ -288,6 +288,7 @@ const VehicleRequest = ({navigation}: any) => {
         </View>
 
         <Text style={styles.commonHeading}>{selectedOption}</Text>
+        {console.log('selectessdRouteDetails', selectedRouteDetails)}
         <SelectRoute
           selectedRouteDetails={selectedRouteDetails}
           style={styles.routeCardStyle}

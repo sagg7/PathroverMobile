@@ -1,4 +1,4 @@
-import React, {useRef, useImperativeHandle, forwardRef, useState} from 'react';
+import React, {useRef, useImperativeHandle, forwardRef} from 'react';
 import {
   Text,
   View,
@@ -18,22 +18,21 @@ import {
 } from '../../../shared/exporter';
 import {svgIcon} from '../../../assets/svg';
 import {RadioSelector} from '../RadioSelectorCard';
-import {ItemInfoCard} from '../ItemInfoCard';
+import {AppButton} from '../AppButton';
 
-interface OptionSelectorSheetProps {
+interface RideCancelReasonSheetProps {
   data: any;
   onPressModel?: (v: any) => void;
-  onPressWeight?: (v: any) => void;
+  onPressWeight?: any;
   isCompany?: boolean;
   ref: any;
+  handleCancelSheetDone: () => void;
+  disabled: boolean;
 }
 
-const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
-  ({data, onPressWeight, onPressModel, isCompany = false}, ref) => {
+const RideCancelReasonSheet: React.FC<RideCancelReasonSheetProps> = forwardRef(
+  ({data, onPressWeight, handleCancelSheetDone, disabled}, ref) => {
     const refScrollable = useRef<any>(null);
-    const modelArr = data?.find(item => item.isWeightSelected)?.model;
-    const itemInfo = modelArr?.find(item => item.isModelSelected);
-    const trailerObj = data?.find(item => item.isWeightSelected);
 
     useImperativeHandle(ref, () => ({
       open: () => {
@@ -43,10 +42,6 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
         refScrollable.current.close();
       },
     }));
-
-    const nestedRenderItem = ({item, index}: object | any) => (
-      <RadioSelector item={item} onPressCard={() => onPressModel(item)} />
-    );
 
     const renderItem = ({item, index}: {item: any; index: number}) => (
       <RadioSelector item={item} onPressCard={() => onPressWeight(item)} />
@@ -61,7 +56,7 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
         }}
         customStyles={{
           container: {
-            height: isIOS() ? HP('95') : HP('100'),
+            height: isIOS() ? HP('85') : HP('100'),
             borderTopLeftRadius: WP('3'),
             borderTopRightRadius: WP('3'),
           },
@@ -70,7 +65,7 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
           <View style={styles.container}>
             <View style={styles.sheetHeader}>
               <Text style={styles.selectOptionText}>
-                {isCompany ? 'Type of Company' : 'Select Option'}
+                {'Cancel Ride Comments'}
               </Text>
               <TouchableOpacity
                 onPress={() => refScrollable.current.close()}
@@ -78,13 +73,8 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
                 {svgIcon.CrossCirlce}
               </TouchableOpacity>
             </View>
-            {trailerObj?.standardLengths?.length > 0 ? (
-              <Text style={styles.previousTextStyle}>Choose Type</Text>
-            ) : (
-              <Text style={styles.previousTextStyle}>
-                {isCompany ? 'Choose Company Type' : 'Choose Weight'}
-              </Text>
-            )}
+
+            <Text style={styles.previousTextStyle}>{'Choose Comment'}</Text>
             <FlatList
               data={data}
               extraData={data}
@@ -92,26 +82,12 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
               showsVerticalScrollIndicator={false}
               keyExtractor={item => item?.toString()}
             />
-            {trailerObj?.standardLengths?.length && (
-              <ItemInfoCard item={trailerObj} isRed={false} />
-            )}
-            <View style={{height: 10}} />
-
-            {modelArr && (
-              <>
-                <Text style={styles.previousTextStyle}>Choose Model</Text>
-                <FlatList
-                  data={modelArr}
-                  extraData={data}
-                  renderItem={nestedRenderItem}
-                  showsVerticalScrollIndicator={false}
-                  keyExtractor={item => item?.id.toString()}
-                />
-                {modelArr && itemInfo && (
-                  <ItemInfoCard item={itemInfo} isRed={false} />
-                )}
-              </>
-            )}
+            <AppButton
+              handleClick={handleCancelSheetDone}
+              title="Done"
+              buttonStyle={styles.doneBtnStyle}
+              disabled={disabled}
+            />
           </View>
         </ScrollView>
       </RBSheet>
@@ -119,7 +95,7 @@ const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
   },
 );
 
-export {OptionSelectorSheet};
+export {RideCancelReasonSheet};
 
 const styles = StyleSheet.create({
   container: {
@@ -152,5 +128,8 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  doneBtnStyle: {
+    marginVertical: WP('10'),
   },
 });

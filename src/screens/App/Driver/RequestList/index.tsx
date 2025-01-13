@@ -1,5 +1,6 @@
 import {View, Text, Image, TouchableOpacity, FlatList} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import Geolocation from 'react-native-geolocation-service';
 import {
   AppLoader,
   MainWrapper,
@@ -29,6 +30,7 @@ import {
 // APIs
 import {
   useLazyGetProfileStatusQuery,
+  useSendLocationMutation,
   useSendOfferToManagerMutation,
 } from '../../../../redux/driver/driverApiSlice';
 import useLocation from '../../../../hooks/getLocation';
@@ -37,7 +39,7 @@ const RequestList = ({navigation}: any) => {
   const dispatch = useDispatch();
   const {location} = useLocation();
   const myLocation = [location?.longitude, location?.latitude];
-
+  const intervalRef = useRef<any>(null);
   const [available, setAvailable] = useState(false);
   const [ridesList, setRidesList] = useState<any[]>([]);
   const [requestStatus, setRequestStatus] = useState<string>('');
@@ -52,6 +54,7 @@ const RequestList = ({navigation}: any) => {
   const {isProfileVerified, isDriverAvailable} = useSelector(
     (state: any) => state?.driver,
   );
+  const [sendLocation] = useSendLocationMutation();
 
   // API
   const [getProfileStatus, {isLoading}] =
@@ -106,7 +109,15 @@ const RequestList = ({navigation}: any) => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log('ACCEPTED ITEM 1 => ', selectedOffer);
+    if (selectedOffer) {
+      setOfferSheetShow(true);
+    }
+  }, [selectedOffer]);
+
   const handleBroadcastData = (res: any) => {
+    console.log('ACCEPTED ITEM 3 => ', selectedOffer);
     const {status, ride_request_id} = res?.data || {};
     if (status === 'cancelled') {
       setRidesList(prev =>
@@ -127,11 +138,17 @@ const RequestList = ({navigation}: any) => {
         prev.filter((item: any) => item?.id === ride_request_id),
       );
       setIsOfferSent(false);
+      setOfferSheetShow(false);
       setTimeout(() => {
-        showAlert('Request Accepted', 'Request has been accepted by Manager.');
+        showAlert(
+          'Request Accepted',
+          'Request has been accepted by Manager.',
+          () => {
+            console.log('ACCEPTED ITEM 4 => ', selectedOffer);
+            navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
+          },
+        );
       }, 300);
-      // Navigate to pickup order
-      navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
     } else if (status === 'rejected') {
       setRequestStatus('rejected');
       if (ride_request_id === selectedOffer?.id) setIsOfferSent(false);
@@ -149,15 +166,14 @@ const RequestList = ({navigation}: any) => {
     );
   };
 
-  const onPressAccept = (item: any) => {
-    setOfferSheetShow(true);
-    setSelectedOffer(item);
+  const onPressAccept = (acceptedItem: any) => {
+    if (acceptedItem) setSelectedOffer(acceptedItem);
   };
 
   const renderRideRequest = ({item, index}: any) => {
     return (
       <OfferRequestCard
-        onPressAccept={() => onPressAccept(item)}
+        onPressAccept={onPressAccept}
         onPressDecline={() => onPressDecline()}
         item={item}
         index={index}
@@ -175,14 +191,19 @@ const RequestList = ({navigation}: any) => {
     };
 
     const resp = await sendOfferToManager(data);
+
     if (resp?.data) {
       setOfferSheetShow(false);
-      setIsOfferSent(true);
+      setTimeout(() => {
+        setIsOfferSent(true);
+      }, 300);
       setOfferPrice('');
+      console.log('ACCEPTED ITEM 2 => ', selectedOffer);
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
+
   const onPressToggle = () => {
     if (profileApproved) setAvailable(!available);
     dispatch(setIsDriverAvailable(!isDriverAvailable));
@@ -196,10 +217,49 @@ const RequestList = ({navigation}: any) => {
     setIsOfferSent(false);
   };
 
+  const trackLocation = async () => {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        });
+      });
+
+      const {latitude, longitude} = position.coords;
+      const obj = {
+        user: {
+          name: '',
+          latitude,
+          longitude,
+        },
+      };
+
+      const resp = await sendLocation(obj);
+    } catch (error) {
+      console.error('Error fetching location:', error);
+    }
+  };
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      if (available) trackLocation();
+    }, 30000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [available]);
+
   return (
     <MainWrapper>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.bellContainer} disabled>
+        <TouchableOpacity
+          style={styles.bellContainer}
+          onPress={() => navigation.navigate(Routes.RideArriving, {item: ''})}>
           <Image source={appIcons.bellIcon} style={styles.bellIcon} />
         </TouchableOpacity>
 

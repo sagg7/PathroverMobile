@@ -8,11 +8,13 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {scale} from '../../../../../shared/theme/responsive';
 import {appImages} from '../../../../../assets/images';
 import {svgIcon} from '../../../../../assets/svg';
 import {PFColors, PFFonts} from '../../../../../shared/exporter';
+import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
+import useLocation from '../../../../../hooks/getLocation';
 
 interface OfferCardProps {
   style: StyleProp<ViewStyle>;
@@ -20,6 +22,7 @@ interface OfferCardProps {
   index: number;
   onPressDecline: () => void;
   onPressAccept: () => void;
+  myLocation: any;
 }
 
 const OfferCard = ({
@@ -28,7 +31,22 @@ const OfferCard = ({
   index,
   onPressDecline,
   onPressAccept,
+  myLocation,
 }: OfferCardProps) => {
+  const [results, setResults] = useState<any>(null);
+  useEffect(() => {
+    const getArrivalTime = async () => {
+      const driverLocation = [
+        item?.driver_location_longitude,
+        item?.driver_location_latitude,
+      ];
+      const locResults = await getTimeAndDistance(myLocation, driverLocation);
+      console.log('LOCA', locResults);
+      setResults(locResults);
+    };
+    getArrivalTime();
+  }, [item]);
+
   return (
     <View style={[styles.cardContainer, style]} key={index}>
       <View style={styles.cardInnerContainer}>
@@ -56,7 +74,9 @@ const OfferCard = ({
         <View style={styles.priceView}>
           <View style={styles.arriveTimeView}>
             {svgIcon.ClockRed}
-            <Text style={styles.arriveTimeText}>Arrives in 3 mins</Text>
+            <Text style={styles.arriveTimeText}>
+              Arrives in {results?.duration}
+            </Text>
           </View>
           <Text style={styles.priceText}>${item?.amount}</Text>
         </View>

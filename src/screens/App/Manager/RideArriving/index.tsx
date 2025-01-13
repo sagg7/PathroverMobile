@@ -3,9 +3,9 @@ import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
   AppHeader,
-  AppLoader,
   CancelRideSheet,
   MainWrapper,
+  OptionSelectorSheet,
   OrderAddressCard,
   RideActionCard,
 } from '../../../../components';
@@ -13,29 +13,35 @@ import {useNavigation} from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
 import {PermissionsAndroid, Platform} from 'react-native';
 import {
+  CancelReasons,
   mapBoxToken,
   PFColors,
   REQ_LIST_SOCKET_URL,
   RIDE_STATUS,
   showAlert,
-  UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
 import haversine from 'haversine-distance'; // For distance calculation
 import {svgIcon} from '../../../../assets/svg';
-import {useChannel} from '../../../../hooks/socket/useChannel';
-import {useActionCable} from '../../../../hooks/socket/useActionCable';
-import {useSelector} from 'react-redux';
+import DriverDetailSheet from './DriverDetailSheet';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import {RideCancelReasonSheet} from '../../../../components/complex/RideCancelReasonSheet';
 import {
   useCancelInProgressRideRequestMutation,
   useUpdateCurrentRideStatusMutation,
 } from '../../../../redux/manager/managerApiSlice';
+import OrderDeliveredSheet from './OrderDelivered';
+import {useActionCable} from '../../../../hooks/socket/useActionCable';
+import {useChannel} from '../../../../hooks/socket/useChannel';
+import {useSelector} from 'react-redux';
 
-const OrderPickup = ({route}: any) => {
+const RideArriving = (route: any) => {
+  // const item = route?.route?.params?.item;
+
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [routeToPickup, setRouteToPickup] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
-  const item = route?.params?.item || {};
 
+  const [item, setItem] = useState<any>(null);
   const [userLocation, setUserLocation] = useState(null);
   const [destination, setDestination] = useState([
     // item?.dropoff_longitude,
@@ -45,23 +51,38 @@ const OrderPickup = ({route}: any) => {
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
   const [showRideActionSheet, setShowRideActionSheet] = useState<any>(false);
   const [showCancelSheet, setShowCancelSheet] = useState<any>(false);
-  const [type, setType] = useState<any>(RIDE_STATUS.ORDER_DELIVERED);
+  const [cancelReason, setCancelReason] = useState(CancelReasons);
+  const [selectedCancelReason, setSelectedCancelReason] = useState<any>('');
   const cleanedToken = accessToken.replace('Bearer ', '');
+  const [cancelInProgressRideRequest, {isLoading: cancelRideLoading}] =
+    useCancelInProgressRideRequestMutation();
+  const [type, setType] = useState<any>('Initial');
+  const [updateCurrentRideStatus, {isLoading}] =
+    useUpdateCurrentRideStatusMutation();
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
   const {subscribe, unsubscribe, connected} = useChannel(actionCable);
-  const [updateCurrentRideStatus, {isLoading}] =
-    useUpdateCurrentRideStatusMutation();
-  const [cancelInProgressRideRequest, {isLoading: cancelRideLoading}] =
-    useCancelInProgressRideRequestMutation();
+
+  const [
+    showCancelSheetConfirmationSheet,
+    setShowCancelSheetConfirmationSheet,
+  ] = useState<boolean>(false);
+  const [showOrderDeliveredSheet, setShowOrderDeliveredSheet] =
+    useState<boolean>(false);
 
   const navigation = useNavigation();
+  const consentSheetRef = useRef<any>();
+  const cancelSheet = useRef<any>();
   useEffect(() => {
     setTimeout(() => {
       setShowRideActionSheet(true);
     }, 3000);
   }, []);
+
+  useEffect(() => {
+    if (route) setItem(route?.route?.params?.item);
+  }, [route?.route?.params]);
 
   // Request location permissions (for Android)
   const requestLocationPermission = async () => {
@@ -109,6 +130,22 @@ const OrderPickup = ({route}: any) => {
     }
   };
 
+  // Check if the user is off the route
+  const isUserOffRoute = currentLocation => {
+    if (!routeCoordinates || routeCoordinates.length === 0) return false;
+
+    // Calculate the distance between the user's current location and the nearest point on the route
+    let minDistance = Infinity;
+    for (const point of routeCoordinates) {
+      const distance = haversine(currentLocation, point);
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+    }
+
+    return minDistance > rerouteThreshold;
+  };
+
   useEffect(() => {
     // if (available) {
     subscribe(
@@ -134,10 +171,10 @@ const OrderPickup = ({route}: any) => {
 
   const handleBroadcastData = res => {
     const {status, cancelled_by} = res?.data;
-    console.log('STATUS DRIVER => ', status);
+    console.log('STATUS MANAGER => ', status);
 
     if (status === 'cancelled') {
-      if (cancelled_by === 'driver') {
+      if (cancelled_by === 'manager') {
         navigation.replace('AppStack');
       } else {
         showAlert('Cancelled', res?.message, () => {
@@ -153,23 +190,13 @@ const OrderPickup = ({route}: any) => {
     }
     if (status === RIDE_STATUS.ORDER_DELIVERED) {
       setType(RIDE_STATUS.ORDER_DELIVERED);
+      setTimeout(() => {
+        setShowOrderDeliveredSheet(true);
+      }, 1000);
     }
-  };
-
-  // Check if the user is off the route
-  const isUserOffRoute = currentLocation => {
-    if (!routeCoordinates || routeCoordinates.length === 0) return false;
-
-    // Calculate the distance between the user's current location and the nearest point on the route
-    let minDistance = Infinity;
-    for (const point of routeCoordinates) {
-      const distance = haversine(currentLocation, point);
-      if (distance < minDistance) {
-        minDistance = distance;
-      }
+    if (status === RIDE_STATUS.COMPLETE_RIDE) {
+      setType(RIDE_STATUS.COMPLETE_RIDE);
     }
-
-    return minDistance > rerouteThreshold;
   };
 
   // Get user's current location and start tracking
@@ -215,13 +242,45 @@ const OrderPickup = ({route}: any) => {
   // whadat Road 31.500973875938808, 74.27898792916038
   // dummy current 31.442345933668406, 74.27597312625042
 
+  const handleCancelReason = i => {
+    let temp = cancelReason?.map(val => {
+      if (i.id === val.id) {
+        const obj = {
+          ...val,
+          isSelected: true,
+        };
+        return obj;
+      } else {
+        return {
+          ...val,
+          isSelected: false,
+        };
+      }
+    });
+    setCancelReason(temp);
+  };
+  const handleCancelOrderBtn = async (reason: string) => {
+    const obj: any = {
+      role: 'manager',
+      order: {
+        reason: reason,
+        ride_request_id: 203,
+      },
+    };
+    const res = await cancelInProgressRideRequest(obj);
+    if (res?.data) {
+      cancelSheet.current.close();
+      navigation.replace('AppStack');
+    }
+  };
+
   const handleRideStatus = async (status: string) => {
     try {
       const obj = {
-        role: 'driver',
+        role: 'manager',
         order: {
           status: status,
-          ride_request_id: 204,
+          ride_request_id: 207,
         },
       };
 
@@ -233,33 +292,11 @@ const OrderPickup = ({route}: any) => {
     }
   };
 
-  const handleCancelRide = async () => {
-    try {
-      const obj = {
-        role: 'driver',
-        order: {
-          reason: '',
-          ride_request_id: 207,
-        },
-      };
-
-      const resp = await cancelInProgressRideRequest(obj);
-      if (resp?.data) {
-        navigation.replace('AppStack');
-      } else {
-        showAlert('Error', resp?.error?.data?.errors[0]);
-      }
-    } catch (error) {
-      showAlert('Error', UNEXPECTED_ERROR);
-    }
-  };
-
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title="Pickup Address" />
-      <OrderAddressCard item={item} type={'Initial'} />
+      <AppHeader title="Driver Arriving" />
 
-      <MapboxGL.MapView style={styles.map}>
+      <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
         <MapboxGL.Camera
           zoomLevel={12}
           centerCoordinate={[74.28242115679376, 31.45982743552883]}
@@ -316,50 +353,42 @@ const OrderPickup = ({route}: any) => {
           </MapboxGL.ShapeSource>
         )}
       </MapboxGL.MapView>
-      {!showCancelSheet && (
-        <RideActionCard
-          onPressBtn={handleRideStatus}
+
+      {!showCancelSheet && !showOrderDeliveredSheet && (
+        <DriverDetailSheet
           type={type}
-          modalVisible={showRideActionSheet}
-          data={item}
-          onPressCancel={() => {
-            setShowRideActionSheet(false);
-            setTimeout(() => {
-              setShowCancelSheet(true);
-            }, 1000);
-          }}
+          onPressCancelOrder={() => consentSheetRef?.current.open()}
+          handleBtn={handleRideStatus}
         />
       )}
 
-      <CancelRideSheet
-        modalVisible={showCancelSheet}
-        onPressDone={() => {
-          setShowCancelSheet(false);
-          // navigation.goBack();
-          handleCancelRide();
-        }}
-        setModalVisible={() => {
-          setShowCancelSheet(false);
+      <ConsentSheet
+        ref={consentSheetRef}
+        message={'Are you sure you want to cancel the Ride?'}
+        cancelBtnText="Cancel"
+        successBtnText={'Continue'}
+        onPressCancel={() => cancelSheet.current.close()}
+        onPressSuccess={() => {
+          consentSheetRef.current.close();
           setTimeout(() => {
-            setShowRideActionSheet(true);
+            cancelSheet.current.open();
           }, 1000);
         }}
       />
-      {cancelRideLoading && <AppLoader />}
-
-      {/* <RideCancelReasonSheet
+      <RideCancelReasonSheet
         ref={cancelSheet}
         data={cancelReason}
         onPressWeight={handleCancelReason}
         isCompany
         handleCancelSheetDone={() => {
           const sel: any = cancelReason?.find(i => i.isSelected)?.title;
-          handleCancelRide(sel);
+          handleCancelOrderBtn(sel);
         }}
         disabled={!cancelReason?.some(val => val.isSelected)}
-      /> */}
+      />
+      {showOrderDeliveredSheet && <OrderDeliveredSheet item={item} />}
     </MainWrapper>
   );
 };
 
-export default OrderPickup;
+export default RideArriving;

@@ -1,13 +1,4 @@
-import {
-  FlatList,
-  Image,
-  Linking,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import Modal from 'react-native-modal';
 import {AppButton} from '../AppButton';
@@ -16,7 +7,6 @@ import {
   PFFontSize,
   PFFonts,
   WP,
-  appIcons,
   fetchSuggestions,
 } from '../../../shared/exporter';
 import {AppInput} from '../..';
@@ -28,13 +18,17 @@ interface FilterLocationSheetProps {
   handleClick: (dates: {startDate: string; endDate: string}) => void;
   setModalVisible: () => void;
   onPressDone: () => void;
-  onPressCancel: () => void;
+  onPressCancel?: () => void;
+  currentLocation: any;
+  setLocation: any;
 }
 const FilterLocationSheet = ({
   modalVisible,
   setModalVisible,
   onPressDone,
   onPressCancel,
+  setLocation,
+  currentLocation,
 }: FilterLocationSheetProps) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -44,6 +38,7 @@ const FilterLocationSheet = ({
     const [longitude, latitude] = place.center;
     setQuery(place.place_name);
     setSuggestions([]);
+    setLocation([longitude, latitude]);
   };
   const handleChangeText = (text: any) => {
     setQuery(text);
@@ -56,6 +51,14 @@ const FilterLocationSheet = ({
       setSuggestions(fetchData?.features);
     }, 2000);
   };
+
+  const onMapPress = (event: any) => {
+    const {geometry} = event;
+    const [longitude, latitude] = geometry.coordinates;
+    setLocation([longitude, latitude]);
+  };
+
+  console.log('LATLNG', currentLocation);
 
   return (
     <Modal
@@ -88,14 +91,24 @@ const FilterLocationSheet = ({
         />
       </View>
       <Text style={styles.titleStyles}>Choose on map</Text>
-      <View style={styles.mapViewContainer}>
-        <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera
-            zoomLevel={12}
-            centerCoordinate={[74.2753883, 31.4541112]}
-          />
-        </MapboxGL.MapView>
-      </View>
+      {currentLocation && (
+        <View style={styles.mapViewContainer}>
+          <MapboxGL.MapView
+            style={styles.map}
+            scaleBarEnabled={false}
+            onPress={onMapPress}>
+            <MapboxGL.Camera
+              zoomLevel={12}
+              centerCoordinate={currentLocation}
+            />
+            {currentLocation && (
+              <MapboxGL.MarkerView coordinate={currentLocation}>
+                {svgIcon.CurrentLocation}
+              </MapboxGL.MarkerView>
+            )}
+          </MapboxGL.MapView>
+        </View>
+      )}
       <AppButton
         title="Done"
         buttonStyle={styles.btnStyles}

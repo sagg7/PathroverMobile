@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
@@ -21,11 +22,19 @@ interface ConsentSheetProps {
   cancelBtnText: string;
   successBtnText: string;
   ref: any;
+  fontSize: number;
 }
 
 const ConsentSheet: React.FC<ConsentSheetProps> = forwardRef(
   (
-    {onPressSuccess, onPressCancel, message, cancelBtnText, successBtnText},
+    {
+      onPressSuccess,
+      onPressCancel,
+      message,
+      cancelBtnText,
+      successBtnText,
+      fontSize,
+    },
     ref,
   ) => {
     const [contentHeight, setContentHeight] = useState(200);
@@ -50,14 +59,22 @@ const ConsentSheet: React.FC<ConsentSheetProps> = forwardRef(
           },
         }}>
         <View onLayout={handleContentLayout} style={styles.mainContainer}>
-          <Text style={styles.messageTextStyle}>{message}</Text>
+          <Text style={[styles.messageTextStyle, {fontSize: fontSize}]}>
+            {message}
+          </Text>
           <View style={styles.btnContainer}>
-            <Pressable style={styles.cancelBtnStyle} onPress={onPressCancel}>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              style={styles.cancelBtnStyle}
+              onPress={onPressCancel}>
               <Text style={styles.cancelBtnTextStyle}>{cancelBtnText}</Text>
-            </Pressable>
-            <Pressable style={styles.successBtnStyle} onPress={onPressSuccess}>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              style={styles.successBtnStyle}
+              onPress={onPressSuccess}>
               <Text style={styles.successBtnTextStyle}>{successBtnText}</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </RBSheet>
@@ -69,21 +86,21 @@ export default ConsentSheet;
 
 const styles = StyleSheet.create({
   mainContainer: {
-   padding:scale(16)
+    padding: scale(16),
   },
   messageTextStyle: {
     color: PFColors.Standard.Black,
     fontSize: scale(20),
     fontFamily: PFFonts.Foundation.SemiBold,
     marginBottom: scale(24),
-    textAlign:'center'
+    textAlign: 'center',
   },
   btnContainer: {
-    width:'100%',
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom:scale(16)
+    marginBottom: scale(16),
   },
   cancelBtnStyle: {
     borderWidth: 1,
@@ -105,7 +122,7 @@ const styles = StyleSheet.create({
     width: scale(166),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor:PFColors.Blue.Dark
+    backgroundColor: PFColors.Blue.Dark,
   },
   successBtnTextStyle: {
     color: PFColors.Standard.White,

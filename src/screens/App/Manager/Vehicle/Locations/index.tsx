@@ -31,6 +31,8 @@ const Locations = ({navigation, route}: any) => {
   const {location} = useLocation();
   const {placeName, fetchPlaceName, setPlaceName, error, loading} =
     usePlaceName();
+  const {placeName: destinationName, fetchPlaceName: fetchDestination} =
+    usePlaceName();
 
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
 
@@ -67,17 +69,20 @@ const Locations = ({navigation, route}: any) => {
     getLocationPermission();
   }, []);
 
-  const handleSave = () => {
-    setSelectedRouteDetails({
-      pickup_latitude:
-        pickUpAddress?.latitude || pickUpAddress?.pickup_latitude,
+  const handleSave = async () => {
+    const latitude = pickUpAddress?.latitude || pickUpAddress?.pickup_latitude;
+    const longitude =
+      pickUpAddress?.longitude || pickUpAddress?.pickup_longitude;
 
-      pickup_longitude:
-        pickUpAddress?.longitude || pickUpAddress?.pickup_longitude,
+    const obj = {
+      pickup_latitude: latitude,
+      pickup_longitude: longitude,
       dropoff_latitude: destinationAddress?.latitude,
       dropoff_longitude: destinationAddress?.longitude,
-    });
-
+      pickup_location_name: placeName,
+      dropoff_location_name: destinationAddress?.placeName,
+    };
+    setSelectedRouteDetails(obj);
     navigation.goBack();
   };
 
