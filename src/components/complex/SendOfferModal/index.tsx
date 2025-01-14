@@ -22,7 +22,7 @@ import {AppButton} from '../AppButton';
 
 interface SendOfferModalProps {
   isModalVisible: boolean;
-  handleClickEmail: () => void;
+  handleClickEmail?: () => void;
   handleExpireRequest: () => void;
   handleGoBack: () => void;
   requestStatus: string;

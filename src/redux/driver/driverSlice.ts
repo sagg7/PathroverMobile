@@ -6,6 +6,7 @@ const driverSlice = createSlice({
     driverProfile: {},
     isProfileVerified: false,
     isDriverAvailable: false,
+    userPickedOffer: {},
   },
   reducers: {
     setDriverProfile: (state, action) => {
@@ -22,9 +23,10 @@ const driverSlice = createSlice({
       state.isProfileVerified = action.payload;
     },
     setIsDriverAvailable: (state, action) => {
-      console.log('DRIVER AVAILABLE==>', action.payload);
-
       state.isDriverAvailable = action.payload;
+    },
+    setUserPickerOffer: (state, action) => {
+      state.userPickedOffer = action.payload;
     },
   },
 });
@@ -34,6 +36,7 @@ export const {
   setDriverProfileEmpty,
   setIsProfileVerified,
   setIsDriverAvailable,
+  setUserPickerOffer,
 } = driverSlice.actions;
 
 export default driverSlice.reducer;

@@ -31,10 +31,10 @@ import {
 } from '../../../../redux/manager/managerApiSlice';
 
 const OrderPickup = ({route}: any) => {
+  const [pickerOffer, setPickedOffer] = useState<any>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [routeToPickup, setRouteToPickup] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
-  const item = route?.params?.item || {};
 
   const [userLocation, setUserLocation] = useState(null);
   const [destination, setDestination] = useState([
@@ -45,6 +45,7 @@ const OrderPickup = ({route}: any) => {
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
   const [showRideActionSheet, setShowRideActionSheet] = useState<any>(false);
   const [showCancelSheet, setShowCancelSheet] = useState<any>(false);
+  const {userPickedOffer} = useSelector((state: any) => state?.driver);
   const [type, setType] = useState<any>(RIDE_STATUS.ORDER_DELIVERED);
   const cleanedToken = accessToken.replace('Bearer ', '');
 
@@ -57,6 +58,11 @@ const OrderPickup = ({route}: any) => {
     useCancelInProgressRideRequestMutation();
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (userPickedOffer) setPickedOffer(userPickedOffer);
+  }, [userPickedOffer]);
+
   useEffect(() => {
     setTimeout(() => {
       setShowRideActionSheet(true);
@@ -134,8 +140,6 @@ const OrderPickup = ({route}: any) => {
 
   const handleBroadcastData = res => {
     const {status, cancelled_by} = res?.data;
-    console.log('STATUS DRIVER => ', status);
-
     if (status === 'cancelled') {
       if (cancelled_by === 'driver') {
         navigation.replace('AppStack');
@@ -257,7 +261,7 @@ const OrderPickup = ({route}: any) => {
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Pickup Address" />
-      <OrderAddressCard item={item} type={'Initial'} />
+      <OrderAddressCard item={pickerOffer} type={'Initial'} />
 
       <MapboxGL.MapView style={styles.map}>
         <MapboxGL.Camera
@@ -321,7 +325,7 @@ const OrderPickup = ({route}: any) => {
           onPressBtn={handleRideStatus}
           type={type}
           modalVisible={showRideActionSheet}
-          data={item}
+          data={pickerOffer}
           onPressCancel={() => {
             setShowRideActionSheet(false);
             setTimeout(() => {

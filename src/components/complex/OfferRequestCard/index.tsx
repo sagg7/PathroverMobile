@@ -15,7 +15,7 @@ import {getTimeAndDistance} from '../../../shared/utils/helpers';
 import useLocation from '../../../hooks/getLocation';
 
 interface OfferRequestCardProps {
-  onPressDecline?: () => void;
+  onPressDecline: (item: any) => void;
   onPressAccept: (item: any) => void;
   item?: any;
   index: number;
@@ -100,7 +100,7 @@ const OfferRequestCard = ({
             title="Decline"
             textStyle={styles.declinetext}
             buttonStyle={[styles.btnStyles, styles.declineBtn]}
-            handleClick={onPressDecline}
+            handleClick={() => onPressDecline(item)}
           />
           <AppButton
             title="Accept"
