@@ -25,6 +25,7 @@ import {useActionCable} from '../../../../hooks/socket/useActionCable';
 import {
   setIsDriverAvailable,
   setIsProfileVerified,
+  setUserPickerOffer,
 } from '../../../../redux/driver/driverSlice';
 
 // APIs
@@ -110,23 +111,29 @@ const RequestList = ({navigation}: any) => {
   }, []);
 
   useEffect(() => {
-    console.log('ACCEPTED ITEM 1 => ', selectedOffer);
-    if (selectedOffer) {
-      setOfferSheetShow(true);
-    }
-  }, [selectedOffer]);
+    intervalRef.current = setInterval(() => {
+      if (available) trackLocation();
+    }, 30000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [available]);
 
   const handleBroadcastData = (res: any) => {
-    console.log('ACCEPTED ITEM 3 => ', selectedOffer);
     const {status, ride_request_id} = res?.data || {};
     if (status === 'cancelled') {
-      setRidesList(prev =>
-        prev.filter((item: any) => item?.id !== ride_request_id),
-      );
       setTimeout(() => {
         showAlert(
           'Request Cancelled',
           'Request has been cancelled by Manager.',
+          () => {
+            setRidesList(prev =>
+              prev.filter((item: any) => item?.id !== ride_request_id),
+            );
+          },
         );
       }, 300);
       if (ride_request_id === selectedOffer?.id && isOfferSent) {
@@ -134,9 +141,6 @@ const RequestList = ({navigation}: any) => {
       }
     } else if (status === 'accepted') {
       setRequestStatus('accepted');
-      setRidesList(prev =>
-        prev.filter((item: any) => item?.id === ride_request_id),
-      );
       setIsOfferSent(false);
       setOfferSheetShow(false);
       setTimeout(() => {
@@ -144,8 +148,10 @@ const RequestList = ({navigation}: any) => {
           'Request Accepted',
           'Request has been accepted by Manager.',
           () => {
-            console.log('ACCEPTED ITEM 4 => ', selectedOffer);
             navigation.navigate(Routes.OrderPickup, {item: selectedOffer});
+            setRidesList(prev =>
+              prev.filter((item: any) => item?.id === ride_request_id),
+            );
           },
         );
       }, 300);
@@ -160,26 +166,19 @@ const RequestList = ({navigation}: any) => {
     }
   };
 
-  const onPressDecline = () => {
+  const onPressDecline = (acceptedItem: any) => {
     setRidesList((prev: any) =>
-      prev.filter((item: any) => item?.id !== item?.id),
+      prev.filter((item: any) => item?.id !== acceptedItem?.id),
     );
   };
 
   const onPressAccept = (acceptedItem: any) => {
-    if (acceptedItem) setSelectedOffer(acceptedItem);
-  };
-
-  const renderRideRequest = ({item, index}: any) => {
-    return (
-      <OfferRequestCard
-        onPressAccept={onPressAccept}
-        onPressDecline={() => onPressDecline()}
-        item={item}
-        index={index}
-        location={myLocation}
-      />
-    );
+    if (acceptedItem) {
+      setSelectedOffer(acceptedItem);
+      setTimeout(() => {
+        setOfferSheetShow(true);
+      }, 300);
+    }
   };
 
   const onPressSend = async () => {
@@ -193,12 +192,12 @@ const RequestList = ({navigation}: any) => {
     const resp = await sendOfferToManager(data);
 
     if (resp?.data) {
+      setOfferPrice('');
       setOfferSheetShow(false);
       setTimeout(() => {
         setIsOfferSent(true);
-      }, 300);
-      setOfferPrice('');
-      console.log('ACCEPTED ITEM 2 => ', selectedOffer);
+      }, 500);
+      dispatch(setUserPickerOffer(selectedOffer));
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
@@ -242,17 +241,15 @@ const RequestList = ({navigation}: any) => {
     }
   };
 
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      if (available) trackLocation();
-    }, 30000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [available]);
+  const renderRideRequest = ({item, index}: any) => (
+    <OfferRequestCard
+      onPressAccept={onPressAccept}
+      onPressDecline={onPressDecline}
+      item={item}
+      index={index}
+      location={myLocation}
+    />
+  );
 
   return (
     <MainWrapper>
@@ -319,6 +316,7 @@ const RequestList = ({navigation}: any) => {
           </View>
         </>
       )}
+
       {available &&
         profileApproved &&
         (ridesList?.length > 0 ? (
@@ -339,7 +337,8 @@ const RequestList = ({navigation}: any) => {
         onPressCancel={() => setOfferSheetShow(false)}
         onPressSend={() => onPressSend()}
         priceValue={offerPrice}
-        onChangeText={text => setOfferPrice(text)}
+        onChangeText={(text: any) => setOfferPrice(text)}
+        location={myLocation}
       />
       {isOfferSent && (
         <SendOfferModal

@@ -5,6 +5,7 @@ import {
   PFColors,
   PFFonts,
   PFFontSize,
+  RIDE_STATUS,
   scale,
   WP,
 } from '../../../../shared/exporter';
@@ -12,13 +13,14 @@ import {AppButton, FromAndToCard} from '../../../../components';
 import {svgIcon} from '../../../../assets/svg';
 interface OrderDeliveredSheetProp {
   onPressCancelOrder: () => void;
-  onPressOrderDelivered: () => void;
+  onPressOrderDelivered: (v: string) => void;
   item: any;
 }
 
 const OrderDeliveredSheet = ({
   onPressCancelOrder,
   onPressOrderDelivered,
+  item,
 }: OrderDeliveredSheetProp) => {
   return (
     <View style={styles.modalContainer}>
@@ -45,7 +47,10 @@ const OrderDeliveredSheet = ({
           </TouchableOpacity>
         </View>
       </View>
-      <FromAndToCard />
+      <FromAndToCard
+        dropOff={item?.ride_request_data?.dropoff_location_name}
+        pickup={item?.ride_request_data?.pickup_location_name}
+      />
       <View style={styles.BtnContainer}>
         {/* <AppButton
           title="Cancel Order"
@@ -56,7 +61,7 @@ const OrderDeliveredSheet = ({
         <AppButton
           title="Order Delivered"
           buttonStyle={styles.orderDeliveredBtn}
-          handleClick={onPressOrderDelivered}
+          handleClick={() => onPressOrderDelivered(RIDE_STATUS.ORDER_DELIVERED)}
         />
       </View>
     </View>

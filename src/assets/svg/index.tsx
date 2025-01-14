@@ -67,6 +67,7 @@ import Edit from './Edit.svg';
 import MiniPin from './miniPin.svg';
 import MiniRatingIcon from './miniRatingIcon.svg';
 import VanFilledIcon from './van.svg';
+import LiveMarker from './liveMarker.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -137,4 +138,5 @@ export const svgIcon = {
   MiniPin: <MiniPin />,
   MiniRatingIcon: <MiniRatingIcon />,
   VanFilledIcon: <VanFilledIcon />,
+  LiveMarker: <LiveMarker />,
 };

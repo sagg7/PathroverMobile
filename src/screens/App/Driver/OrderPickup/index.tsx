@@ -8,6 +8,7 @@ import {
   MainWrapper,
   OrderAddressCard,
   RideActionCard,
+  WaitingModal,
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
@@ -31,22 +32,27 @@ import {
 } from '../../../../redux/manager/managerApiSlice';
 
 const OrderPickup = ({route}: any) => {
+  const navigation: any = useNavigation();
+  const [pickerOffer, setPickedOffer] = useState<any>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [routeToPickup, setRouteToPickup] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
-  const item = route?.params?.item || {};
-
-  const [userLocation, setUserLocation] = useState(null);
+  const [showWaitingModal, setShowWaitingModal] = useState<boolean>(false);
+  const [userLocation, setUserLocation] = useState([74.275388, 31.454111]);
   const [destination, setDestination] = useState([
-    // item?.dropoff_longitude,
-    // item?.dropoff_latitude,
     74.27898792916038, 31.500973875938808,
-  ]); // Example destination: Empire State Building
+  ]);
+  const [pickupLocation, setPickupLocation] = useState([
+    74.27898792916038, 31.500973875938808,
+  ]);
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
   const [showRideActionSheet, setShowRideActionSheet] = useState<any>(false);
+
   const [showCancelSheet, setShowCancelSheet] = useState<any>(false);
-  const [type, setType] = useState<any>(RIDE_STATUS.ORDER_DELIVERED);
+  const {userPickedOffer} = useSelector((state: any) => state?.driver);
+  const [type, setType] = useState<any>('Initial');
   const cleanedToken = accessToken.replace('Bearer ', '');
+  const [showDriverLine, setShowDriverLine] = useState(false);
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
@@ -56,7 +62,10 @@ const OrderPickup = ({route}: any) => {
   const [cancelInProgressRideRequest, {isLoading: cancelRideLoading}] =
     useCancelInProgressRideRequestMutation();
 
-  const navigation = useNavigation();
+  useEffect(() => {
+    if (userPickedOffer) setPickedOffer(userPickedOffer);
+  }, [userPickedOffer]);
+
   useEffect(() => {
     setTimeout(() => {
       setShowRideActionSheet(true);
@@ -75,18 +84,26 @@ const OrderPickup = ({route}: any) => {
   };
 
   useEffect(() => {
-    const fetchRoutes = async () => {
-      const source = [74.27597312625042, 31.442345933668406];
-      const des = [74.27898792916038, 31.500973875938808];
-      const current = [74.28242115679376, 31.45982743552883];
-
-      const pickupToDesRoute = await fetchDirections(source, des);
-      setRouteCoordinates(pickupToDesRoute);
-      const currentToPickup = await fetchDirections(current, source);
-      setRouteToPickup(currentToPickup);
-    };
-    fetchRoutes();
-  }, []);
+    if (pickerOffer) {
+      const fetchRoutes = async () => {
+        const source = [
+          Number(pickerOffer?.pickup_longitude),
+          Number(pickerOffer?.pickup_latitude),
+        ];
+        const des = [
+          Number(pickerOffer?.dropoff_longitude),
+          Number(pickerOffer?.dropoff_latitude),
+        ];
+        setDestination(des);
+        setPickupLocation(source);
+        const pickupToDesRoute = await fetchDirections(source, des);
+        setRouteCoordinates(pickupToDesRoute);
+        const currentToPickup = await fetchDirections(userLocation, source);
+        setRouteToPickup(currentToPickup);
+      };
+      fetchRoutes();
+    }
+  }, [pickerOffer]);
 
   // Fetch directions from Mapbox Directions API
   const fetchDirections = async (source, destination) => {
@@ -100,8 +117,6 @@ const OrderPickup = ({route}: any) => {
 
       const routeJson = await response?.json();
       const route = routeJson.routes[0].geometry.coordinates;
-
-      // console.log('ROUTE Formated==>', route);
       return route;
       // setRouteCoordinates(route);
     } catch (error) {
@@ -110,7 +125,6 @@ const OrderPickup = ({route}: any) => {
   };
 
   useEffect(() => {
-    // if (available) {
     subscribe(
       {
         channel: 'OrderCommunicationChannel',
@@ -132,10 +146,8 @@ const OrderPickup = ({route}: any) => {
     };
   }, []);
 
-  const handleBroadcastData = res => {
+  const handleBroadcastData = (res: any) => {
     const {status, cancelled_by} = res?.data;
-    console.log('STATUS DRIVER => ', status);
-
     if (status === 'cancelled') {
       if (cancelled_by === 'driver') {
         navigation.replace('AppStack');
@@ -151,8 +163,15 @@ const OrderPickup = ({route}: any) => {
     if (status === RIDE_STATUS.START_RIDE) {
       setType(RIDE_STATUS.START_RIDE);
     }
+    if (status === RIDE_STATUS.COMPLETE_RIDE) {
+      setType(RIDE_STATUS.COMPLETE_RIDE);
+      setShowWaitingModal(true);
+    }
     if (status === RIDE_STATUS.ORDER_DELIVERED) {
-      setType(RIDE_STATUS.ORDER_DELIVERED);
+      setShowWaitingModal(false);
+      setTimeout(() => {
+        navigation.replace('AppStack');
+      }, 500);
     }
   };
 
@@ -173,47 +192,44 @@ const OrderPickup = ({route}: any) => {
   };
 
   // Get user's current location and start tracking
-  // useEffect(() => {
-  //   const getCurrentLocation = async () => {
-  //     const hasPermission = await requestLocationPermission();
-  //     if (!hasPermission) return;
+  useEffect(() => {
+    const getCurrentLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
 
-  //     // Get initial location
-  //     Geolocation.getCurrentPosition(
-  //       position => {
-  //         const {latitude, longitude} = position.coords;
-  //         setUserLocation([longitude, latitude]);
-  //         fetchDirections([longitude, latitude], destination);
-  //       },
-  //       error => console.error('Error getting location:', error),
-  //       {enableHighAccuracy: true},
-  //     );
+      // Get initial location
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setUserLocation([longitude, latitude]);
+          fetchDirections([longitude, latitude], destination);
+        },
+        error => console.error('Error getting location:', error),
+        {enableHighAccuracy: true},
+      );
 
-  //     // Track user's location
-  //     const watchId = Geolocation.watchPosition(
-  //       position => {
-  //         const {latitude, longitude} = position.coords;
-  //         const currentLocation = [longitude, latitude];
-  //         setUserLocation(currentLocation);
+      // Track user's location
+      const watchId = Geolocation.watchPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          const currentLocation = [longitude, latitude];
+          setUserLocation(currentLocation);
 
-  //         // Check if the user is off the route and reroute if necessary
-  //         if (isUserOffRoute(currentLocation)) {
-  //           console.log('User is off the route. Recalculating...');
-  //           fetchDirections(currentLocation, destination);
-  //         }
-  //       },
-  //       error => console.error('Error watching location:', error),
-  //       {enableHighAccuracy: true, distanceFilter: 10},
-  //     );
+          // Check if the user is off the route and reroute if necessary
+          if (isUserOffRoute(currentLocation)) {
+            console.log('User is off the route. Recalculating...');
+            fetchDirections(currentLocation, destination);
+          }
+        },
+        error => console.error('Error watching location:', error),
+        {enableHighAccuracy: true, distanceFilter: 10},
+      );
 
-  //     return () => Geolocation.clearWatch(watchId);
-  //   };
+      return () => Geolocation.clearWatch(watchId);
+    };
 
-  //   getCurrentLocation();
-  // }, [destination]);
-  // LDA 31.45982743552883, 74.28242115679376
-  // whadat Road 31.500973875938808, 74.27898792916038
-  // dummy current 31.442345933668406, 74.27597312625042
+    getCurrentLocation();
+  }, []);
 
   const handleRideStatus = async (status: string) => {
     try {
@@ -221,7 +237,7 @@ const OrderPickup = ({route}: any) => {
         role: 'driver',
         order: {
           status: status,
-          ride_request_id: 204,
+          ride_request_id: pickerOffer?.id,
         },
       };
 
@@ -239,7 +255,7 @@ const OrderPickup = ({route}: any) => {
         role: 'driver',
         order: {
           reason: '',
-          ride_request_id: 207,
+          ride_request_id: pickerOffer?.id,
         },
       };
 
@@ -257,46 +273,51 @@ const OrderPickup = ({route}: any) => {
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Pickup Address" />
-      <OrderAddressCard item={item} type={'Initial'} />
+      <OrderAddressCard
+        item={pickerOffer}
+        type={'Initial'}
+        onPressNavigation={() => setShowDriverLine(!showDriverLine)}
+      />
 
-      <MapboxGL.MapView style={styles.map}>
-        <MapboxGL.Camera
-          zoomLevel={12}
-          centerCoordinate={[74.28242115679376, 31.45982743552883]}
-        />
-        {/* Draw the route */}
-        {destination && (
-          <MapboxGL.MarkerView coordinate={destination}>
-            {svgIcon.CurrentLocation}
+      <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
+        <MapboxGL.Camera zoomLevel={12} centerCoordinate={userLocation} />
+        {userLocation && (
+          <MapboxGL.MarkerView coordinate={userLocation}>
+            {svgIcon.LiveMarker}
           </MapboxGL.MarkerView>
         )}
-        {true && (
+
+        {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
             {svgIcon.MapPin}
           </MapboxGL.MarkerView>
         )}
-
-        {routeCoordinates?.length > 0 && (
-          <MapboxGL.ShapeSource
-            id="routeSourceShape"
-            shape={{
-              type: 'Feature',
-              geometry: {
-                type: 'LineString',
-                coordinates: routeCoordinates,
-              },
-            }}>
-            <MapboxGL.LineLayer
-              id="routeSourceLine"
-              style={{
-                lineWidth: 4,
-                lineColor: PFColors.Blue.Dark,
-              }}
-            />
-          </MapboxGL.ShapeSource>
+        {pickupLocation && (
+          <MapboxGL.MarkerView coordinate={pickupLocation}>
+            {svgIcon.CurrentLocation}
+          </MapboxGL.MarkerView>
         )}
+        {/* {routeCoordinates?.length > 0 && ( */}
+        <MapboxGL.ShapeSource
+          id="routeSourceShape"
+          shape={{
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: routeCoordinates,
+            },
+          }}>
+          <MapboxGL.LineLayer
+            id="routeSourceLine"
+            style={{
+              lineWidth: 4,
+              lineColor: PFColors.Blue.Dark,
+            }}
+          />
+        </MapboxGL.ShapeSource>
+        {/* )} */}
 
-        {routeToPickup?.length > 0 && (
+        {showDriverLine && routeToPickup?.length > 0 && (
           <MapboxGL.ShapeSource
             id="routeToPickupShape"
             shape={{
@@ -321,7 +342,7 @@ const OrderPickup = ({route}: any) => {
           onPressBtn={handleRideStatus}
           type={type}
           modalVisible={showRideActionSheet}
-          data={item}
+          data={pickerOffer}
           onPressCancel={() => {
             setShowRideActionSheet(false);
             setTimeout(() => {
@@ -345,19 +366,8 @@ const OrderPickup = ({route}: any) => {
           }, 1000);
         }}
       />
+      {showWaitingModal && <WaitingModal isModalVisible={showWaitingModal} />}
       {cancelRideLoading && <AppLoader />}
-
-      {/* <RideCancelReasonSheet
-        ref={cancelSheet}
-        data={cancelReason}
-        onPressWeight={handleCancelReason}
-        isCompany
-        handleCancelSheetDone={() => {
-          const sel: any = cancelReason?.find(i => i.isSelected)?.title;
-          handleCancelRide(sel);
-        }}
-        disabled={!cancelReason?.some(val => val.isSelected)}
-      /> */}
     </MainWrapper>
   );
 };

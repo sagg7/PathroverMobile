@@ -11,8 +11,13 @@ import {
 interface OrderAddressCardProp {
   item: any;
   type: string;
+  onPressNavigation?: () => void;
 }
-const OrderAddressCard = ({item, type}: OrderAddressCardProp) => {
+const OrderAddressCard = ({
+  item,
+  type,
+  onPressNavigation,
+}: OrderAddressCardProp) => {
   return (
     <View style={styles.cardView}>
       <View style={styles.innerContainer}>
@@ -20,12 +25,12 @@ const OrderAddressCard = ({item, type}: OrderAddressCardProp) => {
           <Image source={appIcons.letterCircle} style={styles.pointIcon} />
           <View style={styles.bubleTextView}>
             <Text style={styles.bubleText}>
-              {type === 'initiala' ? 'Pick-up point' : 'Drop off Point'}
+              {type === 'Initial' ? 'Pick-up point' : 'Drop off Point'}
             </Text>
           </View>
         </View>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPressNavigation}>
           <View style={{alignItems: 'center'}}>
             <Image source={appIcons.navigation} style={styles.navigationIcon} />
             <Text style={styles.navigationText}>Navigation</Text>
@@ -33,7 +38,9 @@ const OrderAddressCard = ({item, type}: OrderAddressCardProp) => {
         </TouchableOpacity>
       </View>
       <Text style={styles.locationName} numberOfLines={2}>
-        {type === 'initial' ? item?.pickup_location : item?.dropoff_location}{' '}
+        {type === 'Initial'
+          ? item?.pickup_location_name
+          : item?.dropoff_location_name}{' '}
       </Text>
     </View>
   );

@@ -84,7 +84,6 @@ const PickUp = ({route, navigation}: any) => {
   const radiusGeoJSON =
     currentLocation &&
     createGeoJSONCircle(currentLocation, RADIUS_IN_METERS + 50);
-  console.log('LOCATOPN===>', currentLocation);
 
   return (
     <MainWrapper>

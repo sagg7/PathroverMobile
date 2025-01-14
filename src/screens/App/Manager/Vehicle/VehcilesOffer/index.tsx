@@ -74,7 +74,6 @@ const VehiclesOffer = ({route}: any) => {
       },
       {
         received: res => {
-          console.log('Manager Res => ', res?.data);
           setRideOffersFromDriver((prev: any) => [...prev, res?.data]);
         },
         connected: () => {

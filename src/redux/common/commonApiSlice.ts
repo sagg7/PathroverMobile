@@ -5,7 +5,6 @@ export const commonApiSlice = apiSlice.injectEndpoints({
     getOfferHistoryRoleBase: builder.query({
       query: ({role, ...params}) => {
         const queryParams = new URLSearchParams({role, ...params}).toString();
-        // console.log('queryParams==>', queryParams);
         return {
           url: `orders?${queryParams}`,
           method: 'GET',

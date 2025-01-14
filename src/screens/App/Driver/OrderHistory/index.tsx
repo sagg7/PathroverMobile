@@ -66,8 +66,6 @@ const OrderHistory = ({}) => {
   const navigateToFilter = () => {
     navigation.navigate(Routes.FilterScreen, {
       onSelectDate: filterData => {
-        console.log('Filter Data:', filterData);
-
         if (filterData?.date || filterData?.location) {
           // Update queryParams with filterData
           setQueryParams((prev: any) => ({

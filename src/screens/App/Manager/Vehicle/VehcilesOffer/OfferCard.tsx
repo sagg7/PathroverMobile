@@ -41,7 +41,6 @@ const OfferCard = ({
         item?.driver_location_latitude,
       ];
       const locResults = await getTimeAndDistance(myLocation, driverLocation);
-      console.log('LOCA', locResults);
       setResults(locResults);
     };
     getArrivalTime();

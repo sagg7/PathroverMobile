@@ -27,7 +27,10 @@ const DriverDetailSheet = ({
   handleRideStatus,
   myLocation,
 }: DriverDetailSheetProp) => {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<any>({
+    duration: 'calculating..',
+    distance: 'calculating..',
+  });
 
   useEffect(() => {
     if (item) getResults();
@@ -39,11 +42,10 @@ const DriverDetailSheet = ({
       Number(item?.driver_location_latitude),
     ];
     const location = [myLocation?.longitude, myLocation?.latitude];
-
     const locResults = await getTimeAndDistance(location, driverLocation);
-
     setResult(locResults);
   };
+
   return (
     <View style={styles.modalContainer}>
       {/* {svgIcon.DragablePin} */}
@@ -52,10 +54,15 @@ const DriverDetailSheet = ({
           ? 'Driver Reached'
           : type === RIDE_STATUS.START_RIDE
           ? 'Driver is heading to destination'
-          : `Your Driver is comming in ${
+          : type === RIDE_STATUS.ORDER_DELIVERED
+          ? ''
+          : type === 'Initial'
+          ? `Your Driver is coming in ${
               result?.duration == '0 min' ? 'few moments' : result?.duration
-            }`}
+            }`
+          : ''}
       </Text>
+
       <View style={styles.driverProfileContainer}>
         <View style={styles.row}>
           <Image
@@ -71,11 +78,15 @@ const DriverDetailSheet = ({
               {item?.user_name}
             </Text>
             <View style={{height: 3}} />
-            <Text style={styles.location}>{svgIcon.MiniPin}800m</Text>
+            <Text style={styles.location}>
+              {svgIcon.MiniPin} {result?.distance}
+            </Text>
             <View style={{height: 3}} />
 
             <Text style={styles.location}>
-              {svgIcon.MiniRatingIcon}4.9 (531 reviews)
+              {svgIcon.MiniRatingIcon}
+              {item?.user_rating?.rating} / ({item?.user_rating?.total_rating}
+              reviews)
             </Text>
           </View>
         </View>
@@ -121,8 +132,7 @@ const DriverDetailSheet = ({
       {type === RIDE_STATUS.COMPLETE_RIDE && (
         <AppButton
           title="Order Delivered"
-          // buttonStyle={styles.cancelBtnStyle}
-          // textStyle={styles.cancelBtnStyles}
+          buttonStyle={styles.disabledStyle}
           handleClick={() => handleRideStatus(RIDE_STATUS.ORDER_DELIVERED)}
         />
       )}

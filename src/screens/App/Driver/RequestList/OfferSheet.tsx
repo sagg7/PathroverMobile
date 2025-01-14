@@ -1,17 +1,16 @@
 import {View, Text, Image, TouchableOpacity, TextInput} from 'react-native';
-import React from 'react';
-import {AppButton, AppInput, FromAndToCard} from '../../../../components';
+import React, {useEffect, useState} from 'react';
+import {AppButton, FromAndToCard} from '../../../../components';
 import styles from './styles';
 import {appIcons} from '../../../../shared/exporter';
-import {
-  KeyboardAwareFlatList,
-  KeyboardAwareScrollView,
-} from 'react-native-keyboard-aware-scroll-view';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 
 interface OfferSheetProp {
   onPressCancel: () => void;
   handleSendOfferBtn: () => void;
   item: any;
+  location?: any;
   priceValue: any;
   onChangeText: any;
 }
@@ -25,9 +24,26 @@ const OfferSheet = ({
   onPressCancel,
   handleSendOfferBtn,
   item,
+  location,
   priceValue,
   onChangeText,
 }: OfferSheetProp) => {
+  const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (item) getResults();
+  }, [item, location]);
+
+  const getResults = async () => {
+    const pickupLocation = [
+      Number(item?.pickup_longitude),
+      Number(item?.pickup_latitude),
+    ];
+    const locResults = await getTimeAndDistance(location, pickupLocation);
+
+    setResult(locResults);
+  };
+
   const BubleView = ({icon, iconStyle, title}: BubleViewProp) => {
     return (
       <TouchableOpacity disabled>
@@ -50,9 +66,12 @@ const OfferSheet = ({
     <View style={styles.sheetContainer}>
       <KeyboardAwareScrollView>
         <View style={styles.sheetHeader}>
-          <BubleView icon={appIcons.curvedarrow} title={'3 Mins'} />
           <BubleView
-            title={'1.7 Km Away'}
+            icon={appIcons.curvedarrow}
+            title={result?.estimated_time || ''}
+          />
+          <BubleView
+            title={`${result?.distance || ''} Km Away`}
             icon={appIcons.clock}
             iconStyle={styles.bubleIconClockStyles}
           />

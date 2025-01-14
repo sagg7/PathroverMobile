@@ -123,12 +123,21 @@ const RideActionCard = ({
             />
           </View>
         )}
-        {type === RIDE_STATUS.ORDER_DELIVERED && (
+        {type === RIDE_STATUS.START_RIDE && (
           <View style={styles.buttonsRow}>
             <AppButton
               title="Complete Ride"
               textStyle={styles.yesTextStyle}
               handleClick={() => onPressBtn(RIDE_STATUS.COMPLETE_RIDE)}
+            />
+          </View>
+        )}
+        {type === RIDE_STATUS.COMPLETE_RIDE && (
+          <View style={styles.buttonsRow}>
+            <AppButton
+              title="Complete Ride"
+              disabled
+              textStyle={styles.yesTextStyle}
             />
           </View>
         )}

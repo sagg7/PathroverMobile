@@ -58,8 +58,6 @@ const FilterLocationSheet = ({
     setLocation([longitude, latitude]);
   };
 
-  console.log('LATLNG', currentLocation);
-
   return (
     <Modal
       useNativeDriver

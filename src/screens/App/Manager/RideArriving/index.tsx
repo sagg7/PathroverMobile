@@ -8,6 +8,7 @@ import {
   OptionSelectorSheet,
   OrderAddressCard,
   RideActionCard,
+  AppLoader,
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
@@ -19,6 +20,7 @@ import {
   REQ_LIST_SOCKET_URL,
   RIDE_STATUS,
   showAlert,
+  UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
 import haversine from 'haversine-distance'; // For distance calculation
 import {svgIcon} from '../../../../assets/svg';
@@ -35,24 +37,28 @@ import {useChannel} from '../../../../hooks/socket/useChannel';
 import {useSelector} from 'react-redux';
 import useLocation from '../../../../hooks/getLocation';
 
-const RideArriving = (route: any) => {
+const RideArriving = ({route}: any) => {
+  const navigation: any = useNavigation();
+  const consentSheetRef = useRef<any>();
+  const cancelSheet = useRef<any>();
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [routeToPickup, setRouteToPickup] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
 
   const [item, setItem] = useState<any>(null);
-  const [userLocation, setUserLocation] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<any>([
+    74.28242115679376, 31.45982743552883,
+  ]);
   const {location} = useLocation();
   const [destination, setDestination] = useState([
-    // item?.dropoff_longitude,
-    // item?.dropoff_latitude,
     74.27898792916038, 31.500973875938808,
-  ]); // Example destination: Empire State Building
+  ]);
+  const [pickupLocation, setPickupLocation] = useState([
+    74.27898792916038, 31.500973875938808,
+  ]);
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
-  const [showRideActionSheet, setShowRideActionSheet] = useState<any>(false);
   const [showCancelSheet, setShowCancelSheet] = useState<any>(false);
   const [cancelReason, setCancelReason] = useState(CancelReasons);
-  const [selectedCancelReason, setSelectedCancelReason] = useState<any>('');
   const cleanedToken = accessToken.replace('Bearer ', '');
   const [cancelInProgressRideRequest, {isLoading: cancelRideLoading}] =
     useCancelInProgressRideRequestMutation();
@@ -64,25 +70,12 @@ const RideArriving = (route: any) => {
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
   const {subscribe, unsubscribe, connected} = useChannel(actionCable);
 
-  const [
-    showCancelSheetConfirmationSheet,
-    setShowCancelSheetConfirmationSheet,
-  ] = useState<boolean>(false);
   const [showOrderDeliveredSheet, setShowOrderDeliveredSheet] =
     useState<boolean>(false);
 
-  const navigation = useNavigation();
-  const consentSheetRef = useRef<any>();
-  const cancelSheet = useRef<any>();
   useEffect(() => {
-    setTimeout(() => {
-      setShowRideActionSheet(true);
-    }, 3000);
-  }, []);
-
-  useEffect(() => {
-    if (route) setItem(route?.route?.params?.item);
-  }, [route?.route?.params]);
+    if (route?.params) setItem(route?.params?.item);
+  }, [route]);
 
   // Request location permissions (for Android)
   const requestLocationPermission = async () => {
@@ -96,18 +89,29 @@ const RideArriving = (route: any) => {
   };
 
   useEffect(() => {
-    const fetchRoutes = async () => {
-      const source = [74.27597312625042, 31.442345933668406];
-      const des = [74.27898792916038, 31.500973875938808];
-      const current = [74.28242115679376, 31.45982743552883];
+    if (item) {
+      const fetchRoutes = async () => {
+        const source = [
+          Number(item?.ride_request_data?.pickup_longitude),
+          Number(item?.ride_request_data?.pickup_latitude),
+        ];
+        const des = [
+          Number(item?.ride_request_data?.dropoff_longitude),
+          Number(item?.ride_request_data?.dropoff_latitude),
+        ];
+        const current = userLocation;
 
-      const pickupToDesRoute = await fetchDirections(source, des);
-      setRouteCoordinates(pickupToDesRoute);
-      const currentToPickup = await fetchDirections(current, source);
-      setRouteToPickup(currentToPickup);
-    };
-    fetchRoutes();
-  }, []);
+        const pickupToDesRoute = await fetchDirections(source, des);
+        setRouteCoordinates(pickupToDesRoute);
+        setDestination(des);
+        setPickupLocation(source);
+
+        const currentToPickup = await fetchDirections(current, source);
+        setRouteToPickup(currentToPickup);
+      };
+      fetchRoutes();
+    }
+  }, [item]);
 
   // Fetch directions from Mapbox Directions API
   const fetchDirections = async (source, destination) => {
@@ -122,7 +126,6 @@ const RideArriving = (route: any) => {
       const routeJson = await response?.json();
       const route = routeJson.routes[0].geometry.coordinates;
 
-      // console.log('ROUTE Formated==>', route);
       return route;
       // setRouteCoordinates(route);
     } catch (error) {
@@ -169,10 +172,8 @@ const RideArriving = (route: any) => {
     };
   }, []);
 
-  const handleBroadcastData = res => {
+  const handleBroadcastData = (res: any) => {
     const {status, cancelled_by} = res?.data;
-    console.log('STATUS MANAGER => ', status);
-
     if (status === 'cancelled') {
       if (cancelled_by === 'manager') {
         navigation.replace('AppStack');
@@ -188,14 +189,14 @@ const RideArriving = (route: any) => {
     if (status === RIDE_STATUS.START_RIDE) {
       setType(RIDE_STATUS.START_RIDE);
     }
-    if (status === RIDE_STATUS.ORDER_DELIVERED) {
-      setType(RIDE_STATUS.ORDER_DELIVERED);
+    if (status === RIDE_STATUS.COMPLETE_RIDE) {
+      setType(RIDE_STATUS.COMPLETE_RIDE);
       setTimeout(() => {
         setShowOrderDeliveredSheet(true);
       }, 1000);
     }
-    if (status === RIDE_STATUS.COMPLETE_RIDE) {
-      setType(RIDE_STATUS.COMPLETE_RIDE);
+    if (status === RIDE_STATUS.ORDER_DELIVERED) {
+      setType(RIDE_STATUS.ORDER_DELIVERED);
     }
   };
 
@@ -208,7 +209,9 @@ const RideArriving = (route: any) => {
       Geolocation.getCurrentPosition(
         position => {
           const {latitude, longitude} = position.coords;
+
           setUserLocation([longitude, latitude]);
+
           fetchDirections([longitude, latitude], destination);
         },
         error => console.error('Error getting location:', error),
@@ -236,10 +239,7 @@ const RideArriving = (route: any) => {
     };
 
     getCurrentLocation();
-  }, [destination]);
-  // LDA 31.45982743552883, 74.28242115679376
-  // whadat Road 31.500973875938808, 74.27898792916038
-  // dummy current 31.442345933668406, 74.27597312625042
+  }, []);
 
   const handleCancelReason = i => {
     let temp = cancelReason?.map(val => {
@@ -263,7 +263,7 @@ const RideArriving = (route: any) => {
       role: 'manager',
       order: {
         reason: reason,
-        ride_request_id: 203,
+        ride_request_id: item?.ride_request_id,
       },
     };
     const res = await cancelInProgressRideRequest(obj);
@@ -279,37 +279,40 @@ const RideArriving = (route: any) => {
         role: 'manager',
         order: {
           status: status,
-          ride_request_id: 207,
+          ride_request_id: item?.ride_request_id,
         },
       };
 
       const resp = await updateCurrentRideStatus(obj);
       if (resp?.data) {
+        if (status === RIDE_STATUS.ORDER_DELIVERED)
+          navigation.replace('AppStack');
       }
     } catch (error) {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
-  console.log('CURRENT LOCATION===>', userLocation);
 
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Driver Arriving" />
 
       <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
-        <MapboxGL.Camera
-          zoomLevel={12}
-          centerCoordinate={[74.28242115679376, 31.45982743552883]}
-        />
-        {/* Draw the route */}
-        {destination && (
-          <MapboxGL.MarkerView coordinate={destination}>
-            {svgIcon.CurrentLocation}
+        <MapboxGL.Camera zoomLevel={12} centerCoordinate={userLocation} />
+        {userLocation && (
+          <MapboxGL.MarkerView coordinate={userLocation}>
+            {svgIcon.LiveMarker}
           </MapboxGL.MarkerView>
         )}
-        {true && (
+
+        {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
             {svgIcon.MapPin}
+          </MapboxGL.MarkerView>
+        )}
+        {pickupLocation && (
+          <MapboxGL.MarkerView coordinate={pickupLocation}>
+            {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
 
@@ -358,7 +361,7 @@ const RideArriving = (route: any) => {
         <DriverDetailSheet
           type={type}
           onPressCancelOrder={() => consentSheetRef?.current.open()}
-          handleBtn={handleRideStatus}
+          handleRideStatus={handleRideStatus}
           item={item}
           myLocation={location}
         />
@@ -388,7 +391,15 @@ const RideArriving = (route: any) => {
         }}
         disabled={!cancelReason?.some(val => val.isSelected)}
       />
-      {showOrderDeliveredSheet && <OrderDeliveredSheet item={item} />}
+
+      {showOrderDeliveredSheet && (
+        <OrderDeliveredSheet
+          item={item}
+          onPressOrderDelivered={handleRideStatus}
+        />
+      )}
+
+      {cancelRideLoading && <AppLoader />}
     </MainWrapper>
   );
 };
