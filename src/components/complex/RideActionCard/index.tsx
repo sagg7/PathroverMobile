@@ -31,8 +31,6 @@ const RideActionCard = ({
   type,
   onPressBtn,
 }: RideActionCardProps) => {
-  console.log('TYPE==>', type);
-
   const item = data;
 
   return (

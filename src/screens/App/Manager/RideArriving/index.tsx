@@ -33,16 +33,16 @@ import OrderDeliveredSheet from './OrderDelivered';
 import {useActionCable} from '../../../../hooks/socket/useActionCable';
 import {useChannel} from '../../../../hooks/socket/useChannel';
 import {useSelector} from 'react-redux';
+import useLocation from '../../../../hooks/getLocation';
 
 const RideArriving = (route: any) => {
-  // const item = route?.route?.params?.item;
-
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [routeToPickup, setRouteToPickup] = useState<any>([]);
   const {accessToken} = useSelector((state: any) => state?.auth);
 
   const [item, setItem] = useState<any>(null);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState<any>(null);
+  const {location} = useLocation();
   const [destination, setDestination] = useState([
     // item?.dropoff_longitude,
     // item?.dropoff_latitude,
@@ -200,44 +200,43 @@ const RideArriving = (route: any) => {
   };
 
   // Get user's current location and start tracking
-  // useEffect(() => {
-  //   const getCurrentLocation = async () => {
-  //     const hasPermission = await requestLocationPermission();
-  //     if (!hasPermission) return;
+  useEffect(() => {
+    const getCurrentLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+      // Get initial location
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setUserLocation([longitude, latitude]);
+          fetchDirections([longitude, latitude], destination);
+        },
+        error => console.error('Error getting location:', error),
+        {enableHighAccuracy: true},
+      );
 
-  //     // Get initial location
-  //     Geolocation.getCurrentPosition(
-  //       position => {
-  //         const {latitude, longitude} = position.coords;
-  //         setUserLocation([longitude, latitude]);
-  //         fetchDirections([longitude, latitude], destination);
-  //       },
-  //       error => console.error('Error getting location:', error),
-  //       {enableHighAccuracy: true},
-  //     );
+      // Track user's location
+      const watchId = Geolocation.watchPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          const currentLocation = [longitude, latitude];
+          setUserLocation(currentLocation);
 
-  //     // Track user's location
-  //     const watchId = Geolocation.watchPosition(
-  //       position => {
-  //         const {latitude, longitude} = position.coords;
-  //         const currentLocation = [longitude, latitude];
-  //         setUserLocation(currentLocation);
+          // Check if the user is off the route and reroute if necessary
+          if (isUserOffRoute(currentLocation)) {
+            console.log('User is off the route. Recalculating...');
+            fetchDirections(currentLocation, destination);
+          }
+        },
+        error => console.error('Error watching location:', error),
+        {enableHighAccuracy: true, distanceFilter: 10},
+      );
 
-  //         // Check if the user is off the route and reroute if necessary
-  //         if (isUserOffRoute(currentLocation)) {
-  //           console.log('User is off the route. Recalculating...');
-  //           fetchDirections(currentLocation, destination);
-  //         }
-  //       },
-  //       error => console.error('Error watching location:', error),
-  //       {enableHighAccuracy: true, distanceFilter: 10},
-  //     );
+      return () => Geolocation.clearWatch(watchId);
+    };
 
-  //     return () => Geolocation.clearWatch(watchId);
-  //   };
-
-  //   getCurrentLocation();
-  // }, [destination]);
+    getCurrentLocation();
+  }, [destination]);
   // LDA 31.45982743552883, 74.28242115679376
   // whadat Road 31.500973875938808, 74.27898792916038
   // dummy current 31.442345933668406, 74.27597312625042
@@ -291,6 +290,7 @@ const RideArriving = (route: any) => {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
+  console.log('CURRENT LOCATION===>', userLocation);
 
   return (
     <MainWrapper style={styles.container}>
@@ -359,6 +359,8 @@ const RideArriving = (route: any) => {
           type={type}
           onPressCancelOrder={() => consentSheetRef?.current.open()}
           handleBtn={handleRideStatus}
+          item={item}
+          myLocation={location}
         />
       )}
 

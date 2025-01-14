@@ -100,8 +100,7 @@ const VehiclesOffer = ({route}: any) => {
       const resp: any = await acceptDeclineDriverOffer(obj);
       if (resp?.data) {
         if (status === OFFER_STATUS.ACCEPTED) {
-          // Navigate the Manager to the Ride Arrive Module
-          navigation.navigate(Routes.RideArriving);
+          navigation.navigate(Routes.RideArriving, {item: item});
           setRideOffersFromDriver([]);
         } else {
           setRideOffersFromDriver((prev: any) =>

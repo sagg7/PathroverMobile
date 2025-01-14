@@ -1,5 +1,5 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   appIcons,
   PFColors,
@@ -11,11 +11,13 @@ import {
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import {AppButton} from '../../../../components';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 interface DriverDetailSheetProp {
   onPressCancelOrder: () => void;
   item: any;
   type: string;
   handleRideStatus?: any;
+  myLocation: any;
 }
 
 const DriverDetailSheet = ({
@@ -23,7 +25,25 @@ const DriverDetailSheet = ({
   item,
   type,
   handleRideStatus,
+  myLocation,
 }: DriverDetailSheetProp) => {
+  const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (item) getResults();
+  }, [item]);
+
+  const getResults = async () => {
+    const driverLocation = [
+      Number(item?.driver_location_longitude),
+      Number(item?.driver_location_latitude),
+    ];
+    const location = [myLocation?.longitude, myLocation?.latitude];
+
+    const locResults = await getTimeAndDistance(location, driverLocation);
+
+    setResult(locResults);
+  };
   return (
     <View style={styles.modalContainer}>
       {/* {svgIcon.DragablePin} */}
@@ -32,17 +52,23 @@ const DriverDetailSheet = ({
           ? 'Driver Reached'
           : type === RIDE_STATUS.START_RIDE
           ? 'Driver is heading to destination'
-          : 'Your Driver is comming in 3:35'}
+          : `Your Driver is comming in ${
+              result?.duration == '0 min' ? 'few moments' : result?.duration
+            }`}
       </Text>
       <View style={styles.driverProfileContainer}>
         <View style={styles.row}>
           <Image
-            source={appIcons.userPlaceholder}
+            source={
+              item?.profile_image
+                ? {uri: item?.profile_image}
+                : appIcons.userPlaceholder
+            }
             style={styles.driverProfile}
           />
           <View style={styles.driverNameContainer}>
             <Text style={styles.name} numberOfLines={1}>
-              Driver Name
+              {item?.user_name}
             </Text>
             <View style={{height: 3}} />
             <Text style={styles.location}>{svgIcon.MiniPin}800m</Text>
@@ -72,7 +98,7 @@ const DriverDetailSheet = ({
       </View>
       <View style={[styles.row, {width: WP('30'), marginTop: WP('4')}]}>
         {svgIcon.VanFilledIcon}
-        <Text style={styles.price}> $9999</Text>
+        <Text style={styles.price}> ${item?.amount}</Text>
       </View>
       {type === 'Initial' && (
         <AppButton
