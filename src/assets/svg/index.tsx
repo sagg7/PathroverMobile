@@ -68,6 +68,7 @@ import MiniPin from './miniPin.svg';
 import MiniRatingIcon from './miniRatingIcon.svg';
 import VanFilledIcon from './van.svg';
 import LiveMarker from './liveMarker.svg';
+import Pin2 from './pin2.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -139,4 +140,5 @@ export const svgIcon = {
   MiniRatingIcon: <MiniRatingIcon />,
   VanFilledIcon: <VanFilledIcon />,
   LiveMarker: <LiveMarker />,
+  Pin2: <Pin2 />,
 };

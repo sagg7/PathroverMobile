@@ -1,5 +1,5 @@
 import {View, Text, Image, TouchableOpacity, ScrollView} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -7,9 +7,9 @@ import {
   MainWrapper,
 } from '../../../../components';
 import styles from './styles';
-import {appIcons} from '../../../../shared/exporter';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import {appIcons, HP, isIOS, WP} from '../../../../shared/exporter';
 import {DatePicker} from '../../../../components';
-import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
@@ -22,6 +22,7 @@ interface ClickableViewProps {
 const FilterScreen = (route: any) => {
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [show, setShow] = useState(false);
+  const refScrollable = useRef<any>();
   const [date, setDate] = useState(
     route?.route?.params?.date ? route?.route?.params?.date : '',
   );
@@ -31,7 +32,6 @@ const FilterScreen = (route: any) => {
   const [selectedLocation, setSelectedLocation] = useState<any>(
     route?.route?.params?.location ? route?.route?.params?.location : null,
   );
-  console.log('route?.route?.params?.location', route?.route?.params);
 
   useEffect(() => {
     if (location) setMyLocation([location?.longitude, location?.latitude]);
@@ -81,7 +81,7 @@ const FilterScreen = (route: any) => {
   const onPressLocationDone = () => {
     setSelectedLocation(myLocation);
     setTimeout(() => {
-      setShowLocationSheet(false);
+      refScrollable.current.close();
     }, 1000);
   };
 
@@ -99,15 +99,33 @@ const FilterScreen = (route: any) => {
       <ClickableView
         title={'Location'}
         icon={svgIcon.BlueMarker}
-        onPress={() => setShowLocationSheet(true)}
+        // onPress={() => setShowLocationSheet(true)
+        onPress={() => refScrollable.current.open()}
       />
-      <FilterLocationSheet
-        modalVisible={showLocationSheet}
-        onPressCancel={() => setShowLocationSheet(false)}
-        currentLocation={selectedLocation ? selectedLocation : myLocation}
-        setLocation={setMyLocation}
-        onPressDone={() => onPressLocationDone()}
-      />
+
+      <RBSheet
+        ref={refScrollable}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customStyles={{
+          container: {
+            height: HP('60'),
+            borderTopLeftRadius: WP('3'),
+            borderTopRightRadius: WP('3'),
+          },
+        }}>
+        <FilterLocationSheet
+          modalVisible={refScrollable}
+          onPressCancel={() => refScrollable?.current.close()}
+          currentLocation={selectedLocation ? selectedLocation : myLocation}
+          setLocation={setMyLocation}
+          onPressDone={() => onPressLocationDone()}
+          setModalVisible={() => refScrollable?.current.close()}
+        />
+      </RBSheet>
+
       <DatePicker
         show={show}
         onCancel={() => setShow(false)}

@@ -289,7 +289,7 @@ const OrderPickup = ({route}: any) => {
 
         {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
-            {svgIcon.MapPin}
+            {svgIcon.Pin2}
           </MapboxGL.MarkerView>
         )}
         {pickupLocation && (

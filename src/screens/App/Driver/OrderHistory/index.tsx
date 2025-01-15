@@ -1,4 +1,4 @@
-import {View, FlatList} from 'react-native';
+import {View, FlatList, Text} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   AppLoader,
@@ -8,7 +8,12 @@ import {
   RideHistoryCard,
 } from '../../../../components';
 import styles from './styles';
-import {OrderHistoryOptions, Routes} from '../../../../shared/exporter';
+import {
+  OrderHistoryOptions,
+  Routes,
+  showAlert,
+  UNEXPECTED_ERROR,
+} from '../../../../shared/exporter';
 import {useNavigation} from '@react-navigation/native';
 import {
   useDeleteOfferHistoryMutation,
@@ -22,7 +27,7 @@ const OrderHistory = ({}) => {
   const navigation = useNavigation();
   const [queryParams, setQueryParams] = useState({
     role: 'driver',
-    status: 'all',
+    // status: 'all',
   });
   const delSheet = useRef<any>();
   const [selectedDate, setSelectedDate] = useState<any>(null);
@@ -50,7 +55,7 @@ const OrderHistory = ({}) => {
     setSelectedIndex(index);
     setQueryParams((prev: any) => ({
       ...prev,
-      status: status,
+      ...{status: status},
     }));
   }, []);
 
@@ -60,6 +65,8 @@ const OrderHistory = ({}) => {
     if (resp?.data) {
       refetch();
       delSheet.current.close();
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
     }
   };
 
@@ -71,7 +78,10 @@ const OrderHistory = ({}) => {
           setQueryParams((prev: any) => ({
             ...prev,
             ...(filterData?.date && {date: filterData.date}),
-            ...(filterData?.location && {location: filterData.location}),
+            ...(filterData?.location && {
+              'location[latitude]': filterData.location[1],
+              'location[longitude]': filterData.location[0],
+            }),
           }));
         } else {
           // Reset to default queryParams
@@ -98,29 +108,6 @@ const OrderHistory = ({}) => {
     });
   };
 
-  // const navigateToFilter = () => {
-  //   navigation.navigate(Routes.FilterScreen, {
-  //     onSelectDate: date => {
-  //       setSelectedDate(date);
-  //       console.log('DATE ROUTING', date);
-
-  //       if (date) {
-  //         setQueryParams((prev: any) => ({
-  //           ...prev,
-  //           ...(date && {date}),
-  //         }));
-  //       } else {
-  //         setQueryParams({
-  //           role: 'manager',
-  //           status: 'all',
-  //         });
-  //       }
-  //     },
-  //     date: selectedDate,
-  //     location: '',
-  //   });
-  // };
-
   return (
     <MainWrapper>
       <BottomTabScreenHeader
@@ -145,13 +132,20 @@ const OrderHistory = ({}) => {
             index={index}
             onPressDel={() => {
               setDelId(item?.id);
-              console.log('===>', item?.id);
               delSheet.current.open();
             }}
             onPressCard={() => navigation.navigate(Routes.OrderDetails)}
           />
         )}
         keyExtractor={item => item.id}
+        ListEmptyComponent={
+          <View style={styles.noRidesContainer}>
+            <Text style={styles.noRidesText}>
+              {' '}
+              {isLoading ? '' : 'No Rides Found'}
+            </Text>
+          </View>
+        }
       />
       <ConsentSheet
         ref={delSheet}
@@ -162,7 +156,7 @@ const OrderHistory = ({}) => {
         onPressSuccess={handleDelOffer}
         fontSize={14}
       />
-      {isLoading && deleteLoader && <AppLoader />}
+      {(isLoading || deleteLoader) && <AppLoader />}
     </MainWrapper>
   );
 };

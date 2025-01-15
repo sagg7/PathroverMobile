@@ -106,16 +106,18 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   }
 };
 export const formatDate = (dateString: string) => {
-  const [day, month, year] = dateString.split('-').map(Number);
+  if (dateString) {
+    const [day, month, year] = dateString?.split('-')?.map(Number);
 
-  const date = new Date(year, month - 1, day); // Month is 0-based in JavaScript
+    const date = new Date(year, month - 1, day); // Month is 0-based in JavaScript
 
-  if (isNaN(date.getTime())) {
-    return 'Invalid Date';
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    const formattedDay = String(date.getDate()).padStart(2, '0');
+    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const formattedYear = date.getFullYear();
+
+    return `${formattedDay}/${formattedMonth}/${formattedYear}`;
   }
-  const formattedDay = String(date.getDate()).padStart(2, '0');
-  const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
-  const formattedYear = date.getFullYear();
-
-  return `${formattedDay}/${formattedMonth}/${formattedYear}`;
 };

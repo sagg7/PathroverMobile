@@ -8,6 +8,7 @@ import {
   PFFonts,
   WP,
   fetchSuggestions,
+  isIOS,
 } from '../../../shared/exporter';
 import {AppInput} from '../..';
 import MapboxGL from '@rnmapbox/maps';
@@ -32,7 +33,7 @@ const FilterLocationSheet = ({
 }: FilterLocationSheetProps) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const debounceTimeout = useRef(null);
+  const debounceTimeout = useRef<any>(null);
 
   const handleSelect = (place: any) => {
     const [longitude, latitude] = place.center;
@@ -59,13 +60,9 @@ const FilterLocationSheet = ({
   };
 
   return (
-    <Modal
-      useNativeDriver
-      isVisible={modalVisible}
-      onBackdropPress={setModalVisible}
-      avoidKeyboard
-      style={styles.modalContainer}>
+    <View>
       <View style={styles.container}>
+        <View style={{height: 20}} />
         <View style={styles.sheetHeader}>
           <Text style={styles.selectOptionText}>Location</Text>
           <TouchableOpacity onPress={onPressCancel}>
@@ -77,16 +74,17 @@ const FilterLocationSheet = ({
           value={query}
           onChangeText={handleChangeText}
         />
-
-        <FlatList
-          data={suggestions}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <TouchableOpacity onPress={() => handleSelect(item)}>
-              <Text style={{padding: 10}}>{item.place_name}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        <View style={styles.listOverlay}>
+          <FlatList
+            data={suggestions}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <TouchableOpacity onPress={() => handleSelect(item)}>
+                <Text style={{padding: 10}}>{item.place_name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       </View>
       <Text style={styles.titleStyles}>Choose on map</Text>
       {currentLocation && (
@@ -112,7 +110,7 @@ const FilterLocationSheet = ({
         buttonStyle={styles.btnStyles}
         handleClick={onPressDone}
       />
-    </Modal>
+    </View>
   );
 };
 
@@ -137,6 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     marginVertical: WP('5'),
+    zIndex: -1,
   },
   map: {
     flex: 1,
@@ -148,6 +147,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     marginHorizontal: WP('6'),
     paddingTop: WP('5s'),
+    zIndex: -2,
   },
   btnStyles: {
     alignSelf: 'center',
@@ -163,5 +163,15 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  listOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    maxHeight: '290%',
+    backgroundColor: PFColors.Standard.White,
+    zIndex: 100,
+
+    marginTop: isIOS() ? WP('35') : WP('37'),
   },
 });

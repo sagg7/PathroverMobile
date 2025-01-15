@@ -63,7 +63,7 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         headers: {},
       }),
     }),
-    //
+
     cancelInProgressRideRequest: builder.mutation({
       query: (data: any) => ({
         url: `orders/cancel_order`,

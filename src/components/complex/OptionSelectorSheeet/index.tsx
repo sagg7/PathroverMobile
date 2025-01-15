@@ -30,7 +30,7 @@ interface OptionSelectorSheetProps {
 
 const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(
   ({data, onPressWeight, onPressModel, isCompany = false}, ref) => {
-    const refScrollable = useRef<any>(null);
+    const refScrollable = useRef(null);
     const modelArr = data?.find(item => item.isWeightSelected)?.model;
     const itemInfo = modelArr?.find(item => item.isModelSelected);
     const trailerObj = data?.find(item => item.isWeightSelected);
