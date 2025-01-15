@@ -258,7 +258,13 @@ const RideArriving = ({route}: any) => {
     });
     setCancelReason(temp);
   };
-  const handleCancelOrderBtn = async (reason: string) => {
+  const handleCancelOrderBtn = async () => {
+    const reason: any = cancelReason?.find(
+      (item: any) => item?.isSelected,
+    )?.title;
+
+    cancelSheet.current.close();
+
     const obj: any = {
       role: 'manager',
       order: {
@@ -267,9 +273,11 @@ const RideArriving = ({route}: any) => {
       },
     };
     const res = await cancelInProgressRideRequest(obj);
+
     if (res?.data) {
-      cancelSheet.current.close();
-      navigation.replace('AppStack');
+      setTimeout(() => {
+        navigation.replace('AppStack');
+      }, 500);
     }
   };
 
@@ -385,10 +393,7 @@ const RideArriving = ({route}: any) => {
         data={cancelReason}
         onPressWeight={handleCancelReason}
         isCompany
-        handleCancelSheetDone={() => {
-          const sel: any = cancelReason?.find(i => i.isSelected)?.title;
-          handleCancelOrderBtn(sel);
-        }}
+        handleCancelSheetDone={handleCancelOrderBtn}
         disabled={!cancelReason?.some(val => val.isSelected)}
       />
 
