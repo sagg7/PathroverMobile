@@ -1,115 +1,174 @@
-import {FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import {AppHeader, MainWrapper} from '../../../../../components';
-import {scale} from '../../../../../shared/theme/responsive';
-import {PFColors, PFFonts} from '../../../../../shared/exporter';
-import {svgIcon} from '../../../../../assets/svg';
+import {FlatList, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {
+  AppHeader,
+  AppLoader,
+  MainWrapper,
+  OfferExpireCard,
+} from '../../../../../components';
 import OfferCard from './OfferCard';
+import styles from './styles';
+import {useActionCable} from '../../../../../hooks/socket/useActionCable';
+import {
+  OFFER_STATUS,
+  REQ_LIST_SOCKET_URL,
+  Routes,
+  showAlert,
+  UNEXPECTED_ERROR,
+} from '../../../../../shared/exporter';
+import {useChannel} from '../../../../../hooks/socket/useChannel';
+import {useNavigation} from '@react-navigation/native';
+import {getTimeAndDistance} from '../../../shared/utils/helpers';
 
-const VehiclesOffer = () => {
+import {
+  useCancelRideRequestMutation,
+  useAcceptDeclineDriverOfferMutation,
+} from '../../../../../redux/manager/managerApiSlice';
+import useLocation from '../../../../../hooks/getLocation';
+
+const VehiclesOffer = ({route}: any) => {
+  const [rideOffersFromDriver, setRideOffersFromDriver] = useState<any>([]);
+  const {accessToken} = useSelector((state: any) => state?.auth);
+  const cleanedToken = accessToken.replace('Bearer ', '');
+  const navigation: any = useNavigation();
+  const [seconds, setSeconds] = useState(300);
+  const {location} = useLocation();
+
+  const myLocation = [location?.longitude, location?.latitude];
+
+  // APIs
+  const [acceptDeclineDriverOffer, {isLoading}] =
+    useAcceptDeclineDriverOfferMutation();
+
+  const [cancelRideRequest, {isLoading: cancelLoading}] =
+    useCancelRideRequestMutation();
+
+  // Socket
+  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
+  const {subscribe, unsubscribe} = useChannel(actionCable);
+
+  useEffect(() => {
+    if (seconds > 0) {
+      const timerId = setTimeout(() => {
+        setSeconds(prevSeconds => prevSeconds - 1);
+      }, 1000);
+
+      return () => clearTimeout(timerId);
+    } else {
+      // handleCancelRequest();
+    }
+  }, [seconds]);
+
+  // Format seconds into MM:SS
+  const formatTime = (totalSeconds: any) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${minutes}:${secs < 10 ? `0${secs}` : secs}`;
+  };
+
+  useEffect(() => {
+    subscribe(
+      {
+        channel: 'RideOffersChannel',
+      },
+      {
+        received: res => {
+          setRideOffersFromDriver((prev: any) => [...prev, res?.data]);
+        },
+        connected: () => {
+          console.log('Connected!');
+        },
+      },
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const updateStatus = async ({status, item}: any) => {
+    try {
+      const obj = {
+        offer_data: {
+          status: status,
+          driver_id: item?.driver_id,
+          ride_request_id: item?.ride_request_id,
+          amount: item?.amount,
+        },
+      };
+
+      const resp: any = await acceptDeclineDriverOffer(obj);
+      if (resp?.data) {
+        if (status === OFFER_STATUS.ACCEPTED) {
+          navigation.navigate(Routes.RideArriving, {item: item});
+          setRideOffersFromDriver([]);
+        } else {
+          setRideOffersFromDriver((prev: any) =>
+            prev.filter(
+              (item: any) => item.ride_request_id !== item.ride_request_id,
+            ),
+          );
+        }
+      } else {
+        showAlert('Error', resp?.error?.data?.error);
+      }
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('reason', '');
+
+      const resp: any = await cancelRideRequest({
+        id: route.params?.id,
+        data: formData,
+      });
+      if (resp?.data) {
+        navigation.goBack();
+        setRideOffersFromDriver([]);
+      } else {
+        showAlert('Error', resp?.error?.data?.error);
+      }
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
   return (
     <MainWrapper>
       <AppHeader title="Request Vehicle" leftIcon={false} />
       <View style={styles.bodyConntainer}>
-        {/* <View style={styles.expireCard}>
-          <View style={styles.expireTimeView}>
-            {svgIcon.ClockRed}
-            <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
-          </View>
-          <Text style={styles.expireMessageText}>
-            Your request has been been sent, You will receive offers shortly
-          </Text>
-          <Pressable style={styles.cancelBtn}>
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </Pressable>
-        </View> */}
         <FlatList
-        contentContainerStyle={styles.flatlistContainerStyle}
+          contentContainerStyle={styles.flatlistContainerStyle}
           showsVerticalScrollIndicator={false}
-          data={[1, 2, 3]}
-          renderItem={({item}) => <OfferCard style={styles.OfferCard} />}
-          ListHeaderComponent={()=> <View style={styles.expireCard}>
-          <View style={styles.expireTimeView}>
-            {svgIcon.ClockRed}
-            <Text style={styles.expireTimeText}>Expires in: 04:53</Text>
-          </View>
-          <Text style={styles.expireMessageText}>
-            Your request has been been sent, You will receive offers shortly
-          </Text>
-          <Pressable style={styles.cancelBtn}>
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </Pressable>
-        </View>}
+          data={rideOffersFromDriver}
+          renderItem={({item, index}) => (
+            <OfferCard
+              myLocation={myLocation}
+              style={styles.OfferCard}
+              item={item}
+              index={index}
+              onPressAccept={() =>
+                updateStatus({item, status: OFFER_STATUS.ACCEPTED})
+              }
+              onPressDecline={() =>
+                updateStatus({item, status: OFFER_STATUS.REJECTED})
+              }
+            />
+          )}
+          ListHeaderComponent={() => (
+            <OfferExpireCard
+              time={formatTime(seconds)}
+              onPressCancel={() => handleCancelRequest()}
+            />
+          )}
         />
       </View>
+      {(isLoading || cancelLoading) && <AppLoader />}
     </MainWrapper>
   );
 };
 
 export default VehiclesOffer;
-
-const styles = StyleSheet.create({
-  bodyConntainer: {
-    flex: 1,
-  },
-  expireCard: {
-    backgroundColor: PFColors.Blue.lightBlue,
-    padding: scale(16),
-    borderRadius: scale(12),
-    alignItems: 'center',
-    marginBottom: scale(16),
-    marginTop:scale(24),
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.17,
-    shadowRadius: 3.05,
-    elevation: 4,
-  },
-  expireTimeView: {
-    flexDirection: 'row',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(8),
-    borderRadius: scale(20),
-    backgroundColor: PFColors.Standard.White,
-    marginBottom: scale(18),
-    alignItems: 'center',
-  },
-  expireTimeText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(10),
-    color: PFColors.Standard.Black,
-    marginLeft: scale(4),
-  },
-  expireMessageText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(14),
-    color: PFColors.Standard.Black,
-    lineHeight: scale(18),
-    textAlign: 'center',
-    marginBottom: scale(18),
-  },
-  cancelBtn: {
-    height: scale(28),
-    width: scale(118),
-    borderRadius: scale(20),
-    borderColor: PFColors.Blue.Dark,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtnText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: scale(12),
-    color: PFColors.Standard.Black,
-    lineHeight: scale(16),
-    textAlign: 'center',
-  },
-  OfferCard: {
-    marginBottom: scale(12),
-  },
-  flatlistContainerStyle:{
-    paddingHorizontal:scale(16),
-  }
-});

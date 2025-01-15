@@ -65,8 +65,8 @@ const PickUp = ({route, navigation}: any) => {
   const handleDone = () => {
     const data = {
       coords: [pickUpLoc[0], pickUpLoc[1]],
-      // latitude: pickUpLoc[0],
-      // longitude: pickUpLoc[1],
+      latitude: pickUpLoc[1],
+      longitude: pickUpLoc[0],
       placeName: placeName,
     };
 
@@ -105,16 +105,19 @@ const PickUp = ({route, navigation}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+
         {!selectedLocation && currentLocation ? (
           <MapboxGL.PointAnnotation
             coordinate={currentLocation}
-            id="current-location"
-          />
+            id="current-location">
+            {svgIcon.CurrentLocation}
+          </MapboxGL.PointAnnotation>
         ) : selectedLocation ? (
           <MapboxGL.PointAnnotation
             coordinate={selectedLocation}
-            id="start-point"
-          />
+            id="current-location">
+            {svgIcon.CurrentLocation}
+          </MapboxGL.PointAnnotation>
         ) : null}
       </MapboxGL.MapView>
       <View style={styles.sheetStyle}>

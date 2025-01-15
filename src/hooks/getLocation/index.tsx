@@ -15,7 +15,6 @@ const useLocation = () => {
     watchID = Geolocation.getCurrentPosition(
       position => {
         const {longitude, latitude} = position.coords;
-        console.log('===>, from hook', longitude, latitude);
 
         setLocation({longitude, latitude});
       },

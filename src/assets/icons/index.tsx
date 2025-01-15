@@ -29,8 +29,11 @@ export const appIcons = {
   safety: require('../icons/Safety.png'),
   privacy: require('../icons/privacy.png'),
   starFill: require('../icons/starFill.png'),
+  grayStar: require('../icons/grayStar.png'),
   starEmpty: require('../icons/starEmpty.png'),
   searchIconBlack: require('../icons/search.png'),
   redMarker: require('../icons/redPin.png'),
   routeLine: require('../icons/routeLine.png'),
+  checked: require('../icons/checked.png'),
+  mapTruck: require('../icons/mapTruck.png'),
 };

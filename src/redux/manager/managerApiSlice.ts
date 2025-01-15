@@ -48,6 +48,36 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
     }),
+    acceptDeclineDriverOffer: builder.mutation({
+      query: (data: any) => ({
+        url: 'offers/update_offer_status',
+        method: 'PUT',
+        body: data,
+      }),
+    }),
+    cancelRideRequest: builder.mutation({
+      query: ({id, data}: any) => ({
+        url: `ride_requests/${id}/cancel_ride_before_order`,
+        method: 'PUT',
+        body: data,
+        headers: {},
+      }),
+    }),
+
+    cancelInProgressRideRequest: builder.mutation({
+      query: (data: any) => ({
+        url: `orders/cancel_order`,
+        method: 'PUT',
+        body: data,
+      }),
+    }),
+    updateCurrentRideStatus: builder.mutation({
+      query: (data: any) => ({
+        url: `orders/order_stages`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
   overrideExisting: true,
 });
@@ -60,4 +90,8 @@ export const {
   useGetAllSaveRouteQuery,
   useUpdateRouteMutation,
   useDeleteRouteMutation,
+  useAcceptDeclineDriverOfferMutation,
+  useCancelRideRequestMutation,
+  useCancelInProgressRideRequestMutation,
+  useUpdateCurrentRideStatusMutation,
 } = managerApiSlice;

@@ -10,6 +10,7 @@ export const PFColors = {
   },
   Orange: {
     Dark: '#cf4727',
+    Light: '#CF47271A',
   },
   Red: {
     ErrorColor: '#ef3434',
@@ -41,5 +42,6 @@ export const PFColors = {
   Green: {
     LeafGreen: '#0e924b',
     MintLight: '#BCDEC9',
+    Light: '#0E924B1A',
   },
 };

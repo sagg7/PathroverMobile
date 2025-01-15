@@ -1,22 +1,28 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextStyle,
+} from 'react-native';
 import React from 'react';
-import { HP, PFColors, PFFontSize, PFFonts, WP } from '../../../shared/exporter';
-
+import {HP, PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 
 interface DynamicSelector {
   items: any;
-  onPressItem?: (v: any) => void,
-  selectedIndex?: number
-  count?: number,
-  btnStyles: any
+  onPressItem?: any;
+  selectedIndex?: number;
+  count?: number;
+  btnStyles: any;
 }
 
 const DynamicSelector = ({
-  items, onPressItem, selectedIndex,
+  items,
+  onPressItem,
+  selectedIndex,
   count,
-  btnStyles
+  btnStyles,
 }: DynamicSelector) => {
-
   return (
     <View style={styles.selectorView}>
       {items?.map((item, index) => (
@@ -25,14 +31,13 @@ const DynamicSelector = ({
           activeOpacity={0.7}
           disabled={item.isSelected}
           style={[button(index === selectedIndex), btnStyles]}
-          onPress={() => onPressItem(index)}>
+          onPress={() => onPressItem(index, item?.status)}>
           <Text style={buttonText(index === selectedIndex)}>{item.title}</Text>
-          {index === selectedIndex && count &&
-
+          {index === selectedIndex && count > 0 && (
             <View style={styles.whiteDigit}>
-              <Text style={styles.countStyles}>5</Text>
+              <Text style={styles.countStyles}>{count}</Text>
             </View>
-          }
+          )}
         </TouchableOpacity>
       ))}
     </View>
@@ -53,18 +58,17 @@ const button = (isSelected: boolean): TextStyle => ({
   borderWidth: 1,
   borderColor: isSelected ? PFColors.Blue.Dark : PFColors.Gray.AshGray,
   marginRight: 15,
-  flexDirection: "row",
-
-})
+  flexDirection: 'row',
+});
 
 const styles = StyleSheet.create({
   selectorView: {
     flexDirection: 'row',
     height: HP('4'),
     alignItems: 'center',
-    borderColor: "pink",
+    borderColor: 'pink',
     marginVertical: WP('2'),
-    marginHorizontal: WP('5')
+    marginHorizontal: WP('5'),
   },
   countStyles: {
     fontFamily: PFFonts.Foundation.Medium,
@@ -73,10 +77,12 @@ const styles = StyleSheet.create({
   },
   whiteDigit: {
     backgroundColor: PFColors.Standard.White,
-    borderRadius: 30, height: 25,
-    width: 25, justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 5
-  }
+    borderRadius: 30,
+    height: 25,
+    width: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 5,
+  },
 });
-export { DynamicSelector };
+export {DynamicSelector};

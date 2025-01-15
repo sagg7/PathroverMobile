@@ -27,16 +27,17 @@ export const BottomTab: React.FC<BottomTabProps> = ({
   navigation,
 }) => {
   const renderIcon = (index: number, name: string) => {
-
     switch (index) {
       case 0:
-        return name === 'Request Life'
+        return name === 'Request List'
           ? svgIcon.RequestList
           : svgIcon.MyRequest;
       case 1:
         return name === 'Wallet' ? svgIcon.Wallet : svgIcon.CreateRoute;
       case 2:
-        return name === 'Order History' ? svgIcon.OrderHistory : svgIcon.RequestHistory;
+        return name === 'Order History'
+          ? svgIcon.OrderHistory
+          : svgIcon.RequestHistory;
       default:
         return svgIcon.More;
     }

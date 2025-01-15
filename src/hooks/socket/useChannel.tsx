@@ -4,13 +4,14 @@ import {Cable, Channel} from '@kesha-antonov/react-native-action-cable';
 interface SubscriptionData {
   channel: string;
   channel_key?: string;
-  [key: string]: any; // Additional properties for dynamic data
+  [key: string]: any;
 }
 
 interface Callbacks {
   received?: (data: any) => void;
-  connected?: (data: any) => void;
+  connected?: () => void;
   disconnected?: () => void;
+  rejected?: () => void;
 }
 
 interface UseChannelReturn {
@@ -23,39 +24,37 @@ interface UseChannelReturn {
 export const useChannel = (actionCable: Cable): UseChannelReturn => {
   const channelRef = useRef<Channel | null>(null);
   const [connected, setConnected] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
     return () => {
-      unsubscribe();
+      if (channelRef?.current) unsubscribe();
     };
   }, []);
 
-  const subscribe = (data: SubscriptionData, callbacks: Callbacks) => {
-    const cable = new Cable({});
-    const channel = cable.setChannel(
-      data.channel,
-      actionCable.subscriptions.create(data),
-    );
+  const subscribe = (data: SubscriptionData, callbacks?: Callbacks) => {
+    console.log('Subscribing to channel =>', data);
+
+    const channel = actionCable.subscriptions.create({
+      channel: data.channel,
+    });
 
     channel
-      .on('received', (x: any) => {
-        console.log('Received from ' + data?.channel);
-        if (callbacks?.received) callbacks.received(x);
+      .on('received', (message: any) => {
+        console.log('Received message from', data.channel, message);
+        if (callbacks?.received) callbacks.received(message);
       })
-      .on('connected', (x: any) => {
-        console.log('Connected to ' + data?.channel);
+      .on('connected', () => {
+        console.log('Connected to', data.channel);
         setConnected(true);
-        setSubscribed(true);
-        if (callbacks?.connected) callbacks.connected(x);
+        if (callbacks?.connected) callbacks.connected();
       })
       .on('rejected', () => {
-        console.log('Rejected');
+        console.log('Subscription rejected for', data.channel);
         setConnected(false);
-        if (callbacks?.disconnected) callbacks.disconnected();
+        if (callbacks?.rejected) callbacks.rejected();
       })
       .on('disconnected', () => {
-        console.log('Disconnected');
+        console.log('Disconnected from', data.channel);
         setConnected(false);
         if (callbacks?.disconnected) callbacks.disconnected();
       });
@@ -64,30 +63,30 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
   };
 
   const send = (type: string, payload: any) => {
-    if (subscribed && !connected) {
-      throw new Error('useChannel - ERROR: not connected');
+    if (!connected) {
+      console.error('useChannel - ERROR: not connected');
+      return;
     }
-    if (!subscribed) {
-      throw new Error('useChannel - ERROR: not subscribed');
+
+    if (!channelRef.current) {
+      console.error('useChannel - ERROR: no channel reference');
+      return;
     }
+
     try {
-      channelRef.current?.perform('send_message', {text: 'Hey'});
-      // channelRef?.current?.send(type, payload);
+      channelRef.current.perform(type, payload);
     } catch (e) {
-      throw new Error('useChannel - ERROR: ' + e);
+      console.error('useChannel - ERROR:', e);
     }
   };
 
   const unsubscribe = () => {
-    setSubscribed(false);
     if (channelRef.current) {
-      console.log(
-        'useChannel - INFO: Unsubscribing from ' +
-          channelRef.current.identifier,
-      );
+      console.log('Unsubscribing from', channelRef.current.identifier);
       actionCable.subscriptions.remove(channelRef.current);
       channelRef.current = null;
     }
+    setConnected(false);
   };
 
   return {subscribe, unsubscribe, send, connected};

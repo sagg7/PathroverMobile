@@ -11,16 +11,18 @@ export const useActionCable = (
 ): UseActionCableReturn => {
   const actionCable = useMemo(
     () => ActionCable.createConsumer(`${url}token=${token}`),
-    [url, token], // Include dependencies
+    [url, token],
   );
 
   useEffect(() => {
     // ActionCable.startDebugging();
+    console.log('Action Cable Connected');
+
     return () => {
-      console.log('Disconnect Action Cable');
+      console.log('Action Cable Disconnected');
       actionCable.disconnect();
     };
-  }, [actionCable]); // Include actionCable in dependencies
+  }, [actionCable]);
 
   return {actionCable};
 };

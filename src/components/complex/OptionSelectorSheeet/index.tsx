@@ -25,7 +25,7 @@ interface OptionSelectorSheetProps {
   onPressModel?: (v: any) => void;
   onPressWeight?: (v: any) => void;
   isCompany?: boolean;
-  ref:any
+  ref: any;
 }
 
 const OptionSelectorSheet: React.FC<OptionSelectorSheetProps> = forwardRef(

@@ -8,7 +8,7 @@ import { svgIcon } from '../../../assets/svg';
 
 interface ReviewsListSheetProps {
     modalVisible: boolean;
-    setModalVisible: () => void;
+    setModalVisible?: () => void;
     onPressDone: () => void;
     onPressCross: () => void
 }

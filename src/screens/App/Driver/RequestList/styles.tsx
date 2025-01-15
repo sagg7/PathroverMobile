@@ -138,6 +138,54 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: PFColors.Blue.Dark,
   },
+  waitingContainer: {
+    padding: WP('5'),
+    marginVertical: 15,
+    borderRadius: WP('3'),
+    marginHorizontal: WP('4'),
+    backgroundColor: PFColors.Orange.Light,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+  },
+  iconStyle: {
+    bottom: 1,
+    width: WP('5'),
+    height: WP('5'),
+  },
+  waitingText: {
+    paddingHorizontal: WP('3'),
+    color: PFColors.Orange.Dark,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  waitingTextDesc: {
+    paddingTop: WP('2'),
+    paddingHorizontal: WP('3'),
+    color: PFColors.Orange.Dark,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    fontFamily: PFFonts.Foundation.Regular,
+  },
+  approvedContainer: {
+    padding: WP('5'),
+    marginVertical: 15,
+    borderRadius: WP('3'),
+    marginHorizontal: WP('4'),
+    backgroundColor: PFColors.Green.Light,
+  },
+  approvedText: {
+    paddingHorizontal: WP('3'),
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  approvedTextDesc: {
+    paddingTop: WP('2'),
+    paddingHorizontal: WP('3'),
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    fontFamily: PFFonts.Foundation.Regular,
+  },
   turnOnOfText: {
     fontSize: PFFontSize.FONT_SIZE_16,
     color: PFColors.Standard.Black,
@@ -145,7 +193,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 25,
   },
-
+  noRidesContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noRidesText: {
+    bottom: WP('2'),
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_18,
+    fontFamily: PFFonts.Foundation.Bold,
+  },
   inputContainerView: {
     width: '100%',
     borderWidth: 1,

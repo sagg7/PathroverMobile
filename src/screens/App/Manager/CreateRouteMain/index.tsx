@@ -34,6 +34,7 @@ const CreateRoute = () => {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [route, setRoute] = useState<any>([]);
+
   const {managerRoute} = useSelector(state => state.manager);
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
@@ -344,7 +345,6 @@ const CreateRoute = () => {
 
       {'destination' in managerRoute && 'pickup' && (
         <AppButton
-          // disabled={}
           title="Create Route"
           buttonStyle={styles.createRouteBtn}
           handleClick={() =>

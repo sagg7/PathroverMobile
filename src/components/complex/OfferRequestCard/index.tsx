@@ -1,43 +1,69 @@
+import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
 import {
   PFColors,
   PFFontSize,
   PFFonts,
   WP,
   appIcons,
+  appImages,
 } from '../../../shared/exporter';
 import {FromAndToCard} from '../FromAndToCard';
 import {PickAndDropTimeCard} from '../PickAndDropTimeCard';
 import {AppButton} from '../AppButton';
+import {getTimeAndDistance} from '../../../shared/utils/helpers';
+import useLocation from '../../../hooks/getLocation';
 
 interface OfferRequestCardProps {
-  onPressDecline?: () => void;
-  onPressAccept?: () => void;
+  onPressDecline: (item: any) => void;
+  onPressAccept: (item: any) => void;
   item?: any;
+  index: number;
+  location?: any;
 }
 
 const OfferRequestCard = ({
   onPressAccept,
   onPressDecline,
   item,
+  index,
+  location,
 }: OfferRequestCardProps) => {
+  const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (item) getResults();
+  }, [item, location]);
+
+  const getResults = async () => {
+    const pickupLocation = [
+      Number(item?.pickup_longitude),
+      Number(item?.pickup_latitude),
+    ];
+    const locResults = await getTimeAndDistance(location, pickupLocation);
+
+    setResult(locResults);
+  };
+
   return (
-    <View style={styles.mainContainer}>
+    <View style={styles.mainContainer} key={index}>
       <View style={styles.blueHeader}>
         <Text style={styles.blueHeaderText}>Per Mile $1220.00</Text>
         <Text style={styles.blueHeaderText}>|</Text>
         <Text style={styles.blueHeaderText}>Expected Earning $371.00 </Text>
       </View>
       <View style={styles.innerContainer}>
-        {/* requestByComponent */}
         <View style={styles.requestByContainer}>
           <View style={styles.row}>
             <Image
-              source={appIcons.userPlaceholder}
+              source={
+                item?.manager_profile_image
+                  ? {uri: item?.manager_profile_image}
+                  : appImages.userPlaceholder
+              }
               style={styles.userProfile}
             />
-            <Text style={styles.username}>Philip Smith</Text>
+            <Text style={styles.username}>{item?.user_name}</Text>
           </View>
           <View style={styles.row}>
             <Image
@@ -45,16 +71,20 @@ const OfferRequestCard = ({
               style={styles.truckIcon}
               resizeMode="contain"
             />
-            <Text style={styles.truckName}>Semi Truck</Text>
+            <Text style={styles.truckName}>{item?.vehicle_type}</Text>
           </View>
         </View>
         <View style={styles.horizontalBar} />
-        {/* From and to Card */}
-        <FromAndToCard />
+        <FromAndToCard
+          dropOff={item?.dropoff_location_name}
+          pickup={item?.pickup_location_name}
+        />
         <View style={styles.horizontalBar} />
-        {/* Pickup & Drop Time Card */}
-        <PickAndDropTimeCard type={'pickup'} />
-        <PickAndDropTimeCard type={'delivery'} />
+        <PickAndDropTimeCard
+          type={'pickup'}
+          value={`${result?.distance || ''}, ${result?.duration || ''}`}
+        />
+        <PickAndDropTimeCard type={'delivery'} value={item?.estimated_time} />
         <View style={styles.horizontalBar} />
 
         <View style={styles.cardFooter}>
@@ -63,23 +93,19 @@ const OfferRequestCard = ({
             style={styles.clockIcon}
             resizeMode="contain"
           />
-          <Text style={styles.descriptionText}>
-            Finish by loading the smaller items like the coffee table, armchair,
-            bookshelf, dresser, nightstand, and desk, taking care to arrange
-            them efficiently to maximize space.
-          </Text>
+          <Text style={styles.descriptionText}>{item?.cargo_description}</Text>
         </View>
         <View style={styles.butonContainer}>
           <AppButton
             title="Decline"
             textStyle={styles.declinetext}
             buttonStyle={[styles.btnStyles, styles.declineBtn]}
-            handleClick={onPressDecline}
+            handleClick={() => onPressDecline(item)}
           />
           <AppButton
             title="Accept"
             buttonStyle={styles.btnStyles}
-            handleClick={onPressAccept}
+            handleClick={() => onPressAccept(item)}
           />
         </View>
       </View>

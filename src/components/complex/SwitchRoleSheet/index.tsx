@@ -30,7 +30,7 @@ const SwitchRoleSheet = ({
       isVisible={modalVisible}
       onBackdropPress={setModalVisible}
       style={styles.modalContainer}>
-      {data?.map(i => {
+      {data?.map((i: any) => {
         return (
           <TouchableOpacity
             disabled={userRole === i.role}

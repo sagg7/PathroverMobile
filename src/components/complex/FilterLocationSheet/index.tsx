@@ -1,13 +1,4 @@
-import {
-  FlatList,
-  Image,
-  Linking,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import Modal from 'react-native-modal';
 import {AppButton} from '../AppButton';
@@ -16,8 +7,8 @@ import {
   PFFontSize,
   PFFonts,
   WP,
-  appIcons,
   fetchSuggestions,
+  isIOS,
 } from '../../../shared/exporter';
 import {AppInput} from '../..';
 import MapboxGL from '@rnmapbox/maps';
@@ -28,22 +19,27 @@ interface FilterLocationSheetProps {
   handleClick: (dates: {startDate: string; endDate: string}) => void;
   setModalVisible: () => void;
   onPressDone: () => void;
-  onPressCancel: () => void;
+  onPressCancel?: () => void;
+  currentLocation: any;
+  setLocation: any;
 }
 const FilterLocationSheet = ({
   modalVisible,
   setModalVisible,
   onPressDone,
   onPressCancel,
+  setLocation,
+  currentLocation,
 }: FilterLocationSheetProps) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const debounceTimeout = useRef(null);
+  const debounceTimeout = useRef<any>(null);
 
   const handleSelect = (place: any) => {
     const [longitude, latitude] = place.center;
     setQuery(place.place_name);
     setSuggestions([]);
+    setLocation([longitude, latitude]);
   };
   const handleChangeText = (text: any) => {
     setQuery(text);
@@ -57,14 +53,16 @@ const FilterLocationSheet = ({
     }, 2000);
   };
 
+  const onMapPress = (event: any) => {
+    const {geometry} = event;
+    const [longitude, latitude] = geometry.coordinates;
+    setLocation([longitude, latitude]);
+  };
+
   return (
-    <Modal
-      useNativeDriver
-      isVisible={modalVisible}
-      onBackdropPress={setModalVisible}
-      avoidKeyboard
-      style={styles.modalContainer}>
+    <View>
       <View style={styles.container}>
+        <View style={{height: 20}} />
         <View style={styles.sheetHeader}>
           <Text style={styles.selectOptionText}>Location</Text>
           <TouchableOpacity onPress={onPressCancel}>
@@ -76,32 +74,43 @@ const FilterLocationSheet = ({
           value={query}
           onChangeText={handleChangeText}
         />
-
-        <FlatList
-          data={suggestions}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <TouchableOpacity onPress={() => handleSelect(item)}>
-              <Text style={{padding: 10}}>{item.place_name}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        <View style={styles.listOverlay}>
+          <FlatList
+            data={suggestions}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <TouchableOpacity onPress={() => handleSelect(item)}>
+                <Text style={{padding: 10}}>{item.place_name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       </View>
       <Text style={styles.titleStyles}>Choose on map</Text>
-      <View style={styles.mapViewContainer}>
-        <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera
-            zoomLevel={12}
-            centerCoordinate={[74.2753883, 31.4541112]}
-          />
-        </MapboxGL.MapView>
-      </View>
+      {currentLocation && (
+        <View style={styles.mapViewContainer}>
+          <MapboxGL.MapView
+            style={styles.map}
+            scaleBarEnabled={false}
+            onPress={onMapPress}>
+            <MapboxGL.Camera
+              zoomLevel={12}
+              centerCoordinate={currentLocation}
+            />
+            {currentLocation && (
+              <MapboxGL.MarkerView coordinate={currentLocation}>
+                {svgIcon.CurrentLocation}
+              </MapboxGL.MarkerView>
+            )}
+          </MapboxGL.MapView>
+        </View>
+      )}
       <AppButton
         title="Done"
         buttonStyle={styles.btnStyles}
         handleClick={onPressDone}
       />
-    </Modal>
+    </View>
   );
 };
 
@@ -126,6 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     marginVertical: WP('5'),
+    zIndex: -1,
   },
   map: {
     flex: 1,
@@ -137,6 +147,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     marginHorizontal: WP('6'),
     paddingTop: WP('5s'),
+    zIndex: -2,
   },
   btnStyles: {
     alignSelf: 'center',
@@ -152,5 +163,15 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  listOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    maxHeight: '290%',
+    backgroundColor: PFColors.Standard.White,
+    zIndex: 100,
+
+    marginTop: isIOS() ? WP('35') : WP('37'),
   },
 });

@@ -64,6 +64,11 @@ import Sattelite from './sattelite.svg';
 import DragablePin from './dragablePin.svg';
 import CurrentLocation from './currentLocation.svg';
 import Edit from './Edit.svg';
+import MiniPin from './miniPin.svg';
+import MiniRatingIcon from './miniRatingIcon.svg';
+import VanFilledIcon from './van.svg';
+import LiveMarker from './liveMarker.svg';
+import Pin2 from './pin2.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -131,4 +136,9 @@ export const svgIcon = {
   DragablePin: <DragablePin />,
   CurrentLocation: <CurrentLocation />,
   Edit: <Edit />,
+  MiniPin: <MiniPin />,
+  MiniRatingIcon: <MiniRatingIcon />,
+  VanFilledIcon: <VanFilledIcon />,
+  LiveMarker: <LiveMarker />,
+  Pin2: <Pin2 />,
 };

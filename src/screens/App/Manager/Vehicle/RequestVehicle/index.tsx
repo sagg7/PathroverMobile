@@ -25,6 +25,7 @@ import SelectRoute from '../SelectRoute';
 import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
 import {useCreateManagerVehicleRequestMutation} from '../../../../../redux/manager/managerApiSlice';
+import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
 
 const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
@@ -149,23 +150,38 @@ const VehicleRequest = ({navigation}: any) => {
   };
 
   const handleCreateRequest = async () => {
+    const startPoint: any = [
+      selectedRouteDetails?.pickup_longitude ??
+        selectedRouteDetails?.pickup_location?.longitude,
+      selectedRouteDetails?.pickup_latitude ??
+        selectedRouteDetails?.pickup_location?.latitude,
+    ];
+
+    const endPoint: any = [
+      selectedRouteDetails?.dropoff_longitude ??
+        selectedRouteDetails?.dropoff_location?.longitude,
+      selectedRouteDetails?.dropoff_latitude ??
+        selectedRouteDetails?.dropoff_location?.latitude,
+    ];
+
+    const result = await getTimeAndDistance(startPoint, endPoint);
     const formData = new FormData();
     formData.append('ride_request[vehicle_type]', selectedVehicle?.title);
     formData.append(
-      'ride_request[pickup_latitude]',
-      selectedRouteDetails?.pickup_latitude,
+      'ride_request[locations_attributes][0][latitude]',
+      startPoint[1],
     );
     formData.append(
-      'ride_request[pickup_longitude]',
-      selectedRouteDetails?.pickup_longitude,
+      'ride_request[locations_attributes][0][longitude]',
+      startPoint[0],
     );
     formData.append(
-      'ride_request[dropoff_latitude]',
-      selectedRouteDetails?.dropoff_latitude,
+      'ride_request[locations_attributes][1][latitude]',
+      endPoint[1],
     );
     formData.append(
-      'ride_request[dropoff_longitude]',
-      selectedRouteDetails?.dropoff_longitude,
+      'ride_request[locations_attributes][1][longitude]',
+      endPoint[0],
     );
     formData.append('ride_request[cargo_images][]', {
       uri: cargoDescriptionDetails?.image.uri,
@@ -179,14 +195,29 @@ const VehicleRequest = ({navigation}: any) => {
     formData.append('ride_request[recipient_name]', recipentDetails?.name);
     formData.append('ride_request[recipient_number]', recipentDetails?.phone);
 
+    formData.append('ride_request[recipient_number]', recipentDetails?.phone);
+    formData.append(
+      'ride_request[locations_attributes][1][name]',
+      'End Location',
+    );
+    formData.append(
+      'ride_request[locations_attributes][0][name]',
+      'Start Location',
+    );
+
+    formData.append('ride_request[estimated_time]', result?.duration);
+    formData.append('ride_request[distance]', result?.distance);
     const res = await createManagerVehicleRequest(formData);
     if (res?.data) {
-      showAlert('Alert', 'Ride Request has been created');
-      setSelectedVehicle(VehicleTypes[0]);
-      setSelectedVehicleDetails(null);
-      setSelectedRouteDetails(null);
-      setCargoDescriptionDetails(null);
-      setRecipentDetails(null);
+      navigation.navigate(Routes.VehiclesOffer, {
+        id: res?.data?.ride_request?.id,
+      });
+
+      // setSelectedVehicle(VehicleTypes[0]);
+      // setSelectedVehicleDetails(null);
+      // setSelectedRouteDetails(null);
+      // setCargoDescriptionDetails(null);
+      // setRecipentDetails(null);
       let reSetVehicleData = vehicleData.map((item: any) => {
         if (item.isWeightSelected) {
           item.isWeightSelected = false;
@@ -201,8 +232,6 @@ const VehicleRequest = ({navigation}: any) => {
     } else {
       showAlert('Error', res?.error?.data?.errors[0]);
     }
-
-    // navigation.navigate(Routes.VehiclesOffer);
   };
 
   const isDisable =
@@ -238,7 +267,6 @@ const VehicleRequest = ({navigation}: any) => {
           onPressCard={openSheet}
           onPressClear={handleClearBtn}
         />
-        {console.log('selectedVehicleDetails', selectedVehicleDetails)}
         <View style={styles.radioBtnContainer}>
           <View style={styles.radioBtn}>
             <Pressable onPress={switchOption('Choose Route')}>
