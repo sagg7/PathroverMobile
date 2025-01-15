@@ -63,10 +63,9 @@ const OfferCard = ({
             <Text style={styles.vehicleType}>{item?.vehicle_type}</Text>
             <View style={styles.ratingView}>
               {svgIcon.RatingStar}
-              <Text
-                style={
-                  styles.ratingFigure
-                }>{`${item?.rating}(${item?.ride_completed})`}</Text>
+              <Text style={styles.ratingFigure}>{`${item?.rating || 0}(${
+                item?.ride_completed || 0
+              })`}</Text>
             </View>
           </View>
         </View>

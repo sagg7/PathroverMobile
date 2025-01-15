@@ -38,7 +38,7 @@ const RideOfferHistoryCard = ({
         <View style={styles.delIconConntainer}>
           <View style={styles.codeView}>
             <Text style={styles.rideCodeText} numberOfLines={1}>
-              {item?.order_number}
+              {item?.order_number || 'KCCJT9-78'}
             </Text>
           </View>
           <TouchableOpacity onPress={onPressDel}>
