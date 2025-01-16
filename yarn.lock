@@ -9173,6 +9173,11 @@ react-native-confirmation-code-field@^7.4.0:
   resolved "https://registry.yarnpkg.com/react-native-confirmation-code-field/-/react-native-confirmation-code-field-7.4.0.tgz#58cc2d5adad59882d1805bf164cd6099d432d21e"
   integrity sha512-Kw7rD0RXi6vZnt0Y67nkSW2wYmZFdnxJ23yxkKm3jqwvSxAvaA1NP3h3MHSPmJd25l0WK/+fjXOeCliDqWZ9rw==
 
+react-native-fbsdk-next@^13.3.0:
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/react-native-fbsdk-next/-/react-native-fbsdk-next-13.3.0.tgz#1f1457a23c5ed0726b19694fad24082bfe2cf4e3"
+  integrity sha512-t2HTHx77yB6Awj6VZpCbEslmRBEgSxqqGM85Jg6t1d1kupho4b3iX2hgR/mfDzjWAqoXnZIAkvN4tNnGTWc7KA==
+
 react-native-geolocation-service@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/react-native-geolocation-service/-/react-native-geolocation-service-5.3.1.tgz#4ce1017789da6fdfcf7576eb6f59435622af4289"
