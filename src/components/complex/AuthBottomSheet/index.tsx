@@ -28,6 +28,7 @@ interface AuthBottomSheetProps {
   headerTitle: string;
   onPressGoogle: () => void;
   onPressApple: () => void;
+  onPressFacebook: () => void;
 }
 
 const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
@@ -40,6 +41,7 @@ const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
   onPressClose,
   onPressGoogle,
   onPressApple,
+  onPressFacebook,
 }) => {
   return (
     <View style={styles.container}>
@@ -68,7 +70,9 @@ const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
           />
           <Text style={styles.continueTxt}>Or continue with</Text>
           <View style={styles.socialLoginContainer}>
-            <TouchableOpacity>{svgIcon.Facebook}</TouchableOpacity>
+            <TouchableOpacity onPress={onPressFacebook}>
+              {svgIcon.Facebook}
+            </TouchableOpacity>
             <TouchableOpacity onPress={onPressGoogle}>
               {svgIcon.Google}
             </TouchableOpacity>
