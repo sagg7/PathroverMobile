@@ -6,6 +6,7 @@ import {
   View,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {svgIcon} from '../../../assets/svg';
@@ -132,7 +133,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'center',
     justifyContent: 'space-around',
-    width: WP('40'),
+    width: WP('35'),
     marginVertical: WP('5'),
+    ...Platform.select({
+      android: {
+        width: WP('35'),
+      },
+      ios: {
+        width: WP('50'),
+      },
+    }),
   } as ViewStyle,
 });
