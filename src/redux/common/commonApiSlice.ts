@@ -26,3 +26,4 @@ export const commonApiSlice = apiSlice.injectEndpoints({
 
 export const {useGetOfferHistoryRoleBaseQuery, useDeleteOfferHistoryMutation} =
   commonApiSlice;
+commonApiSlice;
