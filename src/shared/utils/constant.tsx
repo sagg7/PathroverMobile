@@ -15,6 +15,7 @@ export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
 export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+export const DOMAIN_BASE_URL = 'https://staging.pathfinder-app.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 
