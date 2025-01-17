@@ -37,14 +37,14 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
 	<string>442637768783622</string>
 	<key>FacebookClientToken</key>
 	<string>8a93d8d866abe941c2d880aaaef4c53d</string>
 	<key>FacebookDisplayName</key>
 	<string>PathRover</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -56,6 +56,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>PathRover requires camera permission</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location to show your current position on the map</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -64,9 +66,6 @@
 	<string>We need your location to show nearby places</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>PathRover requires photo library permission</string>
-	<key>NSCameraUsageDescription</key>
-	<string>PathRover requires camera permission</string>
-	
 	<key>UIAppFonts</key>
 	<array>
 		<string>PlusJakartaSans-Bold.ttf</string>
@@ -84,9 +83,13 @@
 		<string>PlusJakartaSans-SemiBold.ttf</string>
 		<string>PlusJakartaSans-SemiBoldItalic.ttf</string>
 	</array>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>fetch</string>
 		<string>location</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
