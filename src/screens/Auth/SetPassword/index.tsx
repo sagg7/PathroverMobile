@@ -1,40 +1,55 @@
-import { View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import {View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
 import styles from './styles';
-import { AppButton, AppHeader, AppInput, AppLoader, MainWrapper } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
-import { Routes, UNEXPECTED_ERROR, isIOS, removeNonNumbers, resetPasswordVal, showAlert, signupPasswordObj, useKeyboardListener } from '../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
+import {
+  AppButton,
+  AppHeader,
+  AppInput,
+  AppLoader,
+  MainWrapper,
+} from '../../../components';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {Formik} from 'formik';
+import {
+  Routes,
+  UNEXPECTED_ERROR,
+  isIOS,
+  removeNonNumbers,
+  resetPasswordVal,
+  showAlert,
+  signupPasswordObj,
+  useKeyboardListener,
+} from '../../../shared/exporter';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useSignUpMutation} from '../../../redux/auth/authApiSlice';
 
-const SetPassword = ({ }) => {
-  const route = useRoute()
-  const { values } = route?.params
-  const { email, phone, firstName, lastName } = values
-  const [signup, { isLoading }] = useSignUpMutation()
-  const navigation = useNavigation()
-  const keyboardVisible = useKeyboardListener()
-  const ref = useRef()
+const SetPassword = ({}) => {
+  const route = useRoute();
+  const {values} = route?.params;
+  const {email, phone, firstName, lastName} = values;
+  const [signup, {isLoading}] = useSignUpMutation();
+  const navigation = useNavigation();
+  const keyboardVisible = useKeyboardListener();
+  const ref = useRef();
 
   const handleContinueBtn = async (val: any) => {
     const obj = {
       user: {
-        ...(email && { email: email }),
-        ...(phone && { phone_number: removeNonNumbers(phone) }),
+        ...(email && {email: email}),
+        ...(phone && {phone_number: removeNonNumbers(phone)}),
         first_name: firstName,
         last_name: lastName,
-        password: val.password
-      }
-    }
+        password: val.password,
+      },
+    };
 
     const resp = await signup(obj);
     if (resp?.data) {
-      navigation.replace(Routes.AccountCreationSuccess)
+      navigation.replace(Routes.AccountCreationSuccess, {isSignUp: true});
     } else {
-      showAlert("Error", resp?.error?.data?.errors[0] || UNEXPECTED_ERROR)
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
-  }
+  };
 
   return (
     <MainWrapper>
@@ -48,21 +63,19 @@ const SetPassword = ({ }) => {
           styles.scrollViewStyle,
           !isIOS() && styles.heightStyle,
         ]}>
-        <View >
+        <View>
           <View style={styles.formikContainer}>
             <Formik
               innerRef={ref}
               enableReinitialize
               initialValues={signupPasswordObj}
               validationSchema={resetPasswordVal}
-              onSubmit={(values, { resetForm }) => {
-                handleContinueBtn(values)
-              }
-              }>
-              {({ handleChange, handleSubmit, values, errors, touched }) => {
-
+              onSubmit={(values, {resetForm}) => {
+                handleContinueBtn(values);
+              }}>
+              {({handleChange, handleSubmit, values, errors, touched}) => {
                 return (
-                  <View style={{ alignSelf: 'center' }}>
+                  <View style={{alignSelf: 'center'}}>
                     <AppInput
                       placeholder="Password"
                       value={values.password}
@@ -81,23 +94,22 @@ const SetPassword = ({ }) => {
                       rightIcon
                       secureTextEntry
                     />
-                    <View style={styles.divider} >
-                      <AppButton title="Continue" handleClick={handleSubmit}
-                        buttonStyle={styles.btnContainer(keyboardVisible)} />
+                    <View style={styles.divider}>
+                      <AppButton
+                        title="Continue"
+                        handleClick={handleSubmit}
+                        buttonStyle={styles.btnContainer(keyboardVisible)}
+                      />
                     </View>
                   </View>
                 );
               }}
             </Formik>
-
           </View>
         </View>
-        {isLoading &&
-          <AppLoader />
-        }
-
+        {isLoading && <AppLoader />}
       </KeyboardAwareScrollView>
-    </MainWrapper >
+    </MainWrapper>
   );
 };
 

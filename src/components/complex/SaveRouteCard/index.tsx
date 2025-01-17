@@ -47,7 +47,12 @@ const SaveRouteCard = ({item, onPressEdit, onPressDel}: SaveRouteCardProps) => {
             <View style={styles.activeInnerContainer}>
               <Text style={styles.routeName2}>{item?.name}</Text>
               <View style={styles.rowDirection}>
-                <TouchableOpacity onPress={onPressEdit}>
+                <TouchableOpacity
+                  onPress={onPressEdit}
+                  style={{
+                    height: 30,
+                    width: 25,
+                  }}>
                   {svgIcon.Edit}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onPressDel}>

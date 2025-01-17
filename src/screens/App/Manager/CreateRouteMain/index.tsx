@@ -354,7 +354,7 @@ const CreateRoute = () => {
           }
         />
       )}
-      {'destination' in managerRoute && 'pickup' && (
+      {'destination' in managerRoute && 'pickup' && route?.length > 0 && (
         <View style={styles.undoRedoContainer}>
           <TouchableOpacity
             style={[styles.button]}

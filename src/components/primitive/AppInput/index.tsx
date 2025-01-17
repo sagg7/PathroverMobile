@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,15 @@ import {
   TouchableOpacity,
   Animated,
 } from 'react-native';
-import { WP, GLColors, PFColors, isIOS, PFFonts, PFFontSize } from '../../../shared/exporter';
-import { svgIcon } from '../../../assets/svg';
+import {
+  WP,
+  GLColors,
+  PFColors,
+  isIOS,
+  PFFonts,
+  PFFontSize,
+} from '../../../shared/exporter';
+import {svgIcon} from '../../../assets/svg';
 
 interface AppInputProps {
   placeholder?: string;
@@ -59,14 +66,11 @@ const AppInput: React.FC<AppInputProps> = ({
   textAlignVertical,
   inputContainerStyle,
   rightIconPress,
-
 }) => {
   const [showPass, setShowPass] = useState(secureTextEntry);
   const [focused, setFocused] = useState(false);
 
-  const animatedIsFocused = useRef(
-    new Animated.Value(value ? 1 : 0),
-  ).current;
+  const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   useEffect(() => {
     Animated.timing(animatedIsFocused, {
@@ -96,7 +100,6 @@ const AppInput: React.FC<AppInputProps> = ({
     backgroundColor: PFColors.Gray.WhisperGray,
   };
 
-
   return (
     <>
       <View
@@ -104,7 +107,6 @@ const AppInput: React.FC<AppInputProps> = ({
           styles.inputContainerView(touched && errorMessage, focused),
           inputContainerStyle,
         ]}>
-
         <Animated.Text style={labelStyle}>{placeholder}</Animated.Text>
         <TextInput
           value={value}
@@ -125,10 +127,9 @@ const AppInput: React.FC<AppInputProps> = ({
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => (icon ? rightIconPress() : setShowPass(!showPass))}>
-          {rightIcon && focused && (
-            icon ? icon : showPass ? svgIcon.EyeIconOf : svgIcon.EyeIconOn
-          )}
-
+          {rightIcon &&
+            focused &&
+            (icon ? icon : showPass ? svgIcon.EyeIconOf : svgIcon.EyeIconOn)}
         </TouchableOpacity>
       </View>
       {touched && errorMessage && (
@@ -149,13 +150,17 @@ const styles = StyleSheet.create({
     marginTop: WP('4'),
     paddingHorizontal: WP('4'),
     justifyContent: 'space-between',
-    borderColor: isError ? PFColors.Red.ErrorColor : focused ? PFColors.Blue.Dark : PFColors.Gray.SoftGray,
+    borderColor: isError
+      ? PFColors.Red.ErrorColor
+      : focused
+      ? PFColors.Blue.Dark
+      : PFColors.Gray.SoftGray,
     backgroundColor: PFColors.Gray.WhisperGray,
-    alignSelf: "center"
+    alignSelf: 'center',
   }),
 
   inputContainerStyle: (rightIcon: any) => ({
-    height: "100%",
+    height: '100%',
     color: PFColors.Standard.Black,
     width: rightIcon ? '90%' : '100%',
     fontSize: PFFontSize.FONT_SIZE_16,
@@ -168,4 +173,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { AppInput };
+export {AppInput};
