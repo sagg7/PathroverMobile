@@ -14,12 +14,8 @@ import {
 } from '../../../../hooks/NotificationHook';
 
 const Home = ({navigation}) => {
-  const [openModal, setOpenModal] = useState(false);
   const [FCMToken, setFCMToken] = useState(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  useEffect(() => {
-    // setOpenModal(true);
-  }, [navigation]);
 
   useEffect(() => {
     (async () => {
@@ -43,11 +39,6 @@ const Home = ({navigation}) => {
           />
         </TouchableOpacity>
       </View>
-      <ReviewModal
-        modalVisible={openModal}
-        onPressCross={() => setOpenModal(false)}
-        onPressDone={() => setOpenModal(false)}
-      />
     </MainWrapper>
   );
 };
