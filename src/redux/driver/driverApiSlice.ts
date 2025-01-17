@@ -84,6 +84,15 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    rateManager: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `ratings`,
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -98,4 +107,5 @@ export const {
   useLazyGetProfileStatusQuery,
   useSendOfferToManagerMutation,
   useSendLocationMutation,
+  useRateManagerMutation,
 } = driverApiSlice;

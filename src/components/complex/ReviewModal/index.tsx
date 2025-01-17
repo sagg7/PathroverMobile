@@ -9,15 +9,19 @@ import {AppInput} from '../../primitive/AppInput';
 
 interface ReviewModalProps {
   modalVisible: boolean;
+  loading?: boolean;
   setModalVisible?: () => void;
-  onPressDone: () => void;
+  onPressDone: (data: object) => void;
   onPressCross: () => void;
+  details: object;
 }
 const ReviewModal = ({
   modalVisible,
   setModalVisible,
   onPressDone,
   onPressCross,
+  details,
+  loading,
 }: ReviewModalProps) => {
   const [data, setData] = useState({
     rating: 0,
@@ -26,9 +30,19 @@ const ReviewModal = ({
   });
 
   useEffect(() => {
-    if (data?.rating > 0 && data?.comment.length > 1) {
-      setData(prev => ({...prev, disabled: false}));
-    }
+    const handler = setTimeout(() => {
+      if (data?.rating > 0 && data?.comment.length > 1 && data.disabled) {
+        setData(prev => ({...prev, disabled: false}));
+      } else if (
+        data?.rating <= 0 &&
+        data?.comment.length <= 0 &&
+        data.disabled
+      ) {
+        setData(prev => ({...prev, disabled: true}));
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
   }, [data]);
 
   return (
@@ -39,19 +53,22 @@ const ReviewModal = ({
       style={styles.modalContainer}>
       <View>
         <View style={styles.modalKnob} />
-        <TouchableOpacity style={styles.crossIconStyle} onPress={onPressCross}>
+        <TouchableOpacity
+          style={styles.crossIconStyle}
+          onPress={onPressCross}
+          disabled={loading}>
           {svgIcon.CrossCirlce}
         </TouchableOpacity>
         <RatingStars
           rating={data.rating}
-          disabled={false}
+          disabled={false || loading}
           ratingStarStyles={styles.ratingStars}
           starContainerStyle={styles.starContainerStyle}
           onRatingChange={val => setData(prev => ({...prev, rating: val}))}
         />
         <Text style={styles.titleText}>Rate your driver</Text>
         <Text style={styles.subtitleText}>
-          You rated Sergio Romasis {data?.rating}{' '}
+          You rated {details?.user_name || ''} {data?.rating}{' '}
           {data.rating > 1 ? 'stars' : 'star'}
         </Text>
 
@@ -63,6 +80,7 @@ const ReviewModal = ({
           inputContainerStyle={styles.inputContainerStyle}
           placeholderBackgroundColor={'transparent'}
           placeholderFontFamily={PFFonts.Foundation.SemiBold}
+          editable={!loading}
         />
 
         <View style={styles.buttonsRow}>
@@ -70,7 +88,7 @@ const ReviewModal = ({
             title="Submit"
             isEmpty={false}
             textStyle={styles.textStyle}
-            handleClick={onPressDone}
+            handleClick={() => onPressDone(data)}
             disabled={data.disabled}
           />
         </View>

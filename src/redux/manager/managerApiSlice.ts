@@ -78,6 +78,15 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    rateDriver: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `ratings`,
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -94,4 +103,5 @@ export const {
   useCancelRideRequestMutation,
   useCancelInProgressRideRequestMutation,
   useUpdateCurrentRideStatusMutation,
+  useRateDriverMutation,
 } = managerApiSlice;
