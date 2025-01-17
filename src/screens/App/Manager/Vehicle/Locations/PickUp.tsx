@@ -27,7 +27,6 @@ const PickUp = ({route, navigation}: any) => {
   const {placeName, fetchPlaceName, setPlaceName, error, loading} =
     usePlaceName();
   const {location} = useLocation();
-
   useEffect(() => {
     if (managerRoute?.pickup) setPlaceName(managerRoute?.pickup?.placeName);
   }, [managerRoute]);
@@ -46,19 +45,20 @@ const PickUp = ({route, navigation}: any) => {
       latitude: selectedLocation[1],
       longitude: selectedLocation[0],
     };
+    if (location) {
+      const distanceFromCurrent = getDistance(
+        {latitude: location?.latitude, longitude: location.longitude},
+        {latitude: selectedLoc.latitude, longitude: selectedLoc.longitude},
+        100,
+      );
 
-    const distanceFromCurrent = getDistance(
-      {latitude: location.latitude, longitude: location.longitude},
-      {latitude: selectedLoc.latitude, longitude: selectedLoc.longitude},
-      100,
-    );
-
-    if (distanceFromCurrent <= RADIUS_IN_METERS) {
-      fetchPlaceName(selectedLocation[1], selectedLocation[0]);
-      setPickUpLoc(selectedLocation);
-      setSelectedLocation([selectedLocation[0], selectedLocation[1]]);
-    } else {
-      showAlert('Alert', 'Select location in the green zone.');
+      if (distanceFromCurrent <= RADIUS_IN_METERS) {
+        fetchPlaceName(selectedLocation[1], selectedLocation[0]);
+        setPickUpLoc(selectedLocation);
+        setSelectedLocation([selectedLocation[0], selectedLocation[1]]);
+      } else {
+        showAlert('Alert', 'Select location in the green zone.');
+      }
     }
   };
 

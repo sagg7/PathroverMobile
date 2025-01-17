@@ -20,6 +20,7 @@ import styles from './styles';
 import {
   CompanyTypes,
   IMAGE_OPTIONS,
+  Routes,
   showAlert,
 } from '../../../../shared/exporter';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -170,7 +171,7 @@ const CompanyDetail = () => {
 
     const resp = await createDriverProfile(data);
     if (resp?.data) {
-      navigation.replace('AppStack');
+      navigation.replace(Routes.DocumentCreationSuccess);
       const obj = {
         ...loginUser,
         is_driver: true,
@@ -257,7 +258,7 @@ const CompanyDetail = () => {
         />
         <View style={styles.height} />
       </ScrollView>
-      {isLoading && <AppLoader />}
+      {/* {isLoading && <AppLoader />} */}
     </MainWrapper>
   );
 };

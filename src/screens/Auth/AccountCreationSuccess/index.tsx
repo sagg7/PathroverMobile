@@ -1,11 +1,11 @@
 import React from 'react';
-import { AppHeader, MainWrapper, SuccessInfo } from '../../../components';
-import { svgIcon } from '../../../assets/svg';
+import {AppHeader, MainWrapper, SuccessInfo} from '../../../components';
+import {svgIcon} from '../../../assets/svg';
 
 const AccountCreationSuccess = () => {
   return (
     <MainWrapper>
-      <AppHeader title='Path Finder' clickBackIcon={() => { }} />
+      <AppHeader title="Path Finder" clickBackIcon={() => {}} />
       <SuccessInfo
         icon={svgIcon.GreenCheck}
         // title="Successfully Created"

@@ -24,10 +24,9 @@ import ConsentSheet from '../../../../components/complex/ConsentSheet';
 const OrderHistory = ({}) => {
   const [options, setOptions] = useState(OrderHistoryOptions);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [queryParams, setQueryParams] = useState({
     role: 'driver',
-    // status: 'all',
   });
   const delSheet = useRef<any>();
   const [selectedDate, setSelectedDate] = useState<any>(null);
@@ -74,7 +73,6 @@ const OrderHistory = ({}) => {
     navigation.navigate(Routes.FilterScreen, {
       onSelectDate: filterData => {
         if (filterData?.date || filterData?.location) {
-          // Update queryParams with filterData
           setQueryParams((prev: any) => ({
             ...prev,
             ...(filterData?.date && {date: filterData.date}),
@@ -84,22 +82,15 @@ const OrderHistory = ({}) => {
             }),
           }));
         } else {
-          // Reset to default queryParams
           setQueryParams({
             role: 'manager',
-            status: 'all',
           });
         }
 
-        // Optionally update selectedDate state
         if (filterData?.date) {
-          console.log('DDate stored', filterData?.date);
-
           setSelectedDate(filterData.date);
         }
         if (filterData?.location) {
-          console.log('Location stored', filterData?.location);
-
           setSelectedLocation(filterData.location);
         }
       },

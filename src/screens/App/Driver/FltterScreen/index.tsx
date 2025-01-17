@@ -1,4 +1,4 @@
-import {View, Text, Image, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, Image, TouchableOpacity} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   AppButton,
@@ -8,7 +8,7 @@ import {
 } from '../../../../components';
 import styles from './styles';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {appIcons, HP, isIOS, WP} from '../../../../shared/exporter';
+import {appIcons, HP, WP} from '../../../../shared/exporter';
 import {DatePicker} from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {svgIcon} from '../../../../assets/svg';
@@ -19,19 +19,19 @@ interface ClickableViewProps {
   icon?: any;
 }
 
-const FilterScreen = (route: any) => {
-  const [showLocationSheet, setShowLocationSheet] = useState(false);
+const FilterScreen = ({route}: any) => {
   const [show, setShow] = useState(false);
   const refScrollable = useRef<any>();
-  const [date, setDate] = useState(
-    route?.route?.params?.date ? route?.route?.params?.date : '',
-  );
+  const [date, setDate] = useState('');
   const navigation = useNavigation();
   const {location} = useLocation();
   const [myLocation, setMyLocation] = useState<any>([]);
-  const [selectedLocation, setSelectedLocation] = useState<any>(
-    route?.route?.params?.location ? route?.route?.params?.location : null,
-  );
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+
+  useEffect(() => {
+    if (route?.params) setDate(route?.params?.date || '');
+    setSelectedLocation(route?.params?.location || null);
+  }, [route]);
 
   useEffect(() => {
     if (location) setMyLocation([location?.longitude, location?.latitude]);
@@ -63,17 +63,21 @@ const FilterScreen = (route: any) => {
   const onChange = dates => {};
 
   const handleSaveBtn = () => {
-    if (route?.route?.params?.onSelectDate) {
-      route?.route?.params?.onSelectDate({
+    if (route?.params?.onSelectDate) {
+      route?.params?.onSelectDate({
         date: date,
         location: selectedLocation,
       });
     }
     navigation.goBack();
   };
+
   const clearFilter = () => {
-    if (route?.route?.params?.onSelectDate) {
-      route?.route?.params?.onSelectDate('');
+    if (route?.params?.onSelectDate) {
+      route?.params?.onSelectDate({
+        date: '',
+        location: null,
+      });
     }
     navigation.goBack();
   };
@@ -133,7 +137,7 @@ const FilterScreen = (route: any) => {
         onChange={onChange}
       />
 
-      {route?.route?.params?.date ? (
+      {route?.params?.date ? (
         <AppButton
           title="Clear Filter"
           buttonStyle={styles.buttonStyle}

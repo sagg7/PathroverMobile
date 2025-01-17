@@ -45,4 +45,5 @@ export const Routes = {
   OrderPickup: 'OrderPickup',
   VehicleRequest: 'VehicleRequest',
   RideArriving: 'RideArriving',
+  DocumentCreationSuccess: 'DocumentCreationSuccess',
 };

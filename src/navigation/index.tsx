@@ -34,6 +34,7 @@ import Faqs from '../screens/App/FAQs';
 import SavedLibrary from '../screens/App/Manager/SavedLibrary';
 import OrderPickup from '../screens/App/Driver/OrderPickup';
 import RideArriving from '../screens/App/Manager/RideArriving';
+import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -84,9 +85,12 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.SearchLatLng} component={SearchLatLng} />
         <Stack.Screen name={Routes.Faqs} component={Faqs} />
         <Stack.Screen name={Routes.SavedLibrary} component={SavedLibrary} />
-
         <Stack.Screen name={Routes.OrderPickup} component={OrderPickup} />
         <Stack.Screen name={Routes.RideArriving} component={RideArriving} />
+        <Stack.Screen
+          name={Routes.DocumentCreationSuccess}
+          component={DocumentCreationSuccess}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

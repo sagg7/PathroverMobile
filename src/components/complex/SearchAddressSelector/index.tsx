@@ -153,67 +153,6 @@ const SearchAddressSelector = ({setRouteData}) => {
     }
   };
 
-  const renderFields = (title: string) =>
-    !showSelectedLocationBox && (
-      <>
-        <LocationBox title={title} />
-        <AppInput
-          maxLength={10}
-          placeholder="Latitude"
-          keyboardType={'numeric'}
-          inputContainerStyle={styles.inputContainerStyle}
-          value={
-            title === LOCATIONS.DROP_OFF
-              ? locations.dropoffLatitude
-              : locations.pickupLatitude
-          }
-          onChangeText={(value: any) => {
-            if (!isValidNumber(value)) {
-              showAlert('Invalid Input', 'Please enter a valid number');
-              return;
-            }
-
-            setLocations((prev: any) => ({
-              ...prev,
-              [title === LOCATIONS.DROP_OFF
-                ? 'dropoffLatitude'
-                : 'pickupLatitude']: Number(value),
-            }));
-          }}
-        />
-        <AppInput
-          maxLength={10}
-          placeholder="Longitude"
-          keyboardType={'numeric'}
-          inputContainerStyle={styles.inputContainerStyle}
-          value={
-            title === LOCATIONS.DROP_OFF
-              ? locations.dropoffLongitude
-              : locations.pickupLongitude
-          }
-          onChangeText={(value: any) => {
-            if (!isValidNumber(value)) {
-              showAlert('Invalid Input', 'Please enter a valid number');
-              return;
-            }
-            setLocations((prev: any) => ({
-              ...prev,
-              [title === LOCATIONS.DROP_OFF
-                ? 'dropoffLongitude'
-                : 'pickupLongitude']: Number(value),
-            }));
-          }}
-        />
-
-        <View style={styles.btnContainer}>
-          <AppButton
-            title={isDropOffSelected ? 'Save' : 'Next'}
-            handleClick={() => handleSaveNextBtn()}
-          />
-        </View>
-      </>
-    );
-
   const SelectedLocationBox = ({show, lat, lng}: any) => {
     return (
       <View style={styles.selectedLocationBox}>
@@ -267,6 +206,73 @@ const SearchAddressSelector = ({setRouteData}) => {
     // navigation.goBack();
     navigation.navigate('AppStack');
   };
+
+  const renderFields = (title: string) =>
+    !showSelectedLocationBox && (
+      <>
+        <LocationBox title={title} />
+        <AppInput
+          maxLength={10}
+          placeholder="Latitude"
+          inputContainerStyle={styles.inputContainerStyle}
+          value={
+            title === LOCATIONS.DROP_OFF
+              ? locations.dropoffLatitude
+              : locations.pickupLatitude
+          }
+          onChangeText={(value: string) => {
+            const isValidNumber = (value: string): boolean => {
+              const regex = /^-?\d*\.?\d*$/;
+              return regex.test(value);
+            };
+
+            if (isValidNumber(value)) {
+              setLocations((prev: any) => ({
+                ...prev,
+                [title === LOCATIONS.DROP_OFF
+                  ? 'dropoffLatitude'
+                  : 'pickupLatitude']: value,
+              }));
+            } else {
+              showAlert('Invalid Input', 'Please enter a valid number');
+            }
+          }}
+        />
+        <AppInput
+          maxLength={10}
+          placeholder="Longitude"
+          inputContainerStyle={styles.inputContainerStyle}
+          value={
+            title === LOCATIONS.DROP_OFF
+              ? locations.dropoffLongitude
+              : locations.pickupLongitude
+          }
+          onChangeText={(value: string) => {
+            const isValidNumber = (value: string): boolean => {
+              const regex = /^-?\d*\.?\d*$/;
+              return regex.test(value);
+            };
+
+            if (isValidNumber(value)) {
+              setLocations((prev: any) => ({
+                ...prev,
+                [title === LOCATIONS.DROP_OFF
+                  ? 'dropoffLongitude'
+                  : 'pickupLongitude']: value, // Store the string value
+              }));
+            } else {
+              showAlert('Invalid Input', 'Please enter a valid number');
+            }
+          }}
+        />
+        <View style={styles.btnContainer}>
+          <AppButton
+            title={isDropOffSelected ? 'Save' : 'Next'}
+            handleClick={() => handleSaveNextBtn()}
+          />
+        </View>
+      </>
+    );
 
   return (
     <View>

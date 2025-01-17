@@ -1,19 +1,8 @@
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {forwardRef, useState} from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {scale, WP} from '../../../shared/theme/responsive';
-import {svgIcon} from '../../../assets/svg';
+import {scale} from '../../../shared/theme/responsive';
 import {PFColors, PFFonts} from '../../../shared/exporter';
-import {AppButton} from '../AppButton';
-import {AppInput} from '../../primitive/AppInput';
 
 interface ConsentSheetProps {
   onPressSuccess: () => void;
@@ -22,7 +11,7 @@ interface ConsentSheetProps {
   cancelBtnText: string;
   successBtnText: string;
   ref: any;
-  fontSize: number;
+  fontSize?: number;
 }
 
 const ConsentSheet: React.FC<ConsentSheetProps> = forwardRef(
