@@ -169,6 +169,7 @@ const OrderPickup = ({route}: any) => {
     }
     if (status === RIDE_STATUS.ORDER_DELIVERED) {
       setShowWaitingModal(false);
+      //TODO: SHOW RATING MODAL
       setTimeout(() => {
         navigation.replace('AppStack');
       }, 500);
