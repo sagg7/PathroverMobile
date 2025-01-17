@@ -7,6 +7,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import {firebase} from '@react-native-firebase/app';
 
 const App = () => {
   MapboxGL.setAccessToken(
@@ -14,6 +15,9 @@ const App = () => {
   );
 
   useEffect(() => {
+    if (!firebase.apps.length) {
+      firebase.initializeApp();
+    }
     GoogleSignin.configure({
       webClientId:
         '259356526485-g0llcedebdppjctams5kt994ghmd9tlu.apps.googleusercontent.com',
