@@ -8,13 +8,29 @@ import {
 } from '../../../../shared/exporter';
 import {MainWrapper, ReviewModal} from '../../../../components';
 import {useSelector} from 'react-redux';
+import {
+  createNotifyChannel,
+  getFCMToken,
+} from '../../../../hooks/NotificationHook';
 
 const Home = ({navigation}) => {
   const [openModal, setOpenModal] = useState(false);
+  const [FCMToken, setFCMToken] = useState(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
   useEffect(() => {
     // setOpenModal(true);
   }, [navigation]);
+
+  useEffect(() => {
+    (async () => {
+      const token = await getFCMToken();
+      if (token?.fcmToken) {
+        setFCMToken(token?.fcmToken);
+        createNotifyChannel();
+      }
+    })();
+  }, []);
+
   return (
     <MainWrapper>
       <View style={styles.headderContainer}>
