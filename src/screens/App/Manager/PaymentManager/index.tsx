@@ -10,7 +10,7 @@ import {FlatList, Text, View} from 'react-native';
 import {svgIcon} from '../../../../assets/svg';
 import styles from './styles';
 
-const PaymentHistory = () => {
+const PaymentMethods = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [getAllCards, {data, isLoading}] = useGetAllCardsMutation();
@@ -89,4 +89,4 @@ const PaymentHistory = () => {
   );
 };
 
-export default PaymentHistory;
+export default PaymentMethods;
