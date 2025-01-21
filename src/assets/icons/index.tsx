@@ -36,4 +36,5 @@ export const appIcons = {
   routeLine: require('../icons/routeLine.png'),
   checked: require('../icons/checked.png'),
   mapTruck: require('../icons/mapTruck.png'),
+  walletIcon: require('../icons/wallet.png'),
 };
