@@ -35,6 +35,8 @@ import SavedLibrary from '../screens/App/Manager/SavedLibrary';
 import OrderPickup from '../screens/App/Driver/OrderPickup';
 import RideArriving from '../screens/App/Manager/RideArriving';
 import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
+import PaymentHistory from '../screens/App/Manager/PaymentManager';
+import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -91,6 +93,8 @@ const AppNavigation = () => {
           name={Routes.DocumentCreationSuccess}
           component={DocumentCreationSuccess}
         />
+        <Stack.Screen name={Routes.PaymentManager} component={PaymentHistory} />
+        <Stack.Screen name={Routes.AddCard} component={AddCard} />
       </Stack.Navigator>
     </NavigationContainer>
   );

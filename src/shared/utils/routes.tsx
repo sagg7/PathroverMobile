@@ -46,4 +46,6 @@ export const Routes = {
   VehicleRequest: 'VehicleRequest',
   RideArriving: 'RideArriving',
   DocumentCreationSuccess: 'DocumentCreationSuccess',
+  PaymentManager: 'PaymentManager',
+  AddCard: 'AddCard',
 };
