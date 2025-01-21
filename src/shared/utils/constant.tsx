@@ -532,6 +532,11 @@ export const ManagerProfileMenu = [
     icon: appIcons.settingIcon,
   },
   {
+    id: 12,
+    title: 'Payment Method',
+    icon: appIcons.walletIcon,
+  },
+  {
     id: 11,
     title: 'Saved Library',
     icon: appIcons.bellIcon,
