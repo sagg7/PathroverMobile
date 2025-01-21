@@ -87,6 +87,40 @@ export const managerApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    addCard: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `user_wallet/stripe_customer`,
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    setDefaultCard: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `user_cards/set_default_card`,
+          method: 'PUT',
+          body: data,
+        };
+      },
+    }),
+    deleteCard: builder.mutation({
+      query: (id: string) => {
+        return {
+          url: `user_cards/${id}`,
+          method: 'DELETE',
+        };
+      },
+    }),
+    getAllCards: builder.mutation({
+      query: () => {
+        return {
+          url: `user_cards`,
+          method: 'GET',
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -104,4 +138,8 @@ export const {
   useCancelInProgressRideRequestMutation,
   useUpdateCurrentRideStatusMutation,
   useRateDriverMutation,
+  useAddCardMutation,
+  useSetDefaultCardMutation,
+  useDeleteCardMutation,
+  useGetAllCardsMutation,
 } = managerApiSlice;
