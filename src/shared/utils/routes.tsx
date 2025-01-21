@@ -48,4 +48,5 @@ export const Routes = {
   DocumentCreationSuccess: 'DocumentCreationSuccess',
   PaymentManager: 'PaymentManager',
   AddCard: 'AddCard',
+  PaymentManagerHistory: 'PaymentManagerHistory',
 };
