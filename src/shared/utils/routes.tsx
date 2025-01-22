@@ -49,4 +49,5 @@ export const Routes = {
   PaymentManager: 'PaymentManager',
   AddCard: 'AddCard',
   PaymentManagerHistory: 'PaymentManagerHistory',
+  WithdrawAmount: 'WithdrawAmount',
 };

@@ -38,6 +38,7 @@ import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
 import PaymentMethods from '../screens/App/Manager/PaymentManager';
 import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
 import PaymentHistory from '../screens/App/Manager/PaymentHistory';
+import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -100,6 +101,7 @@ const AppNavigation = () => {
           component={PaymentHistory}
         />
         <Stack.Screen name={Routes.AddCard} component={AddCard} />
+        <Stack.Screen name={Routes.WithdrawAmount} component={WithdrawAmount} />
       </Stack.Navigator>
     </NavigationContainer>
   );
