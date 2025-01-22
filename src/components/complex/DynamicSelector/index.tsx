@@ -57,7 +57,7 @@ const button = (isSelected: boolean): TextStyle => ({
   borderRadius: 25,
   borderWidth: 1,
   borderColor: isSelected ? PFColors.Blue.Dark : PFColors.Gray.AshGray,
-  marginRight: 15,
+  marginRight: 8,
   flexDirection: 'row',
 });
 

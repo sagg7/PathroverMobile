@@ -264,7 +264,7 @@ const RequestList = ({navigation}: any) => {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.bellContainer}
-          onPress={() => navigation.navigate(Routes.RideArriving, {item: ''})}>
+          onPress={() => navigation.navigate(Routes.Notification)}>
           <Image source={appIcons.bellIcon} style={styles.bellIcon} />
         </TouchableOpacity>
 

@@ -6,6 +6,7 @@ import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 import {AppButton} from '../AppButton';
 import {RatingStars} from '../RatingStars';
 import {AppInput} from '../../primitive/AppInput';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface ReviewModalProps {
   modalVisible: boolean;
@@ -51,48 +52,54 @@ const ReviewModal = ({
       isVisible={modalVisible}
       onBackdropPress={setModalVisible}
       style={styles.modalContainer}>
-      <View>
-        <View style={styles.modalKnob} />
-        <TouchableOpacity
-          style={styles.crossIconStyle}
-          onPress={onPressCross}
-          disabled={loading}>
-          {svgIcon.CrossCirlce}
-        </TouchableOpacity>
-        <RatingStars
-          rating={data.rating}
-          disabled={false || loading}
-          ratingStarStyles={styles.ratingStars}
-          starContainerStyle={styles.starContainerStyle}
-          onRatingChange={val => setData(prev => ({...prev, rating: val}))}
-        />
-        <Text style={styles.titleText}>Rate your driver</Text>
-        <Text style={styles.subtitleText}>
-          You rated {details?.user_name || ''} {data?.rating}{' '}
-          {data.rating > 1 ? 'stars' : 'star'}
-        </Text>
-
-        <AppInput
-          multiline
-          placeholder={'Add Comments'}
-          value={data.comment}
-          onChangeText={txt => setData(prev => ({...prev, comment: txt}))}
-          inputContainerStyle={styles.inputContainerStyle}
-          placeholderBackgroundColor={'transparent'}
-          placeholderFontFamily={PFFonts.Foundation.SemiBold}
-          editable={!loading}
-        />
-
-        <View style={styles.buttonsRow}>
-          <AppButton
-            title="Submit"
-            isEmpty={false}
-            textStyle={styles.textStyle}
-            handleClick={() => onPressDone(data)}
-            disabled={data.disabled}
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        showsVerticalScrollIndicator={false}
+        scrollToOverflowEnabled={false}
+        contentContainerStyle={styles.main}>
+        <View style={styles.container}>
+          <View style={styles.modalKnob} />
+          <TouchableOpacity
+            style={styles.crossIconStyle}
+            onPress={onPressCross}
+            disabled={loading}>
+            {svgIcon.CrossCirlce}
+          </TouchableOpacity>
+          <RatingStars
+            rating={data.rating}
+            disabled={false || loading}
+            ratingStarStyles={styles.ratingStars}
+            starContainerStyle={styles.starContainerStyle}
+            onRatingChange={val => setData(prev => ({...prev, rating: val}))}
           />
+          <Text style={styles.titleText}>Rate your driver</Text>
+          <Text style={styles.subtitleText}>
+            You rated {details?.user_name || ''} {data?.rating}{' '}
+            {data.rating > 1 ? 'stars' : 'star'}
+          </Text>
+
+          <AppInput
+            multiline
+            placeholder={'Add Comments'}
+            value={data.comment}
+            onChangeText={txt => setData(prev => ({...prev, comment: txt}))}
+            inputContainerStyle={styles.inputContainerStyle}
+            placeholderBackgroundColor={'transparent'}
+            placeholderFontFamily={PFFonts.Foundation.SemiBold}
+            editable={!loading}
+          />
+
+          <View style={styles.buttonsRow}>
+            <AppButton
+              title="Submit"
+              isEmpty={false}
+              textStyle={styles.textStyle}
+              handleClick={() => onPressDone(data)}
+              disabled={data.disabled}
+            />
+          </View>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </Modal>
   );
 };
@@ -101,14 +108,23 @@ export {ReviewModal};
 
 const styles = StyleSheet.create({
   modalContainer: {
-    bottom: 0,
     margin: 0,
-    position: 'absolute',
+    justifyContent: 'flex-end',
+  },
+  main: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+  },
+  container: {
+    margin: 0,
     borderRadius: WP('4'),
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     paddingBottom: WP('5'),
     backgroundColor: PFColors.Standard.White,
     width: WP('100'),
     paddingHorizontal: WP('4'),
+    justifyContent: 'flex-end',
   },
   buttonsRow: {
     marginVertical: 10,
@@ -133,7 +149,7 @@ const styles = StyleSheet.create({
   crossIconStyle: {
     alignSelf: 'flex-end',
     marginVertical: WP('3'),
-    right: 0,
+    right: 12,
     position: 'absolute',
     top: 0,
   },
