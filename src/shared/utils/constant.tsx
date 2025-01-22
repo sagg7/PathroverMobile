@@ -452,7 +452,8 @@ export const USER_PROFILE = [
   {title: 'Driver', isSelected: false, id: 1, role: 'driver'},
 ];
 export const DurationArr = [
-  {title: 'Week', isSelected: true},
+  {title: 'All', isSelected: true},
+  {title: 'Week', isSelected: false},
   {title: ' Month', isSelected: false},
   {title: 'Year', isSelected: false},
 ];
