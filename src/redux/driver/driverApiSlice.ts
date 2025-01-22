@@ -93,6 +93,31 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getWalletTransactions: builder.mutation({
+      query: (filter) => {
+        return {
+          url: `transactions?filter=${filter}`,
+          method: 'get',
+        };
+      },
+    }),
+    withdrawAmount: builder.mutation({
+      query: (data: object) => {
+        return {
+          url: 'transactions',
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
+    linkBankAccount: builder.mutation({
+      query: () => {
+        return {
+          url: 'user_wallet/save_bank_account',
+          method: 'POST',
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -108,4 +133,7 @@ export const {
   useSendOfferToManagerMutation,
   useSendLocationMutation,
   useRateManagerMutation,
+  useGetWalletTransactionsMutation,
+  useWithdrawAmountMutation,
+  useLinkBankAccountMutation,
 } = driverApiSlice;
