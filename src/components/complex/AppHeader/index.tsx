@@ -15,14 +15,19 @@ interface AppHeaderProps {
   leftIcon?: boolean;
   rightIcon?: boolean;
   clickBackIcon?: () => void;
+  clickRightIcon?: () => void;
   desc?: string;
   subtitle?: string;
+  isLeftAddIcon?: boolean;
+  isWallet?: boolean;
 }
 const AppHeader: React.FC<AppHeaderProps> = ({
   title,
   clickBackIcon,
+  clickRightIcon,
   leftIcon = true,
   rightIcon = false,
+  isWallet = false,
   subtitle,
   desc,
 }) => {
@@ -45,7 +50,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         <Text style={styles.textStyle}>{title}</Text>
 
         {rightIcon ? (
-          <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              clickRightIcon();
+            }}>
+            {isWallet ? svgIcon.BankAccount : svgIcon.Add}
             {/* {svgIcon.NotifyIcon} */}
           </TouchableOpacity>
         ) : (

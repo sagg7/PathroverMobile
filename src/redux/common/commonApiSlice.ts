@@ -20,9 +20,19 @@ export const commonApiSlice = apiSlice.injectEndpoints({
         body: role,
       }),
     }),
+    userNotification: builder.mutation({
+      query: role => ({
+        url: `notifications?role=${role}`,
+        method: 'GET',
+      }),
+    }),
   }),
   overrideExisting: true,
 });
 
-export const {useGetOfferHistoryRoleBaseQuery, useDeleteOfferHistoryMutation} =
-  commonApiSlice;
+export const {
+  useGetOfferHistoryRoleBaseQuery,
+  useDeleteOfferHistoryMutation,
+  useUserNotificationMutation,
+} = commonApiSlice;
+commonApiSlice;

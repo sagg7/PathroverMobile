@@ -98,9 +98,10 @@ const ManagerSettings = ({navigation}: any) => {
     let screenName = '';
     switch (itemId) {
       case 0:
-        // screenName = Routes.OrderPickup;
-        screenName = Routes.VehiclesOffer;
-
+        screenName = Routes.PaymentManagerHistory;
+        break;
+      case 12:
+        screenName = Routes.PaymentManager;
         break;
       case 1:
         screenName = Routes.ManageProfile;

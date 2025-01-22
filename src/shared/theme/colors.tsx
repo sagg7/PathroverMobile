@@ -7,6 +7,8 @@ export const PFColors = {
     SoftWhite: '#f1f1f1',
     EclipseBlack: '#101018',
     Disable: '#b8c8dc',
+    Default: '#E8D8E3',
+    Debit: '#C2478F',
   },
   Orange: {
     Dark: '#cf4727',

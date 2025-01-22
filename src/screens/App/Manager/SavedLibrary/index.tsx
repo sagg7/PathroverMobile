@@ -1,5 +1,5 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import {FlatList, Text, View} from 'react-native';
+import React, {useRef, useState} from 'react';
 import {
   AppHeader,
   AppLoader,
@@ -13,6 +13,8 @@ import {
   useUpdateRouteMutation,
 } from '../../../../redux/manager/managerApiSlice';
 import styles from './styles';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import {showAlert, UNEXPECTED_ERROR} from '../../../../shared/exporter';
 
 const SavedLibrary = () => {
   const {
@@ -27,6 +29,7 @@ const SavedLibrary = () => {
   const [startData, setstartData] = useState<any>(null);
   const [endData, setEndData] = useState<any>(null);
   const [route, setRoute] = useState<any>(null);
+  const consentSheetRef = useRef<any>(null);
 
   const onPressEdit = async (item: any) => {
     const endItem = item?.dropoff_location;
@@ -66,10 +69,8 @@ const SavedLibrary = () => {
   };
 
   const onPressDel = async (itemId: any) => {
-    const resp = await deleteRoute(itemId);
-    if (resp?.data) {
-      refetch();
-    }
+    consentSheetRef?.current?.open();
+    setRoute(itemId);
   };
 
   const renderSaveRoutes = ({item}: any) => {
@@ -80,6 +81,16 @@ const SavedLibrary = () => {
         onPressEdit={() => onPressEdit(item)}
       />
     );
+  };
+  const handleSuccess = async () => {
+    const resp = await deleteRoute(route);
+    if (resp?.data) {
+      consentSheetRef?.current?.close();
+
+      refetch();
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
   };
 
   return (
@@ -105,6 +116,16 @@ const SavedLibrary = () => {
       />
 
       {isLoading || editLoading || (delLoading && <AppLoader />)}
+
+      <ConsentSheet
+        ref={consentSheetRef}
+        message={'Do you want to delete this\nroute?'}
+        cancelBtnText="Cancel"
+        successBtnText={'Delete'}
+        onPressCancel={() => consentSheetRef?.current.close()}
+        onPressSuccess={handleSuccess}
+        fontSize={20}
+      />
     </MainWrapper>
   );
 };

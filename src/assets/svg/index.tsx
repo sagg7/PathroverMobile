@@ -69,6 +69,16 @@ import MiniRatingIcon from './miniRatingIcon.svg';
 import VanFilledIcon from './van.svg';
 import LiveMarker from './liveMarker.svg';
 import Pin2 from './pin2.svg';
+import AddIcon from './addIcon.svg';
+import DeleteIcon from './deleteIcon.svg';
+import Cards from './cards.svg';
+import VisaCard from './visa.svg';
+import MasterCard from './masterCards.svg';
+import AmexCard from './amex.svg';
+import UnionPay from './unionpay.svg';
+import DiscoverCard from './discover.svg';
+import CreditCard from './credit-card.svg';
+import BankAccount from './bank.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -141,4 +151,14 @@ export const svgIcon = {
   VanFilledIcon: <VanFilledIcon />,
   LiveMarker: <LiveMarker />,
   Pin2: <Pin2 />,
+  Add: <AddIcon />,
+  DeleteIcon: <DeleteIcon />,
+  Cards: <Cards />,
+  VisaCard: <VisaCard />,
+  MasterCard: <MasterCard />,
+  AmexCard: <AmexCard />,
+  UnionPay: <UnionPay />,
+  DiscoverCard: <DiscoverCard />,
+  CreditCard: <CreditCard />,
+  BankAccount: <BankAccount />,
 };

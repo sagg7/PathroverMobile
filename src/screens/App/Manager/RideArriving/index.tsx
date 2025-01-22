@@ -1,18 +1,27 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
-import styles from './styles';
+import haversine from 'haversine-distance'; // For distance calculation
+import React, {useEffect, useRef, useState} from 'react';
+import {PermissionsAndroid, Platform} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import {useSelector} from 'react-redux';
+import {svgIcon} from '../../../../assets/svg';
 import {
   AppHeader,
-  CancelRideSheet,
-  MainWrapper,
-  OptionSelectorSheet,
-  OrderAddressCard,
-  RideActionCard,
   AppLoader,
+  MainWrapper,
+  ReviewModal,
 } from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
-import Geolocation from 'react-native-geolocation-service';
-import {PermissionsAndroid, Platform} from 'react-native';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import {RideCancelReasonSheet} from '../../../../components/complex/RideCancelReasonSheet';
+import useLocation from '../../../../hooks/getLocation';
+import {useActionCable} from '../../../../hooks/socket/useActionCable';
+import {useChannel} from '../../../../hooks/socket/useChannel';
+import {
+  useCancelInProgressRideRequestMutation,
+  useRateDriverMutation,
+  useUpdateCurrentRideStatusMutation,
+} from '../../../../redux/manager/managerApiSlice';
 import {
   CancelReasons,
   mapBoxToken,
@@ -22,20 +31,9 @@ import {
   showAlert,
   UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
-import haversine from 'haversine-distance'; // For distance calculation
-import {svgIcon} from '../../../../assets/svg';
 import DriverDetailSheet from './DriverDetailSheet';
-import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import {RideCancelReasonSheet} from '../../../../components/complex/RideCancelReasonSheet';
-import {
-  useCancelInProgressRideRequestMutation,
-  useUpdateCurrentRideStatusMutation,
-} from '../../../../redux/manager/managerApiSlice';
 import OrderDeliveredSheet from './OrderDelivered';
-import {useActionCable} from '../../../../hooks/socket/useActionCable';
-import {useChannel} from '../../../../hooks/socket/useChannel';
-import {useSelector} from 'react-redux';
-import useLocation from '../../../../hooks/getLocation';
+import styles from './styles';
 
 const RideArriving = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -56,6 +54,7 @@ const RideArriving = ({route}: any) => {
   const [pickupLocation, setPickupLocation] = useState([
     74.27898792916038, 31.500973875938808,
   ]);
+  const [openModal, setOpenModal] = useState(false);
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
   const [showCancelSheet, setShowCancelSheet] = useState<any>(false);
   const [cancelReason, setCancelReason] = useState(CancelReasons);
@@ -65,6 +64,7 @@ const RideArriving = ({route}: any) => {
   const [type, setType] = useState<any>('Initial');
   const [updateCurrentRideStatus, {isLoading}] =
     useUpdateCurrentRideStatusMutation();
+  const [rateDriver, {isLoading: isRateLoading}] = useRateDriverMutation();
 
   // Socket
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, cleanedToken);
@@ -74,9 +74,10 @@ const RideArriving = ({route}: any) => {
     useState<boolean>(false);
 
   useEffect(() => {
-    if (route?.params) setItem(route?.params?.item);
+    if (route?.params) {
+      setItem(route?.params?.item);
+    }
   }, [route]);
-
   // Request location permissions (for Android)
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -135,7 +136,9 @@ const RideArriving = ({route}: any) => {
 
   // Check if the user is off the route
   const isUserOffRoute = currentLocation => {
-    if (!routeCoordinates || routeCoordinates.length === 0) return false;
+    if (!routeCoordinates || routeCoordinates.length === 0) {
+      return false;
+    }
 
     // Calculate the distance between the user's current location and the nearest point on the route
     let minDistance = Infinity;
@@ -204,7 +207,9 @@ const RideArriving = ({route}: any) => {
   useEffect(() => {
     const getCurrentLocation = async () => {
       const hasPermission = await requestLocationPermission();
-      if (!hasPermission) return;
+      if (!hasPermission) {
+        return;
+      }
       // Get initial location
       Geolocation.getCurrentPosition(
         position => {
@@ -293,11 +298,38 @@ const RideArriving = ({route}: any) => {
 
       const resp = await updateCurrentRideStatus(obj);
       if (resp?.data) {
-        if (status === RIDE_STATUS.ORDER_DELIVERED)
-          navigation.replace('AppStack');
+        if (status === RIDE_STATUS.ORDER_DELIVERED) {
+          //TODO: SHOW RATING MODAL
+          setOpenModal(true);
+          // navigation.replace('AppStack');
+        }
       }
     } catch (error) {
       showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const rateUser = async (data: object) => {
+    try {
+      const obj = {
+        // role: 'manager',
+        role: 'driver',
+        ride_request_id: item?.ride_request_id,
+        driver_id: item?.driver_id,
+        rating: {
+          rating: data?.rating || 0,
+          feedback: data?.comment || '',
+        },
+      };
+
+      await rateDriver(obj);
+      setOpenModal(false);
+      setTimeout(() => {
+        setOpenModal(true);
+        navigation.replace('AppStack');
+      }, 300);
+    } catch (error) {
+      //
     }
   };
 
@@ -405,6 +437,21 @@ const RideArriving = ({route}: any) => {
       )}
 
       {cancelRideLoading && <AppLoader />}
+      {openModal && (
+        <ReviewModal
+          details={item}
+          loading={isRateLoading}
+          modalVisible={openModal}
+          onPressCross={() => {
+            setOpenModal(false);
+            setTimeout(() => {
+              setOpenModal(true);
+              navigation.replace('AppStack');
+            }, 300);
+          }}
+          onPressDone={data => rateUser(data)}
+        />
+      )}
     </MainWrapper>
   );
 };

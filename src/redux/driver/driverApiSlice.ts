@@ -84,6 +84,40 @@ export const driverApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    rateManager: builder.mutation({
+      query: (data: any) => {
+        return {
+          url: `ratings`,
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
+    getWalletTransactions: builder.mutation({
+      query: (filter) => {
+        return {
+          url: `transactions?filter=${filter}`,
+          method: 'get',
+        };
+      },
+    }),
+    withdrawAmount: builder.mutation({
+      query: (data: object) => {
+        return {
+          url: 'transactions',
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
+    linkBankAccount: builder.mutation({
+      query: () => {
+        return {
+          url: 'user_wallet/save_bank_account',
+          method: 'POST',
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -98,4 +132,8 @@ export const {
   useLazyGetProfileStatusQuery,
   useSendOfferToManagerMutation,
   useSendLocationMutation,
+  useRateManagerMutation,
+  useGetWalletTransactionsMutation,
+  useWithdrawAmountMutation,
+  useLinkBankAccountMutation,
 } = driverApiSlice;

@@ -6,6 +6,7 @@ import {
   View,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {svgIcon} from '../../../assets/svg';
@@ -28,6 +29,7 @@ interface AuthBottomSheetProps {
   headerTitle: string;
   onPressGoogle: () => void;
   onPressApple: () => void;
+  onPressFacebook: () => void;
 }
 
 const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
@@ -40,6 +42,7 @@ const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
   onPressClose,
   onPressGoogle,
   onPressApple,
+  onPressFacebook,
 }) => {
   return (
     <View style={styles.container}>
@@ -68,7 +71,9 @@ const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
           />
           <Text style={styles.continueTxt}>Or continue with</Text>
           <View style={styles.socialLoginContainer}>
-            <TouchableOpacity>{svgIcon.Facebook}</TouchableOpacity>
+            <TouchableOpacity onPress={onPressFacebook}>
+              {svgIcon.Facebook}
+            </TouchableOpacity>
             <TouchableOpacity onPress={onPressGoogle}>
               {svgIcon.Google}
             </TouchableOpacity>
@@ -128,7 +133,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'center',
     justifyContent: 'space-around',
-    width: WP('40'),
+    width: WP('35'),
     marginVertical: WP('5'),
+    ...Platform.select({
+      android: {
+        width: WP('35'),
+      },
+      ios: {
+        width: WP('50'),
+      },
+    }),
   } as ViewStyle,
 });

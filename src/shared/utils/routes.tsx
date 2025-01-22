@@ -45,4 +45,9 @@ export const Routes = {
   OrderPickup: 'OrderPickup',
   VehicleRequest: 'VehicleRequest',
   RideArriving: 'RideArriving',
+  DocumentCreationSuccess: 'DocumentCreationSuccess',
+  PaymentManager: 'PaymentManager',
+  AddCard: 'AddCard',
+  PaymentManagerHistory: 'PaymentManagerHistory',
+  WithdrawAmount: 'WithdrawAmount',
 };

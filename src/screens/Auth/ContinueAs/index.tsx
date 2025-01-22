@@ -16,6 +16,7 @@ import {useGoogleSignIn} from '../../../hooks/useGoogleLogin';
 import {useDispatch} from 'react-redux';
 import {useSociallLoginMutation} from '../../../redux/auth/authApiSlice';
 import {setLoginUser} from '../../../redux/auth/authSlice';
+import {useFacebookSignIn} from '../../../hooks/useFacebookSignIn';
 
 const ContinueAs = ({}) => {
   const navigation: any = useNavigation();
@@ -23,9 +24,11 @@ const ContinueAs = ({}) => {
   const [data, setData] = useState<any>({});
   const [appleToken, setAppleToken] = useState<string | null>(null);
   const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [facebookToken, setFacebookToken] = useState<string | null>(null);
 
   const {signInWithApple} = useAppleSignIn(setAppleToken);
   const {signInWithGoogle} = useGoogleSignIn(setGoogleToken);
+  const {signInWithFacebook} = useFacebookSignIn(setFacebookToken);
   const [socialLogin, {isLoading}] = useSociallLoginMutation();
   const dispatch = useDispatch();
 
@@ -41,11 +44,20 @@ const ContinueAs = ({}) => {
   };
 
   useEffect(() => {
-    if (appleToken) handleSocialLogin('apple', appleToken);
+    if (appleToken) {
+      handleSocialLogin('apple', appleToken);
+    }
   }, [appleToken]);
   useEffect(() => {
-    if (googleToken) handleSocialLogin('google', googleToken);
+    if (googleToken) {
+      handleSocialLogin('google', googleToken);
+    }
   }, [googleToken]);
+  useEffect(() => {
+    if (facebookToken) {
+      handleSocialLogin('facebook', facebookToken);
+    }
+  }, [facebookToken]);
 
   const handleSocialLogin = async (provider: string, token: string) => {
     const data = new FormData();
@@ -101,6 +113,7 @@ const ContinueAs = ({}) => {
           onPressClose={() => setShowSheet(false)}
           onPressGoogle={() => signInWithGoogle()}
           onPressApple={() => signInWithApple()}
+          onPressFacebook={() => signInWithFacebook()}
         />
       )}
     </ImageBackground>

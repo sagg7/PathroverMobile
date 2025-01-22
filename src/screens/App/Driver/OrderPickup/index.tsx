@@ -1,18 +1,28 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
-import styles from './styles';
+import haversine from 'haversine-distance'; // For distance calculation
+import React, {useEffect, useState} from 'react';
+import {PermissionsAndroid, Platform} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import {useSelector} from 'react-redux';
+import {svgIcon} from '../../../../assets/svg';
 import {
   AppHeader,
   AppLoader,
   CancelRideSheet,
   MainWrapper,
   OrderAddressCard,
+  ReviewModal,
   RideActionCard,
   WaitingModal,
 } from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
-import Geolocation from 'react-native-geolocation-service';
-import {PermissionsAndroid, Platform} from 'react-native';
+import {useActionCable} from '../../../../hooks/socket/useActionCable';
+import {useChannel} from '../../../../hooks/socket/useChannel';
+import {useRateManagerMutation} from '../../../../redux/driver/driverApiSlice';
+import {
+  useCancelInProgressRideRequestMutation,
+  useUpdateCurrentRideStatusMutation,
+} from '../../../../redux/manager/managerApiSlice';
 import {
   mapBoxToken,
   PFColors,
@@ -21,15 +31,7 @@ import {
   showAlert,
   UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
-import haversine from 'haversine-distance'; // For distance calculation
-import {svgIcon} from '../../../../assets/svg';
-import {useChannel} from '../../../../hooks/socket/useChannel';
-import {useActionCable} from '../../../../hooks/socket/useActionCable';
-import {useSelector} from 'react-redux';
-import {
-  useCancelInProgressRideRequestMutation,
-  useUpdateCurrentRideStatusMutation,
-} from '../../../../redux/manager/managerApiSlice';
+import styles from './styles';
 
 const OrderPickup = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -45,6 +47,7 @@ const OrderPickup = ({route}: any) => {
   const [pickupLocation, setPickupLocation] = useState([
     74.27898792916038, 31.500973875938808,
   ]);
+  const [openModal, setOpenModal] = useState(false);
   const rerouteThreshold = 50; // Distance in meters to trigger reroute
   const [showRideActionSheet, setShowRideActionSheet] = useState<any>(false);
 
@@ -61,9 +64,12 @@ const OrderPickup = ({route}: any) => {
     useUpdateCurrentRideStatusMutation();
   const [cancelInProgressRideRequest, {isLoading: cancelRideLoading}] =
     useCancelInProgressRideRequestMutation();
+  const [rateManager, {isLoading: isRateLoading}] = useRateManagerMutation();
 
   useEffect(() => {
-    if (userPickedOffer) setPickedOffer(userPickedOffer);
+    if (userPickedOffer) {
+      setPickedOffer(userPickedOffer);
+    }
   }, [userPickedOffer]);
 
   useEffect(() => {
@@ -169,15 +175,19 @@ const OrderPickup = ({route}: any) => {
     }
     if (status === RIDE_STATUS.ORDER_DELIVERED) {
       setShowWaitingModal(false);
+      //TODO: SHOW RATING MODAL
       setTimeout(() => {
-        navigation.replace('AppStack');
+        setOpenModal(true);
+        //   navigation.replace('AppStack');
       }, 500);
     }
   };
 
   // Check if the user is off the route
   const isUserOffRoute = currentLocation => {
-    if (!routeCoordinates || routeCoordinates.length === 0) return false;
+    if (!routeCoordinates || routeCoordinates.length === 0) {
+      return false;
+    }
 
     // Calculate the distance between the user's current location and the nearest point on the route
     let minDistance = Infinity;
@@ -195,7 +205,9 @@ const OrderPickup = ({route}: any) => {
   useEffect(() => {
     const getCurrentLocation = async () => {
       const hasPermission = await requestLocationPermission();
-      if (!hasPermission) return;
+      if (!hasPermission) {
+        return;
+      }
 
       // Get initial location
       Geolocation.getCurrentPosition(
@@ -252,7 +264,7 @@ const OrderPickup = ({route}: any) => {
   const handleCancelRide = async () => {
     try {
       const obj = {
-        role: 'driver',
+        role: 'manager',
         order: {
           reason: '',
           ride_request_id: pickerOffer?.id,
@@ -267,6 +279,28 @@ const OrderPickup = ({route}: any) => {
       }
     } catch (error) {
       showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const rateUser = async (data: object) => {
+    try {
+      const obj = {
+        role: 'driver',
+        ride_request_id: pickerOffer?.id,
+        manager_id: pickerOffer?.manager_id,
+        rating: {
+          rating: data?.rating || 0,
+          feedback: data?.comment || '',
+        },
+      };
+      await rateManager(obj);
+      setOpenModal(false);
+      setTimeout(() => {
+        setOpenModal(true);
+        navigation.replace('AppStack');
+      }, 300);
+    } catch (error) {
+      //
     }
   };
 
@@ -368,6 +402,21 @@ const OrderPickup = ({route}: any) => {
       />
       {showWaitingModal && <WaitingModal isModalVisible={showWaitingModal} />}
       {cancelRideLoading && <AppLoader />}
+      {openModal && (
+        <ReviewModal
+          details={pickerOffer}
+          modalVisible={openModal}
+          loading={isRateLoading}
+          onPressCross={() => {
+            setOpenModal(false);
+            setTimeout(() => {
+              setOpenModal(true);
+              navigation.replace('AppStack');
+            }, 300);
+          }}
+          onPressDone={data => rateUser(data)}
+        />
+      )}
     </MainWrapper>
   );
 };

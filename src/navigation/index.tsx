@@ -34,6 +34,11 @@ import Faqs from '../screens/App/FAQs';
 import SavedLibrary from '../screens/App/Manager/SavedLibrary';
 import OrderPickup from '../screens/App/Driver/OrderPickup';
 import RideArriving from '../screens/App/Manager/RideArriving';
+import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
+import PaymentMethods from '../screens/App/Manager/PaymentManager';
+import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
+import PaymentHistory from '../screens/App/Manager/PaymentHistory';
+import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -84,9 +89,19 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.SearchLatLng} component={SearchLatLng} />
         <Stack.Screen name={Routes.Faqs} component={Faqs} />
         <Stack.Screen name={Routes.SavedLibrary} component={SavedLibrary} />
-
         <Stack.Screen name={Routes.OrderPickup} component={OrderPickup} />
         <Stack.Screen name={Routes.RideArriving} component={RideArriving} />
+        <Stack.Screen
+          name={Routes.DocumentCreationSuccess}
+          component={DocumentCreationSuccess}
+        />
+        <Stack.Screen name={Routes.PaymentManager} component={PaymentMethods} />
+        <Stack.Screen
+          name={Routes.PaymentManagerHistory}
+          component={PaymentHistory}
+        />
+        <Stack.Screen name={Routes.AddCard} component={AddCard} />
+        <Stack.Screen name={Routes.WithdrawAmount} component={WithdrawAmount} />
       </Stack.Navigator>
     </NavigationContainer>
   );
