@@ -9,6 +9,7 @@ import styles from './styles';
 import {View} from 'react-native';
 import {useWithdrawAmountMutation} from '../../../../../redux/driver/driverApiSlice';
 import {showAlert} from '../../../../../shared/exporter';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const WithdrawAmount = () => {
   const [amount, setAmount] = useState(0);
@@ -29,18 +30,18 @@ const WithdrawAmount = () => {
   return (
     <MainWrapper>
       <AppHeader title="Withdraw Amount" />
-      <View style={styles.contentView}>
-        <AppInput
-          placeholder="Amount"
-          value={amount}
-          onChangeText={txt => {
-            if (parseInt(txt) > -1) {
-              setAmount(txt);
-            }
-          }}
-          keyboardType={'numeric'}
-        />
-        <View style={styles.buttonsRow}>
+      <KeyboardAwareScrollView contentContainerStyle={{flex: 1}}>
+        <View style={styles.contentView}>
+          <AppInput
+            placeholder="Amount"
+            value={amount}
+            onChangeText={txt => {
+              if (parseInt(txt) > -1) {
+                setAmount(txt);
+              }
+            }}
+            keyboardType={'numeric'}
+          />
           <AppButton
             title="Confirm Withdraw"
             isEmpty={false}
@@ -49,9 +50,10 @@ const WithdrawAmount = () => {
               onPressSubmit();
             }}
             disabled={isLoading || amount <= 0}
+            buttonStyle={styles.btnStyles}
           />
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </MainWrapper>
   );
 };

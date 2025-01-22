@@ -8,6 +8,7 @@ import {
   OptionSelectorSheet,
   CargoSheet,
   RecipentSheet,
+  ReviewModal,
 } from '../../../../../components';
 import {styles} from './Styles';
 import {
@@ -29,8 +30,9 @@ import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
 
 const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
-  const [selectedVehicleDetails, setSelectedVehicleDetails] = useState(null);
-  const [selectedRouteDetails, setSelectedRouteDetails] = useState(null);
+  const [selectedVehicleDetails, setSelectedVehicleDetails] =
+    useState<any>(null);
+  const [selectedRouteDetails, setSelectedRouteDetails] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState('Choose Route');
   const [cargoDescriptionDetails, setCargoDescriptionDetails] =
     useState<null | {image: any; description: any}>(null);
@@ -198,16 +200,19 @@ const VehicleRequest = ({navigation}: any) => {
     formData.append('ride_request[recipient_number]', recipentDetails?.phone);
     formData.append(
       'ride_request[locations_attributes][1][name]',
-      'End Location',
+      selectedRouteDetails?.dropoff_location_name ||
+        selectedRouteDetails?.dropoff_location?.name,
     );
     formData.append(
       'ride_request[locations_attributes][0][name]',
-      'Start Location',
+      selectedRouteDetails?.pickup_location_name ||
+        selectedRouteDetails?.pickup_location?.name,
     );
 
     formData.append('ride_request[estimated_time]', result?.duration);
     formData.append('ride_request[distance]', result?.distance);
     const res = await createManagerVehicleRequest(formData);
+
     if (res?.data) {
       navigation.navigate(Routes.VehiclesOffer, {
         id: res?.data?.ride_request?.id,
@@ -334,6 +339,7 @@ const VehicleRequest = ({navigation}: any) => {
         showRecipentSheet={showRecipentSheet}
         setShowRecipentSheet={setShowRecipentSheet}
       />
+
       {isLoading && <AppLoader />}
     </MainWrapper>
   );

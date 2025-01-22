@@ -1,10 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {
-  PFColors,
-  PFFonts,
-  PFFontSize,
-  scale,
-} from '../../../../../shared/exporter';
+import {scale} from '../../../../../shared/exporter';
 
 const styles = StyleSheet.create({
   contentView: {
@@ -18,12 +13,13 @@ const styles = StyleSheet.create({
   },
   buttonsRow: {
     marginVertical: 15,
-    position: 'absolute',
-    bottom: 0,
   },
   textStyle: {
     width: '100%',
     textAlign: 'center',
+  },
+  btnStyles: {
+    top: scale(540),
   },
 });
 export default styles;

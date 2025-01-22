@@ -39,34 +39,39 @@ const PickUp = ({route, navigation}: any) => {
     }
   }, [location]);
 
-  const pickLocation = event => {
+  const pickLocation = (event: any) => {
     const selectedLocation = event.geometry.coordinates;
+    const latitude = selectedLocation && selectedLocation?.[1];
+    const longitude = selectedLocation && selectedLocation?.[0];
     const selectedLoc = {
-      latitude: selectedLocation[1],
-      longitude: selectedLocation[0],
+      latitude: latitude,
+      longitude: longitude,
     };
-    if (location) {
-      const distanceFromCurrent = getDistance(
-        {latitude: location?.latitude, longitude: location.longitude},
-        {latitude: selectedLoc.latitude, longitude: selectedLoc.longitude},
-        100,
-      );
 
-      if (distanceFromCurrent <= RADIUS_IN_METERS) {
-        fetchPlaceName(selectedLocation[1], selectedLocation[0]);
-        setPickUpLoc(selectedLocation);
-        setSelectedLocation([selectedLocation[0], selectedLocation[1]]);
-      } else {
-        showAlert('Alert', 'Select location in the green zone.');
-      }
+    const distanceFromCurrent = getDistance(
+      {latitude: location?.latitude, longitude: location?.longitude},
+      {latitude: selectedLoc?.latitude, longitude: selectedLoc?.longitude},
+      100,
+    );
+
+    if (distanceFromCurrent <= RADIUS_IN_METERS) {
+      fetchPlaceName(latitude, longitude);
+      setPickUpLoc(selectedLocation);
+      setSelectedLocation([longitude, latitude]);
+    } else {
+      showAlert('Alert', 'Select location in the green zone.');
     }
   };
 
   const handleDone = () => {
+    if (pickUpLoc && pickUpLoc?.length > 0)
+      return showAlert('Location', 'Please select location.');
+    const latitude = pickUpLoc && pickUpLoc?.[1];
+    const longitude = pickUpLoc && pickUpLoc?.[0];
     const data = {
-      coords: [pickUpLoc[0], pickUpLoc[1]],
-      latitude: pickUpLoc[1],
-      longitude: pickUpLoc[0],
+      coords: [longitude, latitude],
+      latitude: latitude,
+      longitude: longitude,
       placeName: placeName,
     };
 

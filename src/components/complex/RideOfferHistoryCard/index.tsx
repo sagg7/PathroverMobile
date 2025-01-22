@@ -28,6 +28,8 @@ const RideOfferHistoryCard = ({
   onPressCard,
   index,
 }: RideOfferHistoryCardProps) => {
+  console.log('itemmm', item);
+
   return (
     <TouchableOpacity
       style={styles.mainContainer}
@@ -56,7 +58,7 @@ const RideOfferHistoryCard = ({
         <View style={styles.horizontalBar} />
         <StarRatingContainer
           rating={item?.review_and_feedback?.rating}
-          reviewText={item?.feedback || 'Inprogress'}
+          reviewText={item?.review_and_feedback?.feedback || ''}
         />
 
         {/* <View style={styles.butonContainer}>

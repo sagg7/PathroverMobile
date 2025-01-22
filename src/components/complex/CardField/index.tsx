@@ -33,17 +33,16 @@ const CardFieldSheet = ({loading, onPressSubmit}: CardFieldSheetProps) => {
           disabled={loading}
         />
 
-        <View style={styles.buttonsRow}>
-          <AppButton
-            title="Submit"
-            isEmpty={false}
-            textStyle={styles.textStyle}
-            handleClick={() =>
-              cardDetails?.complete && onPressSubmit(cardDetails)
-            }
-            disabled={!cardDetails?.complete || loading}
-          />
-        </View>
+        <AppButton
+          title="Submit"
+          isEmpty={false}
+          textStyle={styles.textStyle}
+          handleClick={() =>
+            cardDetails?.complete && onPressSubmit(cardDetails)
+          }
+          disabled={!cardDetails?.complete || loading}
+          buttonStyle={styles.buttonStyle}
+        />
       </StripeProvider>
     </View>
   );
@@ -76,5 +75,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: PFColors.Gray.SoftGray,
+  },
+  buttonStyle: {
+    position: 'absolute',
+    top: scale(600),
   },
 });

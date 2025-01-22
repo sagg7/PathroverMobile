@@ -47,3 +47,4 @@ export * from './complex/WaitingModal';
 export * from './complex/ReviewModal';
 export * from './complex/CardField';
 export * from './complex/CardItem';
+export * from './complex/PaymentHistoryCard';

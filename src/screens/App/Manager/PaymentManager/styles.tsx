@@ -26,5 +26,9 @@ const styles = StyleSheet.create({
     paddingBottom: scale(30),
     flexGrow: 1,
   },
+  mainContainer: {
+    backgroundColor: PFColors.Standard.White,
+    flex: 1,
+  },
 });
 export default styles;

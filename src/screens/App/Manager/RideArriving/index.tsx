@@ -297,6 +297,7 @@ const RideArriving = ({route}: any) => {
       };
 
       const resp = await updateCurrentRideStatus(obj);
+
       if (resp?.data) {
         if (status === RIDE_STATUS.ORDER_DELIVERED) {
           //TODO: SHOW RATING MODAL
