@@ -78,6 +78,7 @@ import AmexCard from './amex.svg';
 import UnionPay from './unionpay.svg';
 import DiscoverCard from './discover.svg';
 import CreditCard from './credit-card.svg';
+import BankAccount from './bank.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -159,4 +160,5 @@ export const svgIcon = {
   UnionPay: <UnionPay />,
   DiscoverCard: <DiscoverCard />,
   CreditCard: <CreditCard />,
+  BankAccount: <BankAccount />,
 };
