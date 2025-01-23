@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: HP('4'),
     alignItems: 'center',
-    borderColor: 'pink',
     marginVertical: WP('2'),
     marginHorizontal: WP('5'),
   },

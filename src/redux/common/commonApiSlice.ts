@@ -5,8 +5,6 @@ export const commonApiSlice = apiSlice.injectEndpoints({
     getOfferHistoryRoleBase: builder.query({
       query: ({role, ...params}) => {
         const queryParams = new URLSearchParams({role, ...params}).toString();
-        console.log('queryPArams ', queryParams);
-
         return {
           url: `orders?${queryParams}`,
           method: 'GET',
@@ -26,6 +24,15 @@ export const commonApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+    getInprogressRide: builder.query({
+      query: ({role, ...params}) => {
+        const queryParams = new URLSearchParams({role, ...params}).toString();
+        return {
+          url: `orders/in_progress_order?${queryParams}`,
+          method: 'GET',
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -34,5 +41,6 @@ export const {
   useGetOfferHistoryRoleBaseQuery,
   useDeleteOfferHistoryMutation,
   useUserNotificationMutation,
+  useGetInprogressRideQuery,
 } = commonApiSlice;
 commonApiSlice;

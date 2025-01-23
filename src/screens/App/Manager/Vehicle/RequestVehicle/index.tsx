@@ -1,5 +1,5 @@
 import {View, Text, Pressable, ScrollView} from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -8,6 +8,7 @@ import {
   OptionSelectorSheet,
   CargoSheet,
   RecipentSheet,
+  ReviewModal,
 } from '../../../../../components';
 import {styles} from './Styles';
 import {
@@ -26,11 +27,13 @@ import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
 import {useCreateManagerVehicleRequestMutation} from '../../../../../redux/manager/managerApiSlice';
 import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
+import {useGetInprogressRideQuery} from '../../../../../redux/common/commonApiSlice';
 
 const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
-  const [selectedVehicleDetails, setSelectedVehicleDetails] = useState(null);
-  const [selectedRouteDetails, setSelectedRouteDetails] = useState(null);
+  const [selectedVehicleDetails, setSelectedVehicleDetails] =
+    useState<any>(null);
+  const [selectedRouteDetails, setSelectedRouteDetails] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState('Choose Route');
   const [cargoDescriptionDetails, setCargoDescriptionDetails] =
     useState<null | {image: any; description: any}>(null);
@@ -40,10 +43,21 @@ const VehicleRequest = ({navigation}: any) => {
   const cargoSheetRef = useRef(null);
   const [showCargoSheet, setShowCargoSheet] = useState(false);
   const [showRecipentSheet, setShowRecipentSheet] = useState(false);
+  const [queryParams, setQueryParams] = useState({
+    role: 'manager',
+  });
+  const {isLoading: inProgressLoadding, data: inProgressRide} =
+    useGetInprogressRideQuery(queryParams);
 
   const recipentSheetRef = useRef(null);
-  const [createManagerVehicleRequest, {isLoading}] =
+  const [createManagerVehicleRequest, {isLoading, error}] =
     useCreateManagerVehicleRequestMutation();
+
+  useEffect(() => {
+    console.log('inprogres RIDE', inProgressRide?.data);
+    if (inProgressRide?.data?.length > 0)
+      navigation.navigate(Routes.RideArriving, {item: inProgressRide?.data[0]});
+  }, [inProgressRide]);
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
@@ -198,16 +212,19 @@ const VehicleRequest = ({navigation}: any) => {
     formData.append('ride_request[recipient_number]', recipentDetails?.phone);
     formData.append(
       'ride_request[locations_attributes][1][name]',
-      'End Location',
+      selectedRouteDetails?.dropoff_location_name ||
+        selectedRouteDetails?.dropoff_location?.name,
     );
     formData.append(
       'ride_request[locations_attributes][0][name]',
-      'Start Location',
+      selectedRouteDetails?.pickup_location_name ||
+        selectedRouteDetails?.pickup_location?.name,
     );
 
     formData.append('ride_request[estimated_time]', result?.duration);
     formData.append('ride_request[distance]', result?.distance);
     const res = await createManagerVehicleRequest(formData);
+
     if (res?.data) {
       navigation.navigate(Routes.VehiclesOffer, {
         id: res?.data?.ride_request?.id,
@@ -230,7 +247,7 @@ const VehicleRequest = ({navigation}: any) => {
 
       setVehicleData(reSetVehicleData);
     } else {
-      showAlert('Error', res?.error?.data?.errors[0]);
+      showAlert('Error', res?.error?.data?.error);
     }
   };
 
@@ -334,6 +351,7 @@ const VehicleRequest = ({navigation}: any) => {
         showRecipentSheet={showRecipentSheet}
         setShowRecipentSheet={setShowRecipentSheet}
       />
+
       {isLoading && <AppLoader />}
     </MainWrapper>
   );

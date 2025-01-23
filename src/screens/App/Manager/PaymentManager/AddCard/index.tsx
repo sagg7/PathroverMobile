@@ -8,6 +8,9 @@ import {
 } from '../../../../../components';
 import {useAddCardMutation} from '../../../../../redux/manager/managerApiSlice';
 import {showAlert} from '../../../../../shared/exporter';
+import {KeyboardAvoidingView, SafeAreaView} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import styles from '../styles';
 
 const AddCard = () => {
   const navigation = useNavigation();
@@ -37,10 +40,17 @@ const AddCard = () => {
     }
   };
   return (
-    <MainWrapper>
+    <SafeAreaView style={styles.mainContainer}>
       <AppHeader title="Add Card" />
-      <CardFieldSheet onPressSubmit={onPressSubmit} loading={isLoading} />
-    </MainWrapper>
+      <KeyboardAwareScrollView
+        enableAutomaticScroll={true}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps={'handled'}
+        contentContainerStyle={{flex: 1}}
+        showsVerticalScrollIndicator={false}>
+        <CardFieldSheet onPressSubmit={onPressSubmit} loading={isLoading} />
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 };
 

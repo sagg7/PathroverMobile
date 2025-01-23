@@ -1,5 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
@@ -78,15 +84,15 @@ const ReviewModal = ({
             {data.rating > 1 ? 'stars' : 'star'}
           </Text>
 
-          <AppInput
-            multiline
+          <TextInput
             placeholder={'Add Comments'}
             value={data.comment}
             onChangeText={txt => setData(prev => ({...prev, comment: txt}))}
-            inputContainerStyle={styles.inputContainerStyle}
-            placeholderBackgroundColor={'transparent'}
-            placeholderFontFamily={PFFonts.Foundation.SemiBold}
+            style={styles.inputContainerStyle}
+            placeholderTextColor={PFColors.Gray.DarkGray}
+            // placeholderFontFamily={PFFonts.Foundation.SemiBold}
             editable={!loading}
+            multiline
           />
 
           <View style={styles.buttonsRow}>
@@ -178,5 +184,12 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: PFColors.Standard.Black,
     marginBottom: WP('2'),
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.Regular,
+    borderWidth: 1,
+    borderRadius: 20,
+    textAlignVertical: 'top',
+    padding: 20,
   },
 });

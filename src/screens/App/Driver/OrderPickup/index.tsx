@@ -72,6 +72,17 @@ const OrderPickup = ({route}: any) => {
     }
   }, [userPickedOffer]);
 
+  // useEffect(() => {
+  //   if (route?.params?.item) {
+  //     setPickedOffer(route?.params?.item);
+  //     setType(
+  //       route?.params?.item?.order_status
+  //         ? route?.params?.item?.order_status
+  //         : 'Initial',
+  //     );
+  //   }
+  // }, [route]);
+
   useEffect(() => {
     setTimeout(() => {
       setShowRideActionSheet(true);
