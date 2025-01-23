@@ -128,13 +128,7 @@ const CompanyDetail = () => {
         type: driverData?.vehiclePhoto?.type,
         name: driverData?.vehiclePhoto.fileName,
       });
-    // profile[profile_image];
-    // driverData?.profile &&
-    //   data.append('profile[profile_image]', {
-    //     uri: driverData?.profile?.uri,
-    //     type: driverData?.profile?.type,
-    //     name: driverData?.profile?.fileName,
-    //   });
+
     driverData?.vehiclePhoto &&
       data.append('profile[company_profile_attributes][company_card]', {
         uri: driverData?.vehiclePhoto?.uri,
@@ -142,7 +136,7 @@ const CompanyDetail = () => {
         name: driverData?.vehiclePhoto.fileName,
       });
     driverData?.fileName &&
-      data.append('profile_image', {
+      data.append('profile[profile_image]', {
         uri: driverData?.uri,
         type: driverData?.type,
         name: driverData?.fileName,
