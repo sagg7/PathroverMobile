@@ -4,7 +4,6 @@ import {DriverTabs} from './DriverTabs';
 import {ManagerTabs} from './ManagerTabs';
 import {useSelector} from 'react-redux';
 import {APP_ROLE} from '../../shared/exporter';
-import Home from '../../screens/App/EndUser/Home';
 import {EndUserTabs} from './EndUserTabs';
 import AuthStack from '../stacks/authStack';
 import {notificationListener} from '../../hooks/NotificationHook';
@@ -35,7 +34,7 @@ const AppStack = () => {
     ) : userRole === APP_ROLE.MANAGER ? (
       <ManagerTabs />
     ) : (
-      APP_ROLE.END_USER && <EndUserTabs />
+      <EndUserTabs />
     )
   ) : (
     <AuthStack />

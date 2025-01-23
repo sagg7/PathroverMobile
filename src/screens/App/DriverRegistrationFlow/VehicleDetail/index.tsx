@@ -28,6 +28,7 @@ const VehicleDetail = () => {
   const [vehicleData, setVehicleData] = useState(null);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [selectedKey, setSelectedKey] = useState(null);
+  const [selectedTruck, setSelectedTruck] = useState(null);
   const sheetRef = useRef();
   var type: any = '';
   const dispatch = useDispatch();
@@ -78,6 +79,8 @@ const VehicleDetail = () => {
 
   const handleTruckList = i => {
     const isChecked = vehicleData?.find(i => i.isWeightSelected);
+    setSelectedTruck(i?.title);
+
     if (selectedKey === i.key && isChecked) {
       sheetRef.current.open();
     } else {
@@ -97,6 +100,7 @@ const VehicleDetail = () => {
     const selectedModel = selectedVehicle?.model?.find(i => i.isModelSelected);
     const vehicleDetail = {
       weight: selectedVehicle,
+      selectedTruck: selectedTruck,
       ...(selectedModel && {model: selectedModel}),
       vehiclePhoto: vehicleImage,
     };

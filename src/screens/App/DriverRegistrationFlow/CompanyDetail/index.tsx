@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Image,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import {
@@ -142,30 +141,45 @@ const CompanyDetail = () => {
         type: driverData?.vehiclePhoto?.type,
         name: driverData?.vehiclePhoto.fileName,
       });
-    driverData?.vehiclePhoto &&
+    driverData?.fileName &&
       data.append('profile_image', {
-        uri: driverData?.vehiclePhoto?.uri,
-        type: driverData?.vehiclePhoto?.type,
-        name: driverData?.vehiclePhoto.fileName,
+        uri: driverData?.uri,
+        type: driverData?.type,
+        name: driverData?.fileName,
       });
 
     if (!isSkip) {
-      data.append('profile[vehicle_detail_attributes][weight]', 'a');
+      data.append(
+        'profile[vehicle_detail_attributes][weight]',
+        driverData?.weight?.title,
+      );
       data.append(
         'profile[vehicle_detail_attributes][vehicle_model]',
-        'driver',
+        driverData?.model?.title,
       );
-      data.append('profile[vehicle_detail_attributes][trail_type]', '');
-      data.append('profile[company_profile_attributes][name]', 'driver');
-      data.append('profile[company_profile_attributes][address]', 'driver');
-      data.append('profile[company_profile_attributes][description]', 'driver');
       data.append(
-        'profile[company_profile_attributes][employee_detail]',
-        'driver',
+        'profile[vehicle_detail_attributes][trail_type]',
+        driverData?.selectedTruck,
+      );
+      data.append(
+        'profile[company_profile_attributes][name]',
+        companyForm?.name,
+      );
+      data.append(
+        'profile[company_profile_attributes][address]',
+        companyForm?.location,
+      );
+      data.append(
+        'profile[company_profile_attributes][description]',
+        companyForm?.detail,
+      );
+      data.append(
+        'profile[company_profile_attributes][employe_detail]',
+        companyForm?.employeDetail,
       );
       data.append(
         'profile[company_profile_attributes][company_type]',
-        'Single Company',
+        companyType?.find(i => i.isSelected)?.title,
       );
     }
 
@@ -233,7 +247,7 @@ const CompanyDetail = () => {
         <AppInput
           onChangeText={value => handleInputChange('employeDetail', value)}
           value={companyForm.employeDetail}
-          placeholder="Company Employee Details"
+          placeholder="Company Employe Details"
           inputContainerStyle={styles.normalInput}
         />
 
@@ -258,7 +272,7 @@ const CompanyDetail = () => {
         />
         <View style={styles.height} />
       </ScrollView>
-      {/* {isLoading && <AppLoader />} */}
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };

@@ -10,7 +10,7 @@ import React, {useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
-import {AppLoader, MainWrapper, SwitchRoleSheet} from '../../../../components';
+import {MainWrapper, SwitchRoleSheet} from '../../../../components';
 import {
   APP_ROLE,
   EndUserProfileMenu,
@@ -19,24 +19,25 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {Routes} from '../../../../shared/exporter';
 import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {setUserRole} from '../../../../redux/auth/appRoleSlice';
 import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
 import {setManagerRouteEmpty} from '../../../../redux/manager/managerSlice';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
 
 const Settings = ({navigation}: any) => {
-  const consentSheetRef = useRef<any>(null);
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
-  const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(USER_PROFILE);
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const dispatch = useDispatch();
   const userRole = useSelector(state => state?.appRole.userRole);
-  const username = `${loginUser?.first_name} ${loginUser?.last_name} `;
-
+  const consentSheetRef = useRef<any>(null);
+  const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
     useDeleteUserAccountMutation();
+  const [userName, setUserName] = useState(
+    `${loginUser?.first_name} ${loginUser?.first_name}`,
+  );
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
@@ -56,22 +57,20 @@ const Settings = ({navigation}: any) => {
     if (userRole !== v.role) {
       dispatch(setUserRole(v.role));
     }
-    setTimeout(() => {
-      switch (v.role) {
-        case APP_ROLE.DRIVER:
-          loginUser?.is_driver
-            ? navigation.replace('AppStack')
-            : navigation.navigate(Routes.DriverProfile);
-          break;
-        case APP_ROLE.MANAGER:
-          loginUser?.is_manager
-            ? navigation.replace('AppStack')
-            : navigation.navigate(Routes.DriverProfile);
-        default:
-          break;
-      }
-    }, 5);
 
+    switch (v.role) {
+      case APP_ROLE.DRIVER:
+        loginUser?.is_driver
+          ? navigation.navigate('AppStack')
+          : navigation.navigate(Routes.DriverProfile);
+        break;
+      case APP_ROLE.MANAGER:
+        loginUser?.is_manager
+          ? navigation.navigate('AppStack')
+          : navigation.navigate(Routes.DriverProfile);
+      default:
+        break;
+    }
     setshowSwitchRoleSheet(false);
   };
 
@@ -80,28 +79,13 @@ const Settings = ({navigation}: any) => {
     dispatch(setLoginUser(null));
     dispatch(setUserRole(APP_ROLE.END_USER));
     dispatch(setManagerRouteEmpty({}));
-
     await GoogleSignin.signOut();
+    setTimeout(() => {
+      navigation.replace('AuthStack');
+    }, 1500);
   };
 
-  const settingOption = ({item}) => {
-    return (
-      <TouchableOpacity
-        style={styles.listConatainer}
-        onPress={() => handleNavigation(item.id)}
-        key={item.id}>
-        <View style={styles.innerContainer}>
-          <View style={styles.iconContainer}>
-            <Image source={item?.icon} style={styles.setingOptionIcon} />
-          </View>
-          <Text style={styles.listOptionText}>{item?.title}</Text>
-        </View>
-        {svgIcon.RightChevron}
-      </TouchableOpacity>
-    );
-  };
-
-  const handleNavigation = (itemId: number) => {
+  const handleNavigation = (itemId: any) => {
     let screenName = '';
     switch (itemId) {
       case 0:
@@ -146,7 +130,6 @@ const Settings = ({navigation}: any) => {
       navigation.navigate(screenName);
     }
   };
-
   const handelCancel = () => {
     consentSheetRef?.current.close();
   };
@@ -155,41 +138,43 @@ const Settings = ({navigation}: any) => {
       consentSheetRef?.current.close();
       handleLogout();
     } else {
+      let res = await deleteUserAccount(undefined);
+      consentSheetRef?.current.close();
+      handleLogout();
     }
-    let res = await deleteUserAccount(undefined);
-    consentSheetRef?.current.close();
-    handleLogout();
+  };
+
+  const settingOption = ({item}) => {
+    return (
+      <TouchableOpacity
+        style={styles.listConatainer}
+        onPress={() => handleNavigation(item.id)}
+        key={item.id}>
+        <View style={styles.innerContainer}>
+          <View style={styles.iconContainer}>
+            <Image source={item?.icon} style={styles.setingOptionIcon} />
+          </View>
+          <Text style={styles.listOptionText}>{item?.title}</Text>
+        </View>
+        {svgIcon.RightChevron}
+      </TouchableOpacity>
+    );
   };
 
   return (
     <MainWrapper>
       <View style={styles.userProfileContainer}>
-        {/*  */}
         <Image source={appIcons.userPlaceholder} style={styles.userPicture} />
-
         <View style={styles.userProfileInner}>
-          <Text style={styles.profileTextStyles}>{username}</Text>
+          <Text style={styles.profileTextStyles}>{userName}</Text>
         </View>
-        <TouchableOpacity
-          hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-          style={styles.arrowstyles}
-          activeOpacity={0.7}
-          onPress={() => navigation.goBack()}>
-          {svgIcon.BackArrow}
-        </TouchableOpacity>
       </View>
+
       <FlatList
         data={EndUserProfileMenu}
         renderItem={settingOption}
         keyExtractor={(index, item) => item?.toString()}
         contentContainerStyle={styles.contentContainerStyle}
-      />
-
-      <SwitchRoleSheet
-        modalVisible={showSwitchRoleSheet}
-        data={profiles}
-        onPressCard={handleCard}
-        setModalVisible={() => setshowSwitchRoleSheet(false)}
       />
       <ConsentSheet
         ref={consentSheetRef}
@@ -203,7 +188,12 @@ const Settings = ({navigation}: any) => {
         onPressCancel={handelCancel}
         onPressSuccess={handleSuccess}
       />
-      {isLoadingDeleteAccounnt && <AppLoader />}
+
+      <SwitchRoleSheet
+        modalVisible={showSwitchRoleSheet}
+        data={profiles}
+        onPressCard={handleCard}
+      />
     </MainWrapper>
   );
 };

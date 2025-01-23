@@ -6,7 +6,7 @@ import {DriverSuccessInfo} from '../../../components/complex/DriverSuccessInfo';
 const DocumentCreationSuccess = ({route}: any) => {
   return (
     <MainWrapper>
-      <AppHeader title="Path Finder" clickBackIcon={() => {}} />
+      <AppHeader title="Path Rover" clickBackIcon={() => {}} />
       <DriverSuccessInfo
         icon={svgIcon.GreenCheck}
         // title="Successfully Created"

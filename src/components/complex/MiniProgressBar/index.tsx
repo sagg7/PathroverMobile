@@ -8,7 +8,7 @@ interface MiniProgressBarProps {
   onPressSkip?: () => void;
   desciption?: string;
   heading?: string;
-  totalSetps: number;
+  totalSetps?: number;
 }
 
 function MiniProgressBar({
