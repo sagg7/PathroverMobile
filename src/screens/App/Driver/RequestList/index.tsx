@@ -43,6 +43,7 @@ import {
   useSendOfferToManagerMutation,
 } from '../../../../redux/driver/driverApiSlice';
 import useLocation from '../../../../hooks/getLocation';
+import {useGetInprogressRideQuery} from '../../../../redux/common/commonApiSlice';
 
 const RequestList = ({navigation}: any) => {
   const dispatch = useDispatch();
@@ -60,6 +61,9 @@ const RequestList = ({navigation}: any) => {
   const {accessToken} = useSelector((state: any) => state?.auth);
   const [offerPrice, setOfferPrice] = useState<any>('');
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const [queryParams, setQueryParams] = useState({
+    role: 'driver',
+  });
   const {isProfileVerified, isDriverAvailable} = useSelector(
     (state: any) => state?.driver,
   );
@@ -68,6 +72,9 @@ const RequestList = ({navigation}: any) => {
   // API
   const [getProfileStatus, {isLoading}] =
     useLazyGetProfileStatusQuery(undefined);
+
+  const {isLoading: inProgressLoadding, data: inProgressRide} =
+    useGetInprogressRideQuery(queryParams);
   const [sendOfferToManager, {isLoading: offerLoading}] =
     useSendOfferToManagerMutation();
 
@@ -248,6 +255,12 @@ const RequestList = ({navigation}: any) => {
       console.error('Error fetching location:', error);
     }
   };
+
+  // Todo for inprogress rides
+  // useEffect(() => {
+  //   if (inProgressRide?.data?.length > 0)
+  //     navigation.navigate(Routes.OrderPickup, {item: inProgressRide?.data[0]});
+  // }, [inProgressRide]);
 
   const renderRideRequest = ({item, index}: any) => (
     <OfferRequestCard

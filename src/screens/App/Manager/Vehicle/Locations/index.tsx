@@ -95,6 +95,7 @@ const Locations = ({navigation, route}: any) => {
       setDestinationAddress,
     });
   };
+  console.log('place name on location', pickUpAddress);
 
   useEffect(() => {
     if (location) {
@@ -141,7 +142,11 @@ const Locations = ({navigation, route}: any) => {
               <Text style={styles.titleText}>Pickup Location</Text>
               <View style={styles.addressView}>
                 {svgIcon.MapPin}
-                <Text style={styles.addressText}>{placeName || ''}</Text>
+                <Text style={styles.addressText}>
+                  {pickUpAddress?.placeName
+                    ? pickUpAddress?.placeName
+                    : placeName || ''}
+                </Text>
               </View>
             </View>
             {svgIcon.LeftArrow}

@@ -1,6 +1,11 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useEffect} from 'react';
-import {AppHeader, CardItem, MainWrapper} from '../../../../components';
+import {
+  AppHeader,
+  AppLoader,
+  CardItem,
+  MainWrapper,
+} from '../../../../components';
 import {
   useDeleteCardMutation,
   useGetAllCardsMutation,
@@ -82,9 +87,10 @@ const PaymentMethods = () => {
         data={data?.user_cards}
         keyExtractor={(item, index) => item + index.toString()}
         renderItem={renderItem}
-        ListEmptyComponent={listEmptyComponent}
+        ListEmptyComponent={!isLoading && listEmptyComponent}
         contentContainerStyle={styles.flatlistContainerStyle}
       />
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };

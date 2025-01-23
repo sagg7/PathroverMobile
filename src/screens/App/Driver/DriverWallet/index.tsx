@@ -3,6 +3,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {FlatList, Linking, Text, View} from 'react-native';
 import {
   AppHeader,
+  AppLoader,
   DynamicSelector,
   MainWrapper,
   WalletCard,
@@ -27,7 +28,8 @@ const DriverWallet = ({}) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [getWalletTransactions, {data, isLoading}] =
     useGetWalletTransactionsMutation();
-  const [linkBankAccount] = useLinkBankAccountMutation();
+  const [linkBankAccount, {isLoading: linkLoading}] =
+    useLinkBankAccountMutation();
 
   const getTransactions = async () => {
     try {
@@ -47,7 +49,7 @@ const DriverWallet = ({}) => {
     try {
       const res = await linkBankAccount();
       if (res?.data) {
-        const {response} = res?.data;
+        const {response} = res?.data?.data;
         Linking.openURL(response);
       } else if (res?.error) {
         showAlert('Link Bank Account', res?.error?.data?.errors?.join());
@@ -103,9 +105,7 @@ const DriverWallet = ({}) => {
         title="Wallet"
         isWallet
         rightIcon
-        clickRightIcon={() => {
-          onPressWallet();
-        }}
+        clickRightIcon={() => onPressWallet()}
       />
       <WalletCard
         balance={data?.total_balance}
@@ -119,7 +119,6 @@ const DriverWallet = ({}) => {
         selectedIndex={selectedIndex}
         btnStyles={styles.selectorBtn}
       />
-
       <FlatList
         data={data?.transactions}
         renderItem={renderItem}
@@ -128,6 +127,7 @@ const DriverWallet = ({}) => {
           <Text style={styles.headerText}>Transactions</Text>
         }
       />
+      {(linkLoading || isLoading) && <AppLoader />}
     </MainWrapper>
   );
 };

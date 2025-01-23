@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'pink',
     alignSelf: 'center',
   },
 

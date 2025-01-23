@@ -11,15 +11,24 @@ import {
 interface PickAndDropTimeCardProps {
   type: string;
   value: any;
+  isHistory?: boolean;
 }
 
-const PickAndDropTimeCard = ({type, value}: PickAndDropTimeCardProps) => {
+const PickAndDropTimeCard = ({
+  type,
+  value,
+  isHistory,
+}: PickAndDropTimeCardProps) => {
   return (
     <View style={styles.cardContainer}>
       <Image source={appIcons.clock} style={styles.clockIcon(type)} />
       <Text style={styles.textStyles}>
-        {type === 'pickup' ? 'Pickup Time' : 'Estimated Delivery Time'}:{' '}
-        <Text style={styles.timeStyles}>{value}</Text>
+        {type === 'pickup'
+          ? 'Pickup Time'
+          : isHistory
+          ? 'Distance'
+          : 'Estimated Delivery Time'}
+        : <Text style={styles.timeStyles}>{value}</Text>
       </Text>
     </View>
   );
