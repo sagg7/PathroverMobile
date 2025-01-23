@@ -53,11 +53,11 @@ const VehicleRequest = ({navigation}: any) => {
   const [createManagerVehicleRequest, {isLoading, error}] =
     useCreateManagerVehicleRequestMutation();
 
-  useEffect(() => {
-    console.log('inprogres RIDE', inProgressRide?.data);
-    if (inProgressRide?.data?.length > 0)
-      navigation.navigate(Routes.RideArriving, {item: inProgressRide?.data[0]});
-  }, [inProgressRide]);
+  // Todo for inprogress ride
+  // useEffect(() => {
+  //   if (inProgressRide?.data?.length > 0)
+  //     navigation.navigate(Routes.RideArriving, {item: inProgressRide?.data[0]});
+  // }, [inProgressRide]);
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
