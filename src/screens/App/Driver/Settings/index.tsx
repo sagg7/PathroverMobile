@@ -1,4 +1,11 @@
-import {View, Text, Image, TouchableOpacity, FlatList} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  Linking,
+} from 'react-native';
 import React, {useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
@@ -112,7 +119,9 @@ const Settings = ({navigation}: any) => {
       case 2:
         screenName = Routes.Notification;
         break;
-
+      case 3:
+        Linking.openURL('https://staging.pathfinder-app.com/faq_list');
+        break;
       case 4:
         screenName = Routes.SupportScreen;
         break;

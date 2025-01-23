@@ -76,8 +76,14 @@ const RideArriving = ({route}: any) => {
   useEffect(() => {
     if (route?.params) {
       setItem(route?.params?.item);
+      setType(
+        route?.params?.item?.order_status
+          ? route?.params?.item?.order_status
+          : 'Initial',
+      );
     }
   }, [route]);
+
   // Request location permissions (for Android)
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {

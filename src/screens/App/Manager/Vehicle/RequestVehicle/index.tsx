@@ -1,5 +1,5 @@
 import {View, Text, Pressable, ScrollView} from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -27,6 +27,7 @@ import CargoDescriptionCard from '../CargoDescriptionCard';
 import RecipientDetailCard from '../RecipientDetail';
 import {useCreateManagerVehicleRequestMutation} from '../../../../../redux/manager/managerApiSlice';
 import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
+import {useGetInprogressRideQuery} from '../../../../../redux/common/commonApiSlice';
 
 const VehicleRequest = ({navigation}: any) => {
   const [selectedVehicle, setSelectedVehicle] = useState(VehicleTypes[0]);
@@ -42,10 +43,21 @@ const VehicleRequest = ({navigation}: any) => {
   const cargoSheetRef = useRef(null);
   const [showCargoSheet, setShowCargoSheet] = useState(false);
   const [showRecipentSheet, setShowRecipentSheet] = useState(false);
+  const [queryParams, setQueryParams] = useState({
+    role: 'manager',
+  });
+  const {isLoading: inProgressLoadding, data: inProgressRide} =
+    useGetInprogressRideQuery(queryParams);
 
   const recipentSheetRef = useRef(null);
-  const [createManagerVehicleRequest, {isLoading}] =
+  const [createManagerVehicleRequest, {isLoading, error}] =
     useCreateManagerVehicleRequestMutation();
+
+  useEffect(() => {
+    console.log('inprogres RIDE', inProgressRide?.data);
+    if (inProgressRide?.data?.length > 0)
+      navigation.navigate(Routes.RideArriving, {item: inProgressRide?.data[0]});
+  }, [inProgressRide]);
 
   const onPressVehicle = (item: any) => () => {
     setSelectedVehicle(item);
@@ -235,7 +247,7 @@ const VehicleRequest = ({navigation}: any) => {
 
       setVehicleData(reSetVehicleData);
     } else {
-      showAlert('Error', res?.error?.data?.errors[0]);
+      showAlert('Error', res?.error?.data?.error);
     }
   };
 

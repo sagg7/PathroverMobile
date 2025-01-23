@@ -33,7 +33,9 @@ const SelectRoute = ({
         </View>
         {selectedRouteDetails && (
           <>
-            <Text style={styles.routeTitleText}>Wapdatown</Text>
+            <Text style={styles.routeTitleText}>
+              {selectedRouteDetails?.name || ''}
+            </Text>
             <FromAndToCard dropOff={dropLocName} pickup={pickupName} />
           </>
         )}

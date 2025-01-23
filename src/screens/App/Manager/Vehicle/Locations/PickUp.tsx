@@ -53,7 +53,6 @@ const PickUp = ({route, navigation}: any) => {
       {latitude: selectedLoc?.latitude, longitude: selectedLoc?.longitude},
       100,
     );
-
     if (distanceFromCurrent <= RADIUS_IN_METERS) {
       fetchPlaceName(latitude, longitude);
       setPickUpLoc(selectedLocation);
@@ -64,21 +63,22 @@ const PickUp = ({route, navigation}: any) => {
   };
 
   const handleDone = () => {
-    if (pickUpLoc && pickUpLoc?.length > 0)
+    if (pickUpLoc && pickUpLoc?.length > 0) {
+      const latitude = pickUpLoc && pickUpLoc?.[1];
+      const longitude = pickUpLoc && pickUpLoc?.[0];
+      const data = {
+        coords: [longitude, latitude],
+        latitude: latitude,
+        longitude: longitude,
+        placeName: placeName,
+      };
+
+      setPickUpAddress(data);
+      dispatch(setManagerRoute({pickup: data}));
+      navigation.goBack();
+    } else {
       return showAlert('Location', 'Please select location.');
-    const latitude = pickUpLoc && pickUpLoc?.[1];
-    const longitude = pickUpLoc && pickUpLoc?.[0];
-    const data = {
-      coords: [longitude, latitude],
-      latitude: latitude,
-      longitude: longitude,
-      placeName: placeName,
-    };
-
-    setPickUpAddress(data);
-    dispatch(setManagerRoute({pickup: data}));
-
-    navigation.goBack();
+    }
   };
 
   const createGeoJSONCircle = (center: any, radiusInMeters: any) => {
