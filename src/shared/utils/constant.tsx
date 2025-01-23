@@ -587,6 +587,62 @@ export const ManagerProfileMenu = [
   },
 ];
 
+export const EndUserProfileMenu = [
+  {
+    id: 10,
+    title: 'Switch Account',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 1,
+    title: 'Manage Profile',
+    icon: appIcons.settingIcon,
+  },
+  {
+    id: 11,
+    title: 'Saved Library',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 2,
+    title: 'Notifications',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 4,
+    title: 'Support',
+    icon: appIcons.safety,
+  },
+  {
+    id: 3,
+    title: "FAQ's",
+    icon: appIcons.faq,
+  },
+  {
+    id: 6,
+    title: 'Terms & Condition',
+    icon: appIcons.terms,
+  },
+  {
+    id: 7,
+    title: 'Privacy Policy',
+    icon: appIcons.privacy,
+  },
+
+  {
+    id: 8,
+    title: 'Logout',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 9,
+    title: 'Delete',
+    icon: appIcons.logout,
+  },
+];
+
 export const ManageProfileArr = [
   {
     id: 0,

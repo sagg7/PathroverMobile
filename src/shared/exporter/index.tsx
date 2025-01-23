@@ -33,6 +33,7 @@ export {
   OrderHistoryOptions,
   DriverProfileMenu,
   ManageProfileArr,
+  EndUserProfileMenu,
   APP_ROLE,
   SafetyArr,
   SafetytipsArr,
