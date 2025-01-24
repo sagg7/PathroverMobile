@@ -1,4 +1,8 @@
 {
   "name": "PathFinder",
-  "displayName": "PathRover"
+  "displayName": "PathRover",
+  "react-native-google-mobile-ads": {
+      "android_app_id": "ca-app-pub-8139629720293753~5166858935",
+      "ios_app_id": "ca-app-pub-8139629720293753~6639722708"
+  }
 }

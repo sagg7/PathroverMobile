@@ -56,6 +56,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-8139629720293753~6639722708</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PathRover requires camera permission</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
