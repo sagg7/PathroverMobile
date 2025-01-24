@@ -4,6 +4,7 @@ import {BottomTab} from '../../components';
 import {Routes} from '../../shared/exporter';
 import DummyScreen from '../../screens/App/DummyScreen';
 import Home from '../../screens/App/EndUser/Home';
+import WellPath from '../../screens/App/EndUser/WellPath';
 
 const Tab = createBottomTabNavigator();
 const EndUserTabs = () => {
@@ -24,7 +25,7 @@ const EndUserTabs = () => {
       />
       <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={DummyScreen}
+        component={WellPath}
         name={'WellPath'}
       />
       <Tab.Screen

@@ -83,6 +83,7 @@ import EnduserHome from './endUserHome.svg';
 import Wellpath from './wellpath.svg';
 import Hiking from './hiking.svg';
 import EnduserChat from './chat.svg';
+import CancelIcon from './cancelIcon.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -169,4 +170,5 @@ export const svgIcon = {
   Wellpath: <Wellpath />,
   Hiking: <Hiking />,
   EnduserChat: <EnduserChat />,
+  CancelIcon: <CancelIcon />,
 };
