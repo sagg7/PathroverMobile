@@ -50,4 +50,8 @@ export const Routes = {
   AddCard: 'AddCard',
   PaymentManagerHistory: 'PaymentManagerHistory',
   WithdrawAmount: 'WithdrawAmount',
+  SearchWellPath: 'SearchWellPath',
+  CreateRouteSearch: 'CreateRouteSearch',
+  CreateRouteEndUser: 'CreateRouteEndUser',
+  RouteToWell: 'RouteToWell',
 };

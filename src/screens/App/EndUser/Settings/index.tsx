@@ -193,6 +193,7 @@ const Settings = ({navigation}: any) => {
         modalVisible={showSwitchRoleSheet}
         data={profiles}
         onPressCard={handleCard}
+        setModalVisible={() => setshowSwitchRoleSheet(false)}
       />
     </MainWrapper>
   );

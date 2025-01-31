@@ -46,6 +46,8 @@ export {
   OFFER_STATUS,
   CancelReasons,
   RIDE_STATUS,
+  colorsArr,
+  routeLineArr,
 } from '../utils/constant.tsx';
 export {useKeyboardListener} from '../../hooks/keyboard.tsx';
 export {

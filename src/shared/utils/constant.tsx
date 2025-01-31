@@ -683,7 +683,7 @@ export const MapTypes = [
     id: 2,
     title: 'Satellite Map',
     icon: svgIcon.Sattelite,
-    type: 'mapbox://styles/mapbox/satellite-v9',
+    type: 'mapbox://styles/mapbox/satellite-streets-v12',
     isSelected: false,
   },
   {
@@ -733,3 +733,16 @@ export const RIDE_STATUS = {
   COMPLETE_RIDE: 'complete_ride',
   ORDER_DELIVERED: 'order_delivered',
 };
+export const colorsArr = [
+  {id: 1, color: '#3A424D', isSelected: false},
+  {id: 2, color: '#6469E4', isSelected: false},
+  {id: 3, color: '#43C8BF', isSelected: false},
+  {id: 4, color: '#3AC4EE', isSelected: false},
+  {id: 5, color: '#CF4727', isSelected: false},
+  {id: 6, color: '#A47BF8', isSelected: false},
+];
+export const routeLineArr = [
+  {id: 1, height: 8, isSelected: false},
+  {id: 2, height: 6, isSelected: false},
+  {id: 3, height: 4, isSelected: false},
+];

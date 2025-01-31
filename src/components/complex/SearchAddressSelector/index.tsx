@@ -61,11 +61,6 @@ const SearchAddressSelector = ({setRouteData}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const isValidNumber = (value: string): boolean => {
-    const regex = /^-?\d*\.?\d*$/;
-    return regex.test(value);
-  };
-
   useEffect(() => {
     if (!isAddressSelected) {
       setLocations({

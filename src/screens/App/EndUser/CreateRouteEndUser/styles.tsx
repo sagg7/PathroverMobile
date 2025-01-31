@@ -21,10 +21,30 @@ const styles = StyleSheet.create({
     zIndex: 1111,
     top: isIOS() ? WP('12') : 1,
   },
-  maplayerStyles: {
+  centerMapStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
+    bottom: isIOS() ? WP('35') : WP('10'),
     left: 10,
+  },
+  redoBtn: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('40') : WP('10'),
+    right: 10,
+  },
+  undoBtn: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('25') : WP('27'),
+    right: 10,
+  },
+  pencilBtn: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('55') : WP('44'),
+    right: 10,
+  },
+  SaveButton: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('70') : WP('60'),
+    right: 10,
   },
   undoRedoContainer: {
     flexDirection: 'row',
@@ -101,6 +121,17 @@ const styles = StyleSheet.create({
   filterIcon: {
     height: scale(44),
     width: scale(44),
+  },
+  routeStopStyles: {
+    height: 16,
+    width: 16,
+    borderRadius: 20 / 2,
+    backgroundColor: PFColors.Red.RadiantRed,
+  },
+  maplayerStyles: {
+    position: 'absolute',
+    top: isIOS() ? WP('45') : WP('30'),
+    right: 10,
   },
 });
 export default styles;

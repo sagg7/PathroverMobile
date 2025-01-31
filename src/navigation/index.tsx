@@ -40,6 +40,11 @@ import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
 import PaymentHistory from '../screens/App/Manager/PaymentHistory';
 import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
 import AuthStack from './stacks/authStack';
+import SearchWellPath from '../screens/App/EndUser/SearchWellPath';
+import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearch';
+import CreateRouteEndUser from '../screens/App/EndUser/CreateRouteEndUser';
+import RouteToWell from '../screens/App/EndUser/RouteToWell';
+// import CreateRouteSearch
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -104,6 +109,16 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.AddCard} component={AddCard} />
         <Stack.Screen name={Routes.WithdrawAmount} component={WithdrawAmount} />
         <Stack.Screen name={'AuthStack'} component={AuthStack} />
+        <Stack.Screen name={Routes.SearchWellPath} component={SearchWellPath} />
+        <Stack.Screen
+          name={Routes.CreateRouteSearch}
+          component={CreateRouteSearch}
+        />
+        <Stack.Screen
+          name={Routes.CreateRouteEndUser}
+          component={CreateRouteEndUser}
+        />
+        <Stack.Screen name={Routes.RouteToWell} component={RouteToWell} />
       </Stack.Navigator>
     </NavigationContainer>
   );

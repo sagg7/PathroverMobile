@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
-    left: 10,
+    top: isIOS() ? WP('35') : WP('25'),
+    right: 20,
   },
   undoRedoContainer: {
     flexDirection: 'row',

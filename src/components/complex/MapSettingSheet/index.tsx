@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, FlatList} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Modal from 'react-native-modal';
 import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 import {AppButton} from '../AppButton';
@@ -11,34 +11,40 @@ interface MapSettingSheetProps {
   setModalVisible?: () => void;
   onPressCancel: () => void;
   onPressSave?: () => void;
-  onPressCard: (v: any) => void;
-  data?: any[];
+  well: boolean;
+  pin: boolean;
+  setPin: any;
+  setWell: any;
+  onPressClear: () => void;
 }
 
 const MapSettingSheet = ({
   modalVisible,
   setModalVisible,
-  onPressCard,
-  data = [],
   onPressCancel,
-  onPressSave,
+  well,
+  pin,
+  setPin,
+  setWell,
+  onPressClear,
 }: MapSettingSheetProps) => {
-  const renderItem = () => (
-    <View style={styles.switchView}>
-      <SwitchToggle
-        switchOn={true}
-        // onPress={onPressToggle}
-        circleColorOff={PFColors.Gray.AshGray}
-        circleColorOn={PFColors.Blue.Dark}
-        backgroundColorOn={PFColors.Blue.SoftGlacier}
-        backgroundColorOff={PFColors.Gray.FrostedGray}
-        circleStyle={styles.circleStyle}
-        containerStyle={styles.toggleContainer}
-      />
-      <Text style={styles.settingText}>Show nearby Wells</Text>
-    </View>
-  );
-
+  const SwitchView = ({value, setValue, title}: any) => {
+    return (
+      <View style={styles.switchView}>
+        <SwitchToggle
+          switchOn={value}
+          onPress={() => setValue(!value)}
+          circleColorOff={PFColors.Gray.AshGray}
+          circleColorOn={PFColors.Blue.Dark}
+          backgroundColorOn={PFColors.Blue.SoftGlacier}
+          backgroundColorOff={PFColors.Gray.FrostedGray}
+          circleStyle={styles.circleStyle}
+          containerStyle={styles.toggleContainer}
+        />
+        <Text style={styles.settingText}>Show nearby {title}</Text>
+      </View>
+    );
+  };
   return (
     <Modal
       useNativeDriver
@@ -47,13 +53,20 @@ const MapSettingSheet = ({
       style={styles.modalContainer}>
       <View style={styles.titleView}>
         <Text style={styles.headerText}>Map Settings</Text>
-        <TouchableOpacity>{svgIcon.CancelIcon}</TouchableOpacity>
+        <TouchableOpacity onPress={onPressCancel}>
+          {svgIcon.CancelIcon}
+        </TouchableOpacity>
       </View>
-      {renderItem()}
-      {renderItem()}
+      <SwitchView value={well} setValue={setWell} title={'Wells'} />
+      <SwitchView value={pin} setValue={setPin} title={'Pins'} />
 
       <View style={styles.btnContainer}>
-        <AppButton title="Clear" isSmall="90%" handleClick={onPressSave} />
+        <AppButton
+          title="Clear"
+          isSmall="90%"
+          handleClick={onPressClear}
+          // disabled={well && pin}
+        />
       </View>
     </Modal>
   );
@@ -81,21 +94,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: WP('2'),
   },
-  userprofiles: {
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-  },
-  roleName: {
-    fontFamily: PFFonts.Foundation.Regular,
-    fontSize: PFFontSize.FONT_SIZE_12,
-    color: PFColors.Standard.Black,
-    marginTop: 5,
-  },
-  imageStyle: {
-    borderRadius: 18,
-    borderColor: PFColors.Blue.Dark,
-  },
+
   headerText: {
     fontFamily: PFFonts.Foundation.SemiBold,
     fontSize: PFFontSize.FONT_SIZE_14,
@@ -107,20 +106,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginVertical: WP('3'),
   },
-  cancelbtnStyles: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: PFColors.Blue.Dark,
-  },
-  cancelTextStyles: {
-    color: PFColors.Blue.Dark,
-    fontSize: PFFontSize.FONT_SIZE_16,
-    fontFamily: PFFonts.Foundation.SemiBold,
-  },
-  dragablePin: {
-    alignSelf: 'center',
-    marginBottom: 10,
-  },
+
   switchView: {
     flexDirection: 'row',
     width: WP('94'),
