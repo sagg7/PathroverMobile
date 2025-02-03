@@ -18,7 +18,7 @@ const managerSlice = createSlice({
       state.managerRoute = {};
     },
     setRecentDestSearch: (state, action) => {
-      const MAX_RECENT_SEARCHES = 10;
+      const MAX_RECENT_SEARCHES = 5;
 
       const isDuplicate = state.recentDestSearch.some(
         (item: any) =>

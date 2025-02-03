@@ -587,6 +587,62 @@ export const ManagerProfileMenu = [
   },
 ];
 
+export const EndUserProfileMenu = [
+  {
+    id: 10,
+    title: 'Switch Account',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 1,
+    title: 'Manage Profile',
+    icon: appIcons.settingIcon,
+  },
+  {
+    id: 11,
+    title: 'Saved Library',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 2,
+    title: 'Notifications',
+    icon: appIcons.bellIcon,
+  },
+  {
+    id: 4,
+    title: 'Support',
+    icon: appIcons.safety,
+  },
+  {
+    id: 3,
+    title: "FAQ's",
+    icon: appIcons.faq,
+  },
+  {
+    id: 6,
+    title: 'Terms & Condition',
+    icon: appIcons.terms,
+  },
+  {
+    id: 7,
+    title: 'Privacy Policy',
+    icon: appIcons.privacy,
+  },
+
+  {
+    id: 8,
+    title: 'Logout',
+    icon: appIcons.logout,
+  },
+
+  {
+    id: 9,
+    title: 'Delete',
+    icon: appIcons.logout,
+  },
+];
+
 export const ManageProfileArr = [
   {
     id: 0,
@@ -627,7 +683,7 @@ export const MapTypes = [
     id: 2,
     title: 'Satellite Map',
     icon: svgIcon.Sattelite,
-    type: 'mapbox://styles/mapbox/satellite-v9',
+    type: 'mapbox://styles/mapbox/satellite-streets-v12',
     isSelected: false,
   },
   {
@@ -677,3 +733,16 @@ export const RIDE_STATUS = {
   COMPLETE_RIDE: 'complete_ride',
   ORDER_DELIVERED: 'order_delivered',
 };
+export const colorsArr = [
+  {id: 1, color: '#3A424D', isSelected: false},
+  {id: 2, color: '#6469E4', isSelected: false},
+  {id: 3, color: '#43C8BF', isSelected: false},
+  {id: 4, color: '#3AC4EE', isSelected: false},
+  {id: 5, color: '#CF4727', isSelected: false},
+  {id: 6, color: '#A47BF8', isSelected: false},
+];
+export const routeLineArr = [
+  {id: 1, height: 8, isSelected: false},
+  {id: 2, height: 6, isSelected: false},
+  {id: 3, height: 4, isSelected: false},
+];
