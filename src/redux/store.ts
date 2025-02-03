@@ -6,6 +6,7 @@ import authReducer from './auth/authSlice';
 import driverSlice from './driver/driverSlice';
 import appRoleReduces from './auth/appRoleSlice';
 import managerSlice from './manager/managerSlice';
+import chatSlice from './chat/chatSlice';
 
 const rootReduer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
@@ -13,12 +14,13 @@ const rootReduer = combineReducers({
   driver: driverSlice,
   appRole: appRoleReduces,
   manager: managerSlice,
+  chat: chatSlice,
 });
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'driver'],
+  whitelist: ['auth', 'driver', 'chat'],
   blacklist: [],
 };
 
