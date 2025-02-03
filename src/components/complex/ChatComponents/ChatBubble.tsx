@@ -15,7 +15,7 @@ import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 const ChatBubble = ({props}) => {
   const {currentMessage, position} = props;
   const isLeft = position === 'left';
-  const {text, createdAt, attachments} = currentMessage;
+  const {text, createdAt, image} = currentMessage;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -67,10 +67,11 @@ const ChatBubble = ({props}) => {
           styles.bubbleContainer,
           isLeft ? styles.leftBubble : styles.rightBubble,
         ]}>
-        {attachments && attachments?.length > 0 && (
+        {image && (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => handleImagePress(attachments[0].url)}>
+            // onPress={() => handleImagePress(attachments[0].url)}
+          >
             <Text style={styles.imageTime}>
               {moment(createdAt).format('hh:mm a')}
             </Text>
@@ -79,10 +80,10 @@ const ChatBubble = ({props}) => {
                 isLeft ? PFColors.Standard.Black : PFColors.Standard.White
               }
               indicatorSize={'small'}
-              source={{uri: attachments[0].url}}
+              source={{uri: image.sourceURL}}
               style={{
-                width: scale(40),
-                height: scale(40),
+                width: scale(90),
+                height: scale(90),
                 borderRadius: 3,
                 overflow: 'hidden',
               }}

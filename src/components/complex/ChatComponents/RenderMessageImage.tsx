@@ -7,16 +7,16 @@ const RenderMessageImage = props => {
 
   console.log(
     '[RenderMessageImage:currentMessage.attachments]',
-    currentMessage.attachments,
+    currentMessage.sourceURL,
   );
 
-  if (currentMessage.attachments && currentMessage.attachments.length > 0) {
+  if (currentMessage.sourceURL) {
     return (
       <View style={styles.imageContainer}>
-        {currentMessage.attachments.map((attachment, index) => (
+        {currentMessage.sourceURL.map((attachment, index) => (
           <Image
             key={index}
-            source={{uri: attachment.url}}
+            source={{uri: attachment.sourceURL}}
             style={styles.imageStyle}
             resizeMode="cover"
           />
