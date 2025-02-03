@@ -1,50 +1,63 @@
+import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
 import React, {useState} from 'react';
+import {View} from 'react-native';
+import {GiftedChat} from 'react-native-gifted-chat';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   AppHeader,
   ChatBubble,
   MainWrapper,
   RenderDay,
   RenderInputToolbar,
-  RenderTime,
   RenderMessageText,
+  RenderTime,
 } from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
-import {View} from 'react-native';
-import {GiftedChat} from 'react-native-gifted-chat';
-import styles from './styles';
 import RenderMessageImage from '../../../../components/complex/ChatComponents/RenderMessageImage';
+import {addBotMessage, addUserMessage} from '../../../../redux/chat/chatSlice';
+import {OPEN_AI_KEY, OPEN_AI_URL} from '../../../../shared/utils/constant';
+import styles from './styles';
 
 const AiChat = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {messages} = useSelector(state => state.chat);
   const [inputValue, setInputValue] = useState();
 
-  const chat = [
-    {
-      _id: 1,
-      text: 'Hello developer',
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-    },
-    {
-      _id: 2,
-      text: 'Hello developer',
-      createdAt: new Date(),
-      user: {
-        _id: 1,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-    },
-  ];
+  const onSend = async (message: string) => {
+    try {
+      dispatch(addUserMessage(message));
+      const data = JSON.stringify({
+        messages: [
+          {
+            role: 'user',
+            content: message?.[0]?.text,
+          },
+          message?.[0]?.image && {
+            role: 'user',
+            content: message?.[0]?.image?.sourceURL,
+          },
+        ],
+        model: 'gpt-4',
+        store: true,
+      });
 
-  const onSend = (message: string) => {
-    console.log('==============message======================');
-    console.log(message);
-    console.log('====================================');
+      const config = {
+        method: 'post',
+        url: OPEN_AI_URL + 'chat/completions',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPEN_AI_KEY}`,
+        },
+        data,
+      };
+
+      const response = await axios.request(config);
+      dispatch(addBotMessage(response.data.choices[0].message.content));
+    } catch (error) {
+      console.error('Error sending message:', error);
+      return 'Error: Could not get a response from AI.';
+    }
   };
 
   return (
@@ -55,7 +68,7 @@ const AiChat = () => {
           user={{
             _id: 1,
           }}
-          messages={chat}
+          messages={messages}
           text={inputValue}
           onInputTextChanged={txt => setInputValue(txt)}
           renderAvatar={null}
@@ -64,7 +77,6 @@ const AiChat = () => {
           keyboardShouldPersistTaps="never"
           renderDay={RenderDay}
           renderBubble={props => <ChatBubble props={props} />}
-          //   renderChatEmpty={listEmptyComponent}
           renderMessageText={RenderMessageText}
           renderTime={RenderTime}
           renderMessageImage={RenderMessageImage}
@@ -73,7 +85,6 @@ const AiChat = () => {
             showsVerticalScrollIndicator: false,
             onEndReachedThreshold: 0.3,
           }}
-          //   messagesContainerStyle={styles.messagesContainerStyle}
           onSend={messages => onSend(messages)}
         />
       </View>
