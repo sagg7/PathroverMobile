@@ -306,6 +306,8 @@ const CreateRouteEndUser = () => {
   function updateRoute(dataArr) {
     const start = dataArr?.start;
     const end = dataArr?.end;
+    console.log('Start', start);
+    console.log('End', end);
 
     if (!start || !end) return route;
     let filteredRoute = route.filter(

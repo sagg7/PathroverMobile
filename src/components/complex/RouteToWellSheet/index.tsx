@@ -111,6 +111,7 @@ const RouteToWellSheet = ({
           title={'Directions'}
           selected={actionBtn.direction}
           onPressActionBtn={onPressDirection}
+          disabled={true}
         />
         <ActionButtons
           icon={appIcons.paperPlane}

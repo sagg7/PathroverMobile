@@ -98,6 +98,7 @@ import MapWindow from './mapWindow.svg';
 import BlueClock from './blueClock.svg';
 import LocationFilled from './locationFilled.svg';
 import LiveLocationTracking from './liveTrackingMarker.svg';
+import PinMarker from './markerPin.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -199,4 +200,5 @@ export const svgIcon = {
   BlueClock: <BlueClock />,
   LocationFilled: <LocationFilled />,
   LiveLocationTracking: <LiveLocationTracking />,
+  PinMarker: <PinMarker />,
 };

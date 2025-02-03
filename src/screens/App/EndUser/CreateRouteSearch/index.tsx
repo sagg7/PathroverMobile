@@ -16,6 +16,7 @@ import {
   AppInput,
   MainWrapper,
 } from '../../../../components';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface SelectionBoxProps {
   isSelected: boolean;
@@ -82,10 +83,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
   };
 
   const handleSearchBtn = () => {
-    console.log('1', searchCoordinatesByAddress);
-    console.log('2', searchStartCoords);
-    console.log('3', searchEndCoords);
-
     if (searchCoordinatesByAddress && isAddressSelected) {
       setSearchValuesByAddress(searchCoordinatesByAddress);
       setSearchValues({
@@ -97,7 +94,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         start: searchStartCoords,
         end: searchEndCoords,
       });
-      console.log('here====>');
       setStartingPointName('');
       setEndingPoint('');
       setSearchValuesByAddress({
@@ -105,12 +101,8 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         end: '',
       });
     }
-    console.log('1', searchCoordinatesByAddress);
-    console.log('2', searchStartCoords);
-    console.log('3', searchEndCoords);
     navigation.goBack();
   };
-  console.log('isAddressSelected', isAddressSelected);
 
   const handleInputChange = async (value: string, type: 'start' | 'end') => {
     if (type === 'start') {
@@ -164,6 +156,9 @@ const CreateRouteSearch = ({route, navigation}: any) => {
           return updatedCoords;
         });
       } else if (type === 'end') {
+        console.log('type', type, index);
+        console.log('value', value);
+
         setSearchEndCoords((prevState: any) => {
           const updatedCoords = [...prevState];
           updatedCoords[index] = numericValue;
@@ -172,6 +167,7 @@ const CreateRouteSearch = ({route, navigation}: any) => {
       }
     }
   };
+  console.log('SEArch end latlng', searchEndCoords);
 
   return (
     <MainWrapper>
@@ -188,113 +184,120 @@ const CreateRouteSearch = ({route, navigation}: any) => {
           title="Latitude-Longitude"
         />
       </View>
-      {isAddressSelected ? (
-        <>
-          <AppInput
-            inputContainerStyle={styles.input}
-            placeholder="Starting Point"
-            value={startingPoint}
-            onChangeText={text => handleInputChange(text, 'start')}
-            onFocus={() => setActiveInput('start')}
-          />
-          {activeInput === 'start' && (
-            <View
-              style={[
-                styles.suggestionWrapper,
-                {top: isIOS() ? WP('65') : 190},
-              ]}>
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item: any) => item.id}
-                contentContainerStyle={styles.suggestionContainer}
-                renderItem={({item}: any) => (
-                  <TouchableOpacity onPress={() => handleSelect(item, 'start')}>
-                    <Text style={{padding: 10, color: PFColors.Standard.Black}}>
-                      {item.place_name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
+      <KeyboardAwareScrollView>
+        {isAddressSelected ? (
+          <>
+            <AppInput
+              inputContainerStyle={styles.input}
+              placeholder="Starting Point"
+              value={startingPoint}
+              onChangeText={text => handleInputChange(text, 'start')}
+              onFocus={() => setActiveInput('start')}
+            />
+            {activeInput === 'start' && (
+              <View
+                style={[
+                  styles.suggestionWrapper,
+                  {top: isIOS() ? WP('65') : 190},
+                ]}>
+                <FlatList
+                  data={suggestions}
+                  keyExtractor={(item: any) => item.id}
+                  contentContainerStyle={styles.suggestionContainer}
+                  renderItem={({item}: any) => (
+                    <TouchableOpacity
+                      onPress={() => handleSelect(item, 'start')}>
+                      <Text
+                        style={{padding: 10, color: PFColors.Standard.Black}}>
+                        {item.place_name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+            <AppInput
+              inputContainerStyle={styles.input}
+              placeholder="Ending Point"
+              value={endingPoint}
+              onChangeText={text => handleInputChange(text, 'end')}
+              onFocus={() => setActiveInput('end')}
+            />
+            {activeInput === 'end' && (
+              <View
+                style={[
+                  styles.suggestionWrapper,
+                  {top: isIOS() ? WP('80') : 260},
+                ]}>
+                <FlatList
+                  data={suggestions}
+                  keyExtractor={(item: any) => item.id}
+                  contentContainerStyle={styles.suggestionContainer}
+                  renderItem={({item}: any) => (
+                    <TouchableOpacity onPress={() => handleSelect(item, 'end')}>
+                      <Text
+                        style={{padding: 10, color: PFColors.Standard.Black}}>
+                        {item.place_name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+          </>
+        ) : (
+          <>
+            <View style={styles.titleView}>
+              <Text style={[styles.titleText, {paddingTop: 5}]}>
+                Starting Point
+              </Text>
+              {/* <Text style={[styles.viewOnMap]}>Select on Map</Text> */}
             </View>
-          )}
-          <AppInput
-            inputContainerStyle={styles.input}
-            placeholder="Ending Point"
-            value={endingPoint}
-            onChangeText={text => handleInputChange(text, 'end')}
-            onFocus={() => setActiveInput('end')}
-          />
-          {activeInput === 'end' && (
-            <View
-              style={[
-                styles.suggestionWrapper,
-                {top: isIOS() ? WP('80') : 260},
-              ]}>
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item: any) => item.id}
-                contentContainerStyle={styles.suggestionContainer}
-                renderItem={({item}: any) => (
-                  <TouchableOpacity onPress={() => handleSelect(item, 'end')}>
-                    <Text style={{padding: 10, color: PFColors.Standard.Black}}>
-                      {item.place_name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          )}
-        </>
-      ) : (
-        <>
-          <View style={styles.titleView}>
-            <Text style={[styles.titleText, {paddingTop: 5}]}>
-              Starting Point
+            <AppInput
+              maxLength={10}
+              placeholder="Longitude"
+              inputContainerStyle={styles.inputContainerStyle}
+              value={(searchStartCoords[0] ?? '').toString()}
+              onChangeText={text => onChangeText(text, 'start', 0)}
+            />
+            <AppInput
+              maxLength={10}
+              placeholder="Latitude"
+              inputContainerStyle={styles.inputContainerStyle}
+              value={(searchStartCoords[1] ?? '').toString()}
+              onChangeText={text => onChangeText(text, 'start', 1)}
+            />
+
+            <Text style={[styles.titleText, {paddingTop: 10}]}>
+              Ending Point
             </Text>
-            {/* <Text style={[styles.viewOnMap]}>Select on Map</Text> */}
-          </View>
-          <AppInput
-            maxLength={10}
-            placeholder="Longitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={(searchStartCoords[0] ?? '').toString()}
-            onChangeText={text => onChangeText(text, 'start', 0)}
-          />
-          <AppInput
-            maxLength={10}
-            placeholder="Latitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={(searchStartCoords[1] ?? '').toString()}
-            onChangeText={text => onChangeText(text, 'start', 1)}
-          />
+            <AppInput
+              maxLength={10}
+              placeholder="Longitude"
+              inputContainerStyle={styles.inputContainerStyle}
+              value={(searchEndCoords[0] ?? '').toString()}
+              onChangeText={text => onChangeText(text, 'end', 0)}
+            />
 
-          <Text style={[styles.titleText, {paddingTop: 10}]}>Ending Point</Text>
-          <AppInput
-            maxLength={10}
-            placeholder="Longitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={(searchEndCoords[0] ?? '').toString()}
-            onChangeText={text => onChangeText(text, 'end', 0)}
-          />
-
-          <AppInput
-            maxLength={10}
-            placeholder="Latitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={(searchEndCoords[1] ?? '').toString()}
-            onChangeText={text => onChangeText(text, 'end', 1)}
-          />
-        </>
-      )}
-      <AppButton
-        title="Search"
-        buttonStyle={styles.btnStyles}
-        handleClick={() => handleSearchBtn()}
-        // disabled={
-        //   searchCoordinatesByAddress?.end === '' ||
-        //   searchCoordinatesByAddress?.start === ''
-        // }
-      />
+            <AppInput
+              maxLength={10}
+              placeholder="Latitude"
+              inputContainerStyle={styles.inputContainerStyle}
+              value={(searchEndCoords[1] ?? '').toString()}
+              onChangeText={text => onChangeText(text, 'end', 1)}
+            />
+          </>
+        )}
+        <AppButton
+          title="Search"
+          buttonStyle={styles.btnStyles}
+          handleClick={() => handleSearchBtn()}
+          // disabled={
+          //   searchCoordinatesByAddress?.end === '' ||
+          //   searchCoordinatesByAddress?.start === ''
+          // }
+        />
+      </KeyboardAwareScrollView>
     </MainWrapper>
   );
 };

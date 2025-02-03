@@ -35,7 +35,7 @@ const RouteToWell = ({route}: any) => {
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
   const [actionBtn, setActionBtn] = useState<any>({
-    direction: false,
+    direction: true,
     start: false,
   });
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
@@ -88,6 +88,9 @@ const RouteToWell = ({route}: any) => {
       setRoute(fetchedRoute);
     }
   };
+  useEffect(() => {
+    if (destination && currentLocation) getRoute();
+  }, [destination, currentLocation]);
 
   const onPressMap = (event: any) => {
     try {

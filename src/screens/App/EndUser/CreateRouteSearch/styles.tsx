@@ -44,11 +44,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   btnStyles: {
-    marginVertical: WP('10'),
     width: WP('90'),
     alignSelf: 'center',
-    position: 'absolute',
-    bottom: 20,
+    marginTop: WP('50'),
   },
   suggestionWrapper: {
     position: 'absolute',

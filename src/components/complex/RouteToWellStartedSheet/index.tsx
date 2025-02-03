@@ -23,7 +23,9 @@ const RouteToWellStartedSheet = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      <Text style={styles.headerText}>{routeName ? routeName : ''}</Text>
+      <Text style={styles.headerText}>
+        {routeName ? routeName : 'Enroute to destination'}
+      </Text>
       <View style={styles.routeInfoView}>
         <Text>
           {svgIcon.MapWindow}

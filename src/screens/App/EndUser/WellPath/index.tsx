@@ -282,7 +282,7 @@ const WellPath = () => {
                 id={`pin-${index}`}
                 onSelected={onpressMarker}
                 coordinate={coordinates}>
-                {svgIcon.CurrentLocation}
+                {svgIcon.PinMarker}
               </MapboxGL.PointAnnotation>
             );
           })}
