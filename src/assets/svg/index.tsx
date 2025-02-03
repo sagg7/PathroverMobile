@@ -79,6 +79,10 @@ import UnionPay from './unionpay.svg';
 import DiscoverCard from './discover.svg';
 import CreditCard from './credit-card.svg';
 import BankAccount from './bank.svg';
+import Meta from './meta.svg';
+import SendMeta from './send.svg';
+import SendMsg from './sendMsg.svg';
+import AddButton from './add.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -161,4 +165,8 @@ export const svgIcon = {
   DiscoverCard: <DiscoverCard />,
   CreditCard: <CreditCard />,
   BankAccount: <BankAccount />,
+  Meta: <Meta />,
+  SendMeta: <SendMeta />,
+  SendMsg: <SendMsg />,
+  AddButton: <AddButton />,
 };

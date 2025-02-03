@@ -50,4 +50,5 @@ export const Routes = {
   AddCard: 'AddCard',
   PaymentManagerHistory: 'PaymentManagerHistory',
   WithdrawAmount: 'WithdrawAmount',
+  AiChat: 'AiChat',
 };

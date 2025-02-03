@@ -13,6 +13,7 @@ export const PFColors = {
   Orange: {
     Dark: '#cf4727',
     Light: '#CF47271A',
+    Soft: '#FEF2E7',
   },
   Red: {
     ErrorColor: '#ef3434',

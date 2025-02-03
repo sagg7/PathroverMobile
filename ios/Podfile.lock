@@ -1068,6 +1068,8 @@ PODS:
     - React-Core
   - react-native-geolocation-service (5.3.1):
     - React
+  - react-native-get-random-values (1.11.0):
+    - React-Core
   - react-native-image-picker (7.2.3):
     - DoubleConversion
     - glog
@@ -1091,7 +1093,7 @@ PODS:
     - Yoga
   - react-native-render-html (6.3.4):
     - React-Core
-  - react-native-safe-area-context (4.14.1):
+  - react-native-safe-area-context (5.1.0):
     - React-Core
   - React-nativeconfig (0.74.5)
   - React-NativeModulesApple (0.74.5):
@@ -1359,7 +1361,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNGoogleMobileAds (14.8.0):
+  - RNGoogleMobileAds (14.8.1):
     - DoubleConversion
     - glog
     - Google-Mobile-Ads-SDK (= 11.13.0)
@@ -1385,6 +1387,15 @@ PODS:
   - RNGoogleSignin (13.1.0):
     - GoogleSignIn (~> 7.1)
     - React-Core
+  - RNImageCropPicker (0.41.6):
+    - React-Core
+    - React-RCTImage
+    - RNImageCropPicker/QBImagePickerController (= 0.41.6)
+    - TOCropViewController (~> 2.7.4)
+  - RNImageCropPicker/QBImagePickerController (0.41.6):
+    - React-Core
+    - React-RCTImage
+    - TOCropViewController (~> 2.7.4)
   - rnmapbox-maps (10.1.33):
     - MapboxMaps (~> 10.19.0)
     - React
@@ -1546,6 +1557,7 @@ PODS:
     - StripeUICore (= 24.2.0)
   - StripeUICore (24.2.0):
     - StripeCore (= 24.2.0)
+  - TOCropViewController (2.7.4)
   - Turf (2.8.0)
   - Yoga (0.0.0)
 
@@ -1586,6 +1598,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -1621,6 +1634,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNGoogleMobileAds (from `../node_modules/react-native-google-mobile-ads`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
+  - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - "rnmapbox-maps (from `../node_modules/@rnmapbox/maps`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -1666,6 +1680,7 @@ SPEC REPOS:
     - StripePaymentSheet
     - StripePaymentsUI
     - StripeUICore
+    - TOCropViewController
     - Turf
 
 EXTERNAL SOURCES:
@@ -1734,6 +1749,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fbsdk-next"
   react-native-geolocation-service:
     :path: "../node_modules/react-native-geolocation-service"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-render-html:
@@ -1804,6 +1821,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-google-mobile-ads"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
+  RNImageCropPicker:
+    :path: "../node_modules/react-native-image-crop-picker"
   rnmapbox-maps:
     :path: "../node_modules/@rnmapbox/maps"
   RNPermissions:
@@ -1878,9 +1897,10 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 6c1cacdbf40b531f549eba249e531a7d0bfd8e7f
   react-native-fbsdk-next: c1b5a2dca8d9e66baa011f744d56ae3eca789e44
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
+  react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: fb0c2b3adc3eff6caa3cd6a507a34b9dcc9238dd
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
-  react-native-safe-area-context: 141eca0fd4e4191288dfc8b96a7c7e1c2983447a
+  react-native-safe-area-context: 04803a01f39f31cc6605a5531280b477b48f8a88
   React-nativeconfig: ba9a2e54e2f0882cf7882698825052793ed4c851
   React-NativeModulesApple: 8d11ff8955181540585c944cf48e9e7236952697
   React-perflogger: ed4e0c65781521e0424f2e5e40b40cc7879d737e
@@ -1911,8 +1931,9 @@ SPEC CHECKSUMS:
   RNFBApp: 67229e8085ab427c935defad2a6c3fc57c7f656d
   RNFBMessaging: e485940b19e3cff5eeb0f7f095d480576cbab505
   RNGestureHandler: f7abf21d594742be28a3a72528069225a3187e26
-  RNGoogleMobileAds: a93dd5657d874fddf19a96869f5befb6c89b00db
+  RNGoogleMobileAds: 8a8ae60a19c3975b87e85c5539ff164e4e1db323
   RNGoogleSignin: 9e68b9bcc3888219357924e32ee563624745647d
+  RNImageCropPicker: 8e39c01f205e00d739c31e682f068aac315587bf
   rnmapbox-maps: 334654168efcdc29584a9af1519d890a07a4a28e
   RNPermissions: 969801cfd868c16497541362edf495b8d8851cd4
   RNReanimated: b0728bed09875d78b9a3a0ba0e2d1171f63f8b5a
@@ -1928,6 +1949,7 @@ SPEC CHECKSUMS:
   StripePaymentSheet: 0d8ed5270037b1da3eb107c9876cec67b8b1fe43
   StripePaymentsUI: 6486d8b86bf49b8932506807a8692ce16e9f109d
   StripeUICore: b59aa9c9e202b6a03a556c3519eff578274f7598
+  TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
   Yoga: 950bbfd7e6f04790fdb51149ed51df41f329fcc8
 

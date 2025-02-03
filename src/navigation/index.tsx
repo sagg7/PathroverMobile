@@ -39,6 +39,7 @@ import PaymentMethods from '../screens/App/Manager/PaymentManager';
 import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
 import PaymentHistory from '../screens/App/Manager/PaymentHistory';
 import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
+import AiChat from '../screens/App/EndUser/AiChat';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -102,6 +103,7 @@ const AppNavigation = () => {
         />
         <Stack.Screen name={Routes.AddCard} component={AddCard} />
         <Stack.Screen name={Routes.WithdrawAmount} component={WithdrawAmount} />
+        <Stack.Screen name={Routes.AiChat} component={AiChat} />
       </Stack.Navigator>
     </NavigationContainer>
   );
