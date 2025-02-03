@@ -23,6 +23,9 @@ const TEST_KEY =
   'pk_test_51HCPWGDPRo9kCaKXRY8AILjgfyJhLlmkDUlsvsbU4SbGRZQ4jTBe4Boq4LiL9oHCq40mqRZSn7KRBn4A13RYtd7u00lAzNP0Dc';
 const PRODUCTION_KEY = '';
 export const STRIPE_KEY = isProduction ? PRODUCTION_KEY : TEST_KEY;
+export const OPEN_AI_URL = 'https://api.openai.com/v1/';
+export const OPEN_AI_KEY =
+  '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';
 
 type IntroSlidesTypes = {
   key: number;
@@ -689,7 +692,7 @@ export const top_ads_android = [
   'ca-app-pub-8139629720293753/8057789735',
   'ca-app-pub-8139629720293753/2838080624',
   'ca-app-pub-8139629720293753/5499075003',
-]
+];
 
 export const mid_ads_android = [
   'ca-app-pub-8139629720293753/7328459166',
