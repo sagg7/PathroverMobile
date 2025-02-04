@@ -125,6 +125,10 @@ const Settings = ({navigation}: any) => {
       case 10:
         setshowSwitchRoleSheet(true);
         break;
+      case 11:
+        navigation.navigate(Routes.EndUserSavedLibrary);
+        // setshowSwitchRoleSheet(true);
+        break;
     }
     if (screenName) {
       navigation.navigate(screenName);

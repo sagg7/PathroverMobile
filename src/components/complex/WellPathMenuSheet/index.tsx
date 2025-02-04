@@ -10,6 +10,7 @@ interface WellPathMenuSheetProps {
   onPressCancel: () => void;
   onPressCreateRoute: () => void;
   show: boolean;
+  onPressRecordRoute: () => void;
 }
 
 const WellPathMenuSheet = ({
@@ -18,6 +19,7 @@ const WellPathMenuSheet = ({
   onPressCancel,
   onPressCreateRoute,
   show = true,
+  onPressRecordRoute,
 }: WellPathMenuSheetProps) => {
   const OptionView = ({title, onPress, icon, disabled}: any) => {
     return (
@@ -46,8 +48,7 @@ const WellPathMenuSheet = ({
       <OptionView
         title={'Route Recording'}
         icon={svgIcon.RecordingIcon}
-        onPress={() => {}}
-        disabled={true}
+        onPress={onPressRecordRoute}
       />
       {show && (
         <OptionView

@@ -3,6 +3,7 @@ import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
   AddEntranceSheet,
+  AppHeader,
   AppLoader,
   MainWrapper,
   MapLayerSheet,
@@ -30,9 +31,9 @@ import {PinLocationAddress} from '../../../../components/complex/PinLocationAddr
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {TouchableOpacity} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
 
-const WellPath = () => {
+const RecordRoute = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
@@ -53,6 +54,9 @@ const WellPath = () => {
   const [entranceCoords, setEntranceCoords] = useState<any>(null);
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
 
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
@@ -72,6 +76,37 @@ const WellPath = () => {
       setCurrentLocation([location?.longitude, location?.latitude]);
     }
   }, [location]);
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isRunning) {
+      interval = setInterval(() => {
+        if (startTime) {
+          const currentTime = Date.now();
+          const timePassed = (currentTime - startTime) / 1000; // Convert ms to seconds
+          setElapsedTime(elapsedTime + timePassed);
+          setStartTime(currentTime); // Update start time to avoid cumulative addition
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning]);
+
+  const startTimer = () => {
+    setStartTime(Date.now());
+    // setElapsedTime(0);
+    setIsRunning(true);
+  };
+
+  // Stop Timer
+
+  // Stop Timer
+  const stopTimer = () => {
+    setIsRunning(false);
+  };
 
   useEffect(() => {
     if (allWellLocations) setAllPins(allWellLocations?.pin);
@@ -143,76 +178,24 @@ const WellPath = () => {
     }, 500);
   };
 
-  const onPressToggle = () => {
-    setAvailable(!available);
-  };
-  const routeGeoJSON = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: route,
-    },
-  };
-  const onPressMapSettingClear = () => {
-    setNearbyPins(true);
-    setNearbyWells(true);
-    setTimeout(() => {
-      setShowMapSettigs(false);
-    }, 1000);
-  };
-
   const onpressMarker = (e: any) => {
     setShowPinAddress(true);
     setSelectedWell(e?.geometry?.coordinates);
   };
 
-  const _handlePinBtn = async () => {
-    const startCoords = {
-      latitude: currentLocation[1],
-      longitude: currentLocation[0],
-      name: 'Start',
-    };
-    const endCoords = {
-      latitude: selectedWell[1],
-      longitude: selectedWell[0],
-      name: 'End Location',
-    };
-
-    const routeData = {
-      user_route: {
-        name: 'Pin Location',
-        route_type: 'maps_location_pins',
-        color: PFColors.Blue.Dark,
-        weight: '4',
-
-        location_start_attributes: startCoords,
-        location_end_attributes: endCoords,
-      },
-    };
-    const resp = await createRoute(routeData);
-    if (resp?.data) {
-      showAlert('Alert', 'Your location has been pined.');
-      navigation.goBack();
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
-    }
+  const formatTime = (time: number) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+      2,
+      '0',
+    )}:${String(seconds).padStart(2, '0')}`;
   };
 
   return (
     <MainWrapper style={styles.container}>
-      <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
-      <SearchView
-        onPressSearch={() =>
-          navigation.navigate(Routes.SearchWellPath, {
-            searchLocation,
-            setSearchLocation,
-            searchLocationName,
-            setSearchLocationNames,
-          })
-        }
-        onPressFilter={() => setShowMapSettigs(true)}
-        onPressMenu={() => setShowOptionsSheet(true)}
-      />
+      <AppHeader title="Record Route" />
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -288,7 +271,7 @@ const WellPath = () => {
           })}
 
         {/* Route Line */}
-        {route?.length > 1 && (
+        {/* {route?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               id="routeLayer-unique"
@@ -298,7 +281,19 @@ const WellPath = () => {
               }}
             />
           </MapboxGL.ShapeSource>
-        )}
+        )} */}
+        <View style={styles.bllueView}>
+          <Text style={styles.timeText}>{formatTime(elapsedTime)}</Text>
+
+          <TouchableOpacity
+            style={{marginHorizontal: 10}}
+            onPress={() => startTimer()}>
+            {svgIcon.Pause}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => stopTimer()}>
+            {svgIcon.StopSquare}
+          </TouchableOpacity>
+        </View>
       </MapboxGL.MapView>
       <TouchableOpacity
         style={styles.maplayerStyles}
@@ -307,22 +302,6 @@ const WellPath = () => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
-      <WellPathMenuSheet
-        modalVisible={showOptionsSheet}
-        onPressCancel={() => setShowOptionsSheet(false)}
-        setModalVisible={() => setShowOptionsSheet(false)}
-        onPressRecordRoute={() => {
-          setTimeout(() => {
-            navigation.navigate(Routes.RecordRoute);
-          }, 1000);
-        }}
-        onPressCreateRoute={() => {
-          setShowOptionsSheet(false);
-          setTimeout(() => {
-            navigation.navigate(Routes.CreateRouteEndUser);
-          }, 1000);
-        }}
-      />
 
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}
@@ -332,78 +311,8 @@ const WellPath = () => {
         onPressCancel={() => setMapLayerSheeet(false)}
         onPressSave={() => onPressSave()}
       />
-      <MapSettingSheet
-        setModalVisible={() => setShowMapSettigs(false)}
-        modalVisible={showMapSettigs}
-        onPressCancel={() => setShowMapSettigs(false)}
-        well={nearbyWells}
-        pin={nearbyPins}
-        setPin={setNearbyPins}
-        setWell={setNearbyWells}
-        onPressClear={() => onPressMapSettingClear()}
-      />
-      <PinLocationAddress
-        modalVisible={showPinAddress}
-        selectedPin={selectedWell || ['', '']}
-        setModalVisible={() => setShowPinAddress(false)}
-        onPresAddEntrance={() => {
-          setShowPinAddress(false);
-          setTimeout(() => {
-            setShowAddEntranceSheet(true);
-          }, 1000);
-        }}
-        onPressRouteToWell={() => {
-          setShowPinAddress(false);
-
-          navigation.navigate(Routes.RouteToWell, {
-            entranceCoords: selectedWell,
-            entranceName: '',
-          });
-        }}
-      />
-      {showAddEntranceSheet && (
-        <AddEntranceSheet
-          selectedPin={selectedWell}
-          onChangeEntranceName={(text: string) => setEntranceName(text)}
-          entranceName={entranceName}
-          isEntranceMarker={entranceCoords}
-          onPressPlaceToEntrance={() => {
-            navigation.navigate(Routes.RouteToWell, {
-              entranceCoords: entranceCoords,
-              entranceName: entranceName,
-            });
-            setShowAddEntranceSheet(false);
-            setEntranceCoords(null);
-            setEntranceName(null);
-          }}
-          setModalVisible={() => {
-            setEntranceCoords(null);
-            setShowAddEntranceSheet(false);
-            setEntranceName(null);
-          }}
-        />
-      )}
-      <RBSheet
-        ref={pinLocationSheet}
-        customModalProps={{
-          animationType: 'slide',
-          statusBarTranslucent: true,
-        }}
-        customStyles={{
-          container: {
-            height: isIOS() ? HP('43') : HP('50'),
-            borderTopLeftRadius: WP('3'),
-            borderTopRightRadius: WP('3'),
-          },
-        }}>
-        <PinYourLocationSheet
-          onPressCancel={() => pinLocationSheet.current.close()}
-          values={pinYourLocation}
-          setValues={setPinYourLocation}
-        />
-      </RBSheet>
     </MainWrapper>
   );
 };
 
-export default WellPath;
+export default RecordRoute;

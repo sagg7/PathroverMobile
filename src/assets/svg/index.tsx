@@ -99,6 +99,10 @@ import BlueClock from './blueClock.svg';
 import LocationFilled from './locationFilled.svg';
 import LiveLocationTracking from './liveTrackingMarker.svg';
 import PinMarker from './markerPin.svg';
+import BluePin from './bluePin.svg';
+import VideoCam from './videoCam.svg';
+import StopSquare from './stop-square.svg';
+import Pause from './pause.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -201,4 +205,8 @@ export const svgIcon = {
   LocationFilled: <LocationFilled />,
   LiveLocationTracking: <LiveLocationTracking />,
   PinMarker: <PinMarker />,
+  BluePin: <BluePin />,
+  VideoCam: <VideoCam />,
+  StopSquare: <StopSquare />,
+  Pause: <Pause />,
 };

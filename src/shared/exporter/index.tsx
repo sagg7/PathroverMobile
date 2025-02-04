@@ -48,6 +48,7 @@ export {
   RIDE_STATUS,
   colorsArr,
   routeLineArr,
+  EndUserSetting,
 } from '../utils/constant.tsx';
 export {useKeyboardListener} from '../../hooks/keyboard.tsx';
 export {
