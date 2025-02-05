@@ -1,6 +1,6 @@
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import axios from 'axios';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {useDispatch, useSelector} from 'react-redux';
@@ -19,10 +19,25 @@ import {OPEN_AI_KEY, OPEN_AI_URL} from '../../../../shared/utils/constant';
 import styles from './styles';
 
 const AiChat = () => {
+  const {params} = useRoute();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {messages} = useSelector(state => state.chat);
   const [inputValue, setInputValue] = useState();
+
+  useEffect(() => {
+    if (params?.search) {
+      const data = [
+        {
+          _id: Math.random(),
+          createdAt: new Date(),
+          text: params?.search,
+          user: {_id: 1},
+        },
+      ];
+      onSend(data);
+    }
+  }, [params]);
 
   const onSend = async (message: string) => {
     try {
@@ -33,10 +48,10 @@ const AiChat = () => {
             role: 'user',
             content: message?.[0]?.text,
           },
-          message?.[0]?.image && {
-            role: 'user',
-            content: message?.[0]?.image?.sourceURL,
-          },
+          // message?.[0]?.image && {
+          //   role: 'user',
+          //   content: message?.[0]?.image?.sourceURL,
+          // },
         ],
         model: 'gpt-4',
         store: true,
