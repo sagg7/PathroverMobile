@@ -6,15 +6,19 @@ import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 interface AskMeProps {
   placeholder?: string;
   onPress?: () => void;
+  value: string;
+  onChangeText: (txt: string) => void;
 }
 
-function AskMe({placeholder, onPress}: AskMeProps) {
+function AskMe({placeholder, onPress, value, onChangeText}: AskMeProps) {
   return (
     <TouchableOpacity style={styles.main}>
       {svgIcon.Meta}
       <TextInput
-        placeholder={placeholder}
+        value={value}
         style={styles.input}
+        placeholder={placeholder}
+        onChangeText={onChangeText}
         placeholderTextColor={PFColors.Blue.Dark}
       />
       <TouchableOpacity onPress={onPress}>{svgIcon.SendMeta}</TouchableOpacity>
