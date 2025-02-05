@@ -48,23 +48,24 @@ MobileAds()
   });
 
 const Home = ({navigation}) => {
-  const [FCMToken, setFCMToken] = useState(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [topAds, setTopAds] = useState([]);
-  const [midAds, setMidAds] = useState([]);
-  const [bottomAds, setBottomAds] = useState([]);
+
+  const [FCMToken, setFCMToken] = useState(false);
+  const [search, setSearch] = useState('');
+  const [ads, setAds] = useState({
+    topAds: [],
+    midAds: [],
+    bottomAds: [],
+  });
 
   useEffect(() => {
     const checkPlatform = Platform.OS === 'ios';
-    if (checkPlatform) {
-      setBottomAds(bottom_ads_ios);
-      setMidAds(mid_ads_ios);
-      setTopAds(top_ads_ios);
-    } else {
-      setBottomAds(bottom_ads_android);
-      setMidAds(mid_ads_android);
-      setTopAds(top_ads_android);
-    }
+
+    setAds({
+      topAds: checkPlatform ? top_ads_ios : top_ads_android,
+      midAds: checkPlatform ? mid_ads_ios : mid_ads_android,
+      bottomAds: checkPlatform ? bottom_ads_ios : bottom_ads_android,
+    });
   }, []);
 
   useEffect(() => {
@@ -107,14 +108,19 @@ const Home = ({navigation}) => {
       </View>
 
       <AskMe
+        value={search}
         placeholder={'Ask me anything...'}
-        onPress={() => navigation.navigate('AiChat')}
+        onChangeText={txt => setSearch(txt)}
+        onPress={() => {
+          navigation.navigate('AiChat', { search })
+          setSearch('');
+        }}
       />
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.flatList}>
           <FlatList
             horizontal
-            data={topAds}
+            data={ads.topAds}
             renderItem={renderItem}
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item, index) => item + index.toString()}
@@ -125,7 +131,7 @@ const Home = ({navigation}) => {
           <ListHeaderComponent />
           <FlatList
             horizontal
-            data={midAds}
+            data={ads.midAds}
             renderItem={renderShortItem}
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item, index) => item + index.toString()}
@@ -136,14 +142,13 @@ const Home = ({navigation}) => {
           <ListHeaderComponent />
           <FlatList
             horizontal
-            data={bottomAds}
+            data={ads.bottomAds}
             renderItem={renderShortItem}
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item, index) => item + index.toString()}
           />
         </View>
       </ScrollView>
-      
     </MainWrapper>
   );
 };
@@ -182,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: scale(4),
   },
   scrollView: {
-    flex: 1,
-    paddingBottom: scale(30),
+    flexGrow: 1,
+    paddingBottom: scale(50),
   },
 });
