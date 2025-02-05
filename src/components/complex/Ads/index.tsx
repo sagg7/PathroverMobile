@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
 import {
   NativeAd,
-  NativeAdEventType,
   NativeAdView,
   NativeAsset,
   NativeAssetType,
@@ -53,16 +52,23 @@ function Ads({item, isTop = false}: AdsProps) {
   return (
     <View style={styles.main(isTop)}>
       <NativeAdView nativeAd={ads}>
-        <NativeAsset assetType={NativeAssetType.ICON}>
-          <Image
-            source={{uri: ads?.icon?.url}}
-            style={styles.imageStyle(isTop)}
-          />
-        </NativeAsset>
+        {ads?.icon?.url && (
+          <NativeAsset assetType={NativeAssetType.ICON}>
+            <Image
+              source={{uri: ads?.icon?.url}}
+              style={styles.imageStyle(isTop)}
+            />
+          </NativeAsset>
+        )}
 
         <NativeAsset assetType={NativeAssetType.ADVERTISER}>
-          <Text style={styles.adText}>Ad</Text>
+          <Text style={styles.adText}>{ads?.advertiser || 'Ad'}</Text>
         </NativeAsset>
+        {ads?.callToAction && (
+          <NativeAsset assetType={NativeAssetType.CALL_TO_ACTION}>
+            <Text style={styles.adText}>{ads?.callToAction || ''}</Text>
+          </NativeAsset>
+        )}
         <NativeAsset assetType={NativeAssetType.HEADLINE}>
           <Text style={styles.headline(isTop)}>{ads?.headline}</Text>
         </NativeAsset>
