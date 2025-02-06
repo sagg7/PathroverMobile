@@ -4,7 +4,6 @@ import {
   PFColors,
   PFFonts,
   PFFontSize,
-  scale,
   WP,
 } from '../../../../shared/exporter';
 
@@ -28,21 +27,27 @@ const styles = StyleSheet.create({
   },
   bllueView: {
     backgroundColor: PFColors.Blue.Dark,
-    // padding: 15,
+    padding: 15,
     position: 'absolute',
-    bottom: 40,
+    bottom: isIOS() ? WP('20') : WP('15'),
     right: 20,
     borderRadius: 50,
     flexDirection: 'row',
-    width: WP('37'),
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
+    paddingHorizontal: 25,
   },
   timeText: {
     color: PFColors.Standard.White,
     fontFamily: PFFonts.Foundation.Regular,
     fontSize: PFFontSize.FONT_SIZE_14,
+    width: WP('20'),
+  },
+  videoCam: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('18') : WP('15'),
+    right: 10,
   },
 });
 export default styles;

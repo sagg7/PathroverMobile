@@ -47,6 +47,8 @@ const WellPath = () => {
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
   const [selectedWell, setSelectedWell] = useState<any>(null);
+  const [selectedWellName, setSelectedWellName] = useState<any>(null);
+
   const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
   const [showAddEntranceSheet, setShowAddEntranceSheet] =
     useState<boolean>(false);
@@ -163,7 +165,8 @@ const WellPath = () => {
 
   const onpressMarker = (e: any) => {
     setShowPinAddress(true);
-    setSelectedWell(e?.geometry?.coordinates);
+    setSelectedWell([e?.log, e?.lat]);
+    setSelectedWellName(e?.title ? e?.title : e?.map_title);
   };
 
   const _handlePinBtn = async () => {
@@ -195,6 +198,23 @@ const WellPath = () => {
       navigation.goBack();
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const moveToCurrentLocation = () => {
+    if (
+      !currentLocation ||
+      !Array.isArray(currentLocation) ||
+      currentLocation.length !== 2
+    ) {
+      console.error('Invalid coordinates:', currentLocation);
+      return;
+    }
+
+    if (cameraRef?.current) {
+      cameraRef.current?.setCamera({
+        centerCoordinate: currentLocation,
+      });
     }
   };
 
@@ -258,7 +278,7 @@ const WellPath = () => {
               <MapboxGL.PointAnnotation
                 key={`pin-${index}`}
                 id={`pin-${index}`}
-                onSelected={onpressMarker}
+                onSelected={() => onpressMarker(item)}
                 coordinate={coordinates}>
                 {svgIcon.CurrentLocation}
               </MapboxGL.PointAnnotation>
@@ -280,7 +300,7 @@ const WellPath = () => {
               <MapboxGL.PointAnnotation
                 key={`pin-${index}`}
                 id={`pin-${index}`}
-                onSelected={onpressMarker}
+                onSelected={() => onpressMarker(item)}
                 coordinate={coordinates}>
                 {svgIcon.PinMarker}
               </MapboxGL.PointAnnotation>
@@ -301,6 +321,11 @@ const WellPath = () => {
         )}
       </MapboxGL.MapView>
       <TouchableOpacity
+        style={styles.recenter}
+        onPress={() => moveToCurrentLocation()}>
+        {svgIcon.MapWhiteBg}
+      </TouchableOpacity>
+      <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
           setMapLayerSheeet(true);
@@ -312,6 +337,7 @@ const WellPath = () => {
         onPressCancel={() => setShowOptionsSheet(false)}
         setModalVisible={() => setShowOptionsSheet(false)}
         onPressRecordRoute={() => {
+          setShowOptionsSheet(false);
           setTimeout(() => {
             navigation.navigate(Routes.RecordRoute);
           }, 1000);
@@ -345,6 +371,7 @@ const WellPath = () => {
       <PinLocationAddress
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
+        selectedWellName={selectedWellName || ['', '']}
         setModalVisible={() => setShowPinAddress(false)}
         onPresAddEntrance={() => {
           setShowPinAddress(false);

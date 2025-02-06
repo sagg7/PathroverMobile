@@ -103,6 +103,10 @@ import BluePin from './bluePin.svg';
 import VideoCam from './videoCam.svg';
 import StopSquare from './stop-square.svg';
 import Pause from './pause.svg';
+import RecordRouteMarker from './routeRecordMarker.svg';
+import CurrentMarker from './currentMarker.svg';
+import MiniCam from './miniCam.svg';
+import PlayBtn from './playBtn.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -209,4 +213,8 @@ export const svgIcon = {
   VideoCam: <VideoCam />,
   StopSquare: <StopSquare />,
   Pause: <Pause />,
+  RecordRouteMarker: <RecordRouteMarker />,
+  CurrentMarker: <CurrentMarker />,
+  MiniCam: <MiniCam />,
+  PlayBtn: <PlayBtn />,
 };

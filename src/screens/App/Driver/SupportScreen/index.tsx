@@ -37,15 +37,13 @@ const SupportScreen = () => {
 
   const handleContinueBtn = async (val: any) => {
     const {email, firstName, lastName, message} = val;
-    const obj = {
-      message: {
-        email: email,
-        first_name: firstName,
-        last_name: lastName,
-        message: message,
-      },
-    };
-    const resp = await supportContact(obj);
+
+    const data = new FormData();
+    data.append('first_name', firstName);
+    data.append('last_name', lastName);
+    data.append('email', email);
+    data.append('message', message);
+    const resp = await supportContact(data);
     if (resp?.data) {
       showAlert('Alert', 'Your message has been sent.');
       navigation.goBack();

@@ -7,29 +7,21 @@ import {
   AppLoader,
   MainWrapper,
   MapLayerSheet,
-  PinYourLocationSheet,
-  WellPathMenuSheet,
+  SaveRecordRouteSheet,
 } from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
   Default_Map_Style,
-  HP,
-  isIOS,
   MapTypes,
   PFColors,
-  Routes,
   showAlert,
   UNEXPECTED_ERROR,
-  WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
-import SearchView from './SearchView';
-import HeaderView from './HeaderView';
-import {MapSettingSheet} from '../../../../components/complex/MapSettingSheet';
-import {PinLocationAddress} from '../../../../components/complex/PinLocationAddress';
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
-import RBSheet from 'react-native-raw-bottom-sheet';
+import Geolocation from '@react-native-community/geolocation';
+
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {Text, TouchableOpacity, View} from 'react-native';
 
@@ -39,43 +31,65 @@ const RecordRoute = () => {
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [liveLocation, setLiveLocation] = useState<any>(null);
+  const [recordingDetails, setRecordingDetails] = useState<any>({
+    name: '',
+    notes: '',
+  });
+
   const [route, setRoute] = useState<any>([]);
-  const [available, setAvailable] = useState(false);
-  const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
-  const [nearbyPins, setNearbyPins] = useState<boolean>(true);
-  const [nearbyWells, setNearbyWells] = useState<boolean>(true);
-  const [showOptionsSheet, setShowOptionsSheet] = useState(false);
-  const [searchLocation, setSearchLocation] = useState<any>(null);
-  const [searchLocationName, setSearchLocationNames] = useState<any>(null);
-  const [selectedWell, setSelectedWell] = useState<any>(null);
-  const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
-  const [showAddEntranceSheet, setShowAddEntranceSheet] =
-    useState<boolean>(false);
-  const [entranceCoords, setEntranceCoords] = useState<any>(null);
-  const [entranceName, setEntranceName] = useState<any>('');
+
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
 
-  const [pinYourLocation, setPinYourLocation] = useState<any>({
-    latitude: '',
-    longitude: '',
-    name: '',
-  });
-
   const {data: allWellLocations, isLoading} = useGetAllWellsQuery(undefined);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
-  const pinLocationSheet = useRef<any>(null);
+  const [isRecordingStarted, setIsRecordingStarted] = useState<boolean>(false);
+  const [saveRouteSheet, setSaveRouteSheet] = useState<boolean>(false);
+
   const [allWells, setAllWells] = useState<any>([]);
   const [allPins, setAllPins] = useState<any>([]);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      const interval = setInterval(() => {
+        getLocation();
+      }, 10000);
+
+      return () => clearInterval(interval);
+    }
+  }, [isFocused]);
+
+  const getLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLiveLocation([longitude, latitude]);
+        const isAlreadyInRoute = route.some(
+          ([lng, lat]) => lng === longitude && lat === latitude,
+        );
+
+        if (!isAlreadyInRoute) {
+          route.push([longitude, latitude]);
+        }
+      },
+      error => {
+        console.log('GET POSITION Error:', error.code, error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
 
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
     }
   }, [location]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
@@ -83,9 +97,9 @@ const RecordRoute = () => {
       interval = setInterval(() => {
         if (startTime) {
           const currentTime = Date.now();
-          const timePassed = (currentTime - startTime) / 1000; // Convert ms to seconds
+          const timePassed = (currentTime - startTime) / 1000;
           setElapsedTime(elapsedTime + timePassed);
-          setStartTime(currentTime); // Update start time to avoid cumulative addition
+          setStartTime(currentTime);
         }
       }, 1000);
     }
@@ -97,11 +111,8 @@ const RecordRoute = () => {
 
   const startTimer = () => {
     setStartTime(Date.now());
-    // setElapsedTime(0);
     setIsRunning(true);
   };
-
-  // Stop Timer
 
   // Stop Timer
   const stopTimer = () => {
@@ -113,51 +124,6 @@ const RecordRoute = () => {
     setAllWells(allWellLocations?.wells);
   }, [allWellLocations]);
 
-  useEffect(() => {
-    if (!nearbyPins && nearbyWells) {
-      setAllWells(allWellLocations?.wells);
-      setAllPins([]);
-    } else if (!nearbyWells && nearbyPins) {
-      setAllPins(allWellLocations?.pin);
-      setAllWells([]);
-    } else if (nearbyPins && nearbyWells) {
-      setAllPins(allWellLocations?.pin);
-      setAllWells(allWellLocations?.wells);
-    } else if (!nearbyPins && !nearbyWells) {
-      setAllPins([]);
-      setAllWells([]);
-    }
-  }, [nearbyPins, nearbyWells, allWellLocations]);
-
-  useEffect(() => {
-    if (searchLocation) {
-      setTimeout(() => {
-        if (cameraRef.current) {
-          cameraRef.current.moveTo(searchLocation, 1500);
-        } else {
-          showAlert(
-            'Error',
-            'Your coordinates are incorrect, Unable to locate.',
-          );
-        }
-      }, 200);
-    }
-  }, [searchLocation]);
-
-  const onPressMap = (event: any) => {
-    try {
-      const {geometry} = event;
-      if (geometry && Array.isArray(geometry.coordinates)) {
-        if (showAddEntranceSheet) {
-          setEntranceCoords(geometry.coordinates);
-        }
-      } else {
-        console.error('Invalid coordinates:', geometry);
-      }
-    } catch (error) {
-      console.error('Error in onPressMap:', error);
-    }
-  };
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
       prev.map(v => ({
@@ -178,11 +144,6 @@ const RecordRoute = () => {
     }, 500);
   };
 
-  const onpressMarker = (e: any) => {
-    setShowPinAddress(true);
-    setSelectedWell(e?.geometry?.coordinates);
-  };
-
   const formatTime = (time: number) => {
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
@@ -191,6 +152,43 @@ const RecordRoute = () => {
       2,
       '0',
     )}:${String(seconds).padStart(2, '0')}`;
+  };
+  const routeGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: route,
+    },
+  };
+
+  const handleSaveBtn = async () => {
+    const locationsAttributes =
+      route?.length > 0
+        ? [
+            ...route.map(([longitude, latitude], index) => ({
+              latitude: latitude.toString(),
+              longitude: longitude.toString(),
+              name: `Point ${index + 1}`,
+            })),
+          ]
+        : [];
+    const routeData = {
+      user_route: {
+        name: recordingDetails?.name,
+        route_type: 'recording_route',
+        color: PFColors.Blue.Dark,
+        weight: '4',
+        locations_attributes: locationsAttributes,
+      },
+    };
+    const resp = await createRoute(routeData);
+    setSaveRouteSheet(false);
+    if (resp?.data) {
+      showAlert('Alert', 'Your recording has been saved.');
+      navigation.goBack();
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
   };
 
   return (
@@ -201,27 +199,22 @@ const RecordRoute = () => {
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
-        scaleBarEnabled={false}
-        onPress={onPressMap}>
+        scaleBarEnabled={false}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={12}
+          zoomLevel={16}
           centerCoordinate={currentLocation}
         />
 
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
-            {svgIcon.BlueMapMarker}
+            {svgIcon.CurrentMarker}
           </MapboxGL.MarkerView>
         )}
-        {searchLocation && (
-          <MapboxGL.MarkerView coordinate={searchLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )}
-        {entranceCoords && (
-          <MapboxGL.MarkerView coordinate={entranceCoords}>
-            {svgIcon.BlueMapMarker}
+
+        {liveLocation && isRecordingStarted && (
+          <MapboxGL.MarkerView coordinate={liveLocation}>
+            {svgIcon.RecordRouteMarker}
           </MapboxGL.MarkerView>
         )}
 
@@ -241,7 +234,6 @@ const RecordRoute = () => {
               <MapboxGL.PointAnnotation
                 key={`pin-${index}`}
                 id={`pin-${index}`}
-                onSelected={onpressMarker}
                 coordinate={coordinates}>
                 {svgIcon.CurrentLocation}
               </MapboxGL.PointAnnotation>
@@ -263,7 +255,6 @@ const RecordRoute = () => {
               <MapboxGL.PointAnnotation
                 key={`pin-${index}`}
                 id={`pin-${index}`}
-                onSelected={onpressMarker}
                 coordinate={coordinates}>
                 {svgIcon.PinMarker}
               </MapboxGL.PointAnnotation>
@@ -271,7 +262,7 @@ const RecordRoute = () => {
           })}
 
         {/* Route Line */}
-        {/* {route?.length > 1 && (
+        {route?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               id="routeLayer-unique"
@@ -281,20 +272,40 @@ const RecordRoute = () => {
               }}
             />
           </MapboxGL.ShapeSource>
-        )} */}
+        )}
+      </MapboxGL.MapView>
+      {isRecordingStarted && (
         <View style={styles.bllueView}>
-          <Text style={styles.timeText}>{formatTime(elapsedTime)}</Text>
-
-          <TouchableOpacity
-            style={{marginHorizontal: 10}}
-            onPress={() => startTimer()}>
-            {svgIcon.Pause}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => stopTimer()}>
+          <Text style={styles.timeText}>{formatTime(elapsedTime)} </Text>
+          {isRunning ? (
+            <TouchableOpacity
+              style={{marginHorizontal: 10}}
+              onPress={() => stopTimer()}>
+              {svgIcon.Pause}
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={{marginHorizontal: 10}}
+              onPress={() => startTimer()}>
+              {svgIcon.PlayBtn}
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => setSaveRouteSheet(true)}>
             {svgIcon.StopSquare}
           </TouchableOpacity>
         </View>
-      </MapboxGL.MapView>
+      )}
+      {!isRecordingStarted && (
+        <TouchableOpacity
+          style={styles.videoCam}
+          onPress={() => {
+            setIsRecordingStarted(true);
+            startTimer();
+          }}>
+          {svgIcon.VideoCam}
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
@@ -302,6 +313,14 @@ const RecordRoute = () => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
+      {saveRouteSheet && (
+        <SaveRecordRouteSheet
+          recordingDetails={recordingDetails}
+          setDetails={setRecordingDetails}
+          onPressCancel={() => setSaveRouteSheet(false)}
+          onPressSave={() => handleSaveBtn()}
+        />
+      )}
 
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}

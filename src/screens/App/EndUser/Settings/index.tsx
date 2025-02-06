@@ -35,8 +35,9 @@ const Settings = ({navigation}: any) => {
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
     useDeleteUserAccountMutation();
+
   const [userName, setUserName] = useState(
-    `${loginUser?.first_name} ${loginUser?.first_name}`,
+    `${loginUser?.first_name} ${loginUser?.last_name}`,
   );
 
   const handleCard = (v: any) => {

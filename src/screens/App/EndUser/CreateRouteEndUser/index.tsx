@@ -306,8 +306,6 @@ const CreateRouteEndUser = () => {
   function updateRoute(dataArr) {
     const start = dataArr?.start;
     const end = dataArr?.end;
-    console.log('Start', start);
-    console.log('End', end);
 
     if (!start || !end) return route;
     let filteredRoute = route.filter(
@@ -449,6 +447,12 @@ const CreateRouteEndUser = () => {
           setShowOptionsSheet(false);
           setTimeout(() => {
             navigation.navigate(Routes.CreateRouteSearch);
+          }, 1000);
+        }}
+        onPressRecordRoute={() => {
+          setShowOptionsSheet(false);
+          setTimeout(() => {
+            navigation.navigate(Routes.RecordRoute);
           }, 1000);
         }}
       />

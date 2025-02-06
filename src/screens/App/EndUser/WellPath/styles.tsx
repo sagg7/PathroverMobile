@@ -26,6 +26,11 @@ const styles = StyleSheet.create({
     bottom: isIOS() ? WP('20') : WP('15'),
     left: 10,
   },
+  recenter: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('32') : WP('27'),
+    left: 10,
+  },
   undoRedoContainer: {
     flexDirection: 'row',
     position: 'absolute',
