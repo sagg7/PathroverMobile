@@ -8,8 +8,18 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+    getAllSaveRoutes: builder.query({
+      query: ({type, ...params}) => {
+        const queryParams = new URLSearchParams({...params}).toString();
+        return {
+          url: `user_routes?${queryParams}`,
+          method: 'GET',
+        };
+      },
+    }),
   }),
+
   overrideExisting: true,
 });
 
-export const {useGetAllWellsQuery} = enduserApiSlice;
+export const {useGetAllWellsQuery, useGetAllSaveRoutesQuery} = enduserApiSlice;

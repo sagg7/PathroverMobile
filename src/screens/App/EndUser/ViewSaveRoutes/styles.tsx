@@ -23,13 +23,8 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
-    left: 10,
-  },
-  recenter: {
-    position: 'absolute',
-    bottom: isIOS() ? WP('32') : WP('27'),
-    left: 10,
+    top: isIOS() ? WP('35') : WP('25'),
+    right: 20,
   },
   undoRedoContainer: {
     flexDirection: 'row',
@@ -106,6 +101,42 @@ const styles = StyleSheet.create({
   filterIcon: {
     height: scale(44),
     width: scale(44),
+  },
+  routeStopStyles: {
+    height: 16,
+    width: 16,
+    borderRadius: 20 / 2,
+    backgroundColor: PFColors.Red.RadiantRed,
+  },
+
+  routeInfoText: {
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    color: PFColors.Standard.Black,
+  },
+  routeInfoView: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  shareIcon: {
+    position: 'absolute',
+    right: 2,
+    top: 5,
+  },
+  actionBtnView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+  },
+  bottomView: {
+    backgroundColor: PFColors.Standard.White,
+    height: 100,
+    position: 'absolute',
+    bottom: 0,
+    width: WP('100'),
+    borderTopEndRadius: 20,
+    borderTopLeftRadius: 20,
+    padding: 20,
   },
 });
 export default styles;

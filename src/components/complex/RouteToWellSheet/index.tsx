@@ -100,12 +100,7 @@ const RouteToWellSheet = ({
           {svgIcon.ShareWellPath}
         </TouchableOpacity>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
+      <View style={styles.actionBtnView}>
         <ActionButtons
           icon={appIcons.Directions}
           title={'Directions'}
@@ -177,10 +172,7 @@ const styles = StyleSheet.create({
     right: 2,
     top: 5,
   },
-  actionBtnView: {
-    backgroundColor: 'pink',
-    flexDirection: 'row',
-  },
+
   actionIcon: {
     height: 20,
     width: 20,
@@ -199,5 +191,10 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_16,
     marginLeft: 8,
+  },
+  actionBtnView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
   },
 });

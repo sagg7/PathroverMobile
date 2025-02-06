@@ -54,4 +54,8 @@ export const Routes = {
   CreateRouteSearch: 'CreateRouteSearch',
   CreateRouteEndUser: 'CreateRouteEndUser',
   RouteToWell: 'RouteToWell',
+  EndUserSavedLibrary: 'EndUserSavedLibrary',
+  EndUserSavedLibraryType: 'EndUserSavedLibraryType',
+  ViewSaveRoutes: 'ViewSaveRoutes',
+  RecordRoute: 'RecordRoute',
 };

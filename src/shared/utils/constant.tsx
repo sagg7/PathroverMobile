@@ -746,3 +746,23 @@ export const routeLineArr = [
   {id: 2, height: 6, isSelected: false},
   {id: 3, height: 4, isSelected: false},
 ];
+export const EndUserSetting = [
+  {
+    id: 1,
+    title: 'Custom Routes',
+    icon: svgIcon.RouteBlue,
+    type: 'custom_route',
+  },
+  {
+    id: 2,
+    title: 'Recordings',
+    icon: svgIcon.RecordingIcon,
+    type: 'recording_route',
+  },
+  {
+    id: 3,
+    title: 'Well Location Pins',
+    icon: svgIcon.BluePin,
+    type: 'maps_location_pins',
+  },
+];

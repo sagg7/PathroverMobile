@@ -44,7 +44,7 @@
 buildscript {
     ext {
         RNMapboxMapsImpl = "mapbox"
-
+        googlePlayServicesVersion = "21.0.1"
         useCustomMapbox = false
 
         if (System.getenv('CI_MAP_IMPL').equals('mapbox')) {

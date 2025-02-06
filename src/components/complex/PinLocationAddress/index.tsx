@@ -12,6 +12,7 @@ interface PinLocationAddressProps {
   selectedPin: any;
   onPressRouteToWell: () => void;
   onPresAddEntrance?: () => void;
+  selectedWellName: string;
 }
 
 const PinLocationAddress = ({
@@ -21,6 +22,7 @@ const PinLocationAddress = ({
   selectedPin,
   onPresAddEntrance,
   onPressRouteToWell,
+  selectedWellName,
 }: PinLocationAddressProps) => {
   return (
     <Modal
@@ -37,7 +39,10 @@ const PinLocationAddress = ({
       <View style={styles.addressView}>
         <View style={{flexDirection: 'row'}}>
           {svgIcon.MapPinBlue}
-          <Text style={styles.placeName}> Location</Text>
+          <Text style={styles.placeName}>
+            {' '}
+            {selectedWellName ? selectedWellName : 'Location'}
+          </Text>
         </View>
       </View>
       {selectedPin?.length > 1 && (

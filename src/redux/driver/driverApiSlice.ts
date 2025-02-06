@@ -50,7 +50,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
     supportContact: builder.mutation({
       query: data => {
         return {
-          url: '',
+          url: 'supports',
           method: 'post',
           body: data,
         };
@@ -94,7 +94,7 @@ export const driverApiSlice = apiSlice.injectEndpoints({
       },
     }),
     getWalletTransactions: builder.mutation({
-      query: (filter) => {
+      query: filter => {
         return {
           url: `transactions?filter=${filter}`,
           method: 'get',
