@@ -1091,6 +1091,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-pager-view (6.7.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-render-html (6.3.4):
     - React-Core
   - react-native-safe-area-context (5.1.0):
@@ -1600,6 +1621,7 @@ DEPENDENCIES:
   - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
+  - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1753,6 +1775,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-get-random-values"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
+  react-native-pager-view:
+    :path: "../node_modules/react-native-pager-view"
   react-native-render-html:
     :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
@@ -1899,6 +1923,7 @@ SPEC CHECKSUMS:
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: fb0c2b3adc3eff6caa3cd6a507a34b9dcc9238dd
+  react-native-pager-view: 08a2230db2a7393ead43299b160d17337837a15e
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
   react-native-safe-area-context: 04803a01f39f31cc6605a5531280b477b48f8a88
   React-nativeconfig: ba9a2e54e2f0882cf7882698825052793ed4c851
