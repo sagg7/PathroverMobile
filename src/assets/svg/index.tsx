@@ -83,6 +83,8 @@ import Meta from './meta.svg';
 import SendMeta from './send.svg';
 import SendMsg from './sendMsg.svg';
 import AddButton from './add.svg';
+import LockIcon from './lock.svg';
+import ChatDelete from './chatDelete.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -169,4 +171,6 @@ export const svgIcon = {
   SendMeta: <SendMeta />,
   SendMsg: <SendMsg />,
   AddButton: <AddButton />,
+  LockIcon: <LockIcon />,
+  ChatDelete: <ChatDelete />,
 };
