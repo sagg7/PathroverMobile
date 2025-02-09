@@ -9,9 +9,6 @@ const Chat = () => {
   const navigation = useNavigation();
   const { loginUser } = useSelector(state => state.auth);
 
-  console.log('============loginUser========================');
-  console.log(loginUser);
-  console.log('====================================');
   return (
     <MainWrapper>
       {/* <EmptyChatView onPress={() => navigation.navigate('AddNumber')} /> */}
