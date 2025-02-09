@@ -44,11 +44,12 @@ const RenderActions = props => {
 
 const styles = StyleSheet.create({
   containerStyle: {
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: 5,
+    // justifyContent: 'center',
+    // alignSelf: 'flex-end',
+    // marginBottom: 5,
     left: -15,
     height: 44,
+    width: 44,
   },
 });
 

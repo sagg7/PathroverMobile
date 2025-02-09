@@ -17,10 +17,11 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    width: '60%',
+    width: '64%',
     backgroundColor: PFColors.Gray.LightMist,
     color: PFColors.Gray.DarkGray,
     fontFamily: PFFonts.Foundation.Regular,
+    left: -10,
   },
 });
 

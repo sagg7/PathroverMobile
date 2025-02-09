@@ -12,10 +12,10 @@ import Modal from 'react-native-modal';
 import FitImage from 'react-native-fit-image';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 
-const ChatBubble = ({props}) => {
+const ChatBubble = ({ props }) => {
   const {currentMessage, position} = props;
   const isLeft = position === 'left';
-  const {text, createdAt, image} = currentMessage;
+  const {content, created_at, image} = currentMessage;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -59,7 +59,7 @@ const ChatBubble = ({props}) => {
   return (
     <View style={styles.main}>
       <Text style={[styles.time, isLeft ? styles.leftTime : styles.rightTime]}>
-        {moment(createdAt).format('hh:mm A')}
+        {moment(created_at).format('hh:mm A')}
       </Text>
 
       <View
@@ -73,7 +73,7 @@ const ChatBubble = ({props}) => {
             // onPress={() => handleImagePress(attachments[0].url)}
           >
             <Text style={styles.imageTime}>
-              {moment(createdAt).format('hh:mm a')}
+              {moment(created_at).format('hh:mm a')}
             </Text>
             <FitImage
               indicatorColor={
@@ -93,16 +93,16 @@ const ChatBubble = ({props}) => {
         <View
           style={[
             styles.messageWrapper,
-            text?.length > 30 ? styles.columnDirection : styles.rowDirection,
+            content?.length > 30 ? styles.columnDirection : styles.rowDirection,
           ]}>
-          {text && (
+          {content && (
             <>
               <Text
                 style={[
                   styles.messageText,
                   isLeft ? styles.leftMessageText : styles.rightMessageText,
                 ]}>
-                {renderTextWithUrls(text)}
+                {renderTextWithUrls(content)}
               </Text>
               <View style={{width: 10}} />
             </>

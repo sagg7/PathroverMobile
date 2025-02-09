@@ -4,12 +4,17 @@ import {RenderComposer} from './RenderComposer';
 import RenderActions from './RenderActions';
 import {RenderSend} from './RenderSend';
 import {PFColors, scale} from '../../../shared/exporter';
+import {RenderRecordComposer} from './RenderRecordComposer';
 
-const RenderInputToolbar = (props, onPress) => {
+const RenderInputToolbar = (props, onPress, isRecord) => {
   return (
     <View style={styles.mainContainer}>
       <RenderActions {...props} />
-      <RenderComposer {...props} />
+      {isRecord ? (
+        <RenderRecordComposer {...props} />
+      ) : (
+        <RenderComposer {...props} />
+      )}
       <RenderSend {...props} />
     </View>
   );
@@ -34,11 +39,8 @@ const styles = StyleSheet.create({
     },
     shadowRadius: 4,
     elevation: 4,
-  },
-  containerStyle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 });
 
