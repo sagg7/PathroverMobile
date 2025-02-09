@@ -162,6 +162,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 30,
     alignItems: 'center',
+    paddingVertical: 6,
+    shadowColor: PFColors.Standard.Black,
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+    shadowOffset: {
+      height: 4,
+      width: 0,
+    },
+    marginVertical: 4,
   },
   settingIcon: {
     height: 32,
