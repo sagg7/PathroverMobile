@@ -1,24 +1,19 @@
-import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import React from 'react';
 import {BottomTab} from '../../components';
-import RequestList from '../../screens/App/Driver/RequestList';
-import DriverWallet from '../../screens/App/Driver/DriverWallet'; 
-import OrderHistory from '../../screens/App/Driver/OrderHistory';
-import Settings from '../../screens/App/Driver/Settings';
-import { Routes } from '../../shared/exporter';
 import DummyScreen from '../../screens/App/DummyScreen';
-import VehicleRequest from '../../screens/App/Manager/Vehicle/RequestVehicle';
+import Chat from '../../screens/App/EndUser/Chat';
 import Home from '../../screens/App/EndUser/Home';
+import {Routes} from '../../shared/exporter';
 
 const Tab = createBottomTabNavigator();
 const EndUserTabs = () => {
-
   return (
     <Tab.Navigator
+      // initialRouteName={'Chat'}
       initialRouteName={Routes.myRequest}
       screenOptions={{headerShown: false}}
       tabBar={props => <BottomTab {...props} />}>
-      
       <Tab.Screen
         options={{unmountOnBlur: true}}
         component={Home}
@@ -29,18 +24,16 @@ const EndUserTabs = () => {
         component={DummyScreen}
         name={'Hiking'}
       />
-       <Tab.Screen
+      <Tab.Screen
         options={{unmountOnBlur: true}}
         component={DummyScreen}
         name={'WellPath'}
       />
-       <Tab.Screen
+      <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={DummyScreen}
+        component={Chat}
         name={'Chat'}
       />
-
-      
     </Tab.Navigator>
   );
 };
