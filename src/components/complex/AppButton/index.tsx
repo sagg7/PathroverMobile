@@ -1,11 +1,12 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import {
-  WP,
-  PFColors,
-  PFFontSize,
-  PFFonts,
-} from '../../../shared/exporter';
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import {WP, PFColors, PFFontSize, PFFonts} from '../../../shared/exporter';
 
 interface AppButtonProps {
   icon?: any;
@@ -15,7 +16,8 @@ interface AppButtonProps {
   buttonStyle?: any;
   disabled?: boolean;
   handleClick?: () => void;
-  isSmall?: string
+  isSmall?: string;
+  isLoading?: boolean;
 }
 
 function AppButton({
@@ -25,9 +27,9 @@ function AppButton({
   textStyle,
   buttonStyle,
   handleClick,
-  isSmall
+  isSmall,
+  isLoading,
 }: AppButtonProps) {
-
   return (
     <TouchableOpacity
       disabled={disabled}
@@ -35,7 +37,11 @@ function AppButton({
       onPress={handleClick}
       style={[styles.buttonContainer(disabled, isSmall), buttonStyle]}>
       {icon ? icon : null}
-      <Text style={[styles.typeTextStyle(icon), textStyle]}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator size={'small'} color={PFColors.Standard.White} />
+      ) : (
+        <Text style={[styles.typeTextStyle(icon), textStyle]}>{title}</Text>
+      )}
     </TouchableOpacity>
   );
 }
@@ -49,15 +55,16 @@ const styles = StyleSheet.create({
     borderRadius: WP('10'),
     paddingHorizontal: WP('5'),
     justifyContent: 'center',
-    backgroundColor: isDisabled ? PFColors.Standard.Disable : PFColors.Blue.Dark,
+    backgroundColor: isDisabled
+      ? PFColors.Standard.Disable
+      : PFColors.Blue.Dark,
   }),
   typeTextStyle: icon => ({
     color: PFColors.Standard.White,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
-    paddingLeft: icon ? 10 : 0
+    paddingLeft: icon ? 10 : 0,
   }),
-
 });
 
-export { AppButton };
+export {AppButton};
