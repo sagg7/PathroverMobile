@@ -9,6 +9,9 @@ export const PFColors = {
     Disable: '#b8c8dc',
     Default: '#E8D8E3',
     Debit: '#C2478F',
+    TextBlack: '#3C3C43',
+    GrayBlack: '#171717',
+    TimerBlack: '#030303',
   },
   Orange: {
     Dark: '#cf4727',
@@ -41,6 +44,8 @@ export const PFColors = {
     borderGray: '#D9D9D9',
     LightMist: '#f7f7f7',
     CloudGray: '#f5f5f5',
+    TextBorder: '#DEDEDE',
+    LightGray: '#807F80',
   },
   Green: {
     LeafGreen: '#0e924b',
