@@ -1,9 +1,8 @@
-import { StyleSheet } from "react-native";
-import { PFColors, PFFontSize, PFFonts, WP } from "../../../../shared/exporter";
+import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
-    container: {
-       flex: 1
-   }
-})
-export default styles
+  container: {
+    flex: 1,
+  },
+});
+export default styles;

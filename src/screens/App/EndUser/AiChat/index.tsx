@@ -95,7 +95,9 @@ const AiChat = () => {
           renderMessageText={RenderMessageText}
           renderTime={RenderTime}
           renderMessageImage={RenderMessageImage}
-          renderInputToolbar={props => RenderInputToolbar(props, () => {})}
+          renderInputToolbar={props =>
+            RenderInputToolbar(props, () => {}, false)
+          }
           listViewProps={{
             showsVerticalScrollIndicator: false,
             onEndReachedThreshold: 0.3,
