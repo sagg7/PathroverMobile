@@ -51,4 +51,12 @@ export const Routes = {
   PaymentManagerHistory: 'PaymentManagerHistory',
   WithdrawAmount: 'WithdrawAmount',
   AiChat: 'AiChat',
+  AddNumber: 'AddNumber',
+  VerifyNumber: 'VerifyNumber',
+  Chat: 'Chat',
+  ChatDetail: 'ChatDetail',
+  ChatUsers: 'ChatUsers',
+  MemberList: 'MemberList',
+  CreateGroup: 'CreateGroup',
+  GroupInfo: 'GroupInfo',
 };

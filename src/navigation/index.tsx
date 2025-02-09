@@ -40,6 +40,13 @@ import AddCard from '../screens/App/Manager/PaymentManager/AddCard';
 import PaymentHistory from '../screens/App/Manager/PaymentHistory';
 import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
 import AiChat from '../screens/App/EndUser/AiChat';
+import AddNumber from '../screens/App/EndUser/Chat/AddNumber/Index';
+import VerifyNumber from '../screens/App/EndUser/Chat/VerifyNumber';
+import ChatUsers from '../screens/App/EndUser/Chat/ChatUsers';
+import MemberList from '../screens/App/EndUser/Chat/MembersList';
+import CreateGroup from '../screens/App/EndUser/Chat/CreateGroup';
+import ChatDetail from '../screens/App/EndUser/Chat/ChatDetail';
+import GroupInfoDetail from '../screens/App/EndUser/Chat/GroupInfoDetails';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -104,6 +111,13 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.AddCard} component={AddCard} />
         <Stack.Screen name={Routes.WithdrawAmount} component={WithdrawAmount} />
         <Stack.Screen name={Routes.AiChat} component={AiChat} />
+        <Stack.Screen name={Routes.AddNumber} component={AddNumber} />
+        <Stack.Screen name={Routes.VerifyNumber} component={VerifyNumber} />
+        <Stack.Screen name={Routes.ChatUsers} component={ChatUsers} />
+        <Stack.Screen name={Routes.MemberList} component={MemberList} />
+        <Stack.Screen name={Routes.CreateGroup} component={CreateGroup} />
+        <Stack.Screen name={Routes.ChatDetail} component={ChatDetail} />
+        <Stack.Screen name={Routes.GroupInfo} component={GroupInfoDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );
