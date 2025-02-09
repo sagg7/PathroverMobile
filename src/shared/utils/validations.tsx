@@ -127,6 +127,14 @@ export const EditProfileValidation = (id: number) => {
   return yup.object().shape(baseSchema);
 };
 
+export const AddNumberValidation = yup.object().shape({
+  phone: yup
+    .string()
+    .required('Phone No Required')
+    .max(14, 'Phone number must be exactly 10 digits.')
+    .min(14, 'Phone number must be exactly 10 digits.'),
+});
+
 export const loginValidation = (isEmail: boolean) => {
   const loginScheme = {
     password: yup
