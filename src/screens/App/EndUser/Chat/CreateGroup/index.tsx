@@ -50,29 +50,25 @@ const CreateGroup = () => {
         }
 
         if (image) {
-          form.append('group[group[image]]', {
+          form.append('group[image]', {
             uri:
               Platform.OS === 'ios'
                 ? image?.uri.replace('file://', '')
                 : image?.uri,
             type: image?.type,
-            file_name: image?.fileName,
+            name: image?.fileName,
           });
         }
 
         const res = await createGroup(form);
-        console.log('===============res=====================');
-        console.log(res);
-        console.log('====================================');
-
-        // navigation.navigate('Chat');
+        if (res.data) {
+          navigation.navigate('Chat');
+        }
       } else {
         alert('Please enter group name');
       }
     } catch (error) {
-      console.log('=============error=======================');
-      console.log(error);
-      console.log('====================================');
+      //
     }
   };
 
