@@ -72,5 +72,6 @@ const styles = StyleSheet.create({
   noAccountView: {
     flex: 1,
     marginTop: 32,
+    paddingHorizontal: 16,
   },
 });
