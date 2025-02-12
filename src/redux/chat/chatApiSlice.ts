@@ -129,6 +129,57 @@ export const chatApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getGroupInfo: builder.mutation({
+      query: id => {
+        return {
+          url: `groups/${id}`,
+          method: 'GET',
+        };
+      },
+    }),
+    createChat: builder.mutation({
+      query: data => {
+        return {
+          url: 'chats',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    searchGroupChat: builder.mutation({
+      query: data => {
+        return {
+          url: 'groups/search',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    addMembers: builder.mutation({
+      query: data => {
+        return {
+          url: 'groups/add_members_group',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    readGroupChatMessage: builder.mutation({
+      query: id => {
+        return {
+          url: `groups/${id}/messages/read`,
+          method: 'POST',
+        };
+      },
+    }),
+    getChatCount: builder.mutation({
+      query: () => {
+        return {
+          url: 'chats/messages_count',
+          method: 'GET',
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -149,4 +200,10 @@ export const {
   useReadChatMessageMutation,
   useCreateChatMessageMutation,
   useGetGroupChatMessagesMutation,
+  useGetGroupInfoMutation,
+  useCreateChatMutation,
+  useSearchGroupChatMutation,
+  useAddMembersMutation,
+  useReadGroupChatMessageMutation,
+  useGetChatCountMutation,
 } = chatApiSlice;
