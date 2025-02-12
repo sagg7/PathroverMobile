@@ -4,6 +4,7 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState: {
     messages: [],
+    chat_count: {},
   },
   reducers: {
     addUserMessage: (state, action) => {
@@ -15,7 +16,7 @@ const chatSlice = createSlice({
           name: 'bot',
           _id: 2,
         },
-        image: action.payload?.[0]?.image
+        image: action.payload?.[0]?.image,
       });
     },
     addBotMessage: (state, action) => {
@@ -29,9 +30,12 @@ const chatSlice = createSlice({
         },
       });
     },
+    setChatCount: (state, action) => {
+      state.chat_count = action.payload;
+    },
   },
 });
 
-export const {addUserMessage, addBotMessage} = chatSlice.actions;
+export const {addUserMessage, addBotMessage, setChatCount} = chatSlice.actions;
 
 export default chatSlice.reducer;
