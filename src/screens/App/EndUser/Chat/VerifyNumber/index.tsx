@@ -13,11 +13,19 @@ import {
   useKeyboardListener,
 } from '../../../../../shared/exporter';
 import styles from './styles';
+import {
+  useAddPhoneNumberMutation,
+  useOtpVerificationMutation,
+} from '../../../../../redux/chat/chatApiSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {setLoginUser} from '../../../../../redux/auth/authSlice';
 
 const VerifyNumber = () => {
   const {params} = useRoute();
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const keyboardVisible = useKeyboardListener();
+  const {loginUser} = useSelector(state => state.auth);
 
   const CELL_COUNT = 4;
 
@@ -26,6 +34,9 @@ const VerifyNumber = () => {
   const [value, setValue] = useState('');
   const [timer, setTimer] = useState(59);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [addPhoneNumber] = useAddPhoneNumberMutation();
+  const [otpVerification, {isError, error, isLoading}] =
+    useOtpVerificationMutation();
 
   const [codeFieldProps, getCellOnLayoutHandler] = useClearByFocusCell({
     value,
@@ -33,10 +44,15 @@ const VerifyNumber = () => {
   });
 
   useEffect(() => {
-    if (value.length > 3) {
-      onPressVerify();
+    if (error) {
+      showAlert(
+        'Error',
+        error?.data?.error ||
+          error?.data?.success ||
+          'Unable to process request. Please try again!.',
+      );
     }
-  }, [value]);
+  }, [isError]);
 
   useEffect(() => {
     let interval = null;
@@ -63,8 +79,22 @@ const VerifyNumber = () => {
 
   const onPressVerify = async () => {
     try {
+      const res = await otpVerification({otp: value});
+
+      if (res?.data) {
+        dispatch(setLoginUser({...loginUser, verified: true}));
+        navigation.navigate('Chat');
+      }
     } catch (e) {
       showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const onPressResend = async () => {
+    if (!isResendDisabled) {
+      setTimer(59);
+      setIsResendDisabled(true);
+      await addPhoneNumber(params);
     }
   };
 
@@ -85,7 +115,7 @@ const VerifyNumber = () => {
             onChangeText={setValue}
             cellCount={CELL_COUNT}
             rootStyle={styles.otpInputBox}
-            editable
+            editable={!isLoading}
             keyboardType="number-pad"
             textContentType="oneTimeCode"
             renderCell={({index, symbol, isFocused}) => (
@@ -103,12 +133,7 @@ const VerifyNumber = () => {
         <TouchableOpacity
           style={styles.timerView}
           disabled={isResendDisabled}
-          onPress={() => {
-            if (!isResendDisabled) {
-              setTimer(59);
-              setIsResendDisabled(true);
-            }
-          }}>
+          onPress={() => onPressResend()}>
           <Text style={styles.resendText}>
             Resend code {!isResendDisabled ? '' : 'in '}
           </Text>
@@ -122,6 +147,8 @@ const VerifyNumber = () => {
           <AppButton
             title="Continue"
             handleClick={onPressVerify}
+            isLoading={isLoading}
+            disabled={isLoading}
             buttonStyle={styles.btnContainer(keyboardVisible)}
           />
         </View>
