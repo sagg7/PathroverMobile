@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
+    marginTop: 12,
   },
   subHeaderText: {
     color: PFColors.Gray.DarkGray,
