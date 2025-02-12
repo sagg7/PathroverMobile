@@ -10,6 +10,7 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
+import {getFormattedTime, isToday} from '../../../hooks/getFormattedDate';
 
 interface ChatListItemProps {
   item: object;
@@ -45,6 +46,19 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
     onPressDelete();
   };
 
+  const getTime = (time: string) => {
+    if (time) {
+      const isToDate = isToday(time);
+      if (isToDate) {
+        return dayjs(time).format('hh:mm a');
+      } else {
+        return getFormattedTime(time);
+      }
+    } else {
+      return dayjs().format('hh:mm a');
+    }
+  };
+
   return (
     <GestureHandlerRootView>
       <ReanimatedSwipeable
@@ -60,25 +74,36 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
             source={
               item?.image_url
                 ? {uri: item?.image_url}
+                : item?.user?.avatar
+                ? {uri: item?.user?.avatar}
                 : appIcons.userPlaceholder
             }
             style={styles.imageStyle}
           />
           <View style={styles.textView}>
-            <Text style={styles.nameText}>{item?.name || ''}</Text>
+            {typeof item?.user === 'object' && (
+              <Text style={styles.nameText}>
+                {[item?.user?.first_name, item?.user?.last_name]
+                  ?.filter(Boolean)
+                  ?.join(' ') || 'User'}
+              </Text>
+            )}
+            {item?.name && (
+              <Text style={styles.nameText}>{item?.name || ''}</Text>
+            )}
             {item?.last_message && (
               <Text style={styles.detailText}>
                 {typeof item?.last_message === 'object'
                   ? item?.last_message?.content || ''
-                  : item?.last_message ||''}
+                  : item?.last_message || ''}
               </Text>
             )}
           </View>
           <View style={styles.rightView(item?.count > 0)}>
-            <Text style={styles.timeText}>{dayjs().format('hh:mm a')}</Text>
-            {item?.count > 0 && (
+            <Text style={styles.timeText}>{getTime(item?.created_at)}</Text>
+            {item?.unread_messages > 0 && (
               <View style={styles.countView}>
-                <Text style={styles.countText}>1</Text>
+                <Text style={styles.countText}>{item?.unread_messages}</Text>
               </View>
             )}
           </View>
