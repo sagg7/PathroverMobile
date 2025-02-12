@@ -1,18 +1,29 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  AccessibilityState,
   SafeAreaView,
   Text,
   TouchableOpacity,
   View,
-  AccessibilityState,
 } from 'react-native';
 
-import styles from './styles';
+import {useSelector} from 'react-redux';
+import {useGetChatCountMutation} from '../../../redux/chat/chatApiSlice';
 import ChatHeader from '../ChatHeader';
 import CreateGroupModal from '../CreateGroupModal';
+import styles from './styles';
 
 export default function ChatTopTabBar({state, descriptors, navigation}) {
+  const [getChatCount] = useGetChatCountMutation();
+  const {chat_count} = useSelector(state => state.chat);
+
   const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      await getChatCount();
+    })();
+  }, []);
 
   const onPress = (index: number) => {
     switch (index) {
@@ -67,6 +78,17 @@ export default function ChatTopTabBar({state, descriptors, navigation}) {
             });
           };
 
+          const getCount = label => {
+            switch (label) {
+              case 'Chats':
+                return chat_count?.one_to_one;
+              case 'Groups':
+                return chat_count?.group;
+              default:
+                return 0;
+            }
+          };
+
           return (
             <SafeAreaView key={route.key} style={styles.tabBarView}>
               <TouchableOpacity
@@ -80,6 +102,11 @@ export default function ChatTopTabBar({state, descriptors, navigation}) {
                 onLongPress={onLongPress}
                 style={styles.tabBtn}>
                 <Text style={styles.titleStyle}>{label}</Text>
+                {getCount(label) > 0 && (
+                  <View style={styles.countViewStyle}>
+                    <Text style={styles.countStyle}>{getCount(label)}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
               {isFocused && <View style={styles.lineStyle} />}
             </SafeAreaView>

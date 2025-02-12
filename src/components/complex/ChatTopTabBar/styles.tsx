@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   },
   tabBtn: {
     alignItems: 'center',
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'center',
     width: width / 3,
     paddingVertical: scale(8),
@@ -26,6 +26,18 @@ const styles = StyleSheet.create({
     color: PFColors.Blue.Dark,
     fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  countViewStyle: {
+    backgroundColor: PFColors.Blue.Dark,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    borderRadius: 100,
+    marginLeft: 4,
+  },
+  countStyle: {
+    color: PFColors.Standard.White,
+    fontSize: PFFontSize.FONT_SIZE_10,
+    fontFamily: PFFonts.Foundation.Medium,
   },
   lineStyle: {
     width: '100%',
