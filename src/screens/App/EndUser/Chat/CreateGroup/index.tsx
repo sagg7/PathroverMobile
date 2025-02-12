@@ -14,7 +14,7 @@ import {svgIcon} from '../../../../../assets/svg';
 import UsersListView from '../../../../../components/complex/UsersListView';
 import {useKeyboardListener} from '../../../../../hooks/keyboard';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {IMAGE_OPTIONS} from '../../../../../shared/exporter';
+import {IMAGE_OPTIONS, showAlert} from '../../../../../shared/exporter';
 import {useCreateGroupMutation} from '../../../../../redux/chat/chatApiSlice';
 
 const CreateGroup = () => {
@@ -26,7 +26,7 @@ const CreateGroup = () => {
   const [usersList, setUsersList] = useState('');
   const [image, setImage] = useState(null);
 
-  const [createGroup, {isLoading}] = useCreateGroupMutation();
+  const [createGroup, {isLoading, isError, error}] = useCreateGroupMutation();
 
   useEffect(() => {
     if (params?.users) {
@@ -34,13 +34,22 @@ const CreateGroup = () => {
     }
   }, [params?.users]);
 
+  useEffect(() => {
+    if (error) {
+      showAlert(
+        'Error',
+        error?.data?.error || 'Unable to process request. Please try again!.',
+      );
+    }
+  }, [isError]);
+
   const onPressItem = (item: object) => {
     setUsersList(usersList.filter(i => i.id !== item.id));
   };
 
   const onPress = async () => {
-    try {
-      if (name) {
+    if (name) {
+      try {
         const form = new FormData();
         form.append('group[name]', name);
         if (usersList?.length > 0) {
@@ -61,14 +70,15 @@ const CreateGroup = () => {
         }
 
         const res = await createGroup(form);
+
         if (res.data) {
           navigation.navigate('Chat');
         }
-      } else {
-        alert('Please enter group name');
+      } catch (error) {
+        //
       }
-    } catch (error) {
-      //
+    } else {
+      alert('Please enter group name');
     }
   };
 
