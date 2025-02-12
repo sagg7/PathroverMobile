@@ -5,7 +5,10 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
 import {appIcons} from '../../../../../assets/icons';
 import styles from './styles';
-import {useGetAllUsersMutation} from '../../../../../redux/chat/chatApiSlice';
+import {
+  useCreateChatMutation,
+  useGetAllUsersMutation,
+} from '../../../../../redux/chat/chatApiSlice';
 
 const ChatUsers = () => {
   const isFocused = useIsFocused();
@@ -13,6 +16,7 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
+  const [createChat] = useCreateChatMutation();
 
   useEffect(() => {
     (async () => {
@@ -45,10 +49,35 @@ const ChatUsers = () => {
     return () => clearTimeout(handler);
   }, [search]);
 
+  const initiateChat = async item => {
+    try {
+      const obj = {
+        chat: {
+          chat_type: 0,
+          chat_members_attributes: [{user_id: item?.id}],
+        },
+      };
+      const res = await createChat(obj);
+      if (res?.data) {
+        navigation.navigate('ChatDetail', {
+          item: res?.data,
+          isGroup: false,
+        });
+      }
+    } catch (error) {
+     //
+    }
+  };
+
   const renderItem = ({item, index}) => {
     return (
-      <TouchableOpacity style={styles.container}>
-        <Image source={appIcons.userPlaceholder} style={styles.imageStyle} />
+      <TouchableOpacity
+        style={styles.container}
+        onPress={() => initiateChat(item)}>
+        <Image
+          source={item?.avatar ? {uri: item?.avatar} : appIcons.userPlaceholder}
+          style={styles.imageStyle}
+        />
         <View style={styles.textView}>
           <Text style={styles.nameText}>
             {item?.first_name || 'User'} {item?.last_name || ''}
