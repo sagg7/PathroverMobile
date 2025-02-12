@@ -1,22 +1,58 @@
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {FlatList, View} from 'react-native';
+import {FlatList, Text, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {AppLoader} from '../../../../../components';
 import ChatListItem from '../../../../../components/complex/ChatListItem';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
 import EmptyChatView from '../../../../../components/complex/EmptyChatView';
-import styles from './styles';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useActionCable} from '../../../../../hooks/socket/useActionCable';
+import {useChannel} from '../../../../../hooks/socket/useChannel';
 import {
   useDeleteGroupMutation,
   useGetGroupChatsMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {AppLoader} from '../../../../../components';
+import {setChatCount} from '../../../../../redux/chat/chatSlice';
+import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import styles from './styles';
 
 const ChatGroup = () => {
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [search, setSearch] = useState('');
+  const [chats, setChats] = useState([]);
+  const [searchedChats, setSearchedChats] = useState([]);
   const [getGroupChats, {isLoading, data}] = useGetGroupChatsMutation();
   const [deleteGroup] = useDeleteGroupMutation();
+
+  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const token = accessToken?.replace('Bearer ', '');
+  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const {subscribe, unsubscribe} = useChannel(actionCable);
+
+  useEffect(() => {
+    try {
+      subscribe(
+        {
+          channel: 'ChatCountsChannel',
+          channel_key: `chat_counts_${loginUser?.id}`,
+        },
+        {
+          received: res => {
+            dispatch(setChatCount(res));
+            getGroupChats();
+          },
+          connected: () => {},
+        },
+      );
+    } catch (err) {
+      //
+    }
+    return () => {
+      unsubscribe();
+    };
+  }, [isFocused]);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +61,32 @@ const ChatGroup = () => {
       }
     })();
   }, [isFocused]);
+
+  useEffect(() => {
+    if (data) {
+      setChats([...data]?.reverse());
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (search?.trim().length > 0 && chats?.length > 0) {
+        const searchText = search.toLowerCase();
+
+        const filteredChats = chats.filter(
+          chat =>
+            chat?.name?.toLowerCase().includes(searchText) ||
+            chat?.last_message?.toLowerCase().includes(searchText),
+        );
+
+        setSearchedChats(filteredChats);
+      } else {
+        setSearchedChats([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const onPressDelete = async item => {
     try {
@@ -50,7 +112,11 @@ const ChatGroup = () => {
   };
 
   const listEmptyComponent = () => {
-    return <EmptyChatView buttonText={'Initiate Chat'} onPress={() => {}} />;
+    return (
+      <View style={styles.emptyView}>
+        <Text style={styles.emptyText}>No chats found</Text>
+      </View>
+    );
   };
 
   const listHeaderComponent = () => {
@@ -69,9 +135,16 @@ const ChatGroup = () => {
     <View style={styles.container}>
       {isLoading ? (
         <AppLoader />
+      ) : chats?.length === 0 ? (
+        <EmptyChatView
+          buttonText={'Initiate Chat'}
+          onPress={() => {
+            navigation.navigate('MemberList');
+          }}
+        />
       ) : (
         <FlatList
-          data={data}
+          data={search?.length > 0 ? searchedChats : chats}
           renderItem={renderItem}
           ListEmptyComponent={listEmptyComponent}
           ListHeaderComponent={listHeaderComponent}
