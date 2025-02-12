@@ -31,6 +31,8 @@ import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {TouchableOpacity} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -55,6 +57,9 @@ const WellPath = () => {
   const [entranceCoords, setEntranceCoords] = useState<any>(null);
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const dispatch = useDispatch();
+
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
@@ -81,6 +86,12 @@ const WellPath = () => {
   }, [allWellLocations]);
 
   useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapType(mapLayerStyle);
+    }
+  }, [mapLayerStyle]);
+
+  useEffect(() => {
     if (!nearbyPins && nearbyWells) {
       setAllWells(allWellLocations?.wells);
       setAllPins([]);
@@ -97,7 +108,7 @@ const WellPath = () => {
   }, [nearbyPins, nearbyWells, allWellLocations]);
 
   useEffect(() => {
-    if (searchLocation) {
+    if (searchLocation?.length > 0) {
       setTimeout(() => {
         if (cameraRef.current) {
           cameraRef.current.moveTo(searchLocation, 1500);
@@ -139,6 +150,7 @@ const WellPath = () => {
       (item: any) => item.isSelected,
     )?.type;
     setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
 
     setTimeout(() => {
       setMapLayerSheeet(false);
@@ -239,6 +251,11 @@ const WellPath = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
+        onDidFinishLoadingMap={() => {
+          if (searchLocation) {
+            cameraRef?.current?.flyTo(searchLocation, 1500);
+          }
+        }}
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
@@ -327,9 +344,7 @@ const WellPath = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.maplayerStyles}
-        onPress={() => {
-          setMapLayerSheeet(true);
-        }}>
+        onPress={() => setMapLayerSheeet(true)}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
       <WellPathMenuSheet
@@ -390,6 +405,7 @@ const WellPath = () => {
       />
       {showAddEntranceSheet && (
         <AddEntranceSheet
+          selectedWellName={selectedWellName}
           selectedPin={selectedWell}
           onChangeEntranceName={(text: string) => setEntranceName(text)}
           entranceName={entranceName}

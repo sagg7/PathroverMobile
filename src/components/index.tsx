@@ -56,3 +56,4 @@ export * from './complex/MapSettingSheet';
 export * from './complex/PinYourLocationSheet';
 export * from './complex/AddEntranceSheet';
 export * from './complex/SaveRecordRouteSheet';
+export * from './complex/StartPointModal';

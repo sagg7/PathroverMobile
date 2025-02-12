@@ -50,16 +50,14 @@ const ManageProfile = ({navigation}: any) => {
   };
 
   const uploaPicture = async () => {
-    const obj = {
-      profile: {
-        avatar: {
-          uri: profileImage.uri,
-          type: profileImage?.type,
-          name: profileImage.fileName,
-        },
-      },
-    };
-    const resp = await editProfile(obj);
+    const data = new FormData();
+
+    data.append('profile[avatar]', {
+      uri: profileImage.uri,
+      type: profileImage?.type,
+      name: profileImage.fileName,
+    });
+    const resp = await editProfile(data);
     if (resp?.data) {
       dispatch(setLoginUser(resp?.data?.profile));
       setProfileImage(null);

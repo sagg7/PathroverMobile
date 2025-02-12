@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     marginTop: WP('5'),
     borderWidth: 1,
     borderColor: PFColors.Orange.Dark,
+    backgroundColor: PFColors.Blue.lightBlue,
   },
   placeholder: {
     height: WP('20'),

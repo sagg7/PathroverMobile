@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   maplayerStyles: {
     position: 'absolute',
     top: isIOS() ? WP('45') : WP('30'),
-    right: 10,
+    right: 7,
   },
 });
 export default styles;
