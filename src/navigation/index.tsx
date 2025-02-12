@@ -47,6 +47,15 @@ import MemberList from '../screens/App/EndUser/Chat/MembersList';
 import CreateGroup from '../screens/App/EndUser/Chat/CreateGroup';
 import ChatDetail from '../screens/App/EndUser/Chat/ChatDetail';
 import GroupInfoDetail from '../screens/App/EndUser/Chat/GroupInfoDetails';
+import AuthStack from './stacks/authStack';
+import SearchWellPath from '../screens/App/EndUser/SearchWellPath';
+import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearch';
+import CreateRouteEndUser from '../screens/App/EndUser/CreateRouteEndUser';
+import RouteToWell from '../screens/App/EndUser/RouteToWell';
+import EndUserSavedLibrary from '../screens/App/EndUser/EndUserSavedLibrary';
+import EndUserSavedLibraryType from '../screens/App/EndUser/EndUserSavedLibraryType';
+import ViewSaveRoutes from '../screens/App/EndUser/ViewSaveRoutes';
+import RecordRoute from '../screens/App/EndUser/RecordRoute';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -118,6 +127,28 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.CreateGroup} component={CreateGroup} />
         <Stack.Screen name={Routes.ChatDetail} component={ChatDetail} />
         <Stack.Screen name={Routes.GroupInfo} component={GroupInfoDetail} />
+        <Stack.Screen name={'AuthStack'} component={AuthStack} />
+        <Stack.Screen name={Routes.SearchWellPath} component={SearchWellPath} />
+        <Stack.Screen
+          name={Routes.CreateRouteSearch}
+          component={CreateRouteSearch}
+        />
+        <Stack.Screen
+          name={Routes.CreateRouteEndUser}
+          component={CreateRouteEndUser}
+        />
+        <Stack.Screen name={Routes.RouteToWell} component={RouteToWell} />
+        <Stack.Screen
+          name={Routes.EndUserSavedLibrary}
+          component={EndUserSavedLibrary}
+        />
+
+        <Stack.Screen
+          name={Routes.EndUserSavedLibraryType}
+          component={EndUserSavedLibraryType}
+        />
+        <Stack.Screen name={Routes.RecordRoute} component={RecordRoute} />
+        <Stack.Screen name={Routes.ViewSaveRoutes} component={ViewSaveRoutes} />
       </Stack.Navigator>
     </NavigationContainer>
   );

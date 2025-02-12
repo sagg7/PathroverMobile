@@ -70,7 +70,7 @@ const Header = ({
       </View>
       {isGroup && (
         <TouchableOpacity onPress={onPressMenu}>
-          <Image source={appIcons.menuIcon} style={styles.iconStyle} />
+          <Image source={appIcons.menuIcons} style={styles.iconStyle} />
         </TouchableOpacity>
       )}
       {!isGroup && (

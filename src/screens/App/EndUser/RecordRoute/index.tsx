@@ -1,0 +1,346 @@
+import React, {useEffect, useRef, useState} from 'react';
+import MapboxGL from '@rnmapbox/maps';
+import styles from './styles';
+import {
+  AddEntranceSheet,
+  AppHeader,
+  AppLoader,
+  MainWrapper,
+  MapLayerSheet,
+  SaveRecordRouteSheet,
+} from '../../../../components';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {
+  Default_Map_Style,
+  MapTypes,
+  PFColors,
+  showAlert,
+  UNEXPECTED_ERROR,
+} from '../../../../shared/exporter';
+import {svgIcon} from '../../../../assets/svg';
+import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
+import Geolocation from 'react-native-geolocation-service';
+
+import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+
+const RecordRoute = () => {
+  const navigation: any = useNavigation();
+  const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
+  const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
+  const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.272999, 31.453079,
+  ]);
+
+  const [liveLocation, setLiveLocation] = useState<any>(null);
+  const [recordingDetails, setRecordingDetails] = useState<any>({
+    name: '',
+    notes: '',
+  });
+
+  const [route, setRoute] = useState<any>([]);
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+
+  const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+
+  const {data: allWellLocations, isLoading} = useGetAllWellsQuery(undefined);
+  const cameraRef = useRef<any>(null);
+  const [isRecordingStarted, setIsRecordingStarted] = useState<boolean>(false);
+  const [saveRouteSheet, setSaveRouteSheet] = useState<boolean>(false);
+
+  const [allWells, setAllWells] = useState<any>([]);
+  const [allPins, setAllPins] = useState<any>([]);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapType(mapLayerStyle);
+    }
+  }, [mapLayerStyle]);
+
+  useEffect(() => {
+    getLocationOneTime();
+  }, []);
+
+  const getLocationOneTime = async () => {
+    try {
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setCurrentLocation([longitude, latitude]);
+        },
+
+        error => {
+          showAlert('Location Error', error.message);
+        },
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 5000},
+      );
+    } catch (error) {
+      console.error('Error getting location:', error);
+    }
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isRunning) {
+      interval = setInterval(() => {
+        if (startTime) {
+          const currentTime = Date.now();
+          const timePassed = (currentTime - startTime) / 1000;
+          setElapsedTime(elapsedTime + timePassed);
+          setStartTime(currentTime);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning]);
+
+  const startTimer = () => {
+    setStartTime(Date.now());
+    setIsRunning(true);
+  };
+
+  // Stop Timer
+  const stopTimer = () => {
+    setIsRunning(false);
+  };
+
+  useEffect(() => {
+    if (allWellLocations) setAllPins(allWellLocations?.pin);
+    setAllWells(allWellLocations?.wells);
+  }, [allWellLocations]);
+
+  const onSelectMapType = (item: any) => {
+    setMapTypesArr(prev =>
+      prev.map(v => ({
+        ...v,
+        isSelected: v.id === item.id,
+      })),
+    );
+  };
+
+  const onPressSave = () => {
+    const selected: any = mapTypesArr.find(
+      (item: any) => item.isSelected,
+    )?.type;
+    setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
+
+    setTimeout(() => {
+      setMapLayerSheeet(false);
+    }, 500);
+  };
+
+  const formatTime = (time: number) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+      2,
+      '0',
+    )}:${String(seconds).padStart(2, '0')}`;
+  };
+  const routeGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: route,
+    },
+  };
+
+  const handleSaveBtn = async () => {
+    const locationsAttributes =
+      route?.length > 0
+        ? [
+            ...route.map(([longitude, latitude], index) => ({
+              latitude: latitude.toString(),
+              longitude: longitude.toString(),
+              name: `Point ${index + 1}`,
+            })),
+          ]
+        : [];
+    const routeData = {
+      user_route: {
+        name: recordingDetails?.name,
+        route_type: 'recording_route',
+        color: PFColors.Blue.Dark,
+        weight: '4',
+        locations_attributes: locationsAttributes,
+      },
+    };
+    const resp = await createRoute(routeData);
+    setSaveRouteSheet(false);
+    if (resp?.data) {
+      showAlert('Alert', 'Your recording has been saved.');
+      navigation.goBack();
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+  const handleLocationUpdate = location => {
+    if (location?.coords) {
+      const {latitude, longitude} = location.coords;
+      if (isRecordingStarted) {
+        setLiveLocation([longitude, latitude]);
+        setRoute(prev => [...prev, [longitude, latitude]]);
+      }
+    }
+  };
+
+  return (
+    <MainWrapper style={styles.container}>
+      <AppHeader title="Record Route" />
+
+      <MapboxGL.MapView
+        key={selectedMapType}
+        styleURL={selectedMapType}
+        style={styles.map}
+        scaleBarEnabled={false}>
+        <MapboxGL.Camera
+          ref={cameraRef}
+          zoomLevel={16}
+          centerCoordinate={currentLocation}
+        />
+        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+
+        {currentLocation && (
+          <MapboxGL.MarkerView coordinate={currentLocation}>
+            {svgIcon.CurrentMarker}
+          </MapboxGL.MarkerView>
+        )}
+
+        {liveLocation && isRecordingStarted && (
+          <MapboxGL.MarkerView coordinate={liveLocation}>
+            {svgIcon.RecordRouteMarker}
+          </MapboxGL.MarkerView>
+        )}
+
+        {allWells
+          ?.filter(
+            (item: any) =>
+              item?.lat !== undefined &&
+              item?.lat !== '' &&
+              item?.log !== undefined &&
+              item?.log !== '' &&
+              !isNaN(Number(item?.lat)) &&
+              !isNaN(Number(item?.log)),
+          )
+          .map((item: any, index: number) => {
+            const coordinates = [Number(item?.log), Number(item?.lat)];
+            return (
+              <MapboxGL.PointAnnotation
+                key={`pin-${index}`}
+                id={`pin-${index}`}
+                coordinate={coordinates}>
+                {svgIcon.CurrentLocation}
+              </MapboxGL.PointAnnotation>
+            );
+          })}
+        {allPins
+          ?.filter(
+            (item: any) =>
+              item?.lat !== undefined &&
+              item?.lat !== '' &&
+              item?.log !== undefined &&
+              item?.log !== '' &&
+              !isNaN(Number(item?.lat)) &&
+              !isNaN(Number(item?.log)),
+          )
+          .map((item: any, index: number) => {
+            const coordinates = [Number(item?.log), Number(item?.lat)];
+            return (
+              <MapboxGL.PointAnnotation
+                key={`pin-${index}`}
+                id={`pin-${index}`}
+                coordinate={coordinates}>
+                {svgIcon.PinMarker}
+              </MapboxGL.PointAnnotation>
+            );
+          })}
+
+        {/* Route Line */}
+        {route?.length > 1 && (
+          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
+            <MapboxGL.LineLayer
+              id="routeLayer-unique"
+              style={{
+                lineWidth: 3,
+                lineColor: PFColors.Blue.Dark,
+                lineJoin: 'round',
+                lineCap: 'round',
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
+      </MapboxGL.MapView>
+      {isRecordingStarted && (
+        <View style={styles.bllueView}>
+          <Text style={styles.timeText}>{formatTime(elapsedTime)} </Text>
+          {isRunning ? (
+            <TouchableOpacity
+              style={{marginHorizontal: 10}}
+              onPress={() => stopTimer()}>
+              {svgIcon.Pause}
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={{marginHorizontal: 10}}
+              onPress={() => startTimer()}>
+              {svgIcon.PlayBtn}
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => setSaveRouteSheet(true)}>
+            {svgIcon.StopSquare}
+          </TouchableOpacity>
+        </View>
+      )}
+      {!isRecordingStarted && (
+        <TouchableOpacity
+          style={styles.videoCam}
+          onPress={() => {
+            setIsRecordingStarted(true);
+            startTimer();
+          }}>
+          {svgIcon.VideoCam}
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity
+        style={styles.maplayerStyles}
+        onPress={() => {
+          setMapLayerSheeet(true);
+        }}>
+        {svgIcon.MapLayer}
+      </TouchableOpacity>
+      {saveRouteSheet && (
+        <SaveRecordRouteSheet
+          recordingDetails={recordingDetails}
+          setDetails={setRecordingDetails}
+          onPressCancel={() => setSaveRouteSheet(false)}
+          onPressSave={() => handleSaveBtn()}
+        />
+      )}
+
+      <MapLayerSheet
+        setModalVisible={() => setMapLayerSheeet(false)}
+        modalVisible={mapLayerSheeet}
+        data={mapTypesArr}
+        onPressCard={onSelectMapType}
+        onPressCancel={() => setMapLayerSheeet(false)}
+        onPressSave={() => onPressSave()}
+      />
+    </MainWrapper>
+  );
+};
+
+export default RecordRoute;

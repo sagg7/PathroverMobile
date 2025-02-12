@@ -1,10 +1,12 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {MapTypes} from '../../shared/exporter';
 
 const managerSlice = createSlice({
   name: 'manager',
   initialState: {
     managerRoute: {},
     recentDestSearch: [],
+    mapLayerStyle: '',
   },
   reducers: {
     setManagerRoute: (state, action) => {
@@ -17,8 +19,11 @@ const managerSlice = createSlice({
     setManagerRouteEmpty: (state, action) => {
       state.managerRoute = {};
     },
+    setMapLayerStyle: (state, action) => {
+      state.mapLayerStyle = action.payload;
+    },
     setRecentDestSearch: (state, action) => {
-      const MAX_RECENT_SEARCHES = 10;
+      const MAX_RECENT_SEARCHES = 5;
 
       const isDuplicate = state.recentDestSearch.some(
         (item: any) =>
@@ -34,7 +39,11 @@ const managerSlice = createSlice({
   },
 });
 
-export const {setManagerRoute, setManagerRouteEmpty, setRecentDestSearch} =
-  managerSlice.actions;
+export const {
+  setManagerRoute,
+  setManagerRouteEmpty,
+  setRecentDestSearch,
+  setMapLayerStyle,
+} = managerSlice.actions;
 
 export default managerSlice.reducer;

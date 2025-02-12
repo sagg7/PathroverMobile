@@ -61,7 +61,7 @@ const VerifyOtpScreen = ({}) => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Path Finder" />
+      <AppHeader title="Path Rover" />
       <Text style={styles.desc}>
         Please check your email. We send you the{'\n'}verification code.
       </Text>

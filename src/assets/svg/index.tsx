@@ -95,6 +95,34 @@ import PlusIcon from './plus.svg';
 import RecordIcon from './record.svg';
 import VideoIcon from './video.svg';
 import BlackPhone from './blackPhone.svg';
+import EnduserHome from './endUserHome.svg';
+import Wellpath from './wellpath.svg';
+import Hiking from './hiking.svg';
+import EnduserChat from './chat.svg';
+import CancelIcon from './cancelIcon.svg';
+import MapPinBlue from './mapPinBlue.svg';
+import ShareWellPath from './shareWellpath.svg';
+import RecordingIcon from './recordingIcon.svg';
+import DrawRoute from './drawRoute.svg';
+import UndoRoute from './undoRoute.svg';
+import RedoRoute from './redoRoute.svg';
+import SaveButton from './SaveRoute.svg';
+import MenuDot from './Menudots.svg';
+import ArrowRepeat from './arrowRepeat.svg';
+import BlueMapMarker from './blueMapMarker.svg';
+import MapWindow from './mapWindow.svg';
+import BlueClock from './blueClock.svg';
+import LocationFilled from './locationFilled.svg';
+import LiveLocationTracking from './liveTrackingMarker.svg';
+import PinMarker from './markerPin.svg';
+import BluePin from './bluePin.svg';
+import VideoCam from './videoCam.svg';
+import StopSquare from './stop-square.svg';
+import Pause from './pause.svg';
+import RecordRouteMarker from './routeRecordMarker.svg';
+import CurrentMarker from './currentMarker.svg';
+import MiniCam from './miniCam.svg';
+import PlayBtn from './playBtn.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -193,4 +221,32 @@ export const svgIcon = {
   RecordIcon: <RecordIcon />,
   VideoIcon: <VideoIcon />,
   BlackPhone: <BlackPhone />,
+  EnduserHome: <EnduserHome />,
+  Wellpath: <Wellpath />,
+  Hiking: <Hiking />,
+  EnduserChat: <EnduserChat />,
+  CancelIcon: <CancelIcon />,
+  MapPinBlue: <MapPinBlue />,
+  ShareWellPath: <ShareWellPath />,
+  RecordingIcon: <RecordingIcon />,
+  DrawRoute: <DrawRoute />,
+  UndoRoute: <UndoRoute />,
+  RedoRoute: <RedoRoute />,
+  SaveButton: <SaveButton />,
+  MenuDot: <MenuDot />,
+  ArrowRepeat: <ArrowRepeat />,
+  BlueMapMarker: <BlueMapMarker />,
+  MapWindow: <MapWindow />,
+  BlueClock: <BlueClock />,
+  LocationFilled: <LocationFilled />,
+  LiveLocationTracking: <LiveLocationTracking />,
+  PinMarker: <PinMarker />,
+  BluePin: <BluePin />,
+  VideoCam: <VideoCam />,
+  StopSquare: <StopSquare />,
+  Pause: <Pause />,
+  RecordRouteMarker: <RecordRouteMarker />,
+  CurrentMarker: <CurrentMarker />,
+  MiniCam: <MiniCam />,
+  PlayBtn: <PlayBtn />,
 };

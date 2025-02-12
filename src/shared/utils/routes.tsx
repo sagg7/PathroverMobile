@@ -59,4 +59,12 @@ export const Routes = {
   MemberList: 'MemberList',
   CreateGroup: 'CreateGroup',
   GroupInfo: 'GroupInfo',
+  SearchWellPath: 'SearchWellPath',
+  CreateRouteSearch: 'CreateRouteSearch',
+  CreateRouteEndUser: 'CreateRouteEndUser',
+  RouteToWell: 'RouteToWell',
+  EndUserSavedLibrary: 'EndUserSavedLibrary',
+  EndUserSavedLibraryType: 'EndUserSavedLibraryType',
+  ViewSaveRoutes: 'ViewSaveRoutes',
+  RecordRoute: 'RecordRoute',
 };

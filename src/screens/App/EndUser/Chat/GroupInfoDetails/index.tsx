@@ -134,7 +134,7 @@ const GroupInfoDetail = () => {
         </View>
 
         <TouchableOpacity onPress={() => {}}>
-          <Image source={appIcons.menuIcon} style={styles.iconStyle} />
+          <Image source={appIcons.menuIcons} style={styles.iconStyle} />
         </TouchableOpacity>
       </View>
       <View style={styles.topView}>

@@ -31,13 +31,23 @@ export const BottomTab: React.FC<BottomTabProps> = ({
       case 0:
         return name === 'Request List'
           ? svgIcon.RequestList
+          : name === 'Home'
+          ? svgIcon.EnduserHome
           : svgIcon.MyRequest;
       case 1:
-        return name === 'Wallet' ? svgIcon.Wallet : svgIcon.CreateRoute;
+        return name === 'Wallet'
+          ? svgIcon.Wallet
+          : name === 'Hiking'
+          ? svgIcon.Hiking
+          : svgIcon.CreateRoute;
       case 2:
         return name === 'Order History'
           ? svgIcon.OrderHistory
+          : name === 'WellPath'
+          ? svgIcon.Wellpath
           : svgIcon.RequestHistory;
+      case 3:
+        return name === 'Chat' ? svgIcon.EnduserChat : svgIcon.More;
       default:
         return svgIcon.More;
     }
