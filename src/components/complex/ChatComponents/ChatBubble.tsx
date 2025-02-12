@@ -12,10 +12,10 @@ import Modal from 'react-native-modal';
 import FitImage from 'react-native-fit-image';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 
-const ChatBubble = ({ props }) => {
+const ChatBubble = ({props}) => {
   const {currentMessage, position} = props;
   const isLeft = position === 'left';
-  const {content, created_at, image} = currentMessage;
+  const {content, created_at, image, message_attachment} = currentMessage;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -67,11 +67,10 @@ const ChatBubble = ({ props }) => {
           styles.bubbleContainer,
           isLeft ? styles.leftBubble : styles.rightBubble,
         ]}>
-        {image && (
+        {(image || message_attachment) && (
           <TouchableOpacity
             activeOpacity={0.8}
-            // onPress={() => handleImagePress(attachments[0].url)}
-          >
+            onPress={() => handleImagePress(message_attachment?.url)}>
             <Text style={styles.imageTime}>
               {moment(created_at).format('hh:mm a')}
             </Text>
@@ -80,7 +79,7 @@ const ChatBubble = ({ props }) => {
                 isLeft ? PFColors.Standard.Black : PFColors.Standard.White
               }
               indicatorSize={'small'}
-              source={{uri: image.sourceURL}}
+              source={{uri: image?.sourceURL ?? message_attachment?.url}}
               style={{
                 width: scale(90),
                 height: scale(90),
@@ -109,7 +108,7 @@ const ChatBubble = ({ props }) => {
           )}
         </View>
       </View>
-      {/* <Modal
+      <Modal
         animationIn={'zoomIn'}
         animationOut={'zoomOut'}
         transparent={true}
@@ -121,10 +120,10 @@ const ChatBubble = ({ props }) => {
           //   indicatorColor={config.colors.white}
           indicatorSize={'small'}
           source={{uri: selectedImage}}
-          style={styles.fullScreenImage}
+          style={styles.fullImageStyle}
           resizeMode="contain"
         />
-      </Modal> */}
+      </Modal>
     </View>
   );
 };
@@ -210,6 +209,10 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: 80,
     height: 80,
+  },
+  fullImageStyle: {
+    width: 300,
+    height: 300,
   },
   url: {
     fontSize: PFFontSize.FONT_SIZE_10,
