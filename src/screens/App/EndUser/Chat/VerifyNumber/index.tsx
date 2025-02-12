@@ -1,6 +1,6 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Alert, Text, TouchableOpacity, View} from 'react-native';
 import {
   CodeField,
   useBlurOnFulfill,
@@ -94,7 +94,18 @@ const VerifyNumber = () => {
     if (!isResendDisabled) {
       setTimer(59);
       setIsResendDisabled(true);
-      await addPhoneNumber(params);
+      const res = await addPhoneNumber(params);
+      console.log('=============res=======================');
+      console.log(res);
+      console.log('====================================');
+      Alert.alert('OTP', 'Remember your otp', [
+        {
+          text: 'OK',
+          onPress: () => {
+            navigation.navigate('VerifyNumber', data);
+          },
+        },
+      ]);
     }
   };
 

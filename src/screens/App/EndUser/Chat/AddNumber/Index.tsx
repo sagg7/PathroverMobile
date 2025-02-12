@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -13,21 +13,36 @@ import styles from './styles';
 import {
   formatPhoneNumber,
   removeNonNumbers,
+  showAlert,
   useKeyboardListener,
 } from '../../../../../shared/exporter';
-import {Text, View} from 'react-native';
+import {Alert, Text, View} from 'react-native';
 import NumberVerifyModal from '../../../../../components/complex/NumberVerifyModal';
 import {useAddPhoneNumberMutation} from '../../../../../redux/chat/chatApiSlice';
+import {useSelector} from 'react-redux';
 
 const AddNumber = () => {
   const navigation = useNavigation();
   const keyboardVisible = useKeyboardListener();
-  const [addPhoneNumber] = useAddPhoneNumberMutation();
+  const {loginUser} = useSelector(state => state.auth);
+
+  const [addPhoneNumber, {error, isError, isLoading}] =
+    useAddPhoneNumberMutation();
 
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleContinueBtn = (values: object) => {
-    console.log(values);
+  //TODO: REVERT FOR COMMENTED
+  useEffect(() => {
+    if (error) {
+      setIsVisible(false);
+      showAlert(
+        'Error',
+        error?.data?.error || 'Unable to process request. Please try again!.',
+      );
+    }
+  }, [isError]);
+
+  const handleContinueBtn = () => {
     setIsVisible(true);
   };
 
@@ -38,9 +53,21 @@ const AddNumber = () => {
       };
       const res = await addPhoneNumber(data);
 
-      if (res?.data) {
+      // TODO: REVERT FOR COMMENTED
+      if (res) {
+        // if (res?.data) {
+        console.log('==============res======================');
+        console.log(res);
+        console.log('====================================');
         setIsVisible(false);
-        navigation.navigate('VerifyNumber', data);
+        // Alert.alert('OTP', 'Remember your otp', [
+        //   {
+        //     text: 'OK',
+        //     onPress: () => {
+        //       navigation.navigate('VerifyNumber', data);
+        //     },
+        //   },
+        // ]);
       }
     } catch (error) {
       //
@@ -58,7 +85,9 @@ const AddNumber = () => {
         keyboardShouldPersistTaps={'handled'}>
         <Formik
           enableReinitialize
-          initialValues={{phone: ''}}
+          initialValues={{
+            phone: formatPhoneNumber(loginUser?.phone_number) || '',
+          }}
           validationSchema={AddNumberValidation}
           onSubmit={handleContinueBtn}>
           {({handleSubmit, values, errors, touched, setFieldValue}) => (
@@ -91,6 +120,7 @@ const AddNumber = () => {
                   number={values.phone}
                   onPressEdit={() => setIsVisible(false)}
                   onPressContinue={() => onPressContinue(values)}
+                  isLoading={isLoading}
                 />
               )}
             </View>
