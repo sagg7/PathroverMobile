@@ -89,6 +89,7 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         start: '',
         end: '',
       });
+      console.log('HERE 11');
     } else if (searchStartCoords && searchEndCoords && !isAddressSelected) {
       setSearchValues({
         start: searchStartCoords,
@@ -100,6 +101,7 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         start: '',
         end: '',
       });
+      console.log('HERE 22');
     }
     navigation.goBack();
   };
@@ -156,9 +158,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
           return updatedCoords;
         });
       } else if (type === 'end') {
-        console.log('type', type, index);
-        console.log('value', value);
-
         setSearchEndCoords((prevState: any) => {
           const updatedCoords = [...prevState];
           updatedCoords[index] = numericValue;
@@ -167,7 +166,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
       }
     }
   };
-  console.log('SEArch end latlng', searchEndCoords);
 
   return (
     <MainWrapper>
@@ -198,7 +196,7 @@ const CreateRouteSearch = ({route, navigation}: any) => {
               <View
                 style={[
                   styles.suggestionWrapper,
-                  {top: isIOS() ? WP('65') : 190},
+                  {top: isIOS() ? WP('65') : WP('20')},
                 ]}>
                 <FlatList
                   data={suggestions}
@@ -227,7 +225,7 @@ const CreateRouteSearch = ({route, navigation}: any) => {
               <View
                 style={[
                   styles.suggestionWrapper,
-                  {top: isIOS() ? WP('80') : 260},
+                  {top: isIOS() ? WP('80') : WP('40')},
                 ]}>
                 <FlatList
                   data={suggestions}

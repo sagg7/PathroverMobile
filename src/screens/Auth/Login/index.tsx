@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import {Text, View} from 'react-native';
 import React from 'react';
 import styles from './styles';
 import {
@@ -8,8 +8,8 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {Formik} from 'formik';
 import {
   loginInitialObj,
   loginValidation,
@@ -24,36 +24,38 @@ import {
   showAlert,
   useKeyboardListener,
 } from '../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useLoginMutation } from '../../../redux/auth/authApiSlice';
-import { useDispatch } from 'react-redux';
-import { setLoginUser } from '../../../redux/auth/authSlice';
-import { setUserRole } from '../../../redux/auth/appRoleSlice';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useLoginMutation} from '../../../redux/auth/authApiSlice';
+import {useDispatch} from 'react-redux';
+import {setLoginUser} from '../../../redux/auth/authSlice';
+import {setUserRole} from '../../../redux/auth/appRoleSlice';
 
-const LoginScreen = ({ }) => {
+const LoginScreen = ({}) => {
   const keyboardVisible = useKeyboardListener();
-  const [login, { data, isLoading }] = useLoginMutation();
-  const dispatch = useDispatch()
+  const [login, {data, isLoading}] = useLoginMutation();
+  const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
-  const { isEmail } = route?.params;
+  const {isEmail} = route?.params;
 
   const handleContinueBtn = async (val: any) => {
-    const { email, phone, password } = val;
+    const {email, phone, password} = val;
     const obj = {
       user: {
-        ...(email && { email: email }),
-        ...(phone && { phone_number: removeNonNumbers(phone) }),
+        ...(email && {email: email}),
+        ...(phone && {phone_number: removeNonNumbers(phone)}),
         password: password,
       },
     };
 
     const resp = await login(obj);
-    dispatch(setLoginUser(resp?.data?.user))
-    dispatch(setUserRole(APP_ROLE.END_USER))
+    dispatch(setLoginUser(resp?.data?.user));
+    dispatch(setUserRole(APP_ROLE.END_USER));
 
     if (resp?.data) {
-      navigation.replace('AppStack')
+      console.log('Res.data', resp?.data);
+
+      navigation.replace('AppStack');
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
@@ -64,7 +66,7 @@ const LoginScreen = ({ }) => {
       <AppHeader
         title="Login"
         subtitle="Login"
-        desc={`Enter your ${isEmail ? "email" : "phone number"} and password`}
+        desc={`Enter your ${isEmail ? 'email' : 'phone number'} and password`}
       />
       <KeyboardAwareScrollView
         enableAutomaticScroll={true}
@@ -92,7 +94,7 @@ const LoginScreen = ({ }) => {
                 setFieldValue,
               }) => {
                 return (
-                  <View style={{ alignSelf: 'center' }}>
+                  <View style={{alignSelf: 'center'}}>
                     {isEmail ? (
                       <AppInput
                         placeholder="Email"
@@ -104,7 +106,7 @@ const LoginScreen = ({ }) => {
                     ) : (
                       <AppInput
                         placeholder="Phone No"
-                        keyboardType={"numeric"}
+                        keyboardType={'numeric'}
                         value={values.phone}
                         onChangeText={text => {
                           const formatted = formatPhoneNumber(text);

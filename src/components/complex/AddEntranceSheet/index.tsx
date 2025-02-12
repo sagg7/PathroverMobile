@@ -21,6 +21,7 @@ interface AddEntranceSheetProps {
   entranceName: string;
   onChangeEntranceName: any;
   isEntranceMarker?: any;
+  selectedWellName: any;
 }
 
 const AddEntranceSheet = ({
@@ -31,7 +32,10 @@ const AddEntranceSheet = ({
   entranceName,
   onChangeEntranceName,
   isEntranceMarker,
+  selectedWellName,
 }: AddEntranceSheetProps) => {
+  console.log('Selected====>', isEntranceMarker);
+
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
@@ -50,7 +54,7 @@ const AddEntranceSheet = ({
           <View style={styles.addressView}>
             <View style={{flexDirection: 'row'}}>
               {svgIcon.MapPinBlue}
-              <Text style={styles.placeName}> Shadewal</Text>
+              <Text style={styles.placeName}> {selectedWellName || ''}</Text>
             </View>
             <TouchableOpacity onPress={onPressShare}>
               {svgIcon.ShareWellPath}
@@ -60,11 +64,15 @@ const AddEntranceSheet = ({
             <View>
               <Text style={styles.latLngText}>
                 Latitude:{' '}
-                <Text style={styles.latLngNumberText}>{selectedPin[1]}</Text>
+                <Text style={styles.latLngNumberText}>
+                  {isEntranceMarker?.length ? Number(isEntranceMarker[1]) : ''}
+                </Text>
               </Text>
               <Text style={styles.latLngText}>
                 Longitude:{' '}
-                <Text style={styles.latLngNumberText}>{selectedPin[0]}</Text>
+                <Text style={styles.latLngNumberText}>
+                  {isEntranceMarker?.length ? Number(isEntranceMarker[0]) : ''}
+                </Text>
               </Text>
             </View>
           )}

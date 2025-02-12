@@ -19,6 +19,7 @@ import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet'
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
+import {useSelector} from 'react-redux';
 
 const RouteToWell = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -38,6 +39,8 @@ const RouteToWell = ({route}: any) => {
     direction: true,
     start: false,
   });
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
 
   const {location} = useLocation();
@@ -51,6 +54,11 @@ const RouteToWell = ({route}: any) => {
       setCurrentLocation([location?.longitude, location?.latitude]);
     }
   }, [location]);
+  useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapType(mapLayerStyle);
+    }
+  }, [mapLayerStyle]);
 
   const fetchRoute = async (start, end) => {
     console.log('start', start);

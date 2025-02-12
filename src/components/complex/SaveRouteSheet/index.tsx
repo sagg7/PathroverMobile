@@ -1,15 +1,20 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import Modal from 'react-native-modal';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 import {AppButton} from '../AppButton';
 import {svgIcon} from '../../../assets/svg';
 import {AppInput} from '../../primitive/AppInput';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface SaveRouteSheetProps {
-  modalVisible: boolean;
-  setModalVisible?: () => void;
   onPressCancel: () => void;
   onPressSave?: any;
   onChangeText: any;
@@ -17,60 +22,59 @@ interface SaveRouteSheetProps {
 }
 
 const SaveRouteSheet = ({
-  modalVisible,
-  setModalVisible,
   onPressCancel,
   onPressSave,
   routeName,
   onChangeText,
 }: SaveRouteSheetProps) => {
   const handleSave = () => {
-    onPressSave();
+    Keyboard.dismiss();
+    setTimeout(() => {
+      onPressSave();
+    }, 500);
   };
 
   return (
-    // <KeyboardAwareScrollView
-    //   enableAutomaticScroll={true}
-    //   enableOnAndroid={true}
-    //   keyboardShouldPersistTaps={'handled'}
-    //   contentContainerStyle={{flex: 1, flexGrow: 1}}
-    //   showsVerticalScrollIndicator={false}>
-    //   <Modal
-    //     useNativeDriver
-    //     isVisible={modalVisible}
-    //     onBackdropPress={setModalVisible}
-    //     style={styles.modalContainer}>
-    <View style={styles.modalContainer}>
-      <View style={styles.titleView}>
-        <Text style={styles.headerText}>Save Route</Text>
-        <TouchableOpacity onPress={onPressCancel}>
-          {svgIcon.CancelIcon}
-        </TouchableOpacity>
-      </View>
-      <AppInput
-        placeholder="Route Name"
-        inputContainerStyle={styles.inputStyles}
-        onChangeText={onChangeText}
-        value={routeName}
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardAvoidingContainer}>
+      <ScrollView
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled">
+        <View style={styles.modalContainer}>
+          <View style={styles.titleView}>
+            <Text style={styles.headerText}>Save Route</Text>
+            <TouchableOpacity onPress={onPressCancel}>
+              {svgIcon.CancelIcon}
+            </TouchableOpacity>
+          </View>
+          <AppInput
+            placeholder="Route Name"
+            inputContainerStyle={styles.inputStyles}
+            onChangeText={onChangeText}
+            value={routeName}
+          />
 
-      <View style={styles.btnContainer}>
-        <AppButton
-          title="Cancel"
-          isSmall="40%"
-          handleClick={onPressCancel}
-          buttonStyle={styles.cancelBtn}
-          textStyle={{color: PFColors.Blue.Dark}}
-        />
+          <View style={styles.btnContainer}>
+            <AppButton
+              title="Cancel"
+              isSmall="40%"
+              handleClick={onPressCancel}
+              buttonStyle={styles.cancelBtn}
+              textStyle={{color: PFColors.Blue.Dark}}
+            />
 
-        <AppButton
-          disabled={routeName?.length < 1}
-          title="Save Route"
-          isSmall="40%"
-          handleClick={() => handleSave()}
-        />
-      </View>
-    </View>
+            <AppButton
+              disabled={routeName?.length < 1}
+              title="Save Route"
+              isSmall="40%"
+              handleClick={() => handleSave()}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -79,7 +83,6 @@ export {SaveRouteSheet};
 const styles = StyleSheet.create({
   modalContainer: {
     bottom: 0,
-    // alignSelf: 'flex-end',
     margin: 0,
     position: 'absolute',
     borderRadius: WP('3'),
@@ -115,5 +118,11 @@ const styles = StyleSheet.create({
   },
   inputStyles: {
     width: WP('88'),
+  },
+  keyboardAvoidingContainer: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
 });

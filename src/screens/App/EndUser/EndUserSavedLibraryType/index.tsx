@@ -1,17 +1,26 @@
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
 import {AppHeader, AppLoader, MainWrapper} from '../../../../components';
 import {useGetAllSaveRoutesQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {Routes} from '../../../../shared/exporter';
+import {useIsFocused} from '@react-navigation/native';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
+  const isFocused = useIsFocused();
   const [queryParams] = useState({
     route_type: item?.type,
   });
-  const {data, isLoading} = useGetAllSaveRoutesQuery(queryParams);
+
+  const {data, isLoading, error, refetch} =
+    useGetAllSaveRoutesQuery(queryParams);
+  useEffect(() => {
+    if (isFocused) {
+      refetch();
+    }
+  }, [isFocused]);
 
   const renderView = ({item}: any) => {
     return (

@@ -18,19 +18,23 @@ import {
   UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
-import useLocation from '../../../../hooks/getLocation';
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {Text, TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const RecordRoute = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.272999, 31.453079,
+  ]);
+
   const [liveLocation, setLiveLocation] = useState<any>(null);
   const [recordingDetails, setRecordingDetails] = useState<any>({
     name: '',
@@ -38,6 +42,7 @@ const RecordRoute = () => {
   });
 
   const [route, setRoute] = useState<any>([]);
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -45,50 +50,41 @@ const RecordRoute = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
 
   const {data: allWellLocations, isLoading} = useGetAllWellsQuery(undefined);
-  const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const [isRecordingStarted, setIsRecordingStarted] = useState<boolean>(false);
   const [saveRouteSheet, setSaveRouteSheet] = useState<boolean>(false);
 
   const [allWells, setAllWells] = useState<any>([]);
   const [allPins, setAllPins] = useState<any>([]);
-  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isFocused) {
-      const interval = setInterval(() => {
-        getLocation();
-      }, 10000);
-
-      return () => clearInterval(interval);
+    if (mapLayerStyle) {
+      setSelectedMapType(mapLayerStyle);
     }
-  }, [isFocused]);
+  }, [mapLayerStyle]);
 
-  const getLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLiveLocation([longitude, latitude]);
-        const isAlreadyInRoute = route.some(
-          ([lng, lat]) => lng === longitude && lat === latitude,
-        );
+  useEffect(() => {
+    getLocationOneTime();
+  }, []);
 
-        if (!isAlreadyInRoute) {
-          route.push([longitude, latitude]);
-        }
-      },
-      error => {
-        console.log('GET POSITION Error:', error.code, error.message);
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
+  const getLocationOneTime = async () => {
+    try {
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setCurrentLocation([longitude, latitude]);
+        },
+
+        error => {
+          showAlert('Location Error', error.message);
+        },
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 5000},
+      );
+    } catch (error) {
+      console.error('Error getting location:', error);
+    }
   };
-
-  useEffect(() => {
-    if (location) {
-      setCurrentLocation([location?.longitude, location?.latitude]);
-    }
-  }, [location]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -138,6 +134,7 @@ const RecordRoute = () => {
       (item: any) => item.isSelected,
     )?.type;
     setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
 
     setTimeout(() => {
       setMapLayerSheeet(false);
@@ -190,6 +187,15 @@ const RecordRoute = () => {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
+  const handleLocationUpdate = location => {
+    if (location?.coords) {
+      const {latitude, longitude} = location.coords;
+      if (isRecordingStarted) {
+        setLiveLocation([longitude, latitude]);
+        setRoute(prev => [...prev, [longitude, latitude]]);
+      }
+    }
+  };
 
   return (
     <MainWrapper style={styles.container}>
@@ -205,6 +211,7 @@ const RecordRoute = () => {
           zoomLevel={16}
           centerCoordinate={currentLocation}
         />
+        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
 
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
@@ -269,6 +276,8 @@ const RecordRoute = () => {
               style={{
                 lineWidth: 3,
                 lineColor: PFColors.Blue.Dark,
+                lineJoin: 'round',
+                lineCap: 'round',
               }}
             />
           </MapboxGL.ShapeSource>

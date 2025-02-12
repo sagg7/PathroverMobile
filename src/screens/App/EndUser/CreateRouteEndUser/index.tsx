@@ -1,6 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
 import MapboxGL from '@rnmapbox/maps';
-import {TouchableOpacity, View} from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import styles from './styles';
 import {
   AppHeader,
@@ -15,6 +20,7 @@ import {useNavigation} from '@react-navigation/native';
 import {
   Default_Map_Style,
   HP,
+  isIOS,
   MapTypes,
   PFColors,
   Routes,
@@ -28,6 +34,8 @@ import SearchView from './SearchView';
 import {MapSettingSheet} from '../../../../components';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import {useDispatch, useSelector} from 'react-redux';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const CreateRouteEndUser = () => {
   const navigation: any = useNavigation();
@@ -47,11 +55,12 @@ const CreateRouteEndUser = () => {
   const [endingPointName, setEndingPointName] = useState<string>('');
   const [showRouteLineCustomizeSheet, setShowRouteLineCustomizeSheet] =
     useState(false);
-  const [showSaveRouteSheet, setShowSaveRouteSheet] = useState(false);
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
   const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const dispatch = useDispatch();
 
   const [searchValues, setSearchValues] = useState<any>({
     start: '',
@@ -66,6 +75,23 @@ const CreateRouteEndUser = () => {
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true),
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false),
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const isCoordinates =
     Array.isArray(searchValuesByAddress?.start) &&
@@ -76,14 +102,28 @@ const CreateRouteEndUser = () => {
       setCurrentLocation([location?.longitude, location?.latitude]);
     }
   }, [location]);
+  useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapType(mapLayerStyle);
+    }
+  }, [mapLayerStyle]);
 
   const onPressMap = event => {
     try {
       const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
         setRoute((prevCoordinates: any) => {
-          const start = searchValuesByAddress?.start;
-          const end = searchValuesByAddress?.end;
+          const start = searchValuesByAddress?.start
+            ? searchValuesByAddress?.start
+            : searchValues?.start
+            ? searchValues?.start.map(Number)
+            : null;
+          const end = searchValuesByAddress?.end
+            ? searchValuesByAddress?.end
+            : searchValues?.end
+            ? searchValues?.end.map(Number)
+            : null;
+
           const newPoint = geometry.coordinates;
 
           if (!start || !end) {
@@ -120,10 +160,11 @@ const CreateRouteEndUser = () => {
   };
 
   const onPressSave = () => {
-    const selected: any = mapTypesArr.find(
+    const selected: any = mapTypesArr?.find(
       (item: any) => item.isSelected,
     )?.type;
     setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
 
     setTimeout(() => {
       setMapLayerSheeet(false);
@@ -257,7 +298,6 @@ const CreateRouteEndUser = () => {
   };
 
   const handleSaveRouteBtn = async () => {
-    setShowSaveRouteSheet(false);
     refScrollable.current.close();
     if (routeName) {
       const locationsAttributes =
@@ -297,9 +337,21 @@ const CreateRouteEndUser = () => {
   };
 
   useEffect(() => {
-    if (searchValuesByAddress || searchValues) {
-      const temp = updateRoute(searchValuesByAddress || searchValues);
-      setRoute(temp);
+    if (searchValuesByAddress?.end || searchValues?.start) {
+      if (searchValuesByAddress?.end != '') {
+        const temp = updateRoute(searchValuesByAddress);
+        setRoute(temp);
+      } else if (searchValues?.end?.length > 0) {
+        const updatedState = {
+          end: searchValues?.end.map(Number),
+          start: searchValues?.start.map(Number),
+        };
+        const temp = updateRoute(updatedState);
+        setRoute(temp);
+      }
+      setTimeout(() => {
+        centerMap();
+      }, 1000);
     }
   }, [searchValuesByAddress]);
 
@@ -415,7 +467,6 @@ const CreateRouteEndUser = () => {
         style={styles.SaveButton}
         onPress={() => {
           if (route?.length > 1) {
-            setShowSaveRouteSheet(true);
             refScrollable.current.open();
           } else {
             showAlert('Alert', 'Please create route of atleast two points');
@@ -488,29 +539,29 @@ const CreateRouteEndUser = () => {
         onPressCancel={() => setShowRouteLineCustomizeSheet(false)}
         onPressSave={() => setShowRouteLineCustomizeSheet(false)}
       />
-
-      <RBSheet
-        ref={refScrollable}
-        customModalProps={{
-          animationType: 'slide',
-          statusBarTranslucent: true,
-        }}
-        customStyles={{
-          container: {
-            height: HP('29'),
-            borderTopLeftRadius: WP('3'),
-            borderTopRightRadius: WP('3'),
-          },
-        }}>
-        <SaveRouteSheet
-          modalVisible={refScrollable}
-          routeName={routeName}
-          onChangeText={(text: any) => setRouteName(text)}
-          onPressSave={() => handleSaveRouteBtn()}
-          onPressCancel={() => refScrollable.current.close()}
-        />
-      </RBSheet>
-
+      <KeyboardAvoidingView behavior={isIOS() ? 'padding' : 'height'}>
+        <RBSheet
+          ref={refScrollable}
+          customModalProps={{
+            animationType: 'slide',
+            statusBarTranslucent: true,
+          }}
+          customStyles={{
+            container: {
+              borderTopLeftRadius: WP('3'),
+              borderTopRightRadius: WP('3'),
+              height: keyboardVisible ? HP('35') : HP('29'),
+            },
+          }}>
+          <SaveRouteSheet
+            modalVisible={refScrollable}
+            routeName={routeName}
+            onChangeText={(text: any) => setRouteName(text)}
+            onPressSave={() => handleSaveRouteBtn()}
+            onPressCancel={() => refScrollable.current.close()}
+          />
+        </RBSheet>
+      </KeyboardAvoidingView>
       {/* <PinLocationAddress modalVisible /> */}
       {isLoading && <AppLoader />}
     </MainWrapper>

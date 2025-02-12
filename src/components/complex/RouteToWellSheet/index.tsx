@@ -18,6 +18,7 @@ interface RouteToWellSheetProps {
   distanceInfo?: any;
   routeName: string;
   onpressCancel: () => void;
+  show: any;
 }
 
 const RouteToWellSheet = ({
@@ -29,6 +30,7 @@ const RouteToWellSheet = ({
   distanceInfo,
   routeName,
   onpressCancel,
+  show = true,
 }: RouteToWellSheetProps) => {
   const ActionButtons = ({
     icon,
@@ -96,31 +98,52 @@ const RouteToWellSheet = ({
             {distanceInfo?.distance ? distanceInfo?.duration : 'calculating'}
           </Text>
         </Text>
-        <TouchableOpacity style={styles.shareIcon} disabled>
-          {svgIcon.ShareWellPath}
-        </TouchableOpacity>
+        {show && (
+          <TouchableOpacity style={styles.shareIcon} disabled>
+            {svgIcon.ShareWellPath}
+          </TouchableOpacity>
+        )}
       </View>
-      <View style={styles.actionBtnView}>
-        <ActionButtons
-          icon={appIcons.Directions}
-          title={'Directions'}
-          selected={actionBtn.direction}
-          onPressActionBtn={onPressDirection}
-          disabled={true}
-        />
-        <ActionButtons
-          icon={appIcons.paperPlane}
-          title="Start"
-          selected={false}
-          onPressActionBtn={onPressStart}
-        />
-        <ActionButtons
-          icon={appIcons.pinIcon}
-          title="Pin"
-          selected={false}
-          onPressActionBtn={onPressPin}
-        />
-      </View>
+      {show && (
+        <View style={styles.actionBtnView}>
+          <ActionButtons
+            icon={appIcons.Directions}
+            title={'Directions'}
+            selected={actionBtn.direction}
+            onPressActionBtn={onPressDirection}
+            disabled={true}
+          />
+          <ActionButtons
+            icon={appIcons.paperPlane}
+            title="Start"
+            selected={false}
+            onPressActionBtn={onPressStart}
+          />
+          <ActionButtons
+            icon={appIcons.pinIcon}
+            title="Pin"
+            selected={false}
+            onPressActionBtn={onPressPin}
+          />
+        </View>
+      )}
+      {!show && (
+        <View style={styles.actionBtnViewSecond}>
+          <ActionButtons
+            icon={appIcons.Directions}
+            title={'Directions'}
+            selected={actionBtn.direction}
+            onPressActionBtn={onPressDirection}
+            disabled={true}
+          />
+          <ActionButtons
+            icon={appIcons.paperPlane}
+            title="Start"
+            selected={false}
+            onPressActionBtn={onPressStart}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -196,5 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 20,
+  },
+  actionBtnViewSecond: {
+    flexDirection: 'row',
+    marginVertical: 20,
+    justifyContent: 'space-between',
+    width: WP('65'),
   },
 });

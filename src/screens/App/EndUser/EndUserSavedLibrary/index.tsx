@@ -4,7 +4,6 @@ import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
 import {AppHeader, MainWrapper} from '../../../../components';
 import {EndUserSetting, Routes} from '../../../../shared/exporter';
-import EndUserSavedLibraryType from '../EndUserSavedLibraryType';
 
 const EndUserSavedLibrary = ({navigation}: any) => {
   const renderView = ({item}: any) => {
