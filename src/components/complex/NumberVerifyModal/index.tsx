@@ -7,6 +7,7 @@ import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
 interface NumberVerifyModalProps {
   number: string;
   isVisible?: boolean;
+  isLoading?: boolean;
   setIsVisible: () => void;
   onPressContinue: () => void;
   onPressEdit: () => void;
@@ -18,6 +19,7 @@ const NumberVerifyModal = ({
   setIsVisible,
   onPressContinue,
   onPressEdit,
+  isLoading,
 }: NumberVerifyModalProps) => {
   return (
     <Modal isVisible={isVisible}>
@@ -37,12 +39,15 @@ const NumberVerifyModal = ({
             buttonStyle={styles.editButtonStyle}
             textStyle={styles.editTextStyle}
             handleClick={onPressEdit}
+            disabled={isLoading}
           />
           <AppButton
             title={'Ok'}
             buttonStyle={styles.buttonStyle}
             textStyle={styles.buttonTextStyle}
             handleClick={onPressContinue}
+            isLoading={isLoading}
+            disabled={isLoading}
           />
         </View>
       </View>
