@@ -6201,6 +6201,7 @@ __metadata:
     geolib: ^3.3.4
     haversine-distance: ^1.2.3
     jest: ^29.6.3
+    lodash: ^4.17.21
     npm: ^11.0.0
     patch-package: ^8.0.0
     prettier: 2.8.8
