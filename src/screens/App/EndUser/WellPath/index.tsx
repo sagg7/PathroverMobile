@@ -230,6 +230,10 @@ const WellPath = () => {
     }
   };
 
+  const onRegionDidChange = data => {
+    console.log('data', data);
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
@@ -247,6 +251,7 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        onRegionDidChange={onRegionDidChange}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}

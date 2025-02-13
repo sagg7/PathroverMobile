@@ -107,6 +107,7 @@ import RecordRouteMarker from './routeRecordMarker.svg';
 import CurrentMarker from './currentMarker.svg';
 import MiniCam from './miniCam.svg';
 import PlayBtn from './playBtn.svg';
+import Share from './Share.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -217,4 +218,5 @@ export const svgIcon = {
   CurrentMarker: <CurrentMarker />,
   MiniCam: <MiniCam />,
   PlayBtn: <PlayBtn />,
+  Share: <Share />,
 };
