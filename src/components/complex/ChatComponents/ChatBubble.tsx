@@ -15,7 +15,8 @@ import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 const ChatBubble = ({props}) => {
   const {currentMessage, position} = props;
   const isLeft = position === 'left';
-  const {content, created_at, image, message_attachment} = currentMessage;
+
+  const {content, created_at, image, message_attachment, text} = currentMessage;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -30,9 +31,9 @@ const ChatBubble = ({props}) => {
   };
 
   const renderTextWithUrls = text => {
-    const parts = text.split(urlRegex);
-    return parts.map((part, index) =>
-      urlRegex.test(part) ? (
+    const parts = text?.split(urlRegex);
+    return parts?.map((part, index) =>
+      urlRegex?.test(part) ? (
         <Text
           onPress={() => Linking.openURL(part)}
           style={[
@@ -92,16 +93,18 @@ const ChatBubble = ({props}) => {
         <View
           style={[
             styles.messageWrapper,
-            content?.length > 30 ? styles.columnDirection : styles.rowDirection,
+            content?.length > 30 || text?.length > 30
+              ? styles.columnDirection
+              : styles.rowDirection,
           ]}>
-          {content && (
+          {(content || text) && (
             <>
               <Text
                 style={[
                   styles.messageText,
                   isLeft ? styles.leftMessageText : styles.rightMessageText,
                 ]}>
-                {renderTextWithUrls(content)}
+                {renderTextWithUrls(content || text)}
               </Text>
               <View style={{width: 10}} />
             </>
