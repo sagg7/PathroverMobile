@@ -50,7 +50,7 @@
     "react-native-gesture-handler": "^2.18.1",
     "react-native-get-random-values": "^1.11.0",
     "react-native-gifted-chat": "^2.6.5",
-    "react-native-google-mobile-ads": "^14.8.1",
+    "react-native-google-mobile-ads": "14.7.2",
     "react-native-image-crop-picker": "^0.41.2",
     "react-native-image-picker": "^7.1.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",

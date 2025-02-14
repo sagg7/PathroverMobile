@@ -9905,10 +9905,10 @@ react-native-gifted-chat@^2.6.5:
     react-native-parsed-text "^0.0.22"
     uuid "^11.0.4"
 
-react-native-google-mobile-ads@^14.8.1:
-  version "14.9.0"
-  resolved "https://registry.yarnpkg.com/react-native-google-mobile-ads/-/react-native-google-mobile-ads-14.9.0.tgz#1b2ad9db57830bf014e0270fe849c77160850f77"
-  integrity sha512-jllIbT446rK6r/467XuJ40OeUlGc4FsYRa1PERMlJzeTkVyBcHA4Od9Cg5L874zm7di3aE3Pwt3J5AMx/IX9QA==
+react-native-google-mobile-ads@14.7.2:
+  version "14.7.2"
+  resolved "https://registry.yarnpkg.com/react-native-google-mobile-ads/-/react-native-google-mobile-ads-14.7.2.tgz#462dcebdae98ed3849ffd169c5ba8fbc5aebf988"
+  integrity sha512-JX/KgnpXjl4j4adxotr2fVlPsGy3vFWXfxjH5LeoPxknrUJFsUqYnJ7SCzxHUu2qhOJAQSt45fwZref9lXoIgg==
   dependencies:
     "@iabtcf/core" "^1.5.3"
     use-deep-compare-effect "^1.8.1"
