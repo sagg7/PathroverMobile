@@ -108,6 +108,9 @@ import CurrentMarker from './currentMarker.svg';
 import MiniCam from './miniCam.svg';
 import PlayBtn from './playBtn.svg';
 import Share from './Share.svg';
+import PinLocation from './pinLocation.svg';
+import WellsMarker from './wellsMarker.svg';
+import PinsMarker from './pinsMarker.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -219,4 +222,7 @@ export const svgIcon = {
   MiniCam: <MiniCam />,
   PlayBtn: <PlayBtn />,
   Share: <Share />,
+  PinLocation: <PinLocation />,
+  WellsMarker: <WellsMarker />,
+  PinsMarker: <PinsMarker />,
 };

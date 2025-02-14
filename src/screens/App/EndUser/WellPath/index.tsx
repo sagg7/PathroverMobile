@@ -208,7 +208,7 @@ const WellPath = () => {
   const onpressMarker = (e: any) => {
     setShowPinAddress(true);
     setSelectedWell([e?.log, e?.lat]);
-    setSelectedWellName(e?.title ? e?.title : e?.map_title);
+    setSelectedWellName(e);
   };
 
   const _handlePinBtn = async () => {
@@ -295,7 +295,6 @@ const WellPath = () => {
     const [longitude, latitude] = center;
 
     if (shouldFetchData(lastFetchedPosition, {latitude, longitude})) {
-      // console.log('\n\n\n NOW==Fetching new data...');
       fetchData(latitude, longitude);
       setLastFetchedPosition({latitude, longitude}); // Update last fetched position
     }
@@ -311,11 +310,8 @@ const WellPath = () => {
       newPosition.longitude,
     );
 
-    // console.log(`Scrolled Distance: ${distance.toFixed(2)} meters`);
-
     return distance >= 50000;
   };
-  // console.log('allPinsallPins', allWells);
 
   return (
     <MainWrapper style={styles.container}>
@@ -335,7 +331,7 @@ const WellPath = () => {
 
       <MapboxGL.MapView
         // onMapIdle={onRegionDidChange}
-        onCameraChanged={onCameraChanged}
+        // onCameraChanged={onCameraChanged}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
@@ -473,9 +469,10 @@ const WellPath = () => {
         onPressClear={() => onPressMapSettingClear()}
       />
       <PinLocationAddress
+        // modalVisible={true}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
-        selectedWellName={selectedWellName || ['', '']}
+        selectedWell={selectedWellName || ['', '']}
         setModalVisible={() => setShowPinAddress(false)}
         onPresAddEntrance={() => {
           setShowPinAddress(false);
