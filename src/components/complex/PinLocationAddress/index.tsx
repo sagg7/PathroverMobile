@@ -12,7 +12,8 @@ interface PinLocationAddressProps {
   selectedPin: any;
   onPressRouteToWell: () => void;
   onPresAddEntrance?: () => void;
-  selectedWellName: string;
+  selectedWell: any;
+  onPressPin?: () => void;
 }
 
 const PinLocationAddress = ({
@@ -22,8 +23,15 @@ const PinLocationAddress = ({
   selectedPin,
   onPresAddEntrance,
   onPressRouteToWell,
-  selectedWellName,
+  selectedWell,
+  onPressPin,
 }: PinLocationAddressProps) => {
+  const DetailView = ({title, value}: any) => (
+    <View style={styles.detailTextView}>
+      <Text style={styles.detailTitle}>{title}:</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
   return (
     <Modal
       useNativeDriver
@@ -31,32 +39,51 @@ const PinLocationAddress = ({
       onBackdropPress={setModalVisible}
       style={styles.modalContainer}>
       <View style={styles.titleView}>
-        <Text style={styles.headerText}>Pin Address Location</Text>
+        <Text style={styles.headerText}>{selectedWell?.well_name}</Text>
         <TouchableOpacity onPress={setModalVisible}>
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      <View style={styles.addressView}>
-        <View style={{flexDirection: 'row'}}>
-          {svgIcon.MapPinBlue}
-          <Text style={styles.placeName}>
-            {' '}
-            {selectedWellName ? selectedWellName : 'Location'}
-          </Text>
+      {/* <View style={styles.actionIcon}>
+        <TouchableOpacity onPress={onPressShare} style={{right: 10}}>
+          {svgIcon.ShareWellPath}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onPressPin}>
+          {svgIcon.PinLocation}
+        </TouchableOpacity>
+      </View> */}
+
+      <View style={styles.blueBox}>
+        <View style={styles.detailSection}>
+          <DetailView title="API" value={selectedWell?.api || 'N/A'} />
+          <View style={styles.detailTextView}>
+            <Text style={styles.detailTitle}>Status:</Text>
+            <View style={styles.statusView}>
+              <Text style={styles.statusValueText}>
+                {selectedWell?.status || 'N/A'}
+              </Text>
+            </View>
+          </View>
         </View>
+
+        <View style={styles.horizontalLine} />
+        {selectedWell?.lat > 0 && (
+          <>
+            <View style={styles.detailSection}>
+              <DetailView title="Latitude" value={selectedWell?.lat || 'N/A'} />
+            </View>
+            <DetailView title="Longitude" value={selectedWell?.log || 'N/A'} />
+            <View style={styles.horizontalLine} />
+
+            <View style={styles.detailSection}>
+              <DetailView
+                title="Country"
+                value={selectedWell?.country || 'N/A'}
+              />
+            </View>
+          </>
+        )}
       </View>
-      {selectedPin?.length > 1 && (
-        <View>
-          <Text style={styles.latLngText}>
-            Latitude:{' '}
-            <Text style={styles.latLngNumberText}>{selectedPin[1]}</Text>
-          </Text>
-          <Text style={styles.latLngText}>
-            Longitude:{' '}
-            <Text style={styles.latLngNumberText}>{selectedPin[0]}</Text>
-          </Text>
-        </View>
-      )}
 
       <View style={styles.btnContainer}>
         <AppButton
@@ -90,69 +117,29 @@ const styles = StyleSheet.create({
     width: WP('100'),
   },
 
-  item: {
-    flex: 1,
-    margin: 5,
-  },
-  container: {
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: WP('2'),
-  },
-
   headerText: {
     fontFamily: PFFonts.Foundation.SemiBold,
-    fontSize: PFFontSize.FONT_SIZE_14,
+    fontSize: PFFontSize.FONT_SIZE_16,
     color: PFColors.Standard.Black,
+    width: WP('80'),
+    paddingVertical: 10,
+    textTransform: 'capitalize',
   },
   btnContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: WP('3'),
-    width: WP('92'),
+    width: WP('88'),
     alignSelf: 'center',
   },
 
-  switchView: {
-    flexDirection: 'row',
-    width: WP('94'),
-    marginVertical: 10,
-  },
-  toggleContainer: {
-    width: 50,
-    height: 25,
-    borderRadius: 25,
-    padding: 5,
-    left: 15,
-  },
-  circleStyle: {
-    width: 18,
-    height: 18,
-    borderRadius: 10,
-  },
-  settingText: {
-    color: PFColors.Standard.Black,
-    fontSize: PFFontSize.FONT_SIZE_14,
-    fontFamily: PFFonts.Foundation.Medium,
-    paddingLeft: 25,
-  },
   titleView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: WP('4'),
     marginVertical: 5,
   },
-  latLngText: {
-    fontFamily: PFFonts.Foundation.Bold,
-    color: PFColors.Standard.Black,
-    fontSize: PFFontSize.FONT_SIZE_14,
-    paddingLeft: WP('4'),
-    paddingVertical: WP('1'),
-  },
-  latLngNumberText: {
-    fontFamily: PFFonts.Foundation.Regular,
-    color: PFColors.Gray.DarkGray,
-  },
+
   btnTextStyle: {
     fontSize: PFFontSize.FONT_SIZE_12,
   },
@@ -173,9 +160,56 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 15,
   },
-  placeName: {
-    fontFamily: PFFonts.Foundation.Medium,
+
+  blueBox: {
+    backgroundColor: PFColors.Blue.SoftGlacier,
+    marginHorizontal: WP('6'),
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
+  },
+  detailTitle: {
+    fontFamily: PFFonts.Foundation.SemiBold,
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_14,
+  },
+  detailValue: {
+    fontFamily: PFFonts.Foundation.Regular,
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    paddingLeft: 5,
+  },
+  detailTextView: {
+    flexDirection: 'row',
+    marginVertical: 6,
+    alignItems: 'center',
+  },
+  detailSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  horizontalLine: {
+    height: 2,
+    backgroundColor: PFColors.Gray.CloudGray,
+    marginVertical: 8,
+  },
+  statusValueText: {
+    fontFamily: PFFonts.Foundation.Regular,
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    paddingLeft: 5,
+  },
+  statusView: {
+    backgroundColor: '#B0FFB6',
+    padding: 5,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionIcon: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    right: WP('6'),
+    marginBottom: 20,
   },
 });

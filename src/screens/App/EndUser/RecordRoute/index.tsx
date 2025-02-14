@@ -9,8 +9,9 @@ import {
   MapLayerSheet,
   SaveRecordRouteSheet,
 } from '../../../../components';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {
+  appIcons,
   Default_Map_Style,
   MapTypes,
   PFColors,
@@ -74,6 +75,7 @@ const RecordRoute = () => {
         position => {
           const {latitude, longitude} = position.coords;
           setCurrentLocation([longitude, latitude]);
+          setLiveLocation([longitude, latitude]);
         },
 
         error => {
@@ -159,6 +161,7 @@ const RecordRoute = () => {
   };
 
   const handleSaveBtn = async () => {
+    // setSaveRouteSheet(false);
     const locationsAttributes =
       route?.length > 0
         ? [
@@ -189,10 +192,19 @@ const RecordRoute = () => {
   };
   const handleLocationUpdate = location => {
     if (location?.coords) {
-      const {latitude, longitude} = location.coords;
+      const {latitude, longitude, heading} = location.coords;
+
       if (isRecordingStarted) {
         setLiveLocation([longitude, latitude]);
         setRoute(prev => [...prev, [longitude, latitude]]);
+      }
+      if (cameraRef.current) {
+        cameraRef?.current.setCamera({
+          centerCoordinate: [longitude, latitude],
+          zoomLevel: 16,
+          animationDuration: 1000, // Smooth animation
+          bearing: heading,
+        });
       }
     }
   };
@@ -205,11 +217,15 @@ const RecordRoute = () => {
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
-        scaleBarEnabled={false}>
+        scaleBarEnabled={false}
+        compassEnabled
+        compassPosition={{top: 8, left: 10}}>
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={16}
-          centerCoordinate={currentLocation}
+          followUserLocation={true}
+          followZoomLevel={16}
+          centerCoordinate={liveLocation}
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
 
@@ -219,11 +235,11 @@ const RecordRoute = () => {
           </MapboxGL.MarkerView>
         )}
 
-        {liveLocation && isRecordingStarted && (
+        {/* {liveLocation && isRecordingStarted && (
           <MapboxGL.MarkerView coordinate={liveLocation}>
-            {svgIcon.RecordRouteMarker}
+            {svgIcon.CurrentMarker}
           </MapboxGL.MarkerView>
-        )}
+        )} */}
 
         {allWells
           ?.filter(
@@ -324,6 +340,7 @@ const RecordRoute = () => {
       </TouchableOpacity>
       {saveRouteSheet && (
         <SaveRecordRouteSheet
+          setModalVisible={() => setSaveRouteSheet(false)}
           recordingDetails={recordingDetails}
           setDetails={setRecordingDetails}
           onPressCancel={() => setSaveRouteSheet(false)}
@@ -339,6 +356,8 @@ const RecordRoute = () => {
         onPressCancel={() => setMapLayerSheeet(false)}
         onPressSave={() => onPressSave()}
       />
+
+      {PinLoading && <AppLoader />}
     </MainWrapper>
   );
 };

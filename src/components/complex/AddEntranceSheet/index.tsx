@@ -34,8 +34,6 @@ const AddEntranceSheet = ({
   isEntranceMarker,
   selectedWellName,
 }: AddEntranceSheetProps) => {
-  console.log('Selected====>', isEntranceMarker);
-
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}

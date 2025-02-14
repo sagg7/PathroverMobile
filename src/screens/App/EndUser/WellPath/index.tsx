@@ -33,6 +33,7 @@ import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice'
 import {TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+import {debounce} from 'lodash';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -58,6 +59,13 @@ const WellPath = () => {
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
+  const [lastFetchedPosition, setLastFetchedPosition] = useState<any>(null);
+  const [lastZoom, setLastZoom] = useState(null);
+  const [queryParams, setQueryParams] = useState<any>({
+    latitude: null,
+    longitude: null,
+    radius: 50,
+  });
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
@@ -67,7 +75,11 @@ const WellPath = () => {
     name: '',
   });
 
-  const {data: allWellLocations, isLoading} = useGetAllWellsQuery(undefined);
+  const {
+    data: allWellLocations,
+    isLoading,
+    refetch,
+  } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const pinLocationSheet = useRef<any>(null);
@@ -77,8 +89,18 @@ const WellPath = () => {
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
+      setQueryParams({
+        ...queryParams,
+        latitude: location?.longitude,
+        longitude: location?.latitude,
+      });
     }
   }, [location]);
+  useEffect(() => {
+    if (queryParams) {
+      refetch();
+    }
+  }, [queryParams, refetch]);
 
   useEffect(() => {
     if (allWellLocations) setAllPins(allWellLocations?.pin);
@@ -112,6 +134,14 @@ const WellPath = () => {
       setTimeout(() => {
         if (cameraRef.current) {
           cameraRef.current.moveTo(searchLocation, 1500);
+          // console.log('search location', searchLocation);
+
+          setQueryParams({
+            ...queryParams,
+            latitude: searchLocation[1],
+            longitude: searchLocation[0],
+          });
+          refetch();
         } else {
           showAlert(
             'Error',
@@ -178,7 +208,7 @@ const WellPath = () => {
   const onpressMarker = (e: any) => {
     setShowPinAddress(true);
     setSelectedWell([e?.log, e?.lat]);
-    setSelectedWellName(e?.title ? e?.title : e?.map_title);
+    setSelectedWellName(e);
   };
 
   const _handlePinBtn = async () => {
@@ -230,6 +260,59 @@ const WellPath = () => {
     }
   };
 
+  const fetchData = debounce((latitude, longitude, zoom) => {
+    // console.log(
+    //   `Fetching data for lat: ${latitude}, lon: ${longitude} at zoom ${zoom}`,
+    // );
+    // API call here...
+  }, 1000); // 1-second debounce
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371000; // Radius of Earth in meters
+    const toRad = value => (value * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in meters
+  };
+
+  const getDistanceThreshold = zoom => {
+    if (zoom > 15) return 200; // High zoom (street level) → fetch every 200m
+    if (zoom > 12) return 500; // City zoom → fetch every 500m
+    if (zoom > 9) return 1000; // Regional zoom → fetch every 1km
+    return 50000; // Low zoom (country level) → fetch every 5km
+  };
+
+  const onCameraChanged = event => {
+    const {center} = event.properties;
+    const [longitude, latitude] = center;
+
+    if (shouldFetchData(lastFetchedPosition, {latitude, longitude})) {
+      fetchData(latitude, longitude);
+      setLastFetchedPosition({latitude, longitude}); // Update last fetched position
+    }
+  };
+
+  const shouldFetchData = (lastPosition, newPosition) => {
+    if (!lastPosition) return true; // Fetch on first load
+
+    const distance = getDistance(
+      lastPosition.latitude,
+      lastPosition.longitude,
+      newPosition.latitude,
+      newPosition.longitude,
+    );
+
+    return distance >= 50000;
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
@@ -247,6 +330,8 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        // onMapIdle={onRegionDidChange}
+        // onCameraChanged={onCameraChanged}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
@@ -384,9 +469,10 @@ const WellPath = () => {
         onPressClear={() => onPressMapSettingClear()}
       />
       <PinLocationAddress
+        // modalVisible={true}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
-        selectedWellName={selectedWellName || ['', '']}
+        selectedWell={selectedWellName || ['', '']}
         setModalVisible={() => setShowPinAddress(false)}
         onPresAddEntrance={() => {
           setShowPinAddress(false);
