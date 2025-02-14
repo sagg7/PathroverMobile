@@ -79,6 +79,22 @@ import UnionPay from './unionpay.svg';
 import DiscoverCard from './discover.svg';
 import CreditCard from './credit-card.svg';
 import BankAccount from './bank.svg';
+import Meta from './meta.svg';
+import SendMeta from './send.svg';
+import SendMsg from './sendMsg.svg';
+import AddButton from './add.svg';
+import LockIcon from './lock.svg';
+import ChatDelete from './chatDelete.svg';
+import AddedIcon from './added.svg';
+import RemoveIcon from './remove.svg';
+import Exit from './exit.svg';
+import GroupName from './groupName.svg';
+import MaskMan from './maskMan.svg';
+import MoveForward from './moveForward.svg';
+import PlusIcon from './plus.svg';
+import RecordIcon from './record.svg';
+import VideoIcon from './video.svg';
+import BlackPhone from './blackPhone.svg';
 import EnduserHome from './endUserHome.svg';
 import Wellpath from './wellpath.svg';
 import Hiking from './hiking.svg';
@@ -193,6 +209,22 @@ export const svgIcon = {
   DiscoverCard: <DiscoverCard />,
   CreditCard: <CreditCard />,
   BankAccount: <BankAccount />,
+  Meta: <Meta />,
+  SendMeta: <SendMeta />,
+  SendMsg: <SendMsg />,
+  AddButton: <AddButton />,
+  LockIcon: <LockIcon />,
+  ChatDelete: <ChatDelete />,
+  AddedIcon: <AddedIcon />,
+  RemoveIcon: <RemoveIcon />,
+  Exit: <Exit />,
+  GroupName: <GroupName />,
+  MaskMan: <MaskMan />,
+  MoveForward: <MoveForward />,
+  PlusIcon: <PlusIcon />,
+  RecordIcon: <RecordIcon />,
+  VideoIcon: <VideoIcon />,
+  BlackPhone: <BlackPhone />,
   EnduserHome: <EnduserHome />,
   Wellpath: <Wellpath />,
   Hiking: <Hiking />,

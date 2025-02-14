@@ -37,6 +37,7 @@ export const appIcons = {
   checked: require('../icons/checked.png'),
   mapTruck: require('../icons/mapTruck.png'),
   walletIcon: require('../icons/wallet.png'),
+  menuIcons: require('./menu.png'),
   searchBar: require('../icons/SearchBar.png'),
   filterFill: require('../icons/filterFill.png'),
   menuIcon: require('../icons/menuIcon.png'),

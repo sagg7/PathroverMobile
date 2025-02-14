@@ -74,20 +74,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: WP('2'),
     paddingHorizontal: WP('4'),
-    justifyContent: 'space-between',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.17,
-    shadowRadius: 3.05,
-    elevation: 4,
-    backgroundColor: isIOS() ? null : PFColors.Standard.White,
     height: WP('12'),
+    backgroundColor: PFColors.Standard.White,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    alignItems: 'center',
+    shadowColor: PFColors.Standard.Black,
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+    shadowOffset: {
+      height: 4,
+      width: 0,
+    },
   },
   textStyle: {
     color: PFColors.Standard.Black,

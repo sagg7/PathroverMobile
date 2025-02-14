@@ -36,6 +36,7 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
 
     const channel = actionCable.subscriptions.create({
       channel: data.channel,
+      channel_key: data.channel_key,
     });
 
     channel
