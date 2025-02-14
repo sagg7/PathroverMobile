@@ -53,21 +53,18 @@ const AddNumber = () => {
       };
       const res = await addPhoneNumber(data);
 
-      // TODO: REVERT FOR COMMENTED
+      // TODO: REVERT FOR COMMENTED/REMOVE OTP FROM ALERT
       if (res) {
         // if (res?.data) {
-        console.log('==============res======================');
-        console.log(res);
-        console.log('====================================');
         setIsVisible(false);
-        // Alert.alert('OTP', 'Remember your otp', [
-        //   {
-        //     text: 'OK',
-        //     onPress: () => {
-        //       navigation.navigate('VerifyNumber', data);
-        //     },
-        //   },
-        // ]);
+        Alert.alert('OTP', `Remember your otp ${res?.data?.otp}`, [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate('VerifyNumber', data);
+            },
+          },
+        ]);
       }
     } catch (error) {
       //
