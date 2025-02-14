@@ -1,13 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
-import {
-  NativeAd,
-  NativeAdView,
-  NativeAsset,
-  NativeAssetType,
-  TestIds,
-} from 'react-native-google-mobile-ads';
+import {StyleSheet, View} from 'react-native';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
+import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
 
 interface AdsProps {
   item: string;
@@ -18,68 +12,20 @@ function Ads({item, isTop = false}: AdsProps) {
   const [ads, setAds] = useState({});
 
   useEffect(() => {
-    NativeAd.createForAdRequest(__DEV__ ? TestIds.NATIVE : item)
-      .then(res => {
-        setAds(res);
-        // console.log('res ads', res);
-      })
-      .catch(console.error);
+    setAds(__DEV__ ? TestIds.BANNER : item);
   }, []);
-
-  useEffect(() => {
-    if (!ads) {
-      return;
-    }
-    // const listener = ads.addAdEventListener(NativeAdEventType.CLICKED, () => {
-    //   console.log('Native ad clicked');
-    // });
-    // return () => {
-    //   listener.remove();
-    //   // or
-    //   ads.destroy();
-    // };
-  }, [ads]);
-
-  const handleAdPress = () => {
-    if (ads?.clickUrl) {
-      Linking.openURL(ads?.clickUrl).catch((err: any) =>
-        console.error('Failed to open ad URL', err),
-      );
-    } else {
-    }
-  };
 
   return (
     <View style={styles.main(isTop)}>
-      <NativeAdView nativeAd={ads}>
-        {ads?.icon?.url && (
-          <NativeAsset assetType={NativeAssetType.ICON}>
-            <Image
-              source={{uri: ads?.icon?.url}}
-              style={styles.imageStyle(isTop)}
-            />
-          </NativeAsset>
-        )}
-
-        <NativeAsset assetType={NativeAssetType.ADVERTISER}>
-          <Text style={styles.adText}>{ads?.advertiser || 'Ad'}</Text>
-        </NativeAsset>
-        {ads?.callToAction && (
-          <NativeAsset assetType={NativeAssetType.CALL_TO_ACTION}>
-            <Text style={styles.adText}>{ads?.callToAction || ''}</Text>
-          </NativeAsset>
-        )}
-        <NativeAsset assetType={NativeAssetType.HEADLINE}>
-          <Text style={styles.headline(isTop)}>{ads?.headline}</Text>
-        </NativeAsset>
-      </NativeAdView>
+      <BannerAd unitId={ads} size={BannerAdSize.MEDIUM_RECTANGLE} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   main: (isTop: any) => ({
-    width: isTop ? 327 : 150,
+    // width: 150,
+    // width: isTop ? 327 : 150,
     marginHorizontal: scale(6),
     marginVertical: scale(4),
   }),
@@ -102,3 +48,35 @@ const styles = StyleSheet.create({
 });
 
 export {Ads};
+
+// const listener = ads.addAdEventListener(NativeAdEventType.CLICKED, () => {
+//   console.log('Native ad clicked');
+// });
+// return () => {
+//   listener.remove();
+//   // or
+//   ads.destroy();
+// };
+/* <BannerAd unitId={ads} size={BannerAdSize.LARGE_BANNER} /> */
+/* <NativeAdView nativeAd={ads}>
+        {ads?.icon?.url && (
+          <NativeAsset assetType={NativeAssetType.ICON}>
+            <Image
+              source={{uri: ads?.icon?.url}}
+              style={styles.imageStyle(isTop)}
+            />
+          </NativeAsset>
+        )}
+
+        <NativeAsset assetType={NativeAssetType.ADVERTISER}>
+          <Text style={styles.adText}>{ads?.advertiser || 'Ad'}</Text>
+        </NativeAsset>
+        {ads?.callToAction && (
+          <NativeAsset assetType={NativeAssetType.CALL_TO_ACTION}>
+            <Text style={styles.adText}>{ads?.callToAction || ''}</Text>
+          </NativeAsset>
+        )}
+        <NativeAsset assetType={NativeAssetType.HEADLINE}>
+          <Text style={styles.headline(isTop)}>{ads?.headline}</Text>
+        </NativeAsset>
+      </NativeAdView> */
