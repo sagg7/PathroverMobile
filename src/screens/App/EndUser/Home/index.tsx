@@ -89,7 +89,7 @@ const Home = ({navigation}) => {
   const ListHeaderComponent = () => {
     return (
       <View style={styles.headerView}>
-        <Text>Amazing Ads</Text>
+        <Text style={styles.headerText}>Amazing Ads</Text>
       </View>
     );
   };
@@ -138,7 +138,7 @@ const Home = ({navigation}) => {
           />
         </View>
 
-        <View style={styles.flatlistView}>
+        {/* <View style={styles.flatlistView}>
           <ListHeaderComponent />
           <FlatList
             horizontal
@@ -147,7 +147,7 @@ const Home = ({navigation}) => {
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item, index) => item + index.toString()}
           />
-        </View>
+        </View> */}
       </ScrollView>
     </MainWrapper>
   );
@@ -193,11 +193,16 @@ const styles = StyleSheet.create({
   },
   headerView: {
     flex: 1,
-    marginTop: scale(6),
-    marginBottom: scale(4),
+    marginTop: scale(8),
+    marginBottom: scale(8),
   },
   scrollView: {
     flexGrow: 1,
     paddingBottom: scale(50),
+  },
+  headerText: {
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    color: PFColors.Standard.Black,
   },
 });
