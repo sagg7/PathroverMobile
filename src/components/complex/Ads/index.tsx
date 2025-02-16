@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
 
@@ -9,25 +9,38 @@ interface AdsProps {
 }
 
 function Ads({item, isTop = false}: AdsProps) {
-  const [ads, setAds] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setAds(__DEV__ ? TestIds.BANNER : item);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1500);
   }, []);
 
   return (
     <View style={styles.main(isTop)}>
-      <BannerAd unitId={ads} size={BannerAdSize.MEDIUM_RECTANGLE} />
+      {loading ? (
+        <ActivityIndicator size={'small'} color={PFColors.Blue.Dark} />
+      ) : (
+        <BannerAd
+          unitId={__DEV__ ? TestIds.BANNER : item}
+          size={BannerAdSize.MEDIUM_RECTANGLE}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   main: (isTop: any) => ({
-    // width: 150,
-    // width: isTop ? 327 : 150,
+    width: 300,
     marginHorizontal: scale(6),
     marginVertical: scale(4),
+    height: 250,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: PFColors.Gray.LightMist,
   }),
   adText: {
     fontSize: PFFontSize.FONT_SIZE_8,
