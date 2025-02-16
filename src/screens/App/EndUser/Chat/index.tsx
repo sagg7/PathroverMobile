@@ -11,12 +11,12 @@ const Chat = () => {
   return (
     <MainWrapper>
       {/* TODO: REVERT CODE */}
-      {loginUser?.verified ? (
+      {/* {loginUser?.verified ? (
         <ChatTabBar />
       ) : (
         <EmptyChatView onPress={() => navigation.navigate('AddNumber')} />
-      )}
-      {/* <ChatTabBar /> */}
+      )} */}
+      <ChatTabBar />
     </MainWrapper>
   );
 };
