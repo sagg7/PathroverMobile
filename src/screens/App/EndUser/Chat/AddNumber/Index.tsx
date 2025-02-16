@@ -16,7 +16,7 @@ import {
   showAlert,
   useKeyboardListener,
 } from '../../../../../shared/exporter';
-import {Alert, Text, View} from 'react-native';
+import {Alert, Platform, Text, View} from 'react-native';
 import NumberVerifyModal from '../../../../../components/complex/NumberVerifyModal';
 import {useAddPhoneNumberMutation} from '../../../../../redux/chat/chatApiSlice';
 import {useSelector} from 'react-redux';
@@ -105,7 +105,7 @@ const AddNumber = () => {
                 errorMessage={errors.phone}
                 keyboardType="numeric"
               />
-              <View style={styles.divider}>
+              <View style={styles.divider(keyboardVisible)}>
                 <AppButton
                   title="Next"
                   handleClick={handleSubmit}

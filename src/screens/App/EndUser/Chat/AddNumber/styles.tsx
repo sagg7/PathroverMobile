@@ -1,19 +1,21 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
 import {PFColors, PFFonts, PFFontSize} from '../../../../../shared/exporter';
 
 const styles = StyleSheet.create({
   btnContainer: isOpen => ({
     marginBottom: isOpen ? 300 : 40,
   }),
-  divider: {
+  divider: isOpen => ({
     position: 'absolute',
     bottom: 0,
     width: '100%',
     alignSelf: 'center',
     justifyContent: 'center',
-  },
+  }),
   contentContainerStyle: {
-    flexGrow: 1,
+    flex: 1,
+    // flexGrow: 1,
+    height: Dimensions.get('screen').height,
   },
   container: {
     padding: 16,
