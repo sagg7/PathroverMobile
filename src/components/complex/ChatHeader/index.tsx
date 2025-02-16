@@ -28,7 +28,7 @@ const ChatHeader = ({
           ) : (
             <Image
               source={isMenu ? appIcons.menuIcons : appIcons.settingIcon}
-              style={isMenu ? styles.menuIcons : styles.settingIcon}
+              style={isMenu ? styles.menuIcon : styles.settingIcon}
               resizeMode="contain"
             />
           )}
