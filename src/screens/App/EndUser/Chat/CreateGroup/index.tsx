@@ -1,21 +1,25 @@
+import {useNavigation, useRoute} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
   Image,
   Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {AppButton, MainWrapper} from '../../../../../components';
-import styles from './styles';
+import {launchImageLibrary} from 'react-native-image-picker';
 import {svgIcon} from '../../../../../assets/svg';
+import {AppButton, MainWrapper} from '../../../../../components';
 import UsersListView from '../../../../../components/complex/UsersListView';
 import {useKeyboardListener} from '../../../../../hooks/keyboard';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {IMAGE_OPTIONS, showAlert} from '../../../../../shared/exporter';
 import {useCreateGroupMutation} from '../../../../../redux/chat/chatApiSlice';
+import {
+  IMAGE_OPTIONS,
+  PFColors,
+  showAlert,
+} from '../../../../../shared/exporter';
+import styles from './styles';
 
 const CreateGroup = () => {
   const {params} = useRoute();
@@ -48,7 +52,7 @@ const CreateGroup = () => {
   };
 
   const onPress = async () => {
-    if (name) {
+    if (name && usersList?.length > 0) {
       try {
         const form = new FormData();
         form.append('group[name]', name);
@@ -77,8 +81,13 @@ const CreateGroup = () => {
       } catch (error) {
         //
       }
-    } else {
-      alert('Please enter group name');
+    } else if (!name) {
+      showAlert('Create Group', 'Please enter group name');
+    } else if (usersList?.length === 0) {
+      showAlert(
+        'Create Group',
+        'Please select at least 1 member to create group',
+      );
     }
   };
 
@@ -110,6 +119,7 @@ const CreateGroup = () => {
         <TextInput
           value={name}
           placeholder={'Group Name'}
+          placeholderTextColor={PFColors.Gray.DarkGray}
           onChangeText={text => setName(text)}
           style={styles.textInputStyle}
         />
