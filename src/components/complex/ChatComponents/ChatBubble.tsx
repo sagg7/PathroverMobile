@@ -114,18 +114,17 @@ const ChatBubble = ({props}) => {
       <Modal
         animationIn={'zoomIn'}
         animationOut={'zoomOut'}
-        transparent={true}
         isVisible={modalVisible}
         onBackButtonPress={onClose}
         onBackdropPress={onClose}
         style={styles.modalContainer}>
-        <Image
-          //   indicatorColor={config.colors.white}
-          indicatorSize={'small'}
-          source={{uri: selectedImage}}
-          style={styles.fullImageStyle}
-          resizeMode="contain"
-        />
+        <TouchableOpacity onPress={onClose} style={styles.imageStyle}>
+          <Image
+            source={{uri: selectedImage}}
+            style={styles.fullImageStyle}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -214,8 +213,13 @@ const styles = StyleSheet.create({
     height: 80,
   },
   fullImageStyle: {
-    width: 300,
-    height: 300,
+    width: '96%',
+    flexGrow: 1,
+    alignSelf: 'center',
+  },
+  imageStyle: {
+    flex: 1,
+    width: '100%',
   },
   url: {
     fontSize: PFFontSize.FONT_SIZE_10,
