@@ -73,7 +73,10 @@ const AddNumber = () => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Meta AI" clickBackIcon={() => navigation.pop()} />
+      <AppHeader
+        title="Add Phone Number"
+        clickBackIcon={() => navigation.pop()}
+      />
       <KeyboardAwareScrollView
         enableOnAndroid
         contentContainerStyle={styles.contentContainerStyle}
