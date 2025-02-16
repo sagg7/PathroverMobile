@@ -127,6 +127,10 @@ import Share from './Share.svg';
 import PinLocation from './pinLocation.svg';
 import WellsMarker from './wellsMarker.svg';
 import PinsMarker from './pinsMarker.svg';
+import ImageType from './imageType.svg';
+import FileType from './fileType.svg';
+import VideoType from './videoType.svg';
+import CameraType from './ cameraType.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -257,4 +261,8 @@ export const svgIcon = {
   PinLocation: <PinLocation />,
   WellsMarker: <WellsMarker />,
   PinsMarker: <PinsMarker />,
+  ImageType: <ImageType />,
+  FileType: <FileType />,
+  VideoType: <VideoType />,
+  CameraType: <CameraType />,
 };
