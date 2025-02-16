@@ -1,22 +1,41 @@
+import moment from 'moment';
 import React, {useState} from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
   Image,
-  TouchableOpacity,
   Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import moment from 'moment';
-import Modal from 'react-native-modal';
 import FitImage from 'react-native-fit-image';
+import Modal from 'react-native-modal';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 
+const THRESHOLD = 60 * 1000;
+
+const getShowTime = (currentMessage, nextMessage) => {
+  if (!nextMessage) {
+    return true;
+  }
+
+  if (currentMessage?.user?._id !== nextMessage?.user?._id) {
+    return true;
+  }
+
+  const currentTime = new Date(currentMessage.created_at).getTime();
+  const nextTime = new Date(nextMessage.created_at).getTime();
+
+  return nextTime - currentTime > THRESHOLD;
+};
+
 const ChatBubble = ({props}) => {
-  const {currentMessage, position} = props;
+  const {currentMessage, position, nextMessage} = props;
   const isLeft = position === 'left';
 
   const {content, created_at, image, message_attachment, text} = currentMessage;
+  const showTime = getShowTime(currentMessage, nextMessage);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -59,10 +78,6 @@ const ChatBubble = ({props}) => {
 
   return (
     <View style={styles.main}>
-      <Text style={[styles.time, isLeft ? styles.leftTime : styles.rightTime]}>
-        {moment(created_at).format('hh:mm A')}
-      </Text>
-
       <View
         style={[
           styles.bubbleContainer,
@@ -111,6 +126,12 @@ const ChatBubble = ({props}) => {
           )}
         </View>
       </View>
+      {showTime && (
+        <Text
+          style={[styles.time, isLeft ? styles.leftTime : styles.rightTime]}>
+          {moment(created_at).format('hh:mm A')}
+        </Text>
+      )}
       <Modal
         animationIn={'zoomIn'}
         animationOut={'zoomOut'}
@@ -136,7 +157,7 @@ const styles = StyleSheet.create({
   },
   bubbleContainer: {
     maxWidth: '75%',
-    marginVertical: 5,
+    marginVertical: 1,
     padding: 9,
     borderRadius: 8,
   },
@@ -173,6 +194,8 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_8,
     color: PFColors.Gray.DarkGray,
     fontFamily: PFFonts.Foundation.Medium,
+    marginBottom: 3,
+    marginHorizontal: 2,
   },
   imageTime: {
     fontSize: PFFontSize.FONT_SIZE_8,
