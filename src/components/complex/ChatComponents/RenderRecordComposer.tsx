@@ -53,14 +53,14 @@ const RenderRecordComposer = props => {
       const result = await request(PERMISSIONS.IOS.MICROPHONE);
 
       if (result === RESULTS.GRANTED) {
-        console.log('Microphone permission granted');
+        // console.log('Microphone permission granted');
         return true;
       } else if (result === RESULTS.BLOCKED) {
-        console.log(
-          'Microphone permission denied. User needs to enable it in settings.',
-        );
+        // console.log(
+        //   'Microphone permission denied. User needs to enable it in settings.',
+        // );
       } else {
-        console.log('Microphone permission denied');
+        // console.log('Microphone permission denied');
       }
 
       return false;
@@ -71,8 +71,19 @@ const RenderRecordComposer = props => {
     const fileName = `audio_${new Date().getTime()}.m4a`;
 
     return Platform.OS === 'ios'
-      ? `${RNFS.DocumentDirectoryPath}/${fileName}`
+      ? `file://${RNFS.CachesDirectoryPath}/${fileName}`
       : `${RNFS.ExternalDirectoryPath}/${fileName}`;
+    // return Platform.OS === 'ios'
+    //   ? `${RNFS.DocumentDirectoryPath}/${fileName}`
+    //   : `${RNFS.ExternalDirectoryPath}/${fileName}`;
+  };
+
+  const ensureDirectoryExists = async path => {
+    const dir = path.substring(0, path.lastIndexOf('/'));
+    const exists = await RNFS.exists(dir);
+    if (!exists) {
+      await RNFS.mkdir(dir);
+    }
   };
 
   const onStartRecord = async () => {
@@ -85,36 +96,74 @@ const RenderRecordComposer = props => {
       return;
     }
 
-    console.log('Starting recording...');
+    // console.log('Starting recording...');
     const path = getAudioFilePath();
-    console.log('File path:', path);
+    // console.log('File path:', path);
     recordingPath.current = path;
 
     try {
-      await audioRecorderPlayer.startRecorder(path);
-      console.log('Recording started at:', path);
-      audioRecorderPlayer.addRecordBackListener(e => {
-        const time = formatTime(e.currentPosition);
-        setRecordTime(time);
-      });
-      setIsRecording(true);
+      await ensureDirectoryExists(path);
+      await audioRecorderPlayer
+        .startRecorder(path)
+        .then(res => {
+          // console.log('res===>>', res);
+          audioRecorderPlayer.addRecordBackListener(e => {
+            const time = formatTime(e.currentPosition);
+            setRecordTime(time);
+          });
+          setIsRecording(true);
+        })
+        .catch(err => {
+          // console.log('err----->>>', err);
+        });
+      // console.log('Recording started at:', path);
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      // console.error('Failed to start recording:', error);
       showAlert('Error', 'Failed to start recording. Please try again.');
       setIsRecording(false);
     }
   };
 
+  // const onStartRecord = async () => {
+  //   const hasPermission = await checkMicrophonePermissions();
+  //   if (!hasPermission) {
+  //     showAlert(
+  //       'Permission Denied',
+  //       'Microphone access is required to record audio.',
+  //     );
+  //     return;
+  //   }
+
+  //   console.log('Starting recording...');
+  //   const path = getAudioFilePath();
+  //   console.log('File path:', path);
+  //   recordingPath.current = path;
+
+  //   try {
+  //     await audioRecorderPlayer.startRecorder(path);
+  //     console.log('Recording started at:', path);
+  //     audioRecorderPlayer.addRecordBackListener(e => {
+  //       const time = formatTime(e.currentPosition);
+  //       setRecordTime(time);
+  //     });
+  //     setIsRecording(true);
+  //   } catch (error) {
+  //     console.error('Failed to start recording:', error);
+  //     showAlert('Error', 'Failed to start recording. Please try again.');
+  //     setIsRecording(false);
+  //   }
+  // };
+
   const onStopRecord = async () => {
     if (!isRecording) {
-      console.log('Recording is already stopped.');
+      // console.log('Recording is already stopped.');
       return;
     }
 
-    console.log('Stopping recording...');
+    // console.log('Stopping recording...');
     try {
       const result = await audioRecorderPlayer.stopRecorder();
-      console.log('Recording stopped, file saved at:', result);
+      // console.log('Recording stopped, file saved at:', result);
       audioRecorderPlayer.removeRecordBackListener();
       setIsRecording(false);
       setRecordTime('00:00');
@@ -122,7 +171,7 @@ const RenderRecordComposer = props => {
       if (result && result !== 'Already stopped') {
         const fileExists = await RNFS.exists(result);
         if (fileExists) {
-          console.log('File exists:', result);
+          // console.log('File exists:', result);
           const message = {
             _id: Math.random().toString(36).substring(7),
             text: '',
@@ -143,11 +192,11 @@ const RenderRecordComposer = props => {
           showAlert('Error', 'The recorded file does not exist.');
         }
       } else if (result === 'Already stopped') {
-        console.log('Recording was already stopped.');
+        // console.log('Recording was already stopped.');
         if (recordingPath.current) {
           const fileExists = await RNFS.exists(recordingPath.current);
           if (fileExists) {
-            console.log('File exists at stored path:', recordingPath.current);
+            // console.log('File exists at stored path:', recordingPath.current);
             const message = {
               _id: Math.random().toString(36).substring(7),
               text: '',
@@ -160,27 +209,28 @@ const RenderRecordComposer = props => {
             };
             props.send([message]);
           } else {
-            console.error(
-              'File does not exist at stored path:',
-              recordingPath.current,
-            );
+            // console.error(
+            //   'File does not exist at stored path:',
+            //   recordingPath.current,
+            // );
             showAlert('Error', 'The recorded file does not exist.');
           }
         } else {
-          console.error('No stored path available.');
+          // console.error('No stored path available.');
           showAlert('Error', 'No audio file was recorded.');
         }
       } else {
-        console.error('No file path returned from stopRecorder:', result);
+        // console.error('No file path returned from stopRecorder:', result);
         showAlert('Error', 'No audio file was recorded.');
       }
     } catch (error) {
-      console.error('Failed to stop recording:', error);
+      // console.error('Failed to stop recording:', error);
       showAlert('Error', 'Failed to stop recording. Please try again.');
     }
   };
 
-  const handleRecordPress = () => {
+  const handleRecordPress = async () => {
+    // await audioRecorderPlayer.stopRecorder();
     if (isRecording) {
       onStopRecord();
     } else {
