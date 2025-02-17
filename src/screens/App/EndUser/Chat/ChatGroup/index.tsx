@@ -64,7 +64,7 @@ const ChatGroup = () => {
 
   useEffect(() => {
     if (data) {
-      setChats([...data]?.reverse());
+      setChats(data);
     }
   }, [data]);
 

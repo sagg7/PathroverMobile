@@ -66,7 +66,7 @@ const ChatList = () => {
 
   useEffect(() => {
     if (data?.chats?.length > 0) {
-      setChats([...data?.chats]?.reverse());
+      setChats(data?.chats);
     } else {
       setChats([]);
     }
