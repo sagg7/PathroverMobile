@@ -17,6 +17,10 @@ import {
   PFFontSize,
   scale,
 } from '../../../shared/exporter';
+import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType';
+import AudioMessage from './AudioMessage';
+import VideoMessage from './VideoMessage';
+import FileMessage from './FileMessage';
 
 const THRESHOLD = 60 * 1000;
 
@@ -41,6 +45,9 @@ const GroupChatBubble = ({props}) => {
   const {content, created_at, image, message_attachment, text, user} =
     currentMessage;
   const {avatar, name} = user;
+  const fileType =
+    message_attachment &&
+    identifyAttachmentTypeFromUrl(message_attachment?.url);
 
   // const showAvatar =
   //   !previousMessage ||
@@ -121,7 +128,7 @@ const GroupChatBubble = ({props}) => {
           styles.bubbleContainer,
           isLeft ? styles.leftBubble : styles.rightBubble,
         ]}>
-        {(image || message_attachment) && (
+        {(image || fileType === 'image') && (
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => handleImagePress(message_attachment?.url)}>
@@ -142,6 +149,15 @@ const GroupChatBubble = ({props}) => {
               }}
             />
           </TouchableOpacity>
+        )}
+        {fileType === 'audio' && (
+          <AudioMessage currentMessage={currentMessage} position={position} />
+        )}
+        {fileType === 'video' && (
+          <VideoMessage currentMessage={currentMessage} position={position} />
+        )}
+        {fileType === 'document' && (
+          <FileMessage currentMessage={currentMessage} position={position} />
         )}
         <View
           style={[
