@@ -13,53 +13,45 @@ import {
   RenderMessageText,
   RenderTime,
 } from '../../../../../components';
-import CreateGroupModal from '../../../../../components/complex/CreateGroupModal';
-import {
-  useCreateChatMessageMutation,
-  useCreateGroupMessageMutation,
-  useGetChatMessageMutation,
-  useGetGroupChatMessagesMutation,
-  useReadChatMessageMutation,
-} from '../../../../../redux/chat/chatApiSlice';
-import styles from './styles';
 import RenderMessageImage from '../../../../../components/complex/ChatComponents/RenderMessageImage';
+import CreateGroupModal from '../../../../../components/complex/CreateGroupModal';
 import {useActionCable} from '../../../../../hooks/socket/useActionCable';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
+import {
+  useCreateChatMessageMutation,
+  useGetChatMessageMutation,
+  useReadChatMessageMutation,
+} from '../../../../../redux/chat/chatApiSlice';
 import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import styles from './styles';
 
 interface HeaderProps {
-  isGroup: boolean;
   title: string;
   onPressBack: () => void;
-  onPressMenu?: () => void;
   onPressPhone?: () => void;
   onPressVideo?: () => void;
 }
 
 const Header = ({
-  isGroup,
   onPressBack,
-  onPressMenu,
   title,
   onPressPhone,
   onPressVideo,
 }: HeaderProps) => {
   return (
     <View style={styles.groupHeader}>
-      <TouchableOpacity onPress={onPressBack}>
+      <TouchableOpacity onPress={onPressBack} hitSlop={20}>
         {svgIcon.BackArrow}
       </TouchableOpacity>
-      <View style={styles.headerTextView(isGroup)}>
-        {!isGroup && (
-          <Image
-            source={
-              title?.user?.avatar
-                ? {uri: title?.user?.avatar}
-                : appIcons.userPlaceholder
-            }
-            style={styles.imageStyle}
-          />
-        )}
+      <View style={styles.headerTextView}>
+        <Image
+          source={
+            title?.user?.avatar
+              ? {uri: title?.user?.avatar}
+              : appIcons.userPlaceholder
+          }
+          style={styles.imageStyle}
+        />
         <Text style={styles.groupNameText}>
           {title && typeof title === 'object' && title.user
             ? [title.user.first_name, title.user.last_name]
@@ -68,21 +60,15 @@ const Header = ({
             : title?.name || ''}
         </Text>
       </View>
-      {isGroup && (
-        <TouchableOpacity onPress={onPressMenu}>
-          <Image source={appIcons.menuIcons} style={styles.iconStyle} />
+
+      <View style={styles.iconView}>
+        <TouchableOpacity onPress={onPressPhone}>
+          {svgIcon.BlackPhone}
         </TouchableOpacity>
-      )}
-      {!isGroup && (
-        <View style={styles.iconView}>
-          <TouchableOpacity onPress={onPressPhone}>
-            {svgIcon.BlackPhone}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onPressVideo}>
-            {svgIcon.VideoIcon}
-          </TouchableOpacity>
-        </View>
-      )}
+        <TouchableOpacity onPress={onPressVideo}>
+          {svgIcon.VideoIcon}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -99,44 +85,24 @@ const ChatDetail = () => {
 
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage] = useCreateChatMessageMutation();
-  const [createGroupMessage] = useCreateGroupMessageMutation();
   const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
-  const [getGroupChatMessages, {data}] = useGetGroupChatMessagesMutation();
-  const [readGroupChatMessage] = useReadChatMessageMutation();
 
   useEffect(() => {
     try {
-      if (params?.isGroup) {
-        subscribe(
-          {
-            channel: 'GroupChatChannel',
-            channel_key: `group_chat_${params?.item?.id}_channel`,
-            group_id: params?.item?.id,
+      subscribe(
+        {
+          channel: 'PrivateChatChannel',
+          channel_key: `private_chat_${params?.item?.id}_channel`,
+          chat_id: params?.item?.id,
+        },
+        {
+          received: res => {
+            getChatMessage(params?.item?.id);
+            readChat();
           },
-          {
-            received: res => {
-              getGroupChatMessages(params?.item?.id);
-              readChat();
-            },
-            connected: () => {},
-          },
-        );
-      } else {
-        subscribe(
-          {
-            channel: 'PrivateChatChannel',
-            channel_key: `private_chat_${params?.item?.id}_channel`,
-            chat_id: params?.item?.id,
-          },
-          {
-            received: res => {
-              getChatMessage(params?.item?.id);
-              readChat();
-            },
-            connected: () => {},
-          },
-        );
-      }
+          connected: () => {},
+        },
+      );
     } catch (err) {
       //
     }
@@ -147,29 +113,20 @@ const ChatDetail = () => {
   }, [params]);
 
   useEffect(() => {
-    if (data?.length > 0 && params?.isGroup) {
-      const rearrange = data.map(i => ({
-        ...i,
-        _id: i?.id,
-        user: {...i.user, _id: i.user.id},
-      }));
-      setMessages(rearrange);
-    }
-    if (chat?.length > 0 && !params?.isGroup) {
+    if (chat?.length > 0) {
       const rearrange = chat.map(i => ({
         ...i,
         _id: i?.id,
+        createdAt: i?.created_at,
         user: {...i.user, _id: i.user.id},
       }));
       setMessages(rearrange);
     }
-  }, [data, chat]);
+  }, [chat]);
 
   useEffect(() => {
     (async () => {
-      if (isFocused && params?.isGroup) {
-        await getGroupChatMessages(params?.item?.id);
-      } else {
+      if (isFocused) {
         await getChatMessage(params?.item?.id);
       }
       readChat();
@@ -178,51 +135,35 @@ const ChatDetail = () => {
 
   const onSend = async (message: string) => {
     try {
-      const {item, isGroup} = params;
+      const {item} = params;
       const form = new FormData();
+      if (message[0]?.attachment) {
+        form.append('message[message_attachment]', {
+          uri:
+            Platform.OS === 'ios'
+              ? message[0]?.attachment?.sourceURL?.replace('file://', '') ||
+                message[0]?.attachment?.uri?.replace('file://', '') ||
+                message[0]?.attachment?.path
+              : message[0]?.attachment?.sourceURL?.uri ||
+                message[0]?.attachment?.uri ||
+                message[0]?.attachment?.path,
+          type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
+          name:
+            message[0]?.attachment?.filename ||
+            message[0]?.attachment?.fileName ||
+            message[0]?.attachment?.name ||
+            '',
+        });
+      }
 
-      if (isGroup) {
-        if (message[0]?.image) {
-          form.append('message[message_attachment]', {
-            uri:
-              Platform.OS === 'ios'
-                ? message[0]?.image?.sourceURL?.replace('file://', '')
-                : message[0]?.image?.sourceURL?.uri,
-            type: message[0]?.image?.mime,
-            name: message[0]?.image?.filename,
-          });
-        }
-        form.append('message[content]', message[0]?.text);
-        form.append('message[user_id]', loginUser?.id);
-        form.append('message[message_type]', 'group');
-        form.append('message[read]', false);
-        form.append('message[group_id]', item?.id);
+      form.append('message[content]', message[0]?.text);
+      form.append('message[user_id]', loginUser?.id);
+      form.append('message[message_type]', 'private');
+      form.append('message[read]', false);
 
-        const res = await createGroupMessage({data: form, id: item?.id});
-        if (res) {
-          await getGroupChatMessages(item?.id);
-        }
-      } else {
-        if (message[0]?.image) {
-          form.append('message[message_attachment]', {
-            uri:
-              Platform.OS === 'ios'
-                ? message[0]?.image?.sourceURL?.replace('file://', '')
-                : message[0]?.image?.sourceURL?.uri,
-            type: message[0]?.image?.mime,
-            name: message[0]?.image?.filename,
-          });
-        }
-
-        form.append('message[content]', message[0]?.text);
-        form.append('message[user_id]', loginUser?.id);
-        form.append('message[message_type]', 'private');
-        form.append('message[read]', false);
-
-        const res = await createChatMessage({data: form, id: item?.id});
-        if (res) {
-          await getChatMessage(item?.id);
-        }
+      const res = await createChatMessage({data: form, id: item?.id});
+      if (res) {
+        await getChatMessage(item?.id);
       }
     } catch (error) {
       //
@@ -231,11 +172,7 @@ const ChatDetail = () => {
 
   const readChat = async () => {
     try {
-      if (!params?.isGroup) {
-        await readChatMessage(params?.item?.id);
-      } else {
-        await readGroupChatMessage(params?.item?.id);
-      }
+      await readChatMessage(params?.item?.id);
     } catch (error) {
       //
     }
@@ -244,9 +181,7 @@ const ChatDetail = () => {
   return (
     <MainWrapper>
       <Header
-        isGroup={params?.isGroup}
         onPressBack={() => navigation.navigate('Chat')}
-        onPressMenu={() => setShow(true)}
         title={params?.item || 'Group Chat'}
       />
       <View style={styles.container}>
@@ -258,6 +193,7 @@ const ChatDetail = () => {
           messages={messages}
           renderAvatar={null}
           showUserAvatar={false}
+          scrollToBottom
           isKeyboardInternallyHandled
           keyboardShouldPersistTaps="never"
           renderDay={RenderDay}

@@ -4,6 +4,7 @@ import {PFColors, PFFonts, PFFontSize} from '../../../../../shared/exporter';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 12,
   },
   groupHeader: {
     flexDirection: 'row',
@@ -20,12 +21,13 @@ const styles = StyleSheet.create({
     elevation: 2,
     paddingBottom: 8,
     paddingHorizontal: 16,
+    paddingVertical: 6,
   },
-  headerTextView: (isGroup: boolean) => ({
-    width: isGroup ? '80%' : '70%',
+  headerTextView: {
+    width: '70%',
     flexDirection: 'row',
     alignItems: 'center',
-  }),
+  },
   groupNameText: {
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_14,
