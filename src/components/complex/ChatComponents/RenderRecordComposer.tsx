@@ -1,16 +1,200 @@
-import React from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useState, useRef} from 'react';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
 import {Composer} from 'react-native-gifted-chat';
-import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
+import {
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  showAlert,
+} from '../../../shared/exporter';
 import {svgIcon} from '../../../assets/svg';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import RNFS from 'react-native-fs';
+import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 
 const RenderRecordComposer = props => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordTime, setRecordTime] = useState('00:00');
+  const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
+  const recordingPath = useRef('');
+
+  const formatTime = milliseconds => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
+      2,
+      '0',
+    )}`;
+  };
+
+  const checkMicrophonePermissions = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: 'Microphone Permission',
+          message: 'This app needs access to your microphone to record audio.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    if (Platform.OS === 'ios') {
+      const result = await request(PERMISSIONS.IOS.MICROPHONE);
+
+      if (result === RESULTS.GRANTED) {
+        console.log('Microphone permission granted');
+        return true;
+      } else if (result === RESULTS.BLOCKED) {
+        console.log(
+          'Microphone permission denied. User needs to enable it in settings.',
+        );
+      } else {
+        console.log('Microphone permission denied');
+      }
+
+      return false;
+    }
+  };
+
+  const getAudioFilePath = () => {
+    const fileName = `audio_${new Date().getTime()}.m4a`;
+
+    return Platform.OS === 'ios'
+      ? `${RNFS.DocumentDirectoryPath}/${fileName}`
+      : `${RNFS.ExternalDirectoryPath}/${fileName}`;
+  };
+
+  const onStartRecord = async () => {
+    const hasPermission = await checkMicrophonePermissions();
+    if (!hasPermission) {
+      showAlert(
+        'Permission Denied',
+        'Microphone access is required to record audio.',
+      );
+      return;
+    }
+
+    console.log('Starting recording...');
+    const path = getAudioFilePath();
+    console.log('File path:', path);
+    recordingPath.current = path;
+
+    try {
+      await audioRecorderPlayer.startRecorder(path);
+      console.log('Recording started at:', path);
+      audioRecorderPlayer.addRecordBackListener(e => {
+        const time = formatTime(e.currentPosition);
+        setRecordTime(time);
+      });
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      showAlert('Error', 'Failed to start recording. Please try again.');
+      setIsRecording(false);
+    }
+  };
+
+  const onStopRecord = async () => {
+    if (!isRecording) {
+      console.log('Recording is already stopped.');
+      return;
+    }
+
+    console.log('Stopping recording...');
+    try {
+      const result = await audioRecorderPlayer.stopRecorder();
+      console.log('Recording stopped, file saved at:', result);
+      audioRecorderPlayer.removeRecordBackListener();
+      setIsRecording(false);
+      setRecordTime('00:00');
+
+      if (result && result !== 'Already stopped') {
+        const fileExists = await RNFS.exists(result);
+        if (fileExists) {
+          console.log('File exists:', result);
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: '',
+            createdAt: new Date(),
+            user: {
+              _id: props.user._id,
+              name: props.user.name,
+            },
+            attachment: {
+              uri: result,
+              name: `audio_${new Date().getTime()}.m4a`,
+              type: 'audio/m4a',
+            },
+          };
+          props.onSend([message]);
+        } else {
+          console.error('File does not exist:', result);
+          showAlert('Error', 'The recorded file does not exist.');
+        }
+      } else if (result === 'Already stopped') {
+        console.log('Recording was already stopped.');
+        if (recordingPath.current) {
+          const fileExists = await RNFS.exists(recordingPath.current);
+          if (fileExists) {
+            console.log('File exists at stored path:', recordingPath.current);
+            const message = {
+              _id: Math.random().toString(36).substring(7),
+              text: '',
+              createdAt: new Date(),
+              user: {
+                _id: props.user._id,
+                name: props.user.name,
+              },
+              attachment: recordingPath.current,
+            };
+            props.send([message]);
+          } else {
+            console.error(
+              'File does not exist at stored path:',
+              recordingPath.current,
+            );
+            showAlert('Error', 'The recorded file does not exist.');
+          }
+        } else {
+          console.error('No stored path available.');
+          showAlert('Error', 'No audio file was recorded.');
+        }
+      } else {
+        console.error('No file path returned from stopRecorder:', result);
+        showAlert('Error', 'No audio file was recorded.');
+      }
+    } catch (error) {
+      console.error('Failed to stop recording:', error);
+      showAlert('Error', 'Failed to stop recording. Please try again.');
+    }
+  };
+
+  const handleRecordPress = () => {
+    if (isRecording) {
+      onStopRecord();
+    } else {
+      onStartRecord();
+    }
+  };
+
   return (
     <View style={styles.viewStyle}>
       <Composer {...props} textInputStyle={styles.textInputStyle} />
-      <TouchableOpacity onPress={props?.onPress}>
-        {svgIcon.RecordIcon}
+      <TouchableOpacity onPress={handleRecordPress}>
+        {isRecording ? svgIcon.StopIcon : svgIcon.RecordIcon}
       </TouchableOpacity>
+      {isRecording && <Text style={styles.recordingText}>{recordTime}</Text>}
     </View>
   );
 };
@@ -36,6 +220,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     left: -6,
     marginTop: 4,
+  },
+  recordingText: {
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_10,
+    fontFamily: PFFonts.Foundation.Medium,
+    marginLeft: 4,
   },
 });
 

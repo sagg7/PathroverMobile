@@ -20,7 +20,7 @@ const ChatHeader = ({
     <View style={styles.headerContainer(showIcon)}>
       <Text style={styles.homeText}>Chat</Text>
       {showIcon && (
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={onPress} hitSlop={20}>
           {isInitial ? (
             <View style={styles.textView}>
               <Text style={styles.textStyle}>All Users</Text>
@@ -28,7 +28,7 @@ const ChatHeader = ({
           ) : (
             <Image
               source={isMenu ? appIcons.menuIcons : appIcons.settingIcon}
-              style={isMenu ? styles.menuIcons : styles.settingIcon}
+              style={isMenu ? styles.menuIcon : styles.settingIcon}
               resizeMode="contain"
             />
           )}
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: isIcon ? 'space-between' : 'center',
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingVertical: 8,
     alignItems: 'center',
     shadowColor: PFColors.Standard.Black,
     shadowOpacity: 0.15,

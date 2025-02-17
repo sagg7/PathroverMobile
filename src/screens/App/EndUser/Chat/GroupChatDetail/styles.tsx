@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   headerTextView: {
-    width: '70%',
+    width: '80%',
     flexDirection: 'row',
     alignItems: 'center',
   },

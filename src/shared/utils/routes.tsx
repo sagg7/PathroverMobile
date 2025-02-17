@@ -55,6 +55,7 @@ export const Routes = {
   VerifyNumber: 'VerifyNumber',
   Chat: 'Chat',
   ChatDetail: 'ChatDetail',
+  GroupChatDetail: 'GroupChatDetail',
   ChatUsers: 'ChatUsers',
   MemberList: 'MemberList',
   CreateGroup: 'CreateGroup',

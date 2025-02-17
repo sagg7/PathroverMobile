@@ -84,15 +84,16 @@ const WellPath = () => {
   const cameraRef = useRef<any>(null);
   const pinLocationSheet = useRef<any>(null);
   const [allWells, setAllWells] = useState<any>([]);
-  const [allPins, setAllPins] = useState<any>([]);
+  // const [allPins, setAllPins] = useState<any>([]);
+  console.log('allWells', allWells);
 
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
       setQueryParams({
         ...queryParams,
-        latitude: location?.longitude,
-        longitude: location?.latitude,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
       });
     }
   }, [location]);
@@ -103,8 +104,7 @@ const WellPath = () => {
   }, [queryParams, refetch]);
 
   useEffect(() => {
-    if (allWellLocations) setAllPins(allWellLocations?.pin);
-    setAllWells(allWellLocations?.wells);
+    if (allWellLocations) setAllWells(allWellLocations?.wells);
   }, [allWellLocations]);
 
   useEffect(() => {
@@ -112,22 +112,26 @@ const WellPath = () => {
       setSelectedMapType(mapLayerStyle);
     }
   }, [mapLayerStyle]);
+  const filterByType = (type: string) => {
+    const filtered = allWellLocations?.wells?.filter(
+      (item: any) => item?.well_type === type,
+    );
+
+    return filtered?.length ? filtered : [];
+  };
 
   useEffect(() => {
     if (!nearbyPins && nearbyWells) {
-      setAllWells(allWellLocations?.wells);
-      setAllPins([]);
+      setAllWells(filterByType('well'));
     } else if (!nearbyWells && nearbyPins) {
-      setAllPins(allWellLocations?.pin);
-      setAllWells([]);
+      setAllWells(filterByType('pin'));
     } else if (nearbyPins && nearbyWells) {
-      setAllPins(allWellLocations?.pin);
       setAllWells(allWellLocations?.wells);
     } else if (!nearbyPins && !nearbyWells) {
-      setAllPins([]);
       setAllWells([]);
     }
-  }, [nearbyPins, nearbyWells, allWellLocations]);
+  }, [nearbyWells, allWellLocations]);
+  // console.log('NEARBY WELLS', nearbyWells?.length);
 
   useEffect(() => {
     if (searchLocation?.length > 0) {
@@ -206,9 +210,16 @@ const WellPath = () => {
   };
 
   const onpressMarker = (e: any) => {
+    console.log('e', e);
+
+    if (e?.features[0]?.properties?.cluster) {
+      showAlert('Alert', 'Please zoom marker to view its details.');
+      return;
+    }
+    const selected = e?.features[0]?.properties?.well;
     setShowPinAddress(true);
-    setSelectedWell([e?.log, e?.lat]);
-    setSelectedWellName(e);
+    setSelectedWell([selected?.log, selected?.lat]);
+    setSelectedWellName(selected);
   };
 
   const _handlePinBtn = async () => {
@@ -260,58 +271,18 @@ const WellPath = () => {
     }
   };
 
-  const fetchData = debounce((latitude, longitude, zoom) => {
-    // console.log(
-    //   `Fetching data for lat: ${latitude}, lon: ${longitude} at zoom ${zoom}`,
-    // );
-    // API call here...
-  }, 1000); // 1-second debounce
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371000; // Radius of Earth in meters
-    const toRad = value => (value * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
+  const wellsToGeoJSON = (wells: any[]) => ({
+    type: 'FeatureCollection',
+    features: wells.map(well => ({
+      type: 'Feature',
+      properties: {well: well},
 
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in meters
-  };
-
-  const getDistanceThreshold = zoom => {
-    if (zoom > 15) return 200; // High zoom (street level) → fetch every 200m
-    if (zoom > 12) return 500; // City zoom → fetch every 500m
-    if (zoom > 9) return 1000; // Regional zoom → fetch every 1km
-    return 50000; // Low zoom (country level) → fetch every 5km
-  };
-
-  const onCameraChanged = event => {
-    const {center} = event.properties;
-    const [longitude, latitude] = center;
-
-    if (shouldFetchData(lastFetchedPosition, {latitude, longitude})) {
-      fetchData(latitude, longitude);
-      setLastFetchedPosition({latitude, longitude}); // Update last fetched position
-    }
-  };
-
-  const shouldFetchData = (lastPosition, newPosition) => {
-    if (!lastPosition) return true; // Fetch on first load
-
-    const distance = getDistance(
-      lastPosition.latitude,
-      lastPosition.longitude,
-      newPosition.latitude,
-      newPosition.longitude,
-    );
-
-    return distance >= 50000;
-  };
+      geometry: {
+        type: 'Point',
+        coordinates: [Number(well.log), Number(well.lat)],
+      },
+    })),
+  });
 
   return (
     <MainWrapper style={styles.container}>
@@ -330,8 +301,6 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
-        // onMapIdle={onRegionDidChange}
-        // onCameraChanged={onCameraChanged}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
@@ -363,51 +332,30 @@ const WellPath = () => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-
-        {allWells
-          ?.filter(
-            (item: any) =>
-              item?.lat !== undefined &&
-              item?.lat !== '' &&
-              item?.log !== undefined &&
-              item?.log !== '' &&
-              !isNaN(Number(item?.lat)) &&
-              !isNaN(Number(item?.log)),
-          )
-          .map((item: any, index: number) => {
-            const coordinates = [Number(item?.log), Number(item?.lat)];
-            return (
-              <MapboxGL.PointAnnotation
-                key={`pin-${index}`}
-                id={`pin-${index}`}
-                onSelected={() => onpressMarker(item)}
-                coordinate={coordinates}>
-                {svgIcon.CurrentLocation}
-              </MapboxGL.PointAnnotation>
-            );
-          })}
-        {allPins
-          ?.filter(
-            (item: any) =>
-              item?.lat !== undefined &&
-              item?.lat !== '' &&
-              item?.log !== undefined &&
-              item?.log !== '' &&
-              !isNaN(Number(item?.lat)) &&
-              !isNaN(Number(item?.log)),
-          )
-          .map((item: any, index: number) => {
-            const coordinates = [Number(item?.log), Number(item?.lat)];
-            return (
-              <MapboxGL.PointAnnotation
-                key={`pin-${index}`}
-                id={`pin-${index}`}
-                onSelected={() => onpressMarker(item)}
-                coordinate={coordinates}>
-                {svgIcon.PinMarker}
-              </MapboxGL.PointAnnotation>
-            );
-          })}
+        <MapboxGL.Images
+          images={{
+            marker: require('../../../../assets/icons/wellsMarker.png'),
+          }}
+        />
+        {/* Clustering Source */}
+        {allWells?.length > 0 && (
+          <MapboxGL.ShapeSource
+            onPress={onpressMarker}
+            id="wellsCluster"
+            shape={wellsToGeoJSON(allWells)}
+            cluster
+            clusterRadius={50}
+            clusterMaxZoom={14}>
+            <MapboxGL.SymbolLayer
+              id="markerLayer"
+              style={{
+                iconImage: 'marker',
+                iconSize: 1,
+                iconAllowOverlap: true,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
 
         {/* Route Line */}
         {route?.length > 1 && (
@@ -469,7 +417,7 @@ const WellPath = () => {
         onPressClear={() => onPressMapSettingClear()}
       />
       <PinLocationAddress
-        onPressShare={() => navigation.navigate('Chat')}
+        // onPressShare={() => navigation.navigate('Chat')}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
         selectedWell={selectedWellName || ['', '']}
@@ -531,6 +479,7 @@ const WellPath = () => {
           setValues={setPinYourLocation}
         />
       </RBSheet>
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };
