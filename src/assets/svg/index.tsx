@@ -131,6 +131,9 @@ import ImageType from './imageType.svg';
 import FileType from './fileType.svg';
 import VideoType from './videoType.svg';
 import CameraType from './ cameraType.svg';
+import StopIcon from './stopIcon.svg';
+import OrangeRecordIcon from './orangeRecord.svg';
+import OrangeStopIcon from './orangeStop.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -265,4 +268,7 @@ export const svgIcon = {
   FileType: <FileType />,
   VideoType: <VideoType />,
   CameraType: <CameraType />,
+  StopIcon: <StopIcon />,
+  OrangeRecordIcon: <OrangeRecordIcon />,
+  OrangeStopIcon: <OrangeStopIcon />,
 };
