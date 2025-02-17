@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
 
@@ -32,12 +32,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginHorizontal: scale(12),
     marginVertical: scale(6),
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(12),
+    paddingHorizontal: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: scale(10),
+    ...Platform.select({
+      android: {
+        paddingVertical: 3,
+      },
+      ios: {
+        paddingVertical: 12,
+      },
+    }),
   },
   input: {
     width: '80%',
