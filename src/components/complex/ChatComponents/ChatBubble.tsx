@@ -53,7 +53,7 @@ const ChatBubble = ({props}) => {
   };
 
   const onClose = () => {
-    setModalVisible(!modalVisible);
+    setModalVisible(false);
   };
 
   const renderTextWithUrls = text => {
