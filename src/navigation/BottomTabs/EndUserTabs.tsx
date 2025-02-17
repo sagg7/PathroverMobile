@@ -6,6 +6,7 @@ import Chat from '../../screens/App/EndUser/Chat';
 import Home from '../../screens/App/EndUser/Home';
 import {Routes} from '../../shared/exporter';
 import WellPath from '../../screens/App/EndUser/WellPath';
+import HikingScreen from '../../screens/App/EndUser/HikingScreen';
 
 const Tab = createBottomTabNavigator();
 const EndUserTabs = () => {
@@ -22,7 +23,7 @@ const EndUserTabs = () => {
       />
       <Tab.Screen
         options={{unmountOnBlur: true}}
-        component={DummyScreen}
+        component={HikingScreen}
         name={'Hiking'}
       />
       <Tab.Screen
