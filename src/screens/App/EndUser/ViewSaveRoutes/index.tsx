@@ -23,6 +23,7 @@ import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWel
 import Geolocation from 'react-native-geolocation-service';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import {useSelector} from 'react-redux';
+import {useNavigation} from '@react-navigation/native';
 
 const ViewSaveRoutes = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -38,7 +39,7 @@ const ViewSaveRoutes = ({route}: any) => {
   const [destination, setDestination] = useState<any>(null);
   const [startPoint, setStartPoint] = useState<any>(null);
   const [endPoint, setEndPoint] = useState<any>(null);
-
+  const navigation = useNavigation();
   const [liveLocation, setLiveLocation] = useState<any>(null);
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
   const [timeDistance, setTimeDistance] = useState(null);
@@ -297,7 +298,12 @@ const ViewSaveRoutes = ({route}: any) => {
       ]);
     formattedPoints.unshift(startCoordinates);
     formattedPoints.push(endCoordinates);
-    setRoute(formattedPoints);
+    if (selectedRoute?.route_type === 'maps_location_pins') {
+      getRoadRoute(startCoordinates, endCoordinates);
+    } else {
+      setRoute(formattedPoints);
+    }
+    // setRoute(formattedPoints);
   };
   const onPressStartBtn = () => {
     getRoute();
@@ -413,7 +419,11 @@ const ViewSaveRoutes = ({route}: any) => {
       </MapboxGL.MapView>
       {showRouteStartedSheet && (
         <RouteToWellStartedSheet
-          routeName={'Enroute to starting point'}
+          routeName={
+            modalKey === 1
+              ? 'Enroute to starting point'
+              : 'Enroute to destination point'
+          }
           routeInfo={timeDistance}
           setModalVisible={() => {
             setShowRouteStartedSheet(false);
@@ -428,6 +438,7 @@ const ViewSaveRoutes = ({route}: any) => {
       )}
       {showRouteActionSheet && (
         <RouteToWellSheet
+          onpressCancel={() => navigation.goBack()}
           routeName={route?.params?.entranceName}
           distanceInfo={results}
           actionBtn={actionBtn}
