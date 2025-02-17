@@ -100,7 +100,9 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
             )}
           </View>
           <View style={styles.rightView(item?.count > 0)}>
-            <Text style={styles.timeText}>{getTime(item?.created_at)}</Text>
+            <Text style={styles.timeText}>
+              {getTime(item?.created_at || item?.last_message?.sent_at)}
+            </Text>
             {item?.unread_messages > 0 && (
               <View style={styles.countView}>
                 <Text style={styles.countText}>{item?.unread_messages}</Text>
