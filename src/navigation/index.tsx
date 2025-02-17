@@ -56,6 +56,7 @@ import EndUserSavedLibrary from '../screens/App/EndUser/EndUserSavedLibrary';
 import EndUserSavedLibraryType from '../screens/App/EndUser/EndUserSavedLibraryType';
 import ViewSaveRoutes from '../screens/App/EndUser/ViewSaveRoutes';
 import RecordRoute from '../screens/App/EndUser/RecordRoute';
+import GroupChatDetail from '../screens/App/EndUser/Chat/GroupChatDetail';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -126,6 +127,10 @@ const AppNavigation = () => {
         <Stack.Screen name={Routes.MemberList} component={MemberList} />
         <Stack.Screen name={Routes.CreateGroup} component={CreateGroup} />
         <Stack.Screen name={Routes.ChatDetail} component={ChatDetail} />
+        <Stack.Screen
+          name={Routes.GroupChatDetail}
+          component={GroupChatDetail}
+        />
         <Stack.Screen name={Routes.GroupInfo} component={GroupInfoDetail} />
         <Stack.Screen name={'AuthStack'} component={AuthStack} />
         <Stack.Screen name={Routes.SearchWellPath} component={SearchWellPath} />

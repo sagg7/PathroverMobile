@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, TextInput} from 'react-native';
+import {Text, View, StyleSheet, TextInput, Platform} from 'react-native';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
 
@@ -16,6 +16,7 @@ const ChatSearch = ({value, placeholder, onChangeText}: ChatSearchProps) => {
       <TextInput
         value={value}
         placeholder={placeholder}
+        placeholderTextColor={PFColors.Gray.DarkGray}
         onChangeText={onChangeText}
         style={styles.textStyle}
       />
@@ -29,13 +30,21 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: PFColors.Gray.WhisperGray,
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
     alignItems: 'center',
     flexDirection: 'row',
     marginHorizontal: 12,
     marginVertical: 12,
     justifyContent: 'space-between',
+    ...Platform.select({
+      android: {
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+      },
+      ios: {
+        paddingHorizontal: 14,
+        paddingVertical: 14,
+      },
+    }),
   },
   textStyle: {
     width: '90%',

@@ -104,7 +104,7 @@ const ChatGroup = () => {
       <ChatListItem
         item={item}
         onPress={() => {
-          navigation.navigate('ChatDetail', {item, isGroup: true});
+          navigation.navigate('GroupChatDetail', {item, isGroup: true});
         }}
         onPressDelete={() => onPressDelete(item)}
       />

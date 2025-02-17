@@ -6,52 +6,39 @@ import {useSelector} from 'react-redux';
 import {appIcons} from '../../../../../assets/icons';
 import {svgIcon} from '../../../../../assets/svg';
 import {
-  ChatBubble,
   MainWrapper,
   RenderDay,
   RenderInputToolbar,
   RenderMessageText,
   RenderTime,
 } from '../../../../../components';
+import {GroupChatBubble} from '../../../../../components/complex/ChatComponents/GroupChatBubble';
 import RenderMessageImage from '../../../../../components/complex/ChatComponents/RenderMessageImage';
 import CreateGroupModal from '../../../../../components/complex/CreateGroupModal';
 import {useActionCable} from '../../../../../hooks/socket/useActionCable';
 import {useChannel} from '../../../../../hooks/socket/useChannel';
 import {
-  useCreateChatMessageMutation,
-  useGetChatMessageMutation,
-  useReadChatMessageMutation,
+  useCreateGroupMessageMutation,
+  useGetGroupChatMessagesMutation,
+  useReadGroupChatMessageMutation,
 } from '../../../../../redux/chat/chatApiSlice';
 import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
 import styles from './styles';
+import AudioMessage from '../../../../../components/complex/ChatComponents/AudioMessage';
 
 interface HeaderProps {
   title: string;
   onPressBack: () => void;
-  onPressPhone?: () => void;
-  onPressVideo?: () => void;
+  onPressMenu?: () => void;
 }
 
-const Header = ({
-  onPressBack,
-  title,
-  onPressPhone,
-  onPressVideo,
-}: HeaderProps) => {
+const Header = ({onPressBack, onPressMenu, title}: HeaderProps) => {
   return (
     <View style={styles.groupHeader}>
       <TouchableOpacity onPress={onPressBack} hitSlop={20}>
         {svgIcon.BackArrow}
       </TouchableOpacity>
       <View style={styles.headerTextView}>
-        <Image
-          source={
-            title?.user?.avatar
-              ? {uri: title?.user?.avatar}
-              : appIcons.userPlaceholder
-          }
-          style={styles.imageStyle}
-        />
         <Text style={styles.groupNameText}>
           {title && typeof title === 'object' && title.user
             ? [title.user.first_name, title.user.last_name]
@@ -60,19 +47,13 @@ const Header = ({
             : title?.name || ''}
         </Text>
       </View>
-
-      <View style={styles.iconView}>
-        <TouchableOpacity onPress={onPressPhone}>
-          {svgIcon.BlackPhone}
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onPressVideo}>
-          {svgIcon.VideoIcon}
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={onPressMenu}>
+        <Image source={appIcons.menuIcons} style={styles.iconStyle} />
+      </TouchableOpacity>
     </View>
   );
 };
-const ChatDetail = () => {
+const GroupChatDetail = () => {
   const {params} = useRoute();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
@@ -83,21 +64,21 @@ const ChatDetail = () => {
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
   const {subscribe, unsubscribe} = useChannel(actionCable);
 
-  const [readChatMessage] = useReadChatMessageMutation();
-  const [createChatMessage] = useCreateChatMessageMutation();
-  const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
+  const [createGroupMessage] = useCreateGroupMessageMutation();
+  const [getGroupChatMessages, {data}] = useGetGroupChatMessagesMutation();
+  const [readGroupChatMessage] = useReadGroupChatMessageMutation();
 
   useEffect(() => {
     try {
       subscribe(
         {
-          channel: 'PrivateChatChannel',
-          channel_key: `private_chat_${params?.item?.id}_channel`,
-          chat_id: params?.item?.id,
+          channel: 'GroupChatChannel',
+          channel_key: `group_chat_${params?.item?.id}_channel`,
+          group_id: params?.item?.id,
         },
         {
           received: res => {
-            getChatMessage(params?.item?.id);
+            getGroupChatMessages(params?.item?.id);
             readChat();
           },
           connected: () => {},
@@ -113,21 +94,21 @@ const ChatDetail = () => {
   }, [params]);
 
   useEffect(() => {
-    if (chat?.length > 0) {
-      const rearrange = chat.map(i => ({
+    if (data?.length > 0) {
+      const rearrange = data.map(i => ({
         ...i,
         _id: i?.id,
         createdAt: i?.created_at,
-        user: {...i.user, _id: i.user.id},
+        user: {...i?.user, _id: i?.user?.id},
       }));
       setMessages(rearrange);
     }
-  }, [chat]);
+  }, [data]);
 
   useEffect(() => {
     (async () => {
       if (isFocused) {
-        await getChatMessage(params?.item?.id);
+        await getGroupChatMessages(params?.item?.id);
       }
       readChat();
     })();
@@ -135,8 +116,12 @@ const ChatDetail = () => {
 
   const onSend = async (message: string) => {
     try {
+      console.log('=======message=============================');
+      console.log(message);
+      console.log('====================================');
       const {item} = params;
       const form = new FormData();
+
       if (message[0]?.attachment) {
         form.append('message[message_attachment]', {
           uri:
@@ -155,15 +140,19 @@ const ChatDetail = () => {
             '',
         });
       }
-
       form.append('message[content]', message[0]?.text);
       form.append('message[user_id]', loginUser?.id);
-      form.append('message[message_type]', 'private');
+      form.append('message[message_type]', 'group');
       form.append('message[read]', false);
+      form.append('message[group_id]', item?.id);
 
-      const res = await createChatMessage({data: form, id: item?.id});
+      console.log('==================form==================');
+      console.log(form.getParts());
+      console.log('====================================');
+
+      const res = await createGroupMessage({data: form, id: item?.id});
       if (res) {
-        await getChatMessage(item?.id);
+        await getGroupChatMessages(item?.id);
       }
     } catch (error) {
       //
@@ -172,7 +161,7 @@ const ChatDetail = () => {
 
   const readChat = async () => {
     try {
-      await readChatMessage(params?.item?.id);
+      await readGroupChatMessage(params?.item?.id);
     } catch (error) {
       //
     }
@@ -182,6 +171,7 @@ const ChatDetail = () => {
     <MainWrapper>
       <Header
         onPressBack={() => navigation.navigate('Chat')}
+        onPressMenu={() => setShow(true)}
         title={params?.item || 'Group Chat'}
       />
       <View style={styles.container}>
@@ -196,11 +186,12 @@ const ChatDetail = () => {
           scrollToBottom
           isKeyboardInternallyHandled
           keyboardShouldPersistTaps="never"
-          renderDay={RenderDay}
-          renderBubble={props => <ChatBubble props={props} />}
+          renderDay={props => <RenderDay {...props} />}
+          renderBubble={props => <GroupChatBubble props={props} />}
           renderMessageText={RenderMessageText}
           renderTime={RenderTime}
           renderMessageImage={RenderMessageImage}
+          renderMessageAudio={props => <AudioMessage {...props} />}
           renderInputToolbar={props =>
             RenderInputToolbar(props, () => {}, true)
           }
@@ -227,4 +218,4 @@ const ChatDetail = () => {
   );
 };
 
-export default ChatDetail;
+export default GroupChatDetail;

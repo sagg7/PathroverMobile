@@ -145,7 +145,7 @@ const MemberList = () => {
     <MainWrapper>
       <View style={styles.groupHeader}>
         <View style={styles.topHeaderView}>
-          <TouchableOpacity onPress={() => navigation.pop()}>
+          <TouchableOpacity onPress={() => navigation.pop()} hitSlop={20}>
             {svgIcon.BackArrow}
           </TouchableOpacity>
           <View style={styles.headerTextView}>

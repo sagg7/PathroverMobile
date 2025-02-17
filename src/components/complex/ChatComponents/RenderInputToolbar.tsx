@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import {RenderComposer} from './RenderComposer';
 import RenderActions from './RenderActions';
 import {RenderSend} from './RenderSend';
@@ -9,7 +9,7 @@ import {RenderRecordComposer} from './RenderRecordComposer';
 const RenderInputToolbar = (props, onPress, isRecord) => {
   return (
     <View style={styles.mainContainer}>
-      <RenderActions {...props} />
+      <RenderActions {...props} isRecord />
       {isRecord ? (
         <RenderRecordComposer {...props} />
       ) : (
@@ -31,16 +31,27 @@ const styles = StyleSheet.create({
     backgroundColor: PFColors.Standard.White,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
-    shadowColor: PFColors.Gray.DarkGray,
-    shadowOpacity: 0.5,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
+    shadowColor: PFColors.Standard.Black,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 8,
     justifyContent: 'space-between',
     width: '100%',
+    ...Platform.select({
+      android: {
+        paddingBottom: 6,
+        shadowOffset: {
+          width: 0,
+          height: -10,
+        },
+      },
+      ios: {
+        shadowOffset: {
+          width: 0,
+          height: 0,
+        },
+      },
+    }),
   },
 });
 
