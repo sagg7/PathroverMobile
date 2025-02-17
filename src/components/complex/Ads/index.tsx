@@ -12,12 +12,15 @@ function Ads({item, isTop = false}: AdsProps) {
   const [ads, setAds] = useState({});
 
   useEffect(() => {
-    setAds(__DEV__ ? TestIds.BANNER : item);
+    // setAds(__DEV__ ? TestIds.BANNER : item);
   }, []);
 
   return (
     <View style={styles.main(isTop)}>
-      <BannerAd unitId={ads} size={BannerAdSize.MEDIUM_RECTANGLE} />
+      <BannerAd
+        unitId={__DEV__ ? TestIds.BANNER : item}
+        size={BannerAdSize.MEDIUM_RECTANGLE}
+      />
     </View>
   );
 }

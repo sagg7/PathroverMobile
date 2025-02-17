@@ -52,19 +52,25 @@ const AddNumber = () => {
         phone_number: removeNonNumbers(values?.phone),
       };
       const res = await addPhoneNumber(data);
-
+      a;
       // TODO: REVERT FOR COMMENTED/REMOVE OTP FROM ALERT
-      if (res) {
+      if (res?.data) {
         // if (res?.data) {
         setIsVisible(false);
-        Alert.alert('OTP', `Remember your otp ${res?.data?.otp}`, [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate('VerifyNumber', data);
+        Alert.alert(
+          'OTP',
+          `Remember your otp ${res?.data?.otp ? res?.data?.otp : ''}`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.navigate('VerifyNumber', data);
+              },
             },
-          },
-        ]);
+          ],
+        );
+      } else {
+        showAlert('Error', res?.error?.data?.error);
       }
     } catch (error) {
       //

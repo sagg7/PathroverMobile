@@ -44,29 +44,31 @@ const PinLocationAddress = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      {/* <View style={styles.actionIcon}>
+      <View style={styles.actionIcon}>
         <TouchableOpacity onPress={onPressShare} style={{right: 10}}>
           {svgIcon.ShareWellPath}
         </TouchableOpacity>
         <TouchableOpacity onPress={onPressPin}>
           {svgIcon.PinLocation}
         </TouchableOpacity>
-      </View> */}
+      </View>
 
       <View style={styles.blueBox}>
         <View style={styles.detailSection}>
           <DetailView title="API" value={selectedWell?.api || 'N/A'} />
-          <View style={styles.detailTextView}>
-            <Text style={styles.detailTitle}>Status:</Text>
-            <View style={styles.statusView}>
-              <Text style={styles.statusValueText}>
-                {selectedWell?.status || 'N/A'}
-              </Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.horizontalLine} />
+        <View style={styles.detailTextView}>
+          <Text style={styles.detailTitle}>Status:</Text>
+          <View style={styles.statusView}>
+            <Text style={styles.statusValueText}>
+              {selectedWell?.status || 'N/A'}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.horizontalLine} />
+
         {selectedWell?.lat > 0 && (
           <>
             <View style={styles.detailSection}>

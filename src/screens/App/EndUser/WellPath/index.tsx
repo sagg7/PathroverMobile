@@ -469,7 +469,7 @@ const WellPath = () => {
         onPressClear={() => onPressMapSettingClear()}
       />
       <PinLocationAddress
-        // modalVisible={true}
+        onPressShare={() => navigation.navigate('Chat')}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
         selectedWell={selectedWellName || ['', '']}
