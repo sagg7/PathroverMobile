@@ -1,16 +1,22 @@
-import moment from 'moment';
 import React, {useState} from 'react';
 import {
-  Image,
-  Linking,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
-import FitImage from 'react-native-fit-image';
+import moment from 'moment';
 import Modal from 'react-native-modal';
-import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
+import FitImage from 'react-native-fit-image';
+import {
+  appImages,
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  scale,
+} from '../../../shared/exporter';
 import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType';
 import AudioMessage from './AudioMessage';
 import VideoMessage from './VideoMessage';
@@ -33,15 +39,29 @@ const getShowTime = (currentMessage, nextMessage) => {
   return nextTime - currentTime > THRESHOLD;
 };
 
-const ChatBubble = ({props}) => {
-  const {currentMessage, position, nextMessage} = props;
+const GroupChatBubble = ({props}) => {
+  const {currentMessage, position, previousMessage, nextMessage} = props;
   const isLeft = position === 'left';
-
-  const {content, created_at, image, message_attachment, text} = currentMessage;
-  const showTime = getShowTime(currentMessage, nextMessage);
+  const {content, created_at, image, message_attachment, text, user} =
+    currentMessage;
+  const {avatar, name} = user;
   const fileType =
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.url);
+
+  // const showAvatar =
+  //   !previousMessage ||
+  //   currentMessage?.user?._id !== previousMessage?.user?._id;
+
+  const showAvatar =
+    !previousMessage ||
+    currentMessage?.user?._id !== previousMessage?.user?._id ||
+    !moment(currentMessage?.created_at).isSame(
+      previousMessage?.created_at,
+      'day',
+    );
+
+  const showTime = getShowTime(currentMessage, nextMessage);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -64,7 +84,6 @@ const ChatBubble = ({props}) => {
           onPress={() => Linking.openURL(part)}
           style={[
             styles.url,
-            ,
             isLeft ? styles.leftMessageText : styles.rightMessageText,
             {opacity: 0.8},
           ]}>
@@ -85,6 +104,25 @@ const ChatBubble = ({props}) => {
 
   return (
     <View style={styles.main}>
+      {showAvatar &&
+        (isLeft ? (
+          <View style={styles.userViewLeft}>
+            <Image
+              source={avatar ? {uri: avatar} : appImages.userPlaceholder}
+              style={styles.userIconStyle}
+            />
+            <Text style={styles.userNameText}>{name}</Text>
+          </View>
+        ) : (
+          <View style={styles.userViewRight}>
+            <Text style={styles.userNameText}>{name}</Text>
+            <Image
+              source={avatar ? {uri: avatar} : appImages.userPlaceholder}
+              style={styles.userIconStyle}
+            />
+          </View>
+        ))}
+
       <View
         style={[
           styles.bubbleContainer,
@@ -148,6 +186,7 @@ const ChatBubble = ({props}) => {
           {moment(created_at).format('hh:mm A')}
         </Text>
       )}
+
       <Modal
         animationIn={'zoomIn'}
         animationOut={'zoomOut'}
@@ -180,10 +219,12 @@ const styles = StyleSheet.create({
   leftBubble: {
     alignSelf: 'flex-start',
     backgroundColor: PFColors.Orange.Soft,
+    marginLeft: 25,
   },
   rightBubble: {
     alignSelf: 'flex-end',
     backgroundColor: PFColors.Blue.Dark,
+    marginRight: 25,
   },
   messageWrapper: {
     justifyContent: 'space-between',
@@ -210,8 +251,8 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_8,
     color: PFColors.Gray.DarkGray,
     fontFamily: PFFonts.Foundation.Medium,
+    marginHorizontal: 27,
     marginBottom: 3,
-    marginHorizontal: 2,
   },
   imageTime: {
     fontSize: PFFontSize.FONT_SIZE_8,
@@ -266,6 +307,28 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.Medium,
     textDecorationLine: 'underline',
   },
+  userIconStyle: {
+    height: 22,
+    width: 22,
+    borderRadius: 22,
+    backgroundColor: PFColors.Gray.LightMist,
+  },
+  userViewLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  userViewRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  userNameText: {
+    fontSize: PFFontSize.FONT_SIZE_10,
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    marginHorizontal: 6,
+  },
 });
 
-export {ChatBubble};
+export {GroupChatBubble};

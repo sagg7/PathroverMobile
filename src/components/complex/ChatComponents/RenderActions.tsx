@@ -1,56 +1,186 @@
-import React from 'react';
-import {StyleSheet} from 'react-native';
-import {Actions} from 'react-native-gifted-chat';
-import ImagePicker from 'react-native-image-crop-picker'; // Import Image Picker
+import React, {useState} from 'react';
+import {StyleSheet, TouchableOpacity} from 'react-native';
+import {pickSingle, types} from 'react-native-document-picker';
+import ImagePicker from 'react-native-image-crop-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {svgIcon} from '../../../assets/svg';
+import {showAlert} from '../../../shared/exporter';
+import MediaModal from './MediaModal';
 
 const RenderActions = props => {
-  const handleImagePick = () => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 300,
-      cropping: true, // Enable cropping
-    })
-      .then(image => {
-        // Prepare the message object with image
-        const message = {
-          _id: Math.random().toString(36).substring(7), // Random id for the message
-          text: '', // No text since it's an image
-          createdAt: new Date(),
-          user: {
-            _id: props.user._id, // Ensure the user is correctly assigned
-            name: props.user.name,
-          },
-          image: image, // Attach the image path to the message
-        };
+  const [isVisible, setIsVisible] = useState(false);
 
-        // Call onSend to send the image as a message
-        props.onSend([message]);
+  const handleGallery = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      ImagePicker.openPicker({
+        width: 300,
+        height: 300,
+        cropping: true,
       })
-      .catch(error => {
-        console.log('Error picking image: ', error);
+        .then(image => {
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: '',
+            createdAt: new Date(),
+            user: {
+              _id: props.user._id,
+              name: props.user.name,
+            },
+            attachment: image,
+          };
+
+          props.onSend([message]);
+        })
+        .catch(error => {
+          console.log('Error picking image: ', error);
+        });
+    }, 500);
+  };
+
+  const handleCamera = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      const options = {
+        mediaType: 'photo', 
+        quality: 0.8, 
+        includeBase64: false,
+      };
+
+      launchCamera(options, response => {
+        if (response.didCancel) {
+          console.log('User cancelled image capture');
+        } else if (response.errorCode) {
+          console.log('Camera Error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const imageAsset = response.assets[0];
+
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: '',
+            createdAt: new Date(),
+            user: {
+              _id: props.user._id,
+              name: props.user.name,
+            },
+            attachment: imageAsset,
+          };
+
+          props.onSend([message]);
+          console.log('Captured image URI: ', imageAsset.uri);
+        }
       });
+    }, 500);
+  };
+
+  const handleVideo = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      const options = {
+        mediaType: 'video',
+        videoQuality: 'high',
+        durationLimit: 600,
+        includeBase64: false,
+      };
+
+      launchImageLibrary(options, response => {
+        if (response.didCancel) {
+          console.log('User cancelled video picker');
+        } else if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          const videoUri = response.assets && response.assets[0];
+
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: '',
+            createdAt: new Date(),
+            user: {
+              _id: props.user._id,
+            },
+            attachment: response?.assets[0],
+          };
+
+          props.onSend([message]);
+          console.log('Selected video URI: ', videoUri);
+        }
+      });
+    }, 500);
+  };
+
+  const handleFile = async () => {
+     setIsVisible(false);
+    setTimeout(async () => {
+      await pickSingle({
+        allowMultiSelection: false,
+        type: [
+          types.pdf,
+          types.doc,
+          types.docx,
+          types.plainText,
+          types.ppt,
+          types.pptx,
+          types.xls,
+          types.xlsx,
+          // types.zip,
+        ],
+      })
+        .then(file => {
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: '',
+            createdAt: new Date(),
+            user: {
+              _id: props.user._id,
+              name: props.user.name,
+            },
+            attachment: file,
+          };
+
+          props.onSend([message]);
+        })
+        .catch(error => {
+          console.log('Error picking file: ', error);
+        });
+    }, 500);
   };
 
   return (
-    <Actions
-      {...props}
-      onPressActionButton={handleImagePick}
-      icon={() => <>{svgIcon.AddButton}</>}
-      containerStyle={styles.containerStyle}
-    />
+    <>
+      <TouchableOpacity
+        style={styles.buttonStyle(isVisible)}
+        onPress={() => {
+          if (props?.isRecord) {
+            setIsVisible(true);
+          } else {
+            handleGallery();
+          }
+        }}>
+        {svgIcon.AddButton}
+      </TouchableOpacity>
+      {isVisible && (
+        <MediaModal
+          isVisible={isVisible}
+          setIsVisible={setIsVisible}
+          onPressImage={handleGallery}
+          onPressCamera={handleCamera}
+          onPressVideo={handleVideo}
+          onPressFile={handleFile}
+        />
+      )}
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   containerStyle: {
-    // justifyContent: 'center',
-    // alignSelf: 'flex-end',
-    // marginBottom: 5,
     left: -15,
     height: 44,
     width: 44,
   },
+  buttonStyle: isVisible => ({
+    transform: [{rotate: isVisible ? '90deg' : '0deg'}],
+  }),
 });
 
 export default RenderActions;

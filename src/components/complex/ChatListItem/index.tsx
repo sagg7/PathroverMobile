@@ -92,7 +92,7 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
               <Text style={styles.nameText}>{item?.name || ''}</Text>
             )}
             {item?.last_message && (
-              <Text style={styles.detailText}>
+              <Text style={styles.detailText} numberOfLines={1}>
                 {typeof item?.last_message === 'object'
                   ? item?.last_message?.content || ''
                   : item?.last_message || ''}

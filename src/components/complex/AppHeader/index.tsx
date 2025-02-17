@@ -39,6 +39,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {leftIcon ? (
           <TouchableOpacity
             activeOpacity={0.7}
+            hitSlop={20}
             onPress={() =>
               clickBackIcon ? clickBackIcon() : navigation.goBack()
             }>
@@ -52,6 +53,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {rightIcon ? (
           <TouchableOpacity
             activeOpacity={0.7}
+            hitSlop={20}
             onPress={() => {
               clickRightIcon();
             }}>

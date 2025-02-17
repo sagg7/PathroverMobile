@@ -3270,8 +3270,8 @@ __metadata:
   linkType: hard
 
 "@react-native-google-signin/google-signin@npm:^13.1.0":
-  version: 13.1.0
-  resolution: "@react-native-google-signin/google-signin@npm:13.1.0"
+  version: 13.2.0
+  resolution: "@react-native-google-signin/google-signin@npm:13.2.0"
   peerDependencies:
     expo: ">=50.0.0"
     react: "*"
@@ -3282,7 +3282,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 777bb338ce1ce1b9581f1e3c67d04a1d8eb2486745868e170455b3485c26a6dcbeb202acfb949bf45817b7d7f9c8c7259342c1a0f237aa03eef2965e69b90f12
+  checksum: 2d299b33c47c19976aa6b01837e1f40254b682f35fb3b94664389a071a90b42f49c6a759c52a7145e2cdc06e19f736081dd75a2dd9781d44175db54a6d7355cc
   languageName: node
   linkType: hard
 
@@ -3644,8 +3644,8 @@ __metadata:
   linkType: hard
 
 "@rnmapbox/maps@npm:^10.1.31":
-  version: 10.1.33
-  resolution: "@rnmapbox/maps@npm:10.1.33"
+  version: 10.1.35
+  resolution: "@rnmapbox/maps@npm:10.1.35"
   dependencies:
     "@turf/along": 6.5.0
     "@turf/distance": 6.5.0
@@ -3667,7 +3667,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 847b34994f121d057840d73d20c713bdd54eafda95b576344022cda32362ecd131429a9f55a219068ee6a4ff03ad1e271ade521bffd7d1c5b266746207b3a850
+  checksum: bf04a41c6e374997d0687099383643557549216ffa5b1059dd24d54778ed7f6f3e5836fd2258c89e9f2406a60254e5281ecc36e8cbaf92a693a9cd3dca5c16ab
   languageName: node
   linkType: hard
 
@@ -5961,11 +5961,11 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*":
-  version: 19.0.8
-  resolution: "@types/react@npm:19.0.8"
+  version: 19.0.10
+  resolution: "@types/react@npm:19.0.10"
   dependencies:
     csstype: ^3.0.2
-  checksum: 80dd2e7fa4b3e0ea2d883c21317563f4af1c4d90a6250c8bcbc052079304dc3335369267026004ed5d7cac09c7b0026e02e71ae5cca3150643507e353219fe47
+  checksum: e257e87bc3464825014523aecc700540a9da41c3c23136c03da9b2b7999251ac70ef9e594febdefeea6abe51da2475b42e5d96af6559d76f8d54bffc0b0ddacd
   languageName: node
   linkType: hard
 
@@ -6272,11 +6272,15 @@ __metadata:
     react: 18.2.0
     react-native: 0.74.5
     react-native-app-intro-slider: ^4.0.4
+    react-native-audio-recorder-player: ^3.6.12
     react-native-calendars: ^1.1306.0
     react-native-circular-progress-indicator: ^4.4.2
     react-native-confirmation-code-field: ^7.4.0
+    react-native-document-picker: ^9.3.1
     react-native-fbsdk-next: ^13.3.0
+    react-native-file-viewer: ^2.1.5
     react-native-fit-image: ^1.5.5
+    react-native-fs: ^2.20.0
     react-native-geolocation-service: ^5.3.1
     react-native-gesture-handler: ^2.18.1
     react-native-get-random-values: ^1.11.0
@@ -6299,6 +6303,7 @@ __metadata:
     react-native-svg-transformer: ^1.5.0
     react-native-switch-toggle: ^2.2.1
     react-native-tab-view: ^4.0.5
+    react-native-video: ^6.10.1
     react-redux: ^9.1.2
     react-test-renderer: 18.2.0
     redux-persist: ^6.0.0
@@ -6824,6 +6829,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-64@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "base-64@npm:0.1.0"
+  checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -7057,9 +7069,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001688":
-  version: 1.0.30001699
-  resolution: "caniuse-lite@npm:1.0.30001699"
-  checksum: 697172065537b0f33c428fe8561f4cba6796428dc8e3e56f78eee28404edfcbea70d48bb109ab6c6536de6da90e331058a2cb8ef3a15c58b2226c96ee558bc07
+  version: 1.0.30001700
+  resolution: "caniuse-lite@npm:1.0.30001700"
+  checksum: 0e5e1c8648efeae1a2bcf371c872a4e41d9508d58b47133558f78b99c3d58c4b6ce7688068ea872deffbfc7c3c2a117e756fc48e1de7ae6c5540f3c3a4441c7a
   languageName: node
   linkType: hard
 
@@ -7151,11 +7163,11 @@ __metadata:
   linkType: hard
 
 "cidr-regex@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "cidr-regex@npm:4.1.1"
+  version: 4.1.2
+  resolution: "cidr-regex@npm:4.1.2"
   dependencies:
     ip-regex: ^5.0.0
-  checksum: 161fd1efb06a53b0fad1afbaa4b9f42c5fd10118da99f5d442e990acc99491406be5a397e9301d1a6cd2106b2aa37d72520cec9cae02f8d66500291dd5a91fe5
+  checksum: b506b93f19adf537806d3715c71c033433132aee5fb1a63107ac217bf8f9106ae0511e5bc52873c667e97df845aa9ed45c91944eb6807c18db1c1df78d1e66d7
   languageName: node
   linkType: hard
 
@@ -7964,9 +7976,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.73":
-  version: 1.5.100
-  resolution: "electron-to-chromium@npm:1.5.100"
-  checksum: 14c54ba03bbe96a7cd9e8ae4eff01e3306e8a6932e643bee2b6543a1a48f5ff7418769736d133542fbf6ec4837e113aeb9b2d8859a3420ddd950d498f7bd2b06
+  version: 1.5.101
+  resolution: "electron-to-chromium@npm:1.5.101"
+  checksum: e8358a7c5638514b8f9483ae45cc33dbbad60ed103a35cf179a823483abf28a75195086de1ec942fa33473156839605e642979ac8adbe6c19da3c3b31acba9cc
   languageName: node
   linkType: hard
 
@@ -8870,13 +8882,14 @@ __metadata:
   linkType: hard
 
 "form-data@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "form-data@npm:4.0.1"
+  version: 4.0.2
+  resolution: "form-data@npm:4.0.2"
   dependencies:
     asynckit: ^0.4.0
     combined-stream: ^1.0.8
+    es-set-tostringtag: ^2.1.0
     mime-types: ^2.1.12
-  checksum: ccee458cd5baf234d6b57f349fe9cc5f9a2ea8fd1af5ecda501a18fd1572a6dd3bf08a49f00568afd995b6a65af34cb8dec083cf9d582c4e621836499498dd84
+  checksum: e887298b22c13c7c9c5a8ba3716f295a479a13ca78bfd855ef11cbce1bcf22bc0ae2062e94808e21d46e5c667664a1a1a8a7f57d7040193c1fefbfb11af58aab
   languageName: node
   linkType: hard
 
@@ -9410,6 +9423,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hyochan-welcome@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "hyochan-welcome@npm:1.0.1"
+  bin:
+    hyochan-welcome: bin/hello.js
+  checksum: 2ea7093b54eefcde4c65e4a8ffd3f3926a55ff0bce20a3f5142fe1108e76c0dfcb98517b47714c536f9de8302b92ae02bf240891d3114d527ccd497e2ea9478e
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -9647,11 +9669,11 @@ __metadata:
   linkType: hard
 
 "is-cidr@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "is-cidr@npm:5.1.0"
+  version: 5.1.1
+  resolution: "is-cidr@npm:5.1.1"
   dependencies:
     cidr-regex: ^4.1.1
-  checksum: 58ef580c2ac78d744a1cc58155e3bf31af0d7e302dc6a90fb8509f8e7b4c363845dfd6746436f9641993cd8580c3256d16e58297c5b1684ae14edb4db32ccc30
+  checksum: c4140dffae7cbadfe31e0362fdb6baf79092606927b9da6229092cb3de763f625fd288b767cc0e9dbb15188706e3151ef1b1735a3181f9281141093b5fd3c739
   languageName: node
   linkType: hard
 
@@ -12902,6 +12924,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-audio-recorder-player@npm:^3.6.12":
+  version: 3.6.12
+  resolution: "react-native-audio-recorder-player@npm:3.6.12"
+  dependencies:
+    hyochan-welcome: ^1.0.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: a0c74694fe54eacd8f705b38d77d8ee35ddb9e964243ac0a727483d001e7ad24178b5ed3edcb0b4ddccf87d65af3233a823d5dd73fc98099ddbe0602134586e7
+  languageName: node
+  linkType: hard
+
 "react-native-calendars@npm:^1.1306.0":
   version: 1.1309.0
   resolution: "react-native-calendars@npm:1.1309.0"
@@ -12957,6 +12991,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-document-picker@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "react-native-document-picker@npm:9.3.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 5979e4b93f15e0568ae70b70cc2304cd727f20939a58412d483517942df6d3cf3821319b3b7934bcaa2866ed1918ef9e8de9933ce6953209340abe3455403e0d
+  languageName: node
+  linkType: hard
+
 "react-native-fbsdk-next@npm:^13.3.0":
   version: 13.4.1
   resolution: "react-native-fbsdk-next@npm:13.4.1"
@@ -12970,12 +13020,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-file-viewer@npm:^2.1.5":
+  version: 2.1.5
+  resolution: "react-native-file-viewer@npm:2.1.5"
+  peerDependencies:
+    react-native: ">=0.47"
+  checksum: 390e1e3ce20c3b2fb7d2394d6bedf1c6c5d25f799fb5b344c7ecb72267327403caf2528916a7419e094caecccf41dac8b62dd0d31fa5991725e36dcdd24b725e
+  languageName: node
+  linkType: hard
+
 "react-native-fit-image@npm:^1.5.5":
   version: 1.5.5
   resolution: "react-native-fit-image@npm:1.5.5"
   dependencies:
     prop-types: ^15.5.10
   checksum: 2f3ce06b43191efe3a4bd0698a4117342d821455c96433e9561d50f156ee446d2c449bf9e0908f9a8b7bbb8f95c02478d4fca8d8d103f38b6ce3b8b75557af15
+  languageName: node
+  linkType: hard
+
+"react-native-fs@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "react-native-fs@npm:2.20.0"
+  dependencies:
+    base-64: ^0.1.0
+    utf8: ^3.0.0
+  peerDependencies:
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 0be9bb9a5c13b501d0a3006efc3aa5c0b5b211456ee04718297f4e522532f3527f1daa220bd67d3b82d819ed8fdab8f64b7d6e0d7b768c1fd1d8ec9122d94316
   languageName: node
   linkType: hard
 
@@ -13318,6 +13393,16 @@ __metadata:
     react-native: "*"
     react-native-pager-view: ">= 6.0.0"
   checksum: 8410242eaedc03ebcb4df97af66473e6f80dd537aadea87a388d50852fb2e9f7e1fb64a95274cdf9dca46fc61ddc7d09651084bd63201fc500bca991086df2ae
+  languageName: node
+  linkType: hard
+
+"react-native-video@npm:^6.10.1":
+  version: 6.10.1
+  resolution: "react-native-video@npm:6.10.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 9ffe4b10b623b7954ed0d3e26da44c574a8def78290819ea84e3d36a9be034e69e82ceb5c40c186a86a575fb601759ddfddecd57798bd19b7d36ada3e7e4e133
   languageName: node
   linkType: hard
 
@@ -15214,6 +15299,13 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: dc3843a1b59ac8bd01417bd79498d4c688d5df8bf4801be50008ef4bfaacb349058c0b1605b5b43c828e0a2d62722d7e861573b3f31cea77a7f23e8b0fc2f7e3
+  languageName: node
+  linkType: hard
+
+"utf8@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "utf8@npm:3.0.0"
+  checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
   languageName: node
   linkType: hard
 

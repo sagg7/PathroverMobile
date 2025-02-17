@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 import {PFColors, PFFonts, PFFontSize} from '../../../../../shared/exporter';
 
 const styles = StyleSheet.create({
@@ -52,8 +52,13 @@ const styles = StyleSheet.create({
   buttonStyle: isOpen => ({
     width: '92%',
     position: 'absolute',
-    bottom: isOpen ? 350 : 50,
+    bottom: 50,
     alignSelf: 'center',
+    ...Platform.select({
+      ios: {
+        bottom: isOpen ? 350 : 50,
+      },
+    }),
   }),
   imageStyle: {
     width: 56,
