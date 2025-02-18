@@ -30,6 +30,10 @@ const FileMessage = ({currentMessage, position}) => {
   const {message_attachment} = currentMessage;
   const isLeft = position === 'left';
 
+  console.log('================currentMessage====================');
+  console.log(currentMessage);
+  console.log('====================================');
+
   const onPreview = () => {
     try {
       const getFileName = getFileNameFromUrl(message_attachment?.url);
@@ -58,7 +62,9 @@ const FileMessage = ({currentMessage, position}) => {
 
       <View style={styles.details}>
         <Text style={styles.fileName(isLeft)}>
-          {getFileNameFromUrl(message_attachment?.url) || 'File'}
+          {message_attachment?.file_name ||
+            getFileNameFromUrl(message_attachment?.url) ||
+            'File'}
         </Text>
       </View>
       {isLeft && svgIcon.FileType}

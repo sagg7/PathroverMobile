@@ -124,18 +124,6 @@ const ChatList = () => {
     );
   };
 
-  const listHeaderComponent = () => {
-    return (
-      <ChatSearch
-        placeholder="Search"
-        value={search}
-        onChangeText={text => {
-          setSearch(text);
-        }}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -148,13 +136,21 @@ const ChatList = () => {
           }}
         />
       ) : (
-        <FlatList
-          data={search?.length > 0 ? searchedChats : chats}
-          renderItem={renderItem}
-          ListEmptyComponent={listEmptyComponent}
-          ListHeaderComponent={listHeaderComponent}
-          keyExtractor={(item, index) => item + index.toString()}
-        />
+        <>
+          <ChatSearch
+            placeholder="Search"
+            value={search}
+            onChangeText={text => {
+              setSearch(text);
+            }}
+          />
+          <FlatList
+            data={search?.length > 0 ? searchedChats : chats}
+            renderItem={renderItem}
+            ListEmptyComponent={listEmptyComponent}
+            keyExtractor={(item, index) => item + index.toString()}
+          />
+        </>
       )}
     </View>
   );

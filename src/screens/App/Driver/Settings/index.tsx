@@ -10,7 +10,12 @@ import React, {useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
-import {AppLoader, MainWrapper, SwitchRoleSheet} from '../../../../components';
+import {
+  AppHeader,
+  AppLoader,
+  MainWrapper,
+  SwitchRoleSheet,
+} from '../../../../components';
 import {
   APP_ROLE,
   DriverProfileMenu,
