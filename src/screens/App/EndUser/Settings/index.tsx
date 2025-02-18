@@ -10,7 +10,7 @@ import React, {useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
-import {MainWrapper, SwitchRoleSheet} from '../../../../components';
+import {AppHeader, MainWrapper, SwitchRoleSheet} from '../../../../components';
 import {
   APP_ROLE,
   EndUserProfileMenu,
@@ -168,6 +168,7 @@ const Settings = ({navigation}: any) => {
 
   return (
     <MainWrapper>
+      <AppHeader title="Settings" clickBackIcon={() => navigation.pop()} />
       <View style={styles.userProfileContainer}>
         <Image source={appIcons.userPlaceholder} style={styles.userPicture} />
         <View style={styles.userProfileInner}>

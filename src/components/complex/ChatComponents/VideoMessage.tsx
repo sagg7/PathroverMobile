@@ -16,6 +16,7 @@ const VideoMessage = ({currentMessage, position}) => {
           repeat={false}
           muted={false}
           resizeMode="cover"
+          fullscreen
         />
       </View>
     );
@@ -32,7 +33,8 @@ const styles = StyleSheet.create({
   },
   video: {
     width: 200,
-    height: 150,
+    height: 250,
+    // flexGrow: 1,
   },
 });
 

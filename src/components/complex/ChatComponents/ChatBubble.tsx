@@ -53,7 +53,7 @@ const ChatBubble = ({props}) => {
   };
 
   const onClose = () => {
-    setModalVisible(!modalVisible);
+    setModalVisible(false);
   };
 
   const renderTextWithUrls = text => {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   messageText: {
-    fontSize: PFFontSize.FONT_SIZE_10,
+    fontSize: PFFontSize.FONT_SIZE_12,
     fontFamily: PFFonts.Foundation.Regular,
     marginBottom: 3,
   },

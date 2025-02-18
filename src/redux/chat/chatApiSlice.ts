@@ -168,7 +168,7 @@ export const chatApiSlice = apiSlice.injectEndpoints({
       query: id => {
         return {
           url: `groups/${id}/messages/read_group_message`,
-          method: 'POST',
+          method: 'PATCH',
         };
       },
     }),
