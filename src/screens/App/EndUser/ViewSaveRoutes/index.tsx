@@ -270,10 +270,16 @@ const ViewSaveRoutes = ({route}: any) => {
   };
 
   const estimatedTime = estimateTravelTime(totalDistance, 5);
-  const handleLocationUpdate = location => {
+
+  const handleLocationUpdate = async location => {
     if (location?.coords) {
       const {latitude, longitude} = location.coords;
       setLiveLocation([longitude, latitude]);
+      const routeResults: any = await getTimeAndDistance(
+        [longitude, latitude],
+        endPoint,
+      );
+      setResults(routeResults);
     }
   };
   const handleStartModalSaveBtn = () => {
@@ -305,10 +311,12 @@ const ViewSaveRoutes = ({route}: any) => {
     }
     // setRoute(formattedPoints);
   };
-  const onPressStartBtn = () => {
+  const onPressStartBtn = async () => {
     getRoute();
     setIsStartBtnPressed(true);
     setShowRouteActionSheet(false);
+    const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
+    setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
