@@ -137,6 +137,9 @@ import OrangeStopIcon from './orangeStop.svg';
 import FilterOrange from './filterOrange.svg';
 import WeatherIcon from './weatherIcon.svg';
 import SearchView from './searchView.svg';
+import Wind from './wind.svg';
+import Humiity from './humidity.svg';
+
 export const svgIcon = {
   Forward: <Forward />,
   BackArrow: <BackArrow />,
@@ -276,4 +279,6 @@ export const svgIcon = {
   FilterOrange: <FilterOrange />,
   WeatherIcon: <WeatherIcon />,
   SearchView: <SearchView />,
+  Wind: <Wind />,
+  Humiity: <Humiity />,
 };

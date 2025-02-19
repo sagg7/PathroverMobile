@@ -52,7 +52,10 @@ const AddEntranceSheet = ({
           <View style={styles.addressView}>
             <View style={{flexDirection: 'row'}}>
               {svgIcon.MapPinBlue}
-              <Text style={styles.placeName}> {selectedWellName || ''}</Text>
+              <Text style={styles.placeName}>
+                {' '}
+                {selectedWellName?.name || ''}
+              </Text>
             </View>
             <TouchableOpacity onPress={onPressShare}>
               {svgIcon.ShareWellPath}

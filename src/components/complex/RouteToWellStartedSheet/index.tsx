@@ -8,7 +8,7 @@ interface RouteToWellStartedSheetProps {
   selectedPin: any;
   entranceName: string;
   routeInfo: any;
-  routeName: string;
+  routeName?: any;
 }
 
 const RouteToWellStartedSheet = ({

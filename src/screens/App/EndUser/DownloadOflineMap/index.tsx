@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
-import MapboxGL, {MapView} from '@rnmapbox/maps';
+import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
+  AppHeader,
   AppLoader,
   MainWrapper,
   MapLayerSheet,
@@ -9,7 +10,6 @@ import {
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
-  appIcons,
   Default_Map_Style,
   HP,
   isIOS,
@@ -23,13 +23,12 @@ import {
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
-import HeaderView from './HeaderView';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {Image, TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
-const HikingScreen = () => {
+const DownloadOfflineMap = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
@@ -38,7 +37,6 @@ const HikingScreen = () => {
   const [route, setRoute] = useState<any>([]);
   const [available, setAvailable] = useState(false);
   const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
-  const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
   const [weather, setWeather] = useState<any>([]);
 
   const [selectedWell, setSelectedWell] = useState<any>(null);
@@ -46,12 +44,6 @@ const HikingScreen = () => {
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
   const {loginUser} = useSelector(state => state.auth);
-
-  const [queryParams, setQueryParams] = useState<any>({
-    latitude: null,
-    longitude: null,
-    radius: 50,
-  });
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
@@ -78,17 +70,6 @@ const HikingScreen = () => {
 
     if (location && location?.latitude) {
       fetchWeatherData();
-    }
-  }, [location]);
-
-  useEffect(() => {
-    if (location) {
-      setCurrentLocation([location?.longitude, location?.latitude]);
-      setQueryParams({
-        ...queryParams,
-        latitude: location?.longitude,
-        longitude: location?.latitude,
-      });
     }
   }, [location]);
 
@@ -194,24 +175,10 @@ const HikingScreen = () => {
       });
     }
   };
-  const ActionBtn = ({icon, onPress}: any) => (
-    <TouchableOpacity onPress={onPress}>
-      <Image
-        source={icon}
-        style={styles.actionBtnStyles}
-        resizeMode="contain"
-      />
-    </TouchableOpacity>
-  );
 
   return (
     <MainWrapper style={styles.container}>
-      <HeaderView
-        userPicture={loginUser?.avatar}
-        onPressFilter={() => {}}
-        onPressSearch={() => {}}
-        onPressWeather={() => setShowWeatherSheet(true)}
-      />
+      <AppHeader title="Download Map" />
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -224,13 +191,41 @@ const HikingScreen = () => {
           zoomLevel={12}
           centerCoordinate={currentLocation}
         />
+
+        {/* {currentLocation && (
+          <MapboxGL.MarkerView coordinate={currentLocation}>
+            {svgIcon.BlueMapMarker}
+          </MapboxGL.MarkerView>
+        )}
+        {searchLocation && (
+          <MapboxGL.MarkerView coordinate={searchLocation}>
+            {svgIcon.BlueMapMarker}
+          </MapboxGL.MarkerView>
+        )}
+        {entranceCoords && (
+          <MapboxGL.MarkerView coordinate={entranceCoords}>
+            {svgIcon.BlueMapMarker}
+          </MapboxGL.MarkerView>
+        )} */}
+
+        {/* Route Line */}
+        {route?.length > 1 && (
+          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
+            <MapboxGL.LineLayer
+              id="routeLayer-unique"
+              style={{
+                lineWidth: 3,
+                lineColor: PFColors.Blue.Dark,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
       </MapboxGL.MapView>
       <TouchableOpacity
         style={styles.recenter}
         onPress={() => moveToCurrentLocation()}>
         {svgIcon.MapWhiteBg}
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => setMapLayerSheeet(true)}>
@@ -245,22 +240,8 @@ const HikingScreen = () => {
         onPressCancel={() => setMapLayerSheeet(false)}
         onPressSave={() => onPressSave()}
       />
-      <View style={styles.actionBtnView}>
-        <ActionBtn icon={appIcons.recordTrack} onPress={() => {}} />
-        <ActionBtn icon={appIcons.offlineMap} onPress={() => {}} />
-        <ActionBtn icon={appIcons.myData} onPress={() => {}} />
-      </View>
-
-      {weather?.city && (
-        <WeatherSheet
-          modalVisible={showWeatherSheet}
-          coords={[location?.longitude, location?.latitude]}
-          setModalVisible={() => setShowWeatherSheet(false)}
-          weather={weather}
-        />
-      )}
     </MainWrapper>
   );
 };
 
-export default HikingScreen;
+export default DownloadOfflineMap;

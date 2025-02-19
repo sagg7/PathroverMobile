@@ -23,6 +23,7 @@ export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
 export const DOMAIN_BASE_URL = 'https://staging.pathfinder-app.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
+export const WEATHER_API_KEY = 'deaad5f174ef065c55f06d98b520e02c';
 const TEST_KEY =
   'pk_test_51HCPWGDPRo9kCaKXRY8AILjgfyJhLlmkDUlsvsbU4SbGRZQ4jTBe4Boq4LiL9oHCq40mqRZSn7KRBn4A13RYtd7u00lAzNP0Dc';
 const PRODUCTION_KEY = '';

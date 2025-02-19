@@ -68,4 +68,5 @@ export const Routes = {
   EndUserSavedLibraryType: 'EndUserSavedLibraryType',
   ViewSaveRoutes: 'ViewSaveRoutes',
   RecordRoute: 'RecordRoute',
+  DownloadOfflineMap: 'DownloadOfflineMap',
 };

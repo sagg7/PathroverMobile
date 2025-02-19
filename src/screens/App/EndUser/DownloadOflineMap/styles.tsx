@@ -76,17 +76,5 @@ const styles = StyleSheet.create({
     height: scale(44),
     width: WP('65'),
   },
-  actionBtnView: {
-    flexDirection: 'row',
-    position: 'absolute',
-    zIndex: 1,
-    top: WP('20'),
-    width: WP('100'),
-    justifyContent: 'space-evenly',
-  },
-  actionBtnStyles: {
-    height: scale(36),
-    width: scale(119),
-  },
 });
 export default styles;
