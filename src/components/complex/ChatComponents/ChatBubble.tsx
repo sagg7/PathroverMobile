@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import FitImage from 'react-native-fit-image';
@@ -149,19 +150,20 @@ const ChatBubble = ({props}) => {
         </Text>
       )}
       <Modal
-        animationIn={'zoomIn'}
-        animationOut={'zoomOut'}
+        // animationIn={'zoomIn'}
+        // animationOut={'zoomOut'}
         isVisible={modalVisible}
         onBackButtonPress={onClose}
         onBackdropPress={onClose}
+        useNativeDriver={true}
         style={styles.modalContainer}>
-        <TouchableOpacity onPress={onClose} style={styles.imageStyle}>
-          <Image
-            source={{uri: selectedImage}}
-            style={styles.fullImageStyle}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
+            <Image
+              source={{uri: selectedImage}}
+              style={styles.fullImageStyle}
+              resizeMode="contain"
+            />
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );

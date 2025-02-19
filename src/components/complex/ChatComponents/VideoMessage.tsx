@@ -16,7 +16,7 @@ const VideoMessage = ({currentMessage, position}) => {
           repeat={false}
           muted={false}
           resizeMode="cover"
-          fullscreen
+          // fullscreen
         />
       </View>
     );

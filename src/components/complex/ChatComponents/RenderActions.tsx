@@ -14,29 +14,27 @@ const RenderActions = props => {
   const checkCameraPermissions = async () => {
     setIsVisible(false);
 
-    setTimeout(async () => {
-      const cameraPermission =
-        Platform.OS === 'android'
-          ? PERMISSIONS.ANDROID.CAMERA
-          : PERMISSIONS.IOS.CAMERA;
+    const cameraPermission =
+      Platform.OS === 'android'
+        ? PERMISSIONS.ANDROID.CAMERA
+        : PERMISSIONS.IOS.CAMERA;
 
-      const permissionStatus = await check(cameraPermission);
+    const permissionStatus = await check(cameraPermission);
 
-      if (permissionStatus === RESULTS.GRANTED) {
+    if (permissionStatus === RESULTS.GRANTED) {
+      return true;
+    } else {
+      const requestStatus = await request(cameraPermission);
+      if (requestStatus === RESULTS.GRANTED) {
         return true;
       } else {
-        const requestStatus = await request(cameraPermission);
-        if (requestStatus === RESULTS.GRANTED) {
-          return true;
-        } else {
-          showAlert(
-            'Permission Denied',
-            'Camera access is required to take photos.',
-          );
-          return false;
-        }
+        showAlert(
+          'Permission Denied',
+          'Camera access is required to take photos.',
+        );
+        return false;
       }
-    }, 500);
+    }
   };
 
   const handleGallery = () => {
