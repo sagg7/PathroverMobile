@@ -52,4 +52,7 @@ export const PFColors = {
     MintLight: '#BCDEC9',
     Light: '#0E924B1A',
   },
+  Yellow: {
+    Light: '#EBC70A',
+  },
 };

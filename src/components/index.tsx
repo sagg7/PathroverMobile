@@ -76,3 +76,4 @@ export * from './complex/AddEntranceSheet';
 export * from './complex/SaveRecordRouteSheet';
 export * from './complex/StartPointModal';
 export * from './complex/SaveRouteCustomizationSheet';
+export * from './complex/WeatherSheet';

@@ -57,6 +57,7 @@ import EndUserSavedLibraryType from '../screens/App/EndUser/EndUserSavedLibraryT
 import ViewSaveRoutes from '../screens/App/EndUser/ViewSaveRoutes';
 import RecordRoute from '../screens/App/EndUser/RecordRoute';
 import GroupChatDetail from '../screens/App/EndUser/Chat/GroupChatDetail';
+import DownloadOfflineMap from '../screens/App/EndUser/DownloadOflineMap';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -154,6 +155,10 @@ const AppNavigation = () => {
         />
         <Stack.Screen name={Routes.RecordRoute} component={RecordRoute} />
         <Stack.Screen name={Routes.ViewSaveRoutes} component={ViewSaveRoutes} />
+        <Stack.Screen
+          name={'DownloadOfflineMap'}
+          component={DownloadOfflineMap}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

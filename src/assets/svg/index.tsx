@@ -134,6 +134,11 @@ import CameraType from './ cameraType.svg';
 import StopIcon from './stopIcon.svg';
 import OrangeRecordIcon from './orangeRecord.svg';
 import OrangeStopIcon from './orangeStop.svg';
+import FilterOrange from './filterOrange.svg';
+import WeatherIcon from './weatherIcon.svg';
+import SearchView from './searchView.svg';
+import Wind from './wind.svg';
+import Humiity from './humidity.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -271,4 +276,9 @@ export const svgIcon = {
   StopIcon: <StopIcon />,
   OrangeRecordIcon: <OrangeRecordIcon />,
   OrangeStopIcon: <OrangeStopIcon />,
+  FilterOrange: <FilterOrange />,
+  WeatherIcon: <WeatherIcon />,
+  SearchView: <SearchView />,
+  Wind: <Wind />,
+  Humiity: <Humiity />,
 };

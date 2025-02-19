@@ -46,4 +46,7 @@ export const appIcons = {
   Directions: require('../icons/Direction.png'),
   pinIcon: require('../icons/pinIcon.png'),
   MapFilled: require('../icons/filledMap.png'),
+  myData: require('../icons/myData.png'),
+  recordTrack: require('../icons/recordTrack.png'),
+  offlineMap: require('../icons/offlineMap.png'),
 };
