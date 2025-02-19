@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Linking,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import moment from 'moment';
 import Modal from 'react-native-modal';
@@ -188,19 +189,19 @@ const GroupChatBubble = ({props}) => {
       )}
 
       <Modal
-        animationIn={'zoomIn'}
-        animationOut={'zoomOut'}
+        // animationIn={'zoomIn'}
+        // animationOut={'zoomOut'}
         isVisible={modalVisible}
         onBackButtonPress={onClose}
         onBackdropPress={onClose}
         style={styles.modalContainer}>
-        <TouchableOpacity onPress={onClose} style={styles.imageStyle}>
+        <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
           <Image
             source={{uri: selectedImage}}
             style={styles.fullImageStyle}
             resizeMode="contain"
           />
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
