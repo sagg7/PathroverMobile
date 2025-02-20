@@ -16,6 +16,7 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
+  Routes,
   showAlert,
   UNEXPECTED_ERROR,
   WEATHER_API_KEY,
@@ -247,7 +248,10 @@ const HikingScreen = () => {
       />
       <View style={styles.actionBtnView}>
         <ActionBtn icon={appIcons.recordTrack} onPress={() => {}} />
-        <ActionBtn icon={appIcons.offlineMap} onPress={() => {}} />
+        <ActionBtn
+          icon={appIcons.offlineMap}
+          onPress={() => navigation.navigate(Routes.DownloadOfflineMap)}
+        />
         <ActionBtn icon={appIcons.myData} onPress={() => {}} />
       </View>
 

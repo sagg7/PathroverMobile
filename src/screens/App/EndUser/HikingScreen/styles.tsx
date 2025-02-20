@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   toggleView: {
     flexDirection: 'row',
-    width: WP('25'),
+    // width: WP('25'),
     justifyContent: 'space-between',
   },
   searchbar: {
