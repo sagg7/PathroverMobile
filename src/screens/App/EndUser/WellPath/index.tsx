@@ -7,6 +7,7 @@ import {
   MainWrapper,
   MapLayerSheet,
   PinYourLocationSheet,
+  SaveRecordHikingRouteSheet,
   WellPathMenuSheet,
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
@@ -30,10 +31,13 @@ import {PinLocationAddress} from '../../../../components/complex/PinLocationAddr
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {TouchableOpacity} from 'react-native';
+import {Image, Platform, TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {debounce} from 'lodash';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
+import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -51,6 +55,14 @@ const WellPath = () => {
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
   const [selectedWell, setSelectedWell] = useState<any>(null);
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
+  const [showRouteActionSheet, setShowRouteActionSheet] =
+    useState<boolean>(false);
+  const [zoom, setZoom] = useState<any>(12);
+  const [results, setResults] = useState<null>(null);
+  const [actionBtn, setActionBtn] = useState<any>({
+    direction: true,
+    start: false,
+  });
 
   const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
   const [showAddEntranceSheet, setShowAddEntranceSheet] =
@@ -59,8 +71,6 @@ const WellPath = () => {
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
-  const [lastFetchedPosition, setLastFetchedPosition] = useState<any>(null);
-  const [lastZoom, setLastZoom] = useState(null);
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
     longitude: null,
@@ -82,10 +92,11 @@ const WellPath = () => {
   } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
+  const mapRef = useRef<any>(null);
+
   const pinLocationSheet = useRef<any>(null);
   const [allWells, setAllWells] = useState<any>([]);
   // const [allPins, setAllPins] = useState<any>([]);
-  console.log('allWells', allWells);
 
   useEffect(() => {
     if (location) {
@@ -105,6 +116,10 @@ const WellPath = () => {
 
   useEffect(() => {
     if (allWellLocations) setAllWells(allWellLocations?.wells);
+    console.log(
+      'allWellLocationsallWellLocations',
+      allWellLocations?.wells?.length,
+    );
   }, [allWellLocations]);
 
   useEffect(() => {
@@ -131,19 +146,21 @@ const WellPath = () => {
       setAllWells([]);
     }
   }, [nearbyWells, allWellLocations]);
-  // console.log('NEARBY WELLS', nearbyWells?.length);
 
   useEffect(() => {
     if (searchLocation?.length > 0) {
       setTimeout(() => {
         if (cameraRef.current) {
           cameraRef.current.moveTo(searchLocation, 1500);
-          // console.log('search location', searchLocation);
 
           setQueryParams({
             ...queryParams,
             latitude: searchLocation[1],
             longitude: searchLocation[0],
+          });
+          navigation.navigate(Routes.ViewWellPathNavigation, {
+            entranceCoords: searchLocation,
+            entranceName: searchLocationName,
           });
           refetch();
         } else {
@@ -154,7 +171,7 @@ const WellPath = () => {
         }
       }, 200);
     }
-  }, [searchLocation]);
+  }, [searchLocation, searchLocationName]);
 
   const onPressMap = (event: any) => {
     try {
@@ -207,19 +224,6 @@ const WellPath = () => {
     setTimeout(() => {
       setShowMapSettigs(false);
     }, 1000);
-  };
-
-  const onpressMarker = (e: any) => {
-    console.log('e', e);
-
-    if (e?.features[0]?.properties?.cluster) {
-      showAlert('Alert', 'Please zoom marker to view its details.');
-      return;
-    }
-    const selected = e?.features[0]?.properties?.well;
-    setShowPinAddress(true);
-    setSelectedWell([selected?.log, selected?.lat]);
-    setSelectedWellName(selected);
   };
 
   const _handlePinBtn = async () => {
@@ -284,6 +288,49 @@ const WellPath = () => {
     })),
   });
 
+  const onRegionDidChange = async () => {
+    if (mapRef.current) {
+      const zoom = await mapRef.current.getZoom();
+      setZoom(zoom);
+    }
+  };
+
+  const onPressMarker = (e: any) => {
+    const feature = e?.features[0];
+    if (!feature) return;
+
+    const coordinates = feature.geometry?.coordinates;
+    const isCluster = feature.properties?.cluster || false;
+    const pointCount = feature.properties?.point_count || 1;
+    const selected = feature.properties?.well;
+
+    if (!coordinates) return;
+
+    if (isCluster && pointCount > 1) {
+      showAlert(
+        'Alert',
+        'Markers are clustered—zoom in for a closer look!',
+        () => {
+          cameraRef.current?.moveTo(coordinates, 600);
+
+          setTimeout(() => {
+            cameraRef.current?.setCamera({
+              centerCoordinate: coordinates,
+              zoomLevel: Math.min(16, Math.max(12, 18 - Math.log2(pointCount))), // Adjust zoom
+              animationDuration: 800,
+            });
+          }, 500);
+        },
+      );
+
+      return;
+    }
+
+    setShowPinAddress(true);
+    setSelectedWell([selected?.log, selected?.lat]);
+    setSelectedWellName(selected);
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
@@ -301,6 +348,8 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        ref={mapRef}
+        onRegionDidChange={onRegionDidChange}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
@@ -323,9 +372,17 @@ const WellPath = () => {
           </MapboxGL.MarkerView>
         )}
         {searchLocation && (
-          <MapboxGL.MarkerView coordinate={searchLocation}>
+          <MapboxGL.PointAnnotation
+            id="searchMarker"
+            coordinate={searchLocation}
+            onSelected={() => {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: searchLocation,
+                entranceName: searchLocationName,
+              });
+            }}>
             {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
+          </MapboxGL.PointAnnotation>
         )}
         {entranceCoords && (
           <MapboxGL.MarkerView coordinate={entranceCoords}>
@@ -340,18 +397,30 @@ const WellPath = () => {
         {/* Clustering Source */}
         {allWells?.length > 0 && (
           <MapboxGL.ShapeSource
-            onPress={onpressMarker}
+            onPress={onPressMarker}
             id="wellsCluster"
             shape={wellsToGeoJSON(allWells)}
             cluster
-            clusterRadius={50}
-            clusterMaxZoom={14}>
-            <MapboxGL.SymbolLayer
+            clusterRadius={20}
+            clusterMaxZoom={10}
+            // clusterRadius={20}
+            // clusterMaxZoom={20}
+          >
+            {/* <MapboxGL.SymbolLayer
               id="markerLayer"
               style={{
                 iconImage: 'marker',
                 iconSize: 1,
                 iconAllowOverlap: true,
+              }}
+            /> */}
+            <MapboxGL.SymbolLayer
+              id="markerLayer"
+              style={{
+                iconImage: 'marker', // Reference the registered image name
+                iconSize: Platform.OS === 'android' ? 0.7 : 0.5,
+                iconIgnorePlacement: true,
+                // iconAllowOverlap: true,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -392,6 +461,7 @@ const WellPath = () => {
         }}
         onPressCreateRoute={() => {
           setShowOptionsSheet(false);
+          dispatch(setCreateRouteDataEmpty({}));
           setTimeout(() => {
             navigation.navigate(Routes.CreateRouteEndUser);
           }, 1000);
@@ -460,6 +530,7 @@ const WellPath = () => {
           }}
         />
       )}
+
       <RBSheet
         ref={pinLocationSheet}
         customModalProps={{
@@ -479,7 +550,7 @@ const WellPath = () => {
           setValues={setPinYourLocation}
         />
       </RBSheet>
-      {isLoading && <AppLoader />}
+      {/* {isLoading && <AppLoader />} */}
     </MainWrapper>
   );
 };

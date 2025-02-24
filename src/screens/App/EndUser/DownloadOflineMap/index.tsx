@@ -1,37 +1,72 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {View, Button, Alert, Dimensions} from 'react-native';
+import {
+  View,
+  Button,
+  Alert,
+  Dimensions,
+  ActivityIndicator,
+  Text,
+  KeyboardAvoidingView,
+} from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
-import {mapBoxToken} from '../../../../shared/exporter';
+import {
+  HP,
+  isIOS,
+  mapBoxToken,
+  showAlert,
+  WP,
+} from '../../../../shared/exporter';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import {SaveRouteSheet} from '../../../../components';
+import styles from './styles';
+import useLocation from '../../../../hooks/getLocation';
 
 MapboxGL.setAccessToken(mapBoxToken);
 
 const {width, height} = Dimensions.get('window');
 
-const MIN_AREA_KM = 1; // Minimum size
-const MAX_AREA_KM = 10; // Maximum size
+const PADDING = 50; // Space from screen edges
+const SQUARE_SIZE = Math.min(width, height) - PADDING * 2; // Adjusted square size
 
-const DownloadOflineMap = () => {
+const MIN_AREA_KM = 10; // Minimum area to download (10km x 10km)
+const MAX_AREA_KM = 500; // Maximum area to download (500km x 500km)
+
+const DEFAULT_ZOOM = 12; // Default zoom level
+
+const DownloadOfflineMap = ({navigation}: any) => {
   const mapRef = useRef(null);
   const [bounds, setBounds] = useState(null);
-  const [zoomLevel, setZoomLevel] = useState(12);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [progress, setProgress] = useState(0); // Download progress %
+  const [downloadSize, setDownloadSize] = useState(0); // Downloaded size in MB
+  const [routeName, setRouteName] = useState<string>('');
+  const [currentLocation, setCurrentLocation] = useState<any>([]);
+  const {location} = useLocation();
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [showNameSheet, setShowNameSheet] = useState<boolean>(false);
 
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   useEffect(() => {
-    MapboxGL.offlineManager.setTileCountLimit(100000);
+    MapboxGL.offlineManager.setTileCountLimit(1000);
   }, []);
 
-  // Converts km to degrees
-  // Convert km to latitude degrees (1 km ≈ 1 / 111 degrees)
-  const kmToLatDegrees = km => km / 111;
+  useEffect(() => {
+    if (location && 'latitude' in location) {
+      setCurrentLocation([location?.longitude, location?.latitude]);
+    }
+  }, [location]);
 
-  // Convert km to longitude degrees (varies by latitude)
-  const kmToLngDegrees = (km, lat) =>
-    km / (111 * Math.cos(lat * (Math.PI / 180)));
-
-  // Ensure map is loaded before fetching bounds
   const handleMapLoaded = () => {
     setIsMapLoaded(true);
     console.log('Map is loaded');
+  };
+
+  const handleRegionChange = e => {
+    if (e.properties.zoom) {
+      console.log('Zoom Level Updated:', e.properties.zoom);
+      setZoomLevel(e.properties.zoom);
+    }
   };
 
   const getFixedSquareBounds = async () => {
@@ -53,66 +88,123 @@ const DownloadOflineMap = () => {
         return;
       }
 
-      const centerLng = (visibleBounds[0][0] + visibleBounds[1][0]) / 2;
-      const centerLat = (visibleBounds[0][1] + visibleBounds[1][1]) / 2;
-      console.log('Map Center:', [centerLng, centerLat]);
+      const [swLng, swLat] = visibleBounds[0]; // SW corner
+      const [neLng, neLat] = visibleBounds[1]; // NE corner
 
-      // Define area size based on zoom level
-      let areaSizeKm = 20 / Math.pow(2, zoomLevel - 10);
-      areaSizeKm = Math.max(MIN_AREA_KM, Math.min(areaSizeKm, MAX_AREA_KM));
+      const centerLng = (swLng + neLng) / 2;
+      const centerLat = (swLat + neLat) / 2;
 
-      // Convert km to degrees properly
+      // Calculate area size in km
+      const latRangeKm = (neLat - swLat) * 111;
+      const lngRangeKm =
+        (neLng - swLng) * (111 * Math.cos(centerLat * (Math.PI / 180)));
+      const areaSizeKm = Math.min(latRangeKm, lngRangeKm);
+
+      console.log(
+        `Selected Area Size: ${latRangeKm.toFixed(2)}km x ${lngRangeKm.toFixed(
+          2,
+        )}km`,
+      );
+
+      // Handle area restrictions
+      if (areaSizeKm < MIN_AREA_KM) {
+        Alert.alert(
+          'Error',
+          `The selected area is too small! Minimum size is ${MIN_AREA_KM} km.`,
+        );
+        return;
+      }
+      if (areaSizeKm > MAX_AREA_KM) {
+        Alert.alert(
+          'Error',
+          `The selected area is too large! Maximum size is ${MAX_AREA_KM} km.`,
+        );
+        return;
+      }
+
+      console.log('Final Area Size (km):', areaSizeKm);
+
+      // Convert km back to degrees
       const latDiff = kmToLatDegrees(areaSizeKm / 2);
-      const lngDiff = kmToLngDegrees(areaSizeKm / 2, centerLat); // Now considers latitude!
+      const lngDiff = kmToLngDegrees(areaSizeKm / 2, centerLat);
 
       const newBounds = {
         northEast: [centerLng + lngDiff, centerLat + latDiff],
         southWest: [centerLng - lngDiff, centerLat - latDiff],
       };
-      console.log('1', [centerLng + lngDiff, centerLat + latDiff]);
-      console.log('2', [centerLng - lngDiff, centerLat - latDiff]);
 
       setBounds(newBounds);
-      console.log('Selected Bounds:', newBounds);
-
-      Alert.alert(
-        'Area Selected',
-        `Selected Area: ${Math.round(areaSizeKm)} km × ${Math.round(
-          areaSizeKm,
-        )} km`,
-      );
+      setIsSelected(true);
+      console.log('Adjusted Bounds:', newBounds);
     } catch (error) {
       console.error('Error getting bounds:', error);
       Alert.alert('Error', 'Failed to get map bounds.');
     }
   };
-  // Download the offline map
-  const downloadOfflineMap = async () => {
-    if (!bounds) {
-      Alert.alert('Error', 'Select an area before downloading.');
-      return;
-    }
 
-    console.log('Downloading with bounds:', bounds);
-
+  const downloadOfflineMap = async routeName => {
     try {
-      const options = {
-        name: 'offline-region',
-        styleURL: MapboxGL.StyleURL.Street,
-        bounds: [bounds.southWest, bounds.northEast],
-        minZoom: 10,
-        maxZoom: 16,
-      };
+      setIsDownloading(true);
+      setProgress(0);
+      setDownloadSize(0);
 
-      await MapboxGL.offlineManager.createPack(options, status => {
-        console.log('Download Progress:', status.percentage);
-      });
+      const {northEast, southWest} = bounds;
+      const boundsArray = [southWest, northEast];
 
-      Alert.alert('Download Started', 'Map is being downloaded.');
-    } catch (error) {
-      console.error('Download Error:', error);
-      Alert.alert('Error', 'Failed to download map.');
+      await MapboxGL.offlineManager.createPack(
+        {
+          name: routeName,
+          styleURL: 'mapbox://styles/mapbox/streets-v11',
+          minZoom: 14,
+          maxZoom: 20,
+          bounds: boundsArray,
+        },
+        (pack, status) => {
+          if (pack.name) {
+            const percentage = Math.round(
+              (status.completedResourceCount / status.requiredResourceCount) *
+                100,
+            );
+            const sizeInMB = (
+              status.completedResourceSize /
+              (1024 * 1024)
+            ).toFixed(2); // Convert bytes to MB
+            setProgress(percentage);
+            setDownloadSize(sizeInMB);
+          }
+
+          if (status.percentage === 100) {
+            setIsDownloading(false);
+            showAlert('Alert', 'Your map has been saved.');
+            navigation.goBack();
+            console.log('Download Complete!');
+          }
+        },
+        (pack, error) => {
+          console.log('Download Failed:', error);
+          setIsDownloading(false);
+        },
+      );
+
+      console.log('Download Started');
+    } catch (err: any) {
+      setIsDownloading(false);
+      if (
+        err?.message
+          ?.toLowerCase()
+          .includes('offline pack with name fsd already exists')
+      ) {
+        showAlert(
+          'Error',
+          'This name already exists. Please try a different one.',
+        );
+      }
     }
+  };
+
+  const handleSaveRouteBtn = () => {
+    setShowNameSheet(false);
+    downloadOfflineMap(routeName);
   };
 
   return (
@@ -120,33 +212,61 @@ const DownloadOflineMap = () => {
       <MapboxGL.MapView
         ref={mapRef}
         style={{flex: 1}}
-        onDidFinishLoadingMap={handleMapLoaded} // Ensure map is loaded
-        onRegionDidChange={e => setZoomLevel(e.properties.zoom)}>
-        <MapboxGL.Camera zoomLevel={12} centerCoordinate={[-92.25, 37.75]} />
+        compassEnabled={false}
+        onDidFinishLoadingMap={handleMapLoaded}
+        onRegionDidChange={handleRegionChange}>
+        {currentLocation?.length > 1 && (
+          <MapboxGL.Camera zoomLevel={12} centerCoordinate={currentLocation} />
+        )}
       </MapboxGL.MapView>
 
-      {/* Fixed Square Overlay */}
       <View
         pointerEvents="none"
         style={{
           position: 'absolute',
-          top: (height - 200) / 2,
-          left: (width - 200) / 2,
-          width: 200,
-          height: 200,
+          top: (height - SQUARE_SIZE) / 6,
+          left: (width - SQUARE_SIZE) / 2,
+          width: SQUARE_SIZE,
+          height: SQUARE_SIZE + 300,
           borderWidth: 3,
-          borderColor: 'blue',
-          backgroundColor: 'rgba(0, 0, 255, 0.1)',
+          borderColor: 'red',
+          backgroundColor: 'rgba(255, 0, 0, 0.2)',
         }}
       />
 
       {/* Action Buttons */}
       <View style={{position: 'absolute', bottom: 20, left: 10, right: 10}}>
-        <Button title="Select Area" onPress={getFixedSquareBounds} />
-        <Button title="Download Offline Map" onPress={downloadOfflineMap} />
+        {!isDownloading && (
+          <>
+            {!isSelected ? (
+              <Button title="Select Area" onPress={getFixedSquareBounds} />
+            ) : (
+              <Button
+                title="Download Offline Map"
+                onPress={() => setShowNameSheet(true)}
+              />
+            )}
+          </>
+        )}
+        {isDownloading && (
+          <View style={styles.downloadView}>
+            <Text style={styles.titleStyles}>Downloading... {progress}%</Text>
+            <Text style={styles.titleStyles}>Size: {downloadSize} MB</Text>
+          </View>
+        )}
       </View>
+
+      {showNameSheet && (
+        <SaveRouteSheet
+          modalVisible={showNameSheet}
+          routeName={routeName}
+          onChangeText={(text: any) => setRouteName(text)}
+          onPressSave={() => handleSaveRouteBtn()}
+          onPressCancel={() => setShowNameSheet(false)}
+        />
+      )}
     </View>
   );
 };
 
-export default DownloadOflineMap;
+export default DownloadOfflineMap;
