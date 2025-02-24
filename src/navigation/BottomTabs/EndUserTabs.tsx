@@ -26,6 +26,11 @@ const EndUserTabs = () => {
         component={HikingScreen}
         name={'Hiking'}
       />
+      {/* <Tab.Screen
+        options={{unmountOnBlur: true}}
+        component={DummyScreen}
+        name={'Hiking'}
+      /> */}
       <Tab.Screen
         options={{unmountOnBlur: true}}
         component={WellPath}

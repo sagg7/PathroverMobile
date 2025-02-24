@@ -139,6 +139,7 @@ import WeatherIcon from './weatherIcon.svg';
 import SearchView from './searchView.svg';
 import Wind from './wind.svg';
 import Humiity from './humidity.svg';
+import HikeRoute from './HikeRoute.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -281,4 +282,5 @@ export const svgIcon = {
   SearchView: <SearchView />,
   Wind: <Wind />,
   Humiity: <Humiity />,
+  HikeRoute: <HikeRoute />,
 };

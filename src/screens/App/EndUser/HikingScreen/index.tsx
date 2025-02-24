@@ -1,30 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react';
 import MapboxGL, {MapView} from '@rnmapbox/maps';
 import styles from './styles';
-import {
-  AppLoader,
-  MainWrapper,
-  MapLayerSheet,
-  WeatherSheet,
-} from '../../../../components';
+import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
   appIcons,
   Default_Map_Style,
-  HP,
-  isIOS,
-  mapBoxToken,
   MapTypes,
-  PFColors,
-  showAlert,
-  UNEXPECTED_ERROR,
+  Routes,
   WEATHER_API_KEY,
   WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
 import HeaderView from './HeaderView';
-import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {Image, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
@@ -35,15 +24,9 @@ const HikingScreen = () => {
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
-  const [route, setRoute] = useState<any>([]);
-  const [available, setAvailable] = useState(false);
-  const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
   const [weather, setWeather] = useState<any>([]);
 
-  const [selectedWell, setSelectedWell] = useState<any>(null);
-  const [elevation, setElevation] = useState(null);
-  const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
   const {loginUser} = useSelector(state => state.auth);
 
@@ -130,54 +113,6 @@ const HikingScreen = () => {
     }, 500);
   };
 
-  const onPressToggle = () => {
-    setAvailable(!available);
-  };
-  const routeGeoJSON = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: route,
-    },
-  };
-  const onPressMapSettingClear = () => {
-    setTimeout(() => {
-      setShowMapSettigs(false);
-    }, 1000);
-  };
-
-  const _handlePinBtn = async () => {
-    const startCoords = {
-      latitude: currentLocation[1],
-      longitude: currentLocation[0],
-      name: 'Start',
-    };
-    const endCoords = {
-      latitude: selectedWell[1],
-      longitude: selectedWell[0],
-      name: 'End Location',
-    };
-
-    const routeData = {
-      user_route: {
-        name: 'Pin Location',
-        route_type: 'maps_location_pins',
-        color: PFColors.Blue.Dark,
-        weight: '4',
-
-        location_start_attributes: startCoords,
-        location_end_attributes: endCoords,
-      },
-    };
-    const resp = await createRoute(routeData);
-    if (resp?.data) {
-      showAlert('Alert', 'Your location has been pined.');
-      navigation.goBack();
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
-    }
-  };
-
   const moveToCurrentLocation = () => {
     if (
       !currentLocation ||
@@ -225,16 +160,16 @@ const HikingScreen = () => {
           centerCoordinate={currentLocation}
         />
       </MapboxGL.MapView>
-      <TouchableOpacity
-        style={styles.recenter}
-        onPress={() => moveToCurrentLocation()}>
-        {svgIcon.MapWhiteBg}
-      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => setMapLayerSheeet(true)}>
         {svgIcon.MapLayer}
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.hikeIconStyle}
+        onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
+        {svgIcon.HikeRoute}
       </TouchableOpacity>
 
       <MapLayerSheet
@@ -246,8 +181,14 @@ const HikingScreen = () => {
         onPressSave={() => onPressSave()}
       />
       <View style={styles.actionBtnView}>
-        <ActionBtn icon={appIcons.recordTrack} onPress={() => {}} />
-        <ActionBtn icon={appIcons.offlineMap} onPress={() => {}} />
+        <ActionBtn
+          icon={appIcons.recordTrack}
+          onPress={() => navigation.navigate(Routes.RecordHikingRoute)}
+        />
+        <ActionBtn
+          icon={appIcons.offlineMap}
+          onPress={() => navigation.navigate(Routes.DownloadedMapList)}
+        />
         <ActionBtn icon={appIcons.myData} onPress={() => {}} />
       </View>
 

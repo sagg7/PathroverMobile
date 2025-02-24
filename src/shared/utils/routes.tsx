@@ -69,4 +69,10 @@ export const Routes = {
   ViewSaveRoutes: 'ViewSaveRoutes',
   RecordRoute: 'RecordRoute',
   DownloadOfflineMap: 'DownloadOfflineMap',
+  ViewWellPathNavigation: 'ViewWellPathNavigation',
+  ChooseStartPoint: 'ChooseStartPoint',
+  RecordHikingRoute: 'RecordHikingRoute',
+  CreateHikeRoute: 'CreateHikeRoute',
+  DownloadedMapList: 'DownloadedMapList',
+  ViewOfflineMap: 'ViewOfflineMap',
 };

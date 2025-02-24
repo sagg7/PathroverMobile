@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('5'),
+    bottom: isIOS() ? WP('20') : WP('15'),
     left: 10,
   },
   recenter: {
     position: 'absolute',
-    bottom: isIOS() ? WP('32') : WP('20'),
+    bottom: isIOS() ? WP('32') : WP('27'),
     left: 10,
   },
   undoRedoContainer: {
@@ -61,51 +61,20 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.Medium,
     fontSize: PFFontSize.FONT_SIZE_16,
   },
-  freeFeatureText: {
-    color: PFColors.Blue.Dark,
-    fontFamily: PFFonts.Foundation.Medium,
-    fontSize: PFFontSize.FONT_SIZE_14,
-    paddingRight: 10,
-  },
-  centerSwitchWrapper: {
-    position: 'absolute',
-    left: '35%',
-    transform: [{translateX: -25}],
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  toggleContainer: {
-    width: 50,
-    height: 25,
-    borderRadius: 25,
-    padding: 5,
-    // right: 20,
-  },
-  circleStyle: {
-    width: 18,
-    height: 18,
-    borderRadius: 10,
+  userIcon: {
+    height: 35,
+    width: 35,
+    borderRadius: 20,
+    backgroundColor: '#ccc',
   },
   toggleView: {
     flexDirection: 'row',
-  },
-  searchView: {
-    flexDirection: 'row',
-    position: 'absolute',
-    top: isIOS() ? 120 : 60,
-    zIndex: 1,
+    width: WP('25'),
     justifyContent: 'space-between',
-    alignItems: 'center',
-    width: WP('95'),
-    alignSelf: 'center',
   },
   searchbar: {
     height: scale(44),
     width: WP('65'),
-  },
-  filterIcon: {
-    height: scale(44),
-    width: scale(44),
   },
 });
 export default styles;
