@@ -49,7 +49,7 @@ import ChatDetail from '../screens/App/EndUser/Chat/ChatDetail';
 import GroupInfoDetail from '../screens/App/EndUser/Chat/GroupInfoDetails';
 import AuthStack from './stacks/authStack';
 import SearchWellPath from '../screens/App/EndUser/SearchWellPath';
-import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearchh';
+import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearch';
 import CreateRouteEndUser from '../screens/App/EndUser/CreateRouteEndUser';
 import RouteToWell from '../screens/App/EndUser/RouteToWell';
 import EndUserSavedLibrary from '../screens/App/EndUser/EndUserSavedLibrary';
@@ -181,10 +181,7 @@ const AppNavigation = () => {
           name={Routes.SetTrailStartpoint}
           component={SetTrailStartpoint}
         />
-        <Stack.Screen
-          name={Routes.ChooseOnMap}
-          component={ChooseOnMap}
-        />
+        <Stack.Screen name={Routes.ChooseOnMap} component={ChooseOnMap} />
         <Stack.Screen
           name={'ViewWellPathNavigation'}
           component={ViewWellPathNavigation}

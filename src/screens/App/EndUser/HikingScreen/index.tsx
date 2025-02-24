@@ -10,20 +10,15 @@ import {
   appIcons,
   Default_Map_Style,
   MapTypes,
-  PFColors,
-  showAlert,
-  UNEXPECTED_ERROR,
   Routes,
   WEATHER_API_KEY,
 } from '../../../../shared/exporter';
 import HeaderView from './HeaderView';
-import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {Image, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import styles from './styles';
-import { resetTrailRoute } from '../../../../redux/endUser/endUserSlice';
-
+import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -36,11 +31,11 @@ const MY_DATA_MODAL_CONTENT = [
     type: 'hiking_custom_route',
     icon: svgIcon.Track,
   },
-  {
-    title: 'Offline maps',
-    type: '',
-    icon: svgIcon.MapWindow,
-  },
+  // {
+  //   title: 'Offline maps',
+  //   type: '',
+  //   icon: svgIcon.MapWindow,
+  // },
 ];
 
 const HikingScreen = () => {
