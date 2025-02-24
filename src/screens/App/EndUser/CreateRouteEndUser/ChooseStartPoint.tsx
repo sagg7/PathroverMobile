@@ -25,7 +25,7 @@ import {setCreateRouteData} from '../../../../redux/endUser/endUserSlice';
 
 const ChooseStartPoint = ({route, navigation}: any) => {
   const {setPickUpAddress, isStartPoint} = route?.params;
-  const {createRouteData} = useSelector(state => state?.endUser);
+  const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);
 
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [simpleSearch, setSimpleSearch] = useState<string>('');
@@ -41,7 +41,6 @@ const ChooseStartPoint = ({route, navigation}: any) => {
   const {location} = useLocation();
 
   useEffect(() => {
-    console.log('CREATE ====>', createRouteData);
     if ('start' in createRouteData) {
       setCurrentLocation(
         isStartPoint

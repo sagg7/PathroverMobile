@@ -46,7 +46,8 @@ const CreateRouteEndUser = () => {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
-  const {createRouteData} = useSelector(state => state?.endUser);
+  const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);
+
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [routeName, setRouteName] = useState<string>('');

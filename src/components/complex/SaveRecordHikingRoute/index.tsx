@@ -5,12 +5,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import {PFColors, PFFontSize, PFFonts, WP} from '../../../shared/exporter';
 import {AppButton} from '../AppButton';
-import {svgIcon} from '../../../assets/svg';
 import {AppInput} from '../../primitive/AppInput';
 
 interface SaveRecordHikingRouteSheetProps {
@@ -56,9 +54,9 @@ const SaveRecordHikingRouteSheet = ({
         <View>
           <View style={styles.titleView}>
             <Text style={styles.headerText}>Record Track</Text>
-            <TouchableOpacity onPress={setModalVisible}>
+            {/* <TouchableOpacity onPress={setModalVisible}>
               {svgIcon.CancelIcon}
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           {btnStatus === 'pause' && (
             <AppInput

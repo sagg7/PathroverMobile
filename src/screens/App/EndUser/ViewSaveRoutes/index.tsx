@@ -413,7 +413,7 @@ const ViewSaveRoutes = ({route}: any) => {
               key={route?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight,
+                lineWidth: routeLineHeight || 4,
                 lineColor: routeLineColor,
               }}
             />
@@ -425,7 +425,7 @@ const ViewSaveRoutes = ({route}: any) => {
               key={routeToStartPoint?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight,
+                lineWidth: routeLineHeight || 4,
                 lineColor: routeLineColor,
               }}
             />
