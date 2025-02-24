@@ -22,7 +22,6 @@ const SearchLatLng = () => {
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Search" />
-
       <SearchAddressSelector setRouteData={getRouteData} />
       <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
         <MapboxGL.Camera zoomLevel={15} centerCoordinate={currentLocation} />

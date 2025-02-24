@@ -58,6 +58,10 @@ import ViewSaveRoutes from '../screens/App/EndUser/ViewSaveRoutes';
 import RecordRoute from '../screens/App/EndUser/RecordRoute';
 import GroupChatDetail from '../screens/App/EndUser/Chat/GroupChatDetail';
 import DownloadOfflineMap from '../screens/App/EndUser/DownloadOflineMap';
+import Subscription from '../screens/App/EndUser/Subscription';
+import SearchTrailLatLng from '../screens/App/EndUser/HikingScreen/SearchTrailLatLng';
+import SetTrailStartpoint from '../screens/App/EndUser/HikingScreen/SetTrailStartpoint';
+import ChooseOnMap from '../screens/App/EndUser/HikingScreen/ChooseOnMap';
 import ViewWellPathNavigation from '../screens/App/EndUser/ViewWellPathNavigation';
 import ChooseStartPoint from '../screens/App/EndUser/CreateRouteEndUser/ChooseStartPoint';
 import RecordHikingRoute from '../screens/App/EndUser/RecordHikingRoute';
@@ -163,6 +167,23 @@ const AppNavigation = () => {
         <Stack.Screen
           name={'DownloadOfflineMap'}
           component={DownloadOfflineMap}
+        />
+        <Stack.Screen
+          name={Routes.Subscription}
+          component={Subscription}
+          options={{animation: 'slide_from_bottom'}}
+        />
+        <Stack.Screen
+          name={Routes.SearchTrailLatLng}
+          component={SearchTrailLatLng}
+        />
+        <Stack.Screen
+          name={Routes.SetTrailStartpoint}
+          component={SetTrailStartpoint}
+        />
+        <Stack.Screen
+          name={Routes.ChooseOnMap}
+          component={ChooseOnMap}
         />
         <Stack.Screen
           name={'ViewWellPathNavigation'}

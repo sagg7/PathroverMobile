@@ -1,7 +1,7 @@
 import {View, Text, FlatList, TouchableOpacity, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {AppHeader, AppLoader, MainWrapper} from '../../../../../components';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
 import {appIcons} from '../../../../../assets/icons';
 import styles from './styles';
@@ -11,8 +11,10 @@ import {
 } from '../../../../../redux/chat/chatApiSlice';
 
 const ChatUsers = () => {
+  const {params} = useRoute<any>();
+  const shareTrail = params?.shareTrail;
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
@@ -62,10 +64,11 @@ const ChatUsers = () => {
         navigation.navigate('ChatDetail', {
           item: res?.data,
           isGroup: false,
+          ...(shareTrail && {shareTrail}),
         });
       }
     } catch (error) {
-     //
+      //
     }
   };
 

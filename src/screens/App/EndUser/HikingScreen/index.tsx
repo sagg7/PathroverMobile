@@ -1,22 +1,47 @@
 import React, {useEffect, useRef, useState} from 'react';
-import MapboxGL, {MapView} from '@rnmapbox/maps';
-import styles from './styles';
-import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
+import {FlatList, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import MapboxGL from '@rnmapbox/maps';
+import {svgIcon} from '../../../../assets/svg';
+import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
+import GeneralModal from '../../../../components/complex/GeneralModal';
+import useLocation from '../../../../hooks/getLocation';
 import {
   appIcons,
   Default_Map_Style,
   MapTypes,
+  PFColors,
+  showAlert,
+  UNEXPECTED_ERROR,
   Routes,
   WEATHER_API_KEY,
-  WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
-import useLocation from '../../../../hooks/getLocation';
 import HeaderView from './HeaderView';
+import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {Image, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+import styles from './styles';
+import { resetTrailRoute } from '../../../../redux/endUser/endUserSlice';
+
+
+const MY_DATA_MODAL_CONTENT = [
+  {
+    title: 'Trails',
+    type: 'hiking_trail_route',
+    icon: svgIcon.RouteBlue,
+  },
+  {
+    title: 'Routes',
+    type: 'hiking_custom_route',
+    icon: svgIcon.Track,
+  },
+  {
+    title: 'Offline maps',
+    type: '',
+    icon: svgIcon.MapWindow,
+  },
+];
 
 const HikingScreen = () => {
   const navigation: any = useNavigation();
@@ -26,9 +51,9 @@ const HikingScreen = () => {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
   const [weather, setWeather] = useState<any>([]);
-
   const dispatch = useDispatch();
   const {loginUser} = useSelector(state => state.auth);
+  const [isMyDataVisible, setIsMyDataVisible] = useState(false);
 
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
@@ -172,6 +197,15 @@ const HikingScreen = () => {
         {svgIcon.HikeRoute}
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.searcRoute}
+        onPress={() => {
+          dispatch(resetTrailRoute());
+          navigation.navigate(Routes.SearchTrailLatLng);
+        }}>
+        {svgIcon.SearchRoute}
+      </TouchableOpacity>
+
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}
         modalVisible={mapLayerSheeet}
@@ -189,7 +223,12 @@ const HikingScreen = () => {
           icon={appIcons.offlineMap}
           onPress={() => navigation.navigate(Routes.DownloadedMapList)}
         />
-        <ActionBtn icon={appIcons.myData} onPress={() => {}} />
+        <ActionBtn
+          icon={appIcons.myData}
+          onPress={() => {
+            setIsMyDataVisible(true);
+          }}
+        />
       </View>
 
       {weather?.city && (
@@ -200,6 +239,31 @@ const HikingScreen = () => {
           weather={weather}
         />
       )}
+      <GeneralModal
+        visible={isMyDataVisible}
+        title={'My data'}
+        onClose={() => setIsMyDataVisible(false)}>
+        <FlatList
+          data={MY_DATA_MODAL_CONTENT}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                activeOpacity={0.4}
+                style={styles.tagView}
+                onPress={() => {
+                  setIsMyDataVisible(false),
+                    navigation.navigate(Routes.EndUserSavedLibraryType, {item});
+                }}>
+                <View style={styles.tagRow}>
+                  {item?.icon}
+                  <Text style={styles.tagText}>{item.title}</Text>
+                </View>
+                {svgIcon.RightChevron}
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </GeneralModal>
     </MainWrapper>
   );
 };

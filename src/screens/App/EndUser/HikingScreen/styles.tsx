@@ -36,6 +36,11 @@ const styles = StyleSheet.create({
     bottom: isIOS() ? WP('32') : WP('27'),
     left: 10,
   },
+  searcRoute: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('20') : WP('15'),
+    right: 10,
+  },
   undoRedoContainer: {
     flexDirection: 'row',
     position: 'absolute',
@@ -92,6 +97,26 @@ const styles = StyleSheet.create({
   actionBtnStyles: {
     height: scale(36),
     width: scale(119),
+  },
+  tagView: {
+    flexDirection: 'row',
+    backgroundColor: PFColors.Gray.CloudGray,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 6,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tagText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    marginLeft: WP('5'),
   },
 });
 export default styles;

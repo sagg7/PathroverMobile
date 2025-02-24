@@ -11,9 +11,13 @@ import {
 import {useGetAllSaveRoutesQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {Routes} from '../../../../shared/exporter';
 import {useIsFocused} from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setEndingPoint, setStartingPoint } from '../../../../redux/endUser/endUserSlice';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
+  const isHiking = !!route?.params?.isHiking;
+const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [queryParams] = useState({
     route_type: item?.type,
@@ -28,13 +32,20 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   }, [isFocused]);
 
   const renderView = ({item}: any) => {
+    console.log(" renderView ~ item==>", JSON.stringify(item, null, 2))
     return (
       <TouchableOpacity
         style={styles.listConatainer}
         key={item?.id}
-        onPress={() =>
-          navigation.navigate(Routes.ViewSaveRoutes, {item: item})
-        }>
+        onPress={() =>{
+          if (isHiking) {
+            dispatch(setStartingPoint([item?.pickup_location?.latitude, item?.pickup_location?.longitude]))
+            dispatch(setEndingPoint([item?.dropoff_location?.latitude, item?.dropoff_location?.longitude]))
+            navigation.navigate(Routes.SearchTrailLatLng);
+          } else {
+            navigation.navigate(Routes.ViewSaveRoutes, {item: item})
+          }
+        }}>
         <View style={styles.innerContainer}>
           <View style={styles.iconContainer}>{svgIcon.MapWindow}</View>
           <Text style={styles.listOptionText}>{item?.name}</Text>

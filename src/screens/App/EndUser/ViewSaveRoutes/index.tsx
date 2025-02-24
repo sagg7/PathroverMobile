@@ -1,29 +1,27 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {Text, TouchableOpacity, View} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import {useSelector} from 'react-redux';
+import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
-import styles from './styles';
+import {svgIcon} from '../../../../assets/svg';
 import {
   AppHeader,
   MainWrapper,
   MapLayerSheet,
   StartPointModal,
 } from '../../../../components';
+import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
+import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {
   Default_Map_Style,
-  isIOS,
   mapBoxToken,
   MapTypes,
   PFColors,
   showAlert,
-  WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
-import {Text, TouchableOpacity, View} from 'react-native';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
-import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
-import Geolocation from 'react-native-geolocation-service';
-import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
-import {useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
+import styles from './styles';
 
 const ViewSaveRoutes = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -387,7 +385,6 @@ const ViewSaveRoutes = ({route}: any) => {
           // }
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
-
         {startPoint && (
           <MapboxGL.MarkerView coordinate={startPoint}>
             {svgIcon.BlueMapMarker}
@@ -410,8 +407,6 @@ const ViewSaveRoutes = ({route}: any) => {
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
-
-        {/* Route Line */}
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer

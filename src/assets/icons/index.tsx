@@ -49,4 +49,11 @@ export const appIcons = {
   myData: require('../icons/myData.png'),
   recordTrack: require('../icons/recordTrack.png'),
   offlineMap: require('../icons/offlineMap.png'),
+  accident: require('../icons/accident.png'),
+  laneClosure: require('../icons/lane_closure.png'),
+  object: require('../icons/object.png'),
+  police: require('../icons/police.png'),
+  slowdown: require('../icons/slowdown.png'),
+  warning: require('../icons/warning.png'),
+  workInProgress: require('../icons/wip.png'),
 };

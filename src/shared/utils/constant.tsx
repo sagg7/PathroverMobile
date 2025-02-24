@@ -100,6 +100,8 @@ export const APP_ROLE = {
 };
 export const Default_Map_Style = 'mapbox://styles/mapbox/streets-v12';
 
+export const MESSAGE_CONTAINS_LOCATION = 'messageContainsLocation';
+
 export const VehicleTypes: VehicleTypes[] = [
   {
     key: 1,
@@ -912,3 +914,48 @@ export const EndUserSetting = [
 //   'ca-app-pub-8139629720293753/2997034745',
 //   'ca-app-pub-8139629720293753/8461114412',
 // ];
+
+export const REPORTS_LIST = [
+  {
+    id: 1,
+    name: 'Crash',
+    icon: appIcons.accident,
+    key: 'crash',
+  },
+  {
+    id: 2,
+    name: 'Slowdown',
+    icon: appIcons.slowdown,
+    key: 'slow_down',
+  },
+  {
+    id: 1,
+    name: 'Police',
+    icon: appIcons.police,
+    key: 'police',
+  },
+  {
+    id: 1,
+    name: 'Construction',
+    icon: appIcons.workInProgress,
+    key: 'construction',
+  },
+  {
+    id: 1,
+    name: 'Lane closure',
+    icon: appIcons.laneClosure,
+    key: 'lane_closure',
+  },
+  {
+    id: 1,
+    name: 'Object on road',
+    icon: appIcons.object,
+    key: 'object_on_road',
+  },
+  {
+    id: 1,
+    name: 'Stalled vehicle',
+    icon: appIcons.warning,
+    key: 'stalled_vehicle',
+  },
+];
