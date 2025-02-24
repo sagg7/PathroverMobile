@@ -49,7 +49,7 @@ import ChatDetail from '../screens/App/EndUser/Chat/ChatDetail';
 import GroupInfoDetail from '../screens/App/EndUser/Chat/GroupInfoDetails';
 import AuthStack from './stacks/authStack';
 import SearchWellPath from '../screens/App/EndUser/SearchWellPath';
-import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearch';
+import CreateRouteSearch from '../screens/App/EndUser/CreateRouteSearchh';
 import CreateRouteEndUser from '../screens/App/EndUser/CreateRouteEndUser';
 import RouteToWell from '../screens/App/EndUser/RouteToWell';
 import EndUserSavedLibrary from '../screens/App/EndUser/EndUserSavedLibrary';
@@ -58,6 +58,12 @@ import ViewSaveRoutes from '../screens/App/EndUser/ViewSaveRoutes';
 import RecordRoute from '../screens/App/EndUser/RecordRoute';
 import GroupChatDetail from '../screens/App/EndUser/Chat/GroupChatDetail';
 import DownloadOfflineMap from '../screens/App/EndUser/DownloadOflineMap';
+import ViewWellPathNavigation from '../screens/App/EndUser/ViewWellPathNavigation';
+import ChooseStartPoint from '../screens/App/EndUser/CreateRouteEndUser/ChooseStartPoint';
+import RecordHikingRoute from '../screens/App/EndUser/RecordHikingRoute';
+import CreateHikeRoute from '../screens/App/EndUser/CreateHikeRoute';
+import DownloadedMapList from '../screens/App/EndUser/DownloadedMapList';
+import ViewOfflineMap from '../screens/App/EndUser/ViewOflineMap';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -148,7 +154,6 @@ const AppNavigation = () => {
           name={Routes.EndUserSavedLibrary}
           component={EndUserSavedLibrary}
         />
-
         <Stack.Screen
           name={Routes.EndUserSavedLibraryType}
           component={EndUserSavedLibraryType}
@@ -159,6 +164,24 @@ const AppNavigation = () => {
           name={'DownloadOfflineMap'}
           component={DownloadOfflineMap}
         />
+        <Stack.Screen
+          name={'ViewWellPathNavigation'}
+          component={ViewWellPathNavigation}
+        />
+        <Stack.Screen name={'ChooseStartPoint'} component={ChooseStartPoint} />
+        <Stack.Screen
+          name={Routes.RecordHikingRoute}
+          component={RecordHikingRoute}
+        />
+        <Stack.Screen
+          name={Routes.CreateHikeRoute}
+          component={CreateHikeRoute}
+        />
+        <Stack.Screen
+          name={Routes.DownloadedMapList}
+          component={DownloadedMapList}
+        />
+        <Stack.Screen name={Routes.ViewOfflineMap} component={ViewOfflineMap} />
       </Stack.Navigator>
     </NavigationContainer>
   );

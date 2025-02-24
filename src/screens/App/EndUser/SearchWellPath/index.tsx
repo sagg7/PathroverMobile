@@ -125,7 +125,7 @@ const SearchWellPath = ({route, navigation}: any) => {
     }
   };
   const onSelectFromList = (place: any) => {
-    setSearchLocationNames(place?.place_name);
+    setSearchLocationNames(place?.placeName);
     const [longitude, latitude] = place.coords || place;
 
     setSearchLocation([longitude, latitude]);

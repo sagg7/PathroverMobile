@@ -23,7 +23,12 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
+    bottom: isIOS() ? WP('10') : WP('5'),
+    left: 10,
+  },
+  hikeIconStyle: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('25') : WP('20'),
     left: 10,
   },
   recenter: {
