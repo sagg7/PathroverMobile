@@ -1,4 +1,12 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  FlatList,
+  Image,
+  Linking,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
@@ -9,39 +17,30 @@ import {
   MainWrapper,
   StartPointModal,
 } from '../../../../../components';
+import GeneralModal from '../../../../../components/complex/GeneralModal';
+import ProgressCircle from '../../../../../components/complex/ProgressCircle';
 import {RouteToWellSheet} from '../../../../../components/complex/RouteToWellSheet';
+import {RouteToWellStartedSheet} from '../../../../../components/complex/RouteToWellStartedSheet';
 import SearchTrailSelector from '../../../../../components/complex/SearchTrailSelector';
 import useLocation from '../../../../../hooks/getLocation';
 import {
-  appIcons,
+  useAddRouteReportMutation,
+  useGetRouteReportQuery,
+} from '../../../../../redux/endUser/endUserApiSlice';
+import {useCreateRouteMutation} from '../../../../../redux/manager/managerApiSlice';
+import {
   mapBoxToken,
   PFColors,
   Routes,
   showAlert,
   WP,
 } from '../../../../../shared/exporter';
-import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
-import styles from './styles';
-import {RouteToWellStartedSheet} from '../../../../../components/complex/RouteToWellStartedSheet';
-import {
-  FlatList,
-  Image,
-  Linking,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import GeneralModal from '../../../../../components/complex/GeneralModal';
 import {
   REPORTS_LIST,
   UNEXPECTED_ERROR,
 } from '../../../../../shared/utils/constant';
-import ProgressCircle from '../../../../../components/complex/ProgressCircle';
-import {
-  useAddRouteReportMutation,
-  useGetRouteReportQuery,
-} from '../../../../../redux/endUser/endUserApiSlice';
-import {useCreateRouteMutation} from '../../../../../redux/manager/managerApiSlice';
+import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
+import styles from './styles';
 
 const SearchTrailLatLng = () => {
   const {location} = useLocation();
@@ -185,6 +184,7 @@ const SearchTrailLatLng = () => {
   useEffect(() => {
     getTimeDistanceDetails();
   }, [currentLocation]);
+  
   useEffect(() => {
     if (liveLocation) getTimeDistanceDetails();
   }, [liveLocation]);
@@ -194,8 +194,8 @@ const SearchTrailLatLng = () => {
     setIsStartBtnPressed(true);
     setShowRouteActionSheet(false);
     const routeResults: any = await getTimeAndDistance(
+      currentLocation,
       startingPoint,
-      endingPoint,
     );
     setResults(routeResults);
     setTimeout(() => {
@@ -204,16 +204,31 @@ const SearchTrailLatLng = () => {
     setRoute([]);
   };
 
-  const routeGeoJSON = useMemo(
-    () => ({
-      type: 'Feature',
-      geometry: {
-        type: 'LineString',
-        coordinates: isStartBtnPressed ? routeToStartPoint : routes,
-      },
-    }),
-    [isStartBtnPressed, routeToStartPoint, routes],
-  );
+  // const routeGeoJSON = useMemo(
+  //   () => ({
+  //     type: 'Feature',
+  //     geometry: {
+  //       type: 'LineString',
+  //       coordinates: isStartBtnPressed ? routeToStartPoint : routes,
+  //     },
+  //   }),
+  //   [isStartBtnPressed, routeToStartPoint, routes],
+  // );
+
+  const routeGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: routeToStartPoint,
+    },
+  };
+  const routeJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: routes,
+    },
+  };
 
   const handleLocationUpdate = async (location: any) => {
     if (location?.coords) {
@@ -255,7 +270,6 @@ const SearchTrailLatLng = () => {
               name: 'ucp',
             },
           };
-          console.log(' interval=setInterval ~ data==>', data);
           addRouteReport(data)
             .unwrap()
             .then(res => {
@@ -351,7 +365,7 @@ const SearchTrailLatLng = () => {
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
         {routes?.length > 1 && !isStartBtnPressed && (
-          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
+          <MapboxGL.ShapeSource shape={routeJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               key={routes?.length}
               id="routeLayer-unique"
@@ -409,7 +423,7 @@ const SearchTrailLatLng = () => {
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
-          routeInfo={timeDistance}
+          routeInfo={results}
           setModalVisible={() => {
             setShowRouteStartedSheet(false);
             setIsStartBtnPressed(false);
@@ -425,6 +439,7 @@ const SearchTrailLatLng = () => {
           onPressCancel={() => {}}
         />
       )}
+      {console.log('RESULT', results)}
       {showRouteActionSheet && (
         <RouteToWellSheet
           onpressCancel={() => navigation.navigate('Hiking')}

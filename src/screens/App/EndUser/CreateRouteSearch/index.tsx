@@ -15,7 +15,7 @@ const SearchLatLng = () => {
     start: '',
     end: '',
   });
-  const {createRouteData} = useSelector((state: any) => state?.endUser);
+  const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);
 
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const navigation = useNavigation();

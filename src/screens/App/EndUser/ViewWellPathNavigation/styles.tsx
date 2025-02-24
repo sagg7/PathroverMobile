@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    top: isIOS() ? WP('35') : WP('25'),
+    top: isIOS() ? WP('45') : WP('35'),
     right: 20,
   },
   undoRedoContainer: {
@@ -137,6 +137,44 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 20,
     borderTopLeftRadius: 20,
     padding: 20,
+  },
+  searchBox: {
+    width: WP('90'),
+    height: scale(44),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 10,
+    borderRadius: scale(12),
+    marginBottom: scale(16),
+    alignSelf: 'center',
+    backgroundColor: PFColors.Gray.LightMist,
+    position: 'absolute',
+    top: WP('15'),
+  },
+  input: {
+    fontSize: scale(14),
+    fontFamily: PFFonts.Foundation.Medium,
+    color: PFColors.Standard.Black,
+    width: scale(300),
+    paddingLeft: isIOS() ? 10 : 3,
+  },
+  inputContainerStyle: {
+    width: WP('82'),
+  },
+  suggestionContainer: {
+    width: WP('90'),
+    alignSelf: 'center',
+    // position: 'absolute',
+    // top: 30,
+    // backgroundColor: 'red',
+  },
+  listStyles: {
+    backgroundColor: PFColors.Standard.White,
+    position: 'absolute',
+    flex: 1,
+    zIndex: 1,
+    alignSelf: 'center',
+    top: isIOS() ? WP('20') : WP('25'),
   },
 });
 export default styles;

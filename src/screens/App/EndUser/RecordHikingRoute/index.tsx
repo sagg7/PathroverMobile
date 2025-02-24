@@ -2,18 +2,15 @@ import React, {useEffect, useRef, useState} from 'react';
 import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
-  AddEntranceSheet,
   AppButton,
   AppHeader,
   AppLoader,
   MainWrapper,
   MapLayerSheet,
   SaveRecordHikingRouteSheet,
-  SaveRecordRouteSheet,
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
-  appIcons,
   Default_Map_Style,
   MapTypes,
   PFColors,
@@ -24,7 +21,7 @@ import {svgIcon} from '../../../../assets/svg';
 import Geolocation from 'react-native-geolocation-service';
 
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import haversine from 'haversine-distance';
@@ -167,15 +164,14 @@ const RecordHikingRoute = () => {
         : [];
     const routeData = {
       user_route: {
-        name: recordingDetails?.name,
-        route_type: 'trail_route',
+        name: recordingDetails,
+        route_type: 'hiking_trail_route',
         color: PFColors.Blue.Dark,
         weight: '4',
         locations_attributes: locationsAttributes,
       },
     };
     const resp = await createRoute(routeData);
-
     setSaveRouteSheet(false);
     if (resp?.data) {
       showAlert('Alert', 'Your recording has been saved.');
@@ -282,37 +278,7 @@ const RecordHikingRoute = () => {
           </MapboxGL.ShapeSource>
         )}
       </MapboxGL.MapView>
-      {/* {isRecordingStarted && (
-        <View style={styles.bllueView}>
-          <Text style={styles.timeText}>{formatTime(elapsedTime)} </Text>
-          {isRunning ? (
-            <TouchableOpacity
-              style={{marginHorizontal: 10}}
-              onPress={() => stopTimer()}>
-              {svgIcon.Pause}
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={{marginHorizontal: 10}}
-              onPress={() => startTimer()}>
-              {svgIcon.PlayBtn}
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity onPress={() => setSaveRouteSheet(true)}>
-            {svgIcon.StopSquare}
-          </TouchableOpacity>
-        </View>
-      )} */}
-      {/* {!isRecordingStarted && (
-        <TouchableOpacity
-          style={styles.videoCam}
-          onPress={() => {
-            setIsRecordingStarted(true);
-            startTimer();
-          }}>
-          {svgIcon.VideoCam}
-        </TouchableOpacity>
-      )} */}
+
       {!isRecordingStarted && (
         <AppButton
           title="Start Recording"
@@ -328,15 +294,6 @@ const RecordHikingRoute = () => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
-      {/* {saveRouteSheet && (
-        <SaveRecordRouteSheet
-          setModalVisible={() => setSaveRouteSheet(false)}
-          recordingDetails={recordingDetails}
-          setDetails={setRecordingDetails}
-          onPressCancel={() => setSaveRouteSheet(false)}
-          onPressSave={() => handleSaveBtn()}
-        />
-      )} */}
 
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}
@@ -357,6 +314,7 @@ const RecordHikingRoute = () => {
           distance={totalDistance}
           value={recordingDetails}
           onChange={text => setRecordingDetails(text)}
+          // setModalVisible={()=>}
         />
       )}
       {PinLoading && <AppLoader />}

@@ -11,13 +11,16 @@ import {
 import {useGetAllSaveRoutesQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {Routes} from '../../../../shared/exporter';
 import {useIsFocused} from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
-import { setEndingPoint, setStartingPoint } from '../../../../redux/endUser/endUserSlice';
+import {useDispatch} from 'react-redux';
+import {
+  setEndingPoint,
+  setStartingPoint,
+} from '../../../../redux/endUser/endUserSlice';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
   const isHiking = !!route?.params?.isHiking;
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [queryParams] = useState({
     route_type: item?.type,
@@ -32,18 +35,28 @@ const dispatch = useDispatch();
   }, [isFocused]);
 
   const renderView = ({item}: any) => {
-    console.log(" renderView ~ item==>", JSON.stringify(item, null, 2))
     return (
       <TouchableOpacity
         style={styles.listConatainer}
         key={item?.id}
-        onPress={() =>{
+        onPress={() => {
           if (isHiking) {
-            dispatch(setStartingPoint([item?.pickup_location?.latitude, item?.pickup_location?.longitude]))
-            dispatch(setEndingPoint([item?.dropoff_location?.latitude, item?.dropoff_location?.longitude]))
+
+            dispatch(
+              setStartingPoint([
+                parseFloat(item?.pickup_location?.longitude),
+                parseFloat(item?.pickup_location?.latitude),
+              ]),
+            );
+            dispatch(
+              setEndingPoint([
+                parseFloat(item?.dropoff_location?.longitude),
+                parseFloat(item?.dropoff_location?.latitude),
+              ]),
+            );
             navigation.navigate(Routes.SearchTrailLatLng);
           } else {
-            navigation.navigate(Routes.ViewSaveRoutes, {item: item})
+            navigation.navigate(Routes.ViewSaveRoutes, {item: item});
           }
         }}>
         <View style={styles.innerContainer}>

@@ -14,12 +14,23 @@ import {
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
-import {TouchableOpacity} from 'react-native';
+import {
+  FlatList,
+  Keyboard,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {
+  fetchSuggestions,
+  getTimeAndDistance,
+} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {useSelector} from 'react-redux';
+import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -33,6 +44,22 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [tourStarted, setTourStarted] = useState<boolean>(false);
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
+  const [searchLocation, setSearchLocation] = useState<any>(null);
+
+  const [simpleSearch, setSimpleSearch] = useState<string>('');
+  const debounceTimeout = useRef<any>(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [queryParams, setQueryParams] = useState<any>({
+    latitude: null,
+    longitude: null,
+    radius: 50,
+  });
+  const [allWells, setAllWells] = useState<any>([]);
+  const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
+  const [showAddEntranceSheet, setShowAddEntranceSheet] =
+    useState<boolean>(false);
+  const [selectedWell, setSelectedWell] = useState<any>(null);
+  const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
   const [actionBtn, setActionBtn] = useState<any>({
@@ -40,9 +67,14 @@ const ViewWellPathNavigation = ({route}: any) => {
     start: false,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
-
+  const {
+    data: allWellLocations,
+    isLoading,
+    refetch,
+  } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
 
@@ -59,6 +91,28 @@ const ViewWellPathNavigation = ({route}: any) => {
       setSelectedMapType(mapLayerStyle);
     }
   }, [mapLayerStyle]);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true),
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false),
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+  useEffect(() => {
+    if (allWellLocations) setAllWells(allWellLocations?.wells);
+    console.log(
+      'allWellLocationsallWellLocations',
+      allWellLocations?.wells?.length,
+    );
+  }, [allWellLocations]);
 
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
@@ -193,10 +247,84 @@ const ViewWellPathNavigation = ({route}: any) => {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
+  const handleChangeText = (text: any) => {
+    setSimpleSearch(text);
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      const fetchData = await fetchSuggestions(text);
+      if (fetchData?.message === 'Empty query text') {
+        setSuggestions([]);
+      } else {
+        setSuggestions(fetchData?.features);
+      }
+    }, 1500);
+  };
+  const handleSelect = (place: any) => {
+    const [longitude, latitude] = place.center || place;
+    cameraRef.current.moveTo([longitude, latitude], 1500);
+    setSuggestions([]);
+    setSearchLocation([longitude, latitude]);
+    setQueryParams({
+      ...queryParams,
+      latitude: latitude,
+      longitude: longitude,
+    });
+  };
+  const wellsToGeoJSON = (wells: any[]) => ({
+    type: 'FeatureCollection',
+    features: wells.map(well => ({
+      type: 'Feature',
+      properties: {well: well},
+
+      geometry: {
+        type: 'Point',
+        coordinates: [Number(well.log), Number(well.lat)],
+      },
+    })),
+  });
+  const onPressMarker = (e: any) => {
+    const feature = e?.features[0];
+    if (!feature) return;
+
+    const coordinates = feature.geometry?.coordinates;
+    const isCluster = feature.properties?.cluster || false;
+    const pointCount = feature.properties?.point_count || 1;
+    const selected = feature.properties?.well;
+
+    if (!coordinates) return;
+
+    if (isCluster && pointCount > 1) {
+      showAlert(
+        'Alert',
+        'Markers are clustered—zoom in for a closer look!',
+        () => {
+          cameraRef.current?.moveTo(coordinates, 600);
+
+          setTimeout(() => {
+            cameraRef.current?.setCamera({
+              centerCoordinate: coordinates,
+              zoomLevel: Math.min(16, Math.max(12, 18 - Math.log2(pointCount))), // Adjust zoom
+              animationDuration: 800,
+            });
+          }, 500);
+        },
+      );
+
+      return;
+    }
+
+    setShowPinAddress(true);
+    setSelectedWell([selected?.log, selected?.lat]);
+    setSelectedWellName(selected);
+  };
 
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title="Route To Well" />
+      <AppHeader title="View Route" />
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -221,7 +349,13 @@ const ViewWellPathNavigation = ({route}: any) => {
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
-
+        {searchLocation && (
+          <MapboxGL.PointAnnotation
+            id="searchMarker"
+            coordinate={searchLocation}>
+            {svgIcon.BlueMapMarker}
+          </MapboxGL.PointAnnotation>
+        )}
         {/* Route Line */}
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
@@ -234,8 +368,44 @@ const ViewWellPathNavigation = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+        <MapboxGL.Images
+          images={{
+            marker: require('../../../../assets/icons/wellsMarker.png'),
+          }}
+        />
+        {/* Clustering Source */}
+        {allWells?.length > 0 && (
+          <MapboxGL.ShapeSource
+            onPress={onPressMarker}
+            id="wellsCluster"
+            shape={wellsToGeoJSON(allWells)}
+            cluster
+            clusterRadius={20}
+            clusterMaxZoom={10}
+            // clusterRadius={20}
+            // clusterMaxZoom={20}
+          >
+            {/* <MapboxGL.SymbolLayer
+              id="markerLayer"
+              style={{
+                iconImage: 'marker',
+                iconSize: 1,
+                iconAllowOverlap: true,
+              }}
+            /> */}
+            <MapboxGL.SymbolLayer
+              id="markerLayer"
+              style={{
+                iconImage: 'marker', // Reference the registered image name
+                iconSize: Platform.OS === 'android' ? 0.7 : 0.5,
+                iconIgnorePlacement: true,
+                // iconAllowOverlap: true,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
       </MapboxGL.MapView>
-      {showRouteActionSheet && (
+      {showRouteActionSheet && !keyboardVisible && (
         <RouteToWellSheet
           onpressCancel={() => navigation.goBack()}
           routeName={route?.params?.entranceName}
@@ -262,6 +432,7 @@ const ViewWellPathNavigation = ({route}: any) => {
             }, 1000);
           }}
           onPressPin={() => handlePinBtn()}
+          show={false}
         />
       )}
       {showRouteStartedSheet && (
@@ -280,6 +451,36 @@ const ViewWellPathNavigation = ({route}: any) => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
+      <View style={styles.searchBox}>
+        {svgIcon.Search}
+        <TextInput
+          placeholder="Search"
+          placeholderTextColor={PFColors.Gray.DarkGray}
+          value={simpleSearch}
+          onChangeText={handleChangeText}
+          style={styles.input}
+        />
+        {/* {suggestions?.length > 0 && ( */}
+
+        {/* )} */}
+      </View>
+      {suggestions?.length > 0 && (
+        <View style={styles.listStyles}>
+          <FlatList
+            data={suggestions}
+            keyExtractor={(item: any) => item.id}
+            contentContainerStyle={styles.suggestionContainer}
+            renderItem={({item}: any) => (
+              <TouchableOpacity onPress={() => handleSelect(item)}>
+                <Text style={{padding: 10, color: PFColors.Standard.Black}}>
+                  {item.place_name}jjn
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}
         modalVisible={mapLayerSheeet}
