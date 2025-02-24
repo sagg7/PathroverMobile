@@ -178,7 +178,7 @@ export const svgIcon = {
   CrossCirlce: <CrossCirlce />,
   RightChevron: <RightChevron />,
   LeftChevron: <LeftChevron />,
-  BlueMarker: <BlueMarker />,
+  BlueMarker: <BlueMarker stroke={'#13488A'} />,
   MyRequest: <MyRequest />,
   CreateRoute: <CreateRoute />,
   RequestHistory: <RequestHistory />,
