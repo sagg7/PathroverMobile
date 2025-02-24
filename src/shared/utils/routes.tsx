@@ -69,4 +69,8 @@ export const Routes = {
   ViewSaveRoutes: 'ViewSaveRoutes',
   RecordRoute: 'RecordRoute',
   DownloadOfflineMap: 'DownloadOfflineMap',
+  Subscription: 'Subscription',
+  SearchTrailLatLng: 'SearchTrailLatLng',
+  SetTrailStartpoint: 'SetTrailStartpoint',
+  ChooseOnMap: 'ChooseOnMap',
 };

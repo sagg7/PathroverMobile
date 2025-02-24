@@ -13,7 +13,8 @@ interface RouteToWellSheetProps {
   setModalVisible?: () => void;
   onPressDirection: () => void;
   onPressStart: () => void;
-  onPressPin: () => void;
+  onPressPin?: () => void;
+  onPressShare?: () => void;
   actionBtn: any;
   distanceInfo?: any;
   routeName: string;
@@ -21,9 +22,50 @@ interface RouteToWellSheetProps {
   show: any;
 }
 
+export const ActionButtons = ({
+  icon,
+  title,
+  selected,
+  onPressActionBtn,
+  disabled,
+}: any) => {
+  return (
+    <TouchableOpacity
+      disabled={disabled}
+      onPress={onPressActionBtn}
+      style={[
+        styles.buttonContainer,
+        {
+          backgroundColor: selected ? PFColors.Blue.Dark : '#ECEFF3',
+          borderColor: selected ? '#ECEFF3' : PFColors.Blue.Dark,
+        },
+      ]}>
+      <Image
+        source={icon}
+        style={[
+          styles.actionIcon,
+          {
+            tintColor: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
+          },
+        ]}
+      />
+      <Text
+        style={[
+          styles.buttonText,
+          {
+            color: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
+          },
+        ]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 const RouteToWellSheet = ({
   setModalVisible,
   onPressDirection,
+  onPressShare,
   onPressStart,
   onPressPin,
   actionBtn,
@@ -32,47 +74,6 @@ const RouteToWellSheet = ({
   onpressCancel,
   show = true,
 }: RouteToWellSheetProps) => {
-  const ActionButtons = ({
-    icon,
-    title,
-    selected,
-    onPressActionBtn,
-    disabled,
-  }: any) => {
-    return (
-      <TouchableOpacity
-        disabled={disabled}
-        onPress={onPressActionBtn}
-        style={[
-          styles.buttonContainer,
-          {
-            backgroundColor: selected ? PFColors.Blue.Dark : '#ECEFF3',
-            borderColor: selected ? '#ECEFF3' : PFColors.Blue.Dark,
-          },
-        ]}>
-        <Image
-          source={icon}
-          style={[
-            styles.actionIcon,
-            {
-              tintColor: selected
-                ? PFColors.Standard.White
-                : PFColors.Blue.Dark,
-            },
-          ]}
-        />
-        <Text
-          style={[
-            styles.buttonText,
-            {
-              color: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
-            },
-          ]}>
-          {title}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
   return (
     <View style={[styles.modalContainer, styles.innerContainer]}>
       <View style={styles.titleView}>
@@ -99,7 +100,11 @@ const RouteToWellSheet = ({
           </Text>
         </Text>
         {show && (
-          <TouchableOpacity style={styles.shareIcon} disabled>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={onPressShare}
+            style={styles.shareIcon}
+            disabled={!onPressShare}>
             {svgIcon.ShareWellPath}
           </TouchableOpacity>
         )}

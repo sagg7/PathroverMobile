@@ -24,6 +24,7 @@ import {
 } from '../../../../../redux/chat/chatApiSlice';
 import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
 import styles from './styles';
+import {MESSAGE_CONTAINS_LOCATION} from '../../../../../shared/utils/constant';
 
 interface HeaderProps {
   title: string;
@@ -73,7 +74,8 @@ const Header = ({
   );
 };
 const ChatDetail = () => {
-  const {params} = useRoute();
+  const {params} = useRoute<any>();
+  const {shareTrail} = params;
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [show, setShow] = useState(false);
@@ -82,7 +84,7 @@ const ChatDetail = () => {
   const token = accessToken?.replace('Bearer ', '');
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
   const {subscribe, unsubscribe} = useChannel(actionCable);
-
+  const [isConnected, setIsConnected] = useState(false);
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage] = useCreateChatMessageMutation();
   const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
@@ -100,7 +102,9 @@ const ChatDetail = () => {
             getChatMessage(params?.item?.id);
             readChat();
           },
-          connected: () => {},
+          connected: () => {
+            setIsConnected(true);
+          },
         },
       );
     } catch (err) {
@@ -133,6 +137,16 @@ const ChatDetail = () => {
     })();
   }, [isFocused]);
 
+  useEffect(() => {
+    if (isConnected && shareTrail) {
+      console.log('RESP', {[MESSAGE_CONTAINS_LOCATION]: shareTrail});
+
+      onSend([
+        {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
+      ]);
+    }
+  }, [shareTrail, isConnected]);
+
   const onSend = async (message: string) => {
     try {
       const {item} = params;
@@ -156,7 +170,7 @@ const ChatDetail = () => {
         });
       }
 
-      form.append('message[content]', message[0]?.text);
+      form.append('message[content]', message?.[0]?.text);
       form.append('message[user_id]', loginUser?.id);
       form.append('message[message_type]', 'private');
       form.append('message[read]', false);

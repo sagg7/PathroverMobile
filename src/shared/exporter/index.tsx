@@ -72,3 +72,4 @@ export {
 } from '../utils/validations.tsx';
 export {fetchSuggestions, formatDate} from '../utils/helpers.tsx';
 export * from '../../hooks/getPlaceName';
+export * from '../../components';

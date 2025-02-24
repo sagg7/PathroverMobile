@@ -20,9 +20,42 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    addRouteReport: builder.mutation({
+      query: data => {
+        return {
+          url: `route_reports`,
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    getRouteReport: builder.query({
+      query: () => {
+        return {
+          url: `route_reports`,
+          method: 'GET',
+        };
+      },
+      transformResponse: res => res?.route_reports,
+    }),
+    createSubscriptions: builder.mutation({
+      query: data => {
+        return {
+          url: `subscriptions`,
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
   }),
 
   overrideExisting: true,
 });
 
-export const {useGetAllWellsQuery, useGetAllSaveRoutesQuery} = enduserApiSlice;
+export const {
+  useGetAllWellsQuery,
+  useGetAllSaveRoutesQuery,
+  useAddRouteReportMutation,
+  useGetRouteReportQuery,
+  useCreateSubscriptionsMutation,
+} = enduserApiSlice;

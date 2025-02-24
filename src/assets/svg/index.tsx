@@ -139,6 +139,13 @@ import WeatherIcon from './weatherIcon.svg';
 import SearchView from './searchView.svg';
 import Wind from './wind.svg';
 import Humiity from './humidity.svg';
+import Cross from './cross.svg';
+import CheckCircle from './checkCircle.svg';
+import Track from './track.svg';
+import SearchRoute from './searchRoute.svg';
+import MyLocation from './myLocation.svg';
+import EmergencyCall from './emergency_call.svg';
+import PaperPlane from './paper_plane.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -281,4 +288,11 @@ export const svgIcon = {
   SearchView: <SearchView />,
   Wind: <Wind />,
   Humiity: <Humiity />,
+  Cross: <Cross />,
+  CheckCircle: <CheckCircle />,
+  Track: <Track />,
+  SearchRoute: <SearchRoute />,
+  MyLocation: <MyLocation />,
+  EmergencyCall: <EmergencyCall />,
+  PaperPlane: <PaperPlane />,
 };

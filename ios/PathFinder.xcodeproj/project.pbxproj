@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* PathFinderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* PathFinderTests.m */; };
+		085A50AD2D6A019200021A45 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 085A50AC2D6A019200021A45 /* StoreKit.framework */; };
 		0B76B64390E0473D95DDA4FE /* PlusJakartaSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 52831D35A0074E42B1063221 /* PlusJakartaSans-ExtraLight.ttf */; };
 		0FCDCC73C64943DB88BA75DB /* PlusJakartaSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6F47A18B922C4134953D5D7A /* PlusJakartaSans-Regular.ttf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
@@ -47,6 +48,8 @@
 		00E356EE1AD99517003FC87E /* PathFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PathFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* PathFinderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PathFinderTests.m; sourceTree = "<group>"; };
+		085A50AC2D6A019200021A45 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		08D9CA912D6A4F620081C70E /* storekitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = storekitConfig.storekit; sourceTree = "<group>"; };
 		0F3C9FE8720C41CB9F0FA8BD /* PlusJakartaSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "PlusJakartaSans-SemiBold.ttf"; path = "../src/assets/fonts/PlusJakartaSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* PathFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PathFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = PathFinder/AppDelegate.h; sourceTree = "<group>"; };
@@ -96,6 +99,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41625D7E9218D8A4AEF7D2AC /* libPods-PathFinder.a in Frameworks */,
+				085A50AD2D6A019200021A45 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,6 +144,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				085A50AC2D6A019200021A45 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				940DD4D3AC115EB5FDCBCBA8 /* libPods-PathFinder.a */,
 				33B2A7BE63DE0FC99DC6EEC2 /* libPods-PathFinder-PathFinderTests.a */,
@@ -178,6 +183,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				08D9CA912D6A4F620081C70E /* storekitConfig.storekit */,
 				13B07FAE1A68108700A75B9A /* PathFinder */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* PathFinderTests */,

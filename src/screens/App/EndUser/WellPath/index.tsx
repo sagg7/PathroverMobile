@@ -193,6 +193,7 @@ const WellPath = () => {
 
   const onPressToggle = () => {
     setAvailable(!available);
+    navigation.navigate(Routes.Subscription);
   };
   const routeGeoJSON = {
     type: 'Feature',
