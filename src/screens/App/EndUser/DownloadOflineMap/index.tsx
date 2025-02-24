@@ -1,246 +1,271 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
+import {
+  View,
+  Button,
+  Alert,
+  Dimensions,
+  ActivityIndicator,
+  Text,
+  KeyboardAvoidingView,
+} from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
-import styles from './styles';
 import {
-  AppHeader,
-  AppLoader,
-  MainWrapper,
-  MapLayerSheet,
-  WeatherSheet,
-} from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
-import {
-  Default_Map_Style,
   HP,
   isIOS,
   mapBoxToken,
-  MapTypes,
-  PFColors,
   showAlert,
-  UNEXPECTED_ERROR,
-  WEATHER_API_KEY,
   WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import {SaveRouteSheet} from '../../../../components';
+import styles from './styles';
 import useLocation from '../../../../hooks/getLocation';
-import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {TouchableOpacity} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
-const DownloadOfflineMap = () => {
-  const navigation: any = useNavigation();
-  const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
-  const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
-  const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
-  const [route, setRoute] = useState<any>([]);
-  const [available, setAvailable] = useState(false);
-  const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
-  const [weather, setWeather] = useState<any>([]);
+MapboxGL.setAccessToken(mapBoxToken);
 
-  const [selectedWell, setSelectedWell] = useState<any>(null);
-  const [elevation, setElevation] = useState(null);
-  const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
-  const dispatch = useDispatch();
-  const {loginUser} = useSelector(state => state.auth);
+const {width, height} = Dimensions.get('window');
 
-  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+const PADDING = 50; // Space from screen edges
+const SQUARE_SIZE = Math.min(width, height) - PADDING * 2; // Adjusted square size
 
+const MIN_AREA_KM = 10; // Minimum area to download (10km x 10km)
+const MAX_AREA_KM = 500; // Maximum area to download (500km x 500km)
+
+const DEFAULT_ZOOM = 12; // Default zoom level
+
+const DownloadOfflineMap = ({navigation}: any) => {
+  const mapRef = useRef(null);
+  const [bounds, setBounds] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [progress, setProgress] = useState(0); // Download progress %
+  const [downloadSize, setDownloadSize] = useState(0); // Downloaded size in MB
+  const [routeName, setRouteName] = useState<string>('');
+  const [currentLocation, setCurrentLocation] = useState<any>([]);
   const {location} = useLocation();
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [showNameSheet, setShowNameSheet] = useState<boolean>(false);
 
-  const cameraRef = useRef<any>(null);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  useEffect(() => {
+    MapboxGL.offlineManager.setTileCountLimit(1000);
+  }, []);
 
   useEffect(() => {
-    const fetchWeatherData = async () => {
-      try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${location?.latitude}&lon=${location?.longitude}&cnt=7&appid=${WEATHER_API_KEY}&units=metric`,
-        );
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to fetch weather data: ${errorText}`);
-        }
-        const data = await response.json();
-        setWeather(data);
-      } catch (error) {
-        console.error('Error fetching weather data:', error.message);
-      }
-    };
-
-    if (location && location?.latitude) {
-      fetchWeatherData();
+    if (location && 'latitude' in location) {
+      setCurrentLocation([location?.longitude, location?.latitude]);
     }
   }, [location]);
 
-  useEffect(() => {
-    if (mapLayerStyle) {
-      setSelectedMapType(mapLayerStyle);
-    }
-  }, [mapLayerStyle]);
-
-  const onPressMap = (event: any) => {
-    try {
-      const {geometry} = event;
-      if (geometry && Array.isArray(geometry.coordinates)) {
-      } else {
-        console.error('Invalid coordinates:', geometry);
-      }
-    } catch (error) {
-      console.error('Error in onPressMap:', error);
-    }
-  };
-  const onSelectMapType = (item: any) => {
-    setMapTypesArr(prev =>
-      prev.map(v => ({
-        ...v,
-        isSelected: v.id === item.id,
-      })),
-    );
+  const handleMapLoaded = () => {
+    setIsMapLoaded(true);
+    console.log('Map is loaded');
   };
 
-  const onPressSave = () => {
-    const selected: any = mapTypesArr.find(
-      (item: any) => item.isSelected,
-    )?.type;
-    setSelectedMapType(selected);
-    dispatch(setMapLayerStyle(selected));
-
-    setTimeout(() => {
-      setMapLayerSheeet(false);
-    }, 500);
-  };
-
-  const onPressToggle = () => {
-    setAvailable(!available);
-  };
-  const routeGeoJSON = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: route,
-    },
-  };
-  const onPressMapSettingClear = () => {
-    setTimeout(() => {
-      setShowMapSettigs(false);
-    }, 1000);
-  };
-
-  const _handlePinBtn = async () => {
-    const startCoords = {
-      latitude: currentLocation[1],
-      longitude: currentLocation[0],
-      name: 'Start',
-    };
-    const endCoords = {
-      latitude: selectedWell[1],
-      longitude: selectedWell[0],
-      name: 'End Location',
-    };
-
-    const routeData = {
-      user_route: {
-        name: 'Pin Location',
-        route_type: 'maps_location_pins',
-        color: PFColors.Blue.Dark,
-        weight: '4',
-
-        location_start_attributes: startCoords,
-        location_end_attributes: endCoords,
-      },
-    };
-    const resp = await createRoute(routeData);
-    if (resp?.data) {
-      showAlert('Alert', 'Your location has been pined.');
-      navigation.goBack();
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
+  const handleRegionChange = e => {
+    if (e.properties.zoom) {
+      console.log('Zoom Level Updated:', e.properties.zoom);
+      setZoomLevel(e.properties.zoom);
     }
   };
 
-  const moveToCurrentLocation = () => {
-    if (
-      !currentLocation ||
-      !Array.isArray(currentLocation) ||
-      currentLocation.length !== 2
-    ) {
-      console.error('Invalid coordinates:', currentLocation);
+  const getFixedSquareBounds = async () => {
+    if (!isMapLoaded || !mapRef.current) {
+      Alert.alert('Error', 'Map is not loaded yet.');
       return;
     }
 
-    if (cameraRef?.current) {
-      cameraRef.current?.setCamera({
-        centerCoordinate: currentLocation,
-      });
+    try {
+      let visibleBounds = await mapRef.current.getVisibleBounds();
+      console.log('Visible Bounds:', visibleBounds);
+
+      if (
+        !visibleBounds ||
+        visibleBounds.length !== 2 ||
+        visibleBounds.flat().includes(NaN)
+      ) {
+        Alert.alert('Error', 'Invalid visible bounds. Try again.');
+        return;
+      }
+
+      const [swLng, swLat] = visibleBounds[0]; // SW corner
+      const [neLng, neLat] = visibleBounds[1]; // NE corner
+
+      const centerLng = (swLng + neLng) / 2;
+      const centerLat = (swLat + neLat) / 2;
+
+      // Calculate area size in km
+      const latRangeKm = (neLat - swLat) * 111;
+      const lngRangeKm =
+        (neLng - swLng) * (111 * Math.cos(centerLat * (Math.PI / 180)));
+      const areaSizeKm = Math.min(latRangeKm, lngRangeKm);
+
+      console.log(
+        `Selected Area Size: ${latRangeKm.toFixed(2)}km x ${lngRangeKm.toFixed(
+          2,
+        )}km`,
+      );
+
+      // Handle area restrictions
+      if (areaSizeKm < MIN_AREA_KM) {
+        Alert.alert(
+          'Error',
+          `The selected area is too small! Minimum size is ${MIN_AREA_KM} km.`,
+        );
+        return;
+      }
+      if (areaSizeKm > MAX_AREA_KM) {
+        Alert.alert(
+          'Error',
+          `The selected area is too large! Maximum size is ${MAX_AREA_KM} km.`,
+        );
+        return;
+      }
+
+      console.log('Final Area Size (km):', areaSizeKm);
+
+      // Convert km back to degrees
+      const latDiff = kmToLatDegrees(areaSizeKm / 2);
+      const lngDiff = kmToLngDegrees(areaSizeKm / 2, centerLat);
+
+      const newBounds = {
+        northEast: [centerLng + lngDiff, centerLat + latDiff],
+        southWest: [centerLng - lngDiff, centerLat - latDiff],
+      };
+
+      setBounds(newBounds);
+      setIsSelected(true);
+      console.log('Adjusted Bounds:', newBounds);
+    } catch (error) {
+      console.error('Error getting bounds:', error);
+      Alert.alert('Error', 'Failed to get map bounds.');
     }
   };
 
+  const downloadOfflineMap = async routeName => {
+    try {
+      setIsDownloading(true);
+      setProgress(0);
+      setDownloadSize(0);
+
+      const {northEast, southWest} = bounds;
+      const boundsArray = [southWest, northEast];
+
+      await MapboxGL.offlineManager.createPack(
+        {
+          name: routeName,
+          styleURL: 'mapbox://styles/mapbox/streets-v11',
+          minZoom: 14,
+          maxZoom: 20,
+          bounds: boundsArray,
+        },
+        (pack, status) => {
+          if (pack.name) {
+            const percentage = Math.round(
+              (status.completedResourceCount / status.requiredResourceCount) *
+                100,
+            );
+            const sizeInMB = (
+              status.completedResourceSize /
+              (1024 * 1024)
+            ).toFixed(2); // Convert bytes to MB
+            setProgress(percentage);
+            setDownloadSize(sizeInMB);
+          }
+
+          if (status.percentage === 100) {
+            setIsDownloading(false);
+            showAlert('Alert', 'Your map has been saved.');
+            navigation.goBack();
+            console.log('Download Complete!');
+          }
+        },
+        (pack, error) => {
+          console.log('Download Failed:', error);
+          setIsDownloading(false);
+        },
+      );
+
+      console.log('Download Started');
+    } catch (err: any) {
+      setIsDownloading(false);
+      if (
+        err?.message
+          ?.toLowerCase()
+          .includes('offline pack with name fsd already exists')
+      ) {
+        showAlert(
+          'Error',
+          'This name already exists. Please try a different one.',
+        );
+      }
+    }
+  };
+
+  const handleSaveRouteBtn = () => {
+    setShowNameSheet(false);
+    downloadOfflineMap(routeName);
+  };
+
   return (
-    <MainWrapper style={styles.container}>
-      <AppHeader title="Download Map" />
-
+    <View style={{flex: 1}}>
       <MapboxGL.MapView
-        key={selectedMapType}
-        styleURL={selectedMapType}
-        style={styles.map}
-        scaleBarEnabled={false}
-        onPress={onPressMap}>
-        <MapboxGL.Camera
-          ref={cameraRef}
-          zoomLevel={12}
-          centerCoordinate={currentLocation}
-        />
-
-        {/* {currentLocation && (
-          <MapboxGL.MarkerView coordinate={currentLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )}
-        {searchLocation && (
-          <MapboxGL.MarkerView coordinate={searchLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )}
-        {entranceCoords && (
-          <MapboxGL.MarkerView coordinate={entranceCoords}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )} */}
-
-        {/* Route Line */}
-        {route?.length > 1 && (
-          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
-            <MapboxGL.LineLayer
-              id="routeLayer-unique"
-              style={{
-                lineWidth: 3,
-                lineColor: PFColors.Blue.Dark,
-              }}
-            />
-          </MapboxGL.ShapeSource>
+        ref={mapRef}
+        style={{flex: 1}}
+        compassEnabled={false}
+        onDidFinishLoadingMap={handleMapLoaded}
+        onRegionDidChange={handleRegionChange}>
+        {currentLocation?.length > 1 && (
+          <MapboxGL.Camera zoomLevel={12} centerCoordinate={currentLocation} />
         )}
       </MapboxGL.MapView>
-      <TouchableOpacity
-        style={styles.recenter}
-        onPress={() => moveToCurrentLocation()}>
-        {svgIcon.MapWhiteBg}
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
-        {svgIcon.MapLayer}
-      </TouchableOpacity>
 
-      <MapLayerSheet
-        setModalVisible={() => setMapLayerSheeet(false)}
-        modalVisible={mapLayerSheeet}
-        data={mapTypesArr}
-        onPressCard={onSelectMapType}
-        onPressCancel={() => setMapLayerSheeet(false)}
-        onPressSave={() => onPressSave()}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: (height - SQUARE_SIZE) / 6,
+          left: (width - SQUARE_SIZE) / 2,
+          width: SQUARE_SIZE,
+          height: SQUARE_SIZE + 300,
+          borderWidth: 3,
+          borderColor: 'red',
+          backgroundColor: 'rgba(255, 0, 0, 0.2)',
+        }}
       />
-    </MainWrapper>
+
+      {/* Action Buttons */}
+      <View style={{position: 'absolute', bottom: 20, left: 10, right: 10}}>
+        {!isDownloading && (
+          <>
+            {!isSelected ? (
+              <Button title="Select Area" onPress={getFixedSquareBounds} />
+            ) : (
+              <Button
+                title="Download Offline Map"
+                onPress={() => setShowNameSheet(true)}
+              />
+            )}
+          </>
+        )}
+        {isDownloading && (
+          <View style={styles.downloadView}>
+            <Text style={styles.titleStyles}>Downloading... {progress}%</Text>
+            <Text style={styles.titleStyles}>Size: {downloadSize} MB</Text>
+          </View>
+        )}
+      </View>
+
+      {showNameSheet && (
+        <SaveRouteSheet
+          modalVisible={showNameSheet}
+          routeName={routeName}
+          onChangeText={(text: any) => setRouteName(text)}
+          onPressSave={() => handleSaveRouteBtn()}
+          onPressCancel={() => setShowNameSheet(false)}
+        />
+      )}
+    </View>
   );
 };
 

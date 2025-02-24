@@ -72,6 +72,8 @@ const ViewSaveRoutes = ({route}: any) => {
   useEffect(() => {
     if (route) {
       const selectedRoute = route?.params?.item;
+      console.log('selectedRoute', selectedRoute?.pinned_points);
+
       const endCoordinates = [
         parseFloat(selectedRoute?.dropoff_location.longitude),
         parseFloat(selectedRoute?.dropoff_location.latitude),
@@ -311,14 +313,38 @@ const ViewSaveRoutes = ({route}: any) => {
   };
   const onPressStartBtn = async () => {
     getRoute();
-    setIsStartBtnPressed(true);
     setShowRouteActionSheet(false);
+    setIsStartBtnPressed(true);
     const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
     setRoute([]);
+  };
+  const calculateBounds = coordinates => {
+    if (!coordinates || coordinates.length === 0) return undefined;
+
+    let minLng = Infinity,
+      maxLng = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+
+    for (const [lng, lat] of coordinates) {
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+    }
+
+    return {
+      ne: [maxLng, maxLat], // North-East (Top-Right)
+      sw: [minLng, minLat], // South-West (Bottom-Left)
+      paddingLeft: 30,
+      paddingRight: 30,
+      paddingTop: 30,
+      paddingBottom: 180,
+    };
   };
 
   return (
@@ -334,28 +360,29 @@ const ViewSaveRoutes = ({route}: any) => {
           ref={cameraRef}
           zoomLevel={10}
           centerCoordinate={currentLocation}
-          bounds={
-            routes?.length > 0 && {
-              ne: routes?.reduce(
-                (acc, coord) => [
-                  Math.max(acc[0], coord[0]),
-                  Math.max(acc[1], coord[1]),
-                ],
-                [-Infinity, -Infinity],
-              ),
-              sw: routes.reduce(
-                (acc, coord) => [
-                  Math.min(acc[0], coord[0]),
-                  Math.min(acc[1], coord[1]),
-                ],
-                [Infinity, Infinity],
-              ),
-              paddingLeft: 30,
-              paddingRight: 30,
-              paddingTop: 30,
-              paddingBottom: 180,
-            }
-          }
+          bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
+          // bounds={
+          //   routes?.length > 0 && {
+          //     ne: routes?.reduce(
+          //       (acc, coord) => [
+          //         Math.max(acc[0], coord[0]),
+          //         Math.max(acc[1], coord[1]),
+          //       ],
+          //       [-Infinity, -Infinity],
+          //     ),
+          //     sw: routes.reduce(
+          //       (acc, coord) => [
+          //         Math.min(acc[0], coord[0]),
+          //         Math.min(acc[1], coord[1]),
+          //       ],
+          //       [Infinity, Infinity],
+          //     ),
+          //     paddingLeft: 30,
+          //     paddingRight: 30,
+          //     paddingTop: 30,
+          //     paddingBottom: 180,
+          //   }
+          // }
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
         {startPoint && (
@@ -363,6 +390,18 @@ const ViewSaveRoutes = ({route}: any) => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
+        {selectedRoute?.pinned_points?.map(point => (
+          <MapboxGL.MarkerView
+            key={point.id}
+            coordinate={[
+              parseFloat(point.longitude),
+              parseFloat(point.latitude),
+            ]} // Convert to numbers
+          >
+            {svgIcon.RedPin}
+          </MapboxGL.MarkerView>
+        ))}
+
         {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
             {svgIcon.CurrentLocation}
@@ -392,7 +431,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
-        {route?.params?.item?.route_type === 'custom_route' &&
+        {/* {route?.params?.item?.route_type === 'custom_route' &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -400,7 +439,7 @@ const ViewSaveRoutes = ({route}: any) => {
               coordinate={coordinate}>
               <View style={styles.routeStopStyles} />
             </MapboxGL.PointAnnotation>
-          ))}
+          ))} */}
         <View style={styles.bottomView}>
           <View style={styles.routeInfoView}>
             <Text>
@@ -422,15 +461,13 @@ const ViewSaveRoutes = ({route}: any) => {
       </MapboxGL.MapView>
       {showRouteStartedSheet && (
         <RouteToWellStartedSheet
+          setModalVisible={() => navigation.goBack()}
           routeName={
             modalKey === 1
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
           routeInfo={timeDistance}
-          setModalVisible={() => {
-            setShowRouteStartedSheet(false);
-          }}
         />
       )}
       {modalKey === 1 && isStartBtnPressed && (
@@ -441,17 +478,21 @@ const ViewSaveRoutes = ({route}: any) => {
       )}
       {showRouteActionSheet && (
         <RouteToWellSheet
-          onpressCancel={() => navigation.goBack()}
+          onpressCancel={() => {
+            setShowRouteActionSheet(false);
+            setShowRouteStartedSheet(false);
+            setTimeout(() => {
+              navigation.goBack();
+            }, 500);
+          }}
           routeName={route?.params?.entranceName}
           distanceInfo={results}
           actionBtn={actionBtn}
           onPressDirection={() => {
-            // getRoute();
             setActionBtn({
               ...actionBtn,
               direction: true,
             });
-            // centerMap();
           }}
           onPressStart={() => onPressStartBtn()}
           show={false}

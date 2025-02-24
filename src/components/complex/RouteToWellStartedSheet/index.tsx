@@ -5,9 +5,9 @@ import {svgIcon} from '../../../assets/svg';
 
 interface RouteToWellStartedSheetProps {
   setModalVisible?: () => void;
-  selectedPin: any;
-  entranceName: string;
-  routeInfo: any;
+  selectedPin?: any;
+  entranceName?: string;
+  routeInfo?: any;
   routeName?: any;
 }
 

@@ -73,4 +73,10 @@ export const Routes = {
   SearchTrailLatLng: 'SearchTrailLatLng',
   SetTrailStartpoint: 'SetTrailStartpoint',
   ChooseOnMap: 'ChooseOnMap',
+  ViewWellPathNavigation: 'ViewWellPathNavigation',
+  ChooseStartPoint: 'ChooseStartPoint',
+  RecordHikingRoute: 'RecordHikingRoute',
+  CreateHikeRoute: 'CreateHikeRoute',
+  DownloadedMapList: 'DownloadedMapList',
+  ViewOfflineMap: 'ViewOfflineMap',
 };

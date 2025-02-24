@@ -146,6 +146,7 @@ import SearchRoute from './searchRoute.svg';
 import MyLocation from './myLocation.svg';
 import EmergencyCall from './emergency_call.svg';
 import PaperPlane from './paper_plane.svg';
+import HikeRoute from './HikeRoute.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -295,4 +296,5 @@ export const svgIcon = {
   MyLocation: <MyLocation />,
   EmergencyCall: <EmergencyCall />,
   PaperPlane: <PaperPlane />,
+  HikeRoute: <HikeRoute />,
 };
