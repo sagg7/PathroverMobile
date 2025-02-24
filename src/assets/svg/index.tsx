@@ -134,6 +134,14 @@ import CameraType from './ cameraType.svg';
 import StopIcon from './stopIcon.svg';
 import OrangeRecordIcon from './orangeRecord.svg';
 import OrangeStopIcon from './orangeStop.svg';
+import IncomingCall from './icoming_call.svg';
+import OutgoingCall from './out_going.svg';
+import EndCall from './endCall.svg';
+import Mute from './mute.svg';
+import Muted from './muted.svg';
+import SpeakerOn from './speakerOn.svg';
+import SpeakerOff from './speakerOff.svg';
+
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -271,4 +279,11 @@ export const svgIcon = {
   StopIcon: <StopIcon />,
   OrangeRecordIcon: <OrangeRecordIcon />,
   OrangeStopIcon: <OrangeStopIcon />,
+  IncomingCall: <IncomingCall />,
+  OutgoingCall: <OutgoingCall />,
+  EndCall: <EndCall />,
+  Mute: <Mute />,
+  Muted: <Muted />,
+  SpeakerOn: <SpeakerOn />,
+  SpeakerOff: <SpeakerOff />,
 };

@@ -46,4 +46,9 @@ export const appIcons = {
   Directions: require('../icons/Direction.png'),
   pinIcon: require('../icons/pinIcon.png'),
   MapFilled: require('../icons/filledMap.png'),
+  speakerOn: require('../icons/speakerOn.png'),
+  speakerOff: require('../icons/speakerOff.png'),
+  mute: require('../icons/mute.png'),
+  muted: require('../icons/muted.png'),
+  endCall: require('../icons/endCall.png'),
 };
