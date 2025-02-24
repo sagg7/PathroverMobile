@@ -35,7 +35,7 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   };
 
   return (
-    <View style={styles.main}>
+    <View style={{...styles.main, marginLeft: 10}}>
       <TouchableOpacity
         style={[
           styles.bubbleContainer,
@@ -44,9 +44,32 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={hanldeClick}
-          style={styles.locContainer}>
-          <Svg width={23} height={23} />
-          <Text style={styles.locText}>{'Shared location'}</Text>
+          style={[
+            styles.locContainer,
+            {flexDirection: isLeft ? 'row-reverse' : 'row'},
+          ]}>
+          <View
+            style={[
+              styles.locButtonLeft,
+              {
+                backgroundColor: isLeft
+                  ? PFColors.Orange.Soft
+                  : PFColors.Blue.SoftGlacier,
+              },
+            ]}>
+            <Svg
+              width={20}
+              height={20}
+              stroke={isLeft ? PFColors.Orange.Dark : PFColors.Blue.Dark}
+            />
+          </View>
+          <Text
+            style={{
+              ...styles.locText,
+              color: isLeft ? PFColors.Orange.Dark : PFColors.Blue.Dark,
+            }}>
+            {'Shared location'}
+          </Text>
         </TouchableOpacity>
       </TouchableOpacity>
       {showTime && (
@@ -65,11 +88,19 @@ const styles = StyleSheet.create({
   main: {
     width: '100%',
   },
+  locButtonLeft: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bubbleContainer: {
     width: '60%',
     marginVertical: 1,
     padding: 9,
     borderRadius: 8,
+    marginLeft: 10,
   },
   leftBubble: {
     alignSelf: 'flex-start',
@@ -91,8 +122,8 @@ const styles = StyleSheet.create({
   },
   locText: {
     width: '80%',
+    textAlign: 'center',
     fontSize: PFFontSize.FONT_SIZE_14,
-    color: PFColors.Blue.Dark,
     fontFamily: PFFonts.Foundation.Medium,
   },
   time: {
@@ -100,7 +131,7 @@ const styles = StyleSheet.create({
     color: PFColors.Gray.DarkGray,
     fontFamily: PFFonts.Foundation.Medium,
     marginBottom: 3,
-    marginHorizontal: 2,
+    marginHorizontal: 10,
   },
   leftTime: {
     fontSize: PFFontSize.FONT_SIZE_8,
