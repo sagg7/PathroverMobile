@@ -91,6 +91,7 @@ const WellPath = () => {
     refetch,
   } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
+  console.log(" WellPath ~ location==>", location)
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
 
@@ -263,7 +264,7 @@ const WellPath = () => {
     if (
       !currentLocation ||
       !Array.isArray(currentLocation) ||
-      currentLocation.length !== 2
+      currentLocation?.length !== 2
     ) {
       console.error('Invalid coordinates:', currentLocation);
       return;

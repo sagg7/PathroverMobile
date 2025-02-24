@@ -41,16 +41,17 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         key={item?.id}
         onPress={() => {
           if (isHiking) {
+
             dispatch(
               setStartingPoint([
-                item?.pickup_location?.latitude,
-                item?.pickup_location?.longitude,
+                parseFloat(item?.pickup_location?.longitude),
+                parseFloat(item?.pickup_location?.latitude),
               ]),
             );
             dispatch(
               setEndingPoint([
-                item?.dropoff_location?.latitude,
-                item?.dropoff_location?.longitude,
+                parseFloat(item?.dropoff_location?.longitude),
+                parseFloat(item?.dropoff_location?.latitude),
               ]),
             );
             navigation.navigate(Routes.SearchTrailLatLng);
