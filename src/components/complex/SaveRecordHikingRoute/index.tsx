@@ -59,26 +59,36 @@ const SaveRecordHikingRouteSheet = ({
             </TouchableOpacity> */}
           </View>
           {btnStatus === 'pause' && (
-            <AppInput
-              placeholder="Name"
-              inputContainerStyle={styles.inputWidth}
-              value={value}
-              onChangeText={onChange}
-            />
+            <>
+              <Text style={styles.inputTitle}>Track Name</Text>
+              <AppInput
+                placeholder="Name"
+                inputContainerStyle={styles.inputWidth}
+                value={value?.name}
+                onChangeText={text =>
+                  onChange({
+                    ...value,
+                    name: text,
+                  })
+                }
+              />
+            </>
           )}
-          <View style={styles.distanceView}>
-            <Text style={styles.distanceNumberText}>
-              {distance?.toFixed(2)}
-            </Text>
-            <Text style={styles.distanceText}>Distance</Text>
-          </View>
+          {btnStatus === 'play' && (
+            <View style={styles.distanceView}>
+              <Text style={styles.distanceNumberText}>
+                {distance?.toFixed(2)}
+              </Text>
+              <Text style={styles.distanceText}>Distance</Text>
+            </View>
+          )}
           <View style={styles.recordingDetailsView}>
             <View style={styles.detailInnerView}>
               <Text style={styles.digitsText}>{elevation}</Text>
               <Text style={styles.digitTitleText}>Elevation (ft)</Text>
             </View>
             <View style={styles.detailInnerView}>
-              <Text style={styles.digitsText}>{speed}</Text>
+              <Text style={styles.digitsText}>{speed} mph</Text>
               <Text style={styles.digitTitleText}>Speed</Text>
             </View>
             <View style={styles.detailInnerView}>
@@ -86,6 +96,22 @@ const SaveRecordHikingRouteSheet = ({
               <Text style={styles.digitTitleText}>Time</Text>
             </View>
           </View>
+          {btnStatus === 'pause' && (
+            <>
+              <Text style={styles.inputTitle}>Notes</Text>
+              <AppInput
+                placeholder="Note"
+                inputContainerStyle={styles.inputWidth}
+                value={value.note}
+                onChangeText={text =>
+                  onChange({
+                    ...value,
+                    note: text,
+                  })
+                }
+              />
+            </>
+          )}
 
           <View style={styles.btnContainer}>
             {btnStatus === 'play' ? (
@@ -235,8 +261,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: WP('4'),
     borderRadius: 10,
-    // justifyContent: 'center',
-    // alignItems: 'center',
     marginVertical: 15,
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -254,5 +278,11 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_14,
     color: PFColors.Standard.Black,
     fontFamily: PFFonts.Foundation.Regular,
+  },
+  inputTitle: {
+    fontSize: PFFontSize.FONT_SIZE_14,
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    paddingLeft: 15,
   },
 });

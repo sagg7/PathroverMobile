@@ -16,27 +16,50 @@ import {
   PFColors,
   showAlert,
   UNEXPECTED_ERROR,
+  WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import Geolocation from 'react-native-geolocation-service';
 
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {TouchableOpacity} from 'react-native';
+import {
+  FlatList,
+  Image,
+  Linking,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import haversine from 'haversine-distance';
+import GeneralModal from '../../../../components/complex/GeneralModal';
+import ProgressCircle from '../../../../components/complex/ProgressCircle';
+import {REPORTS_LIST} from '../../../../shared/utils/constant';
+import {
+  useAddRouteReportMutation,
+  useGetRouteReportQuery,
+} from '../../../../redux/endUser/endUserApiSlice';
 
 const RecordHikingRoute = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
+  const [reportsVisible, setReportsVisible] = useState(false);
+  const [confirmReportVisible, setConfirmReportVisible] = useState(false);
+  const [selectedReport, setSelectedReport] =
+    useState<(typeof REPORTS_LIST)[0]>();
   const [currentLocation, setCurrentLocation] = useState<any>([
     74.272999, 31.453079,
   ]);
+  const {data: allReports, refetch} = useGetRouteReportQuery({});
 
   const [liveLocation, setLiveLocation] = useState<any>(null);
-  const [recordingDetails, setRecordingDetails] = useState<any>('');
+  const [recordingDetails, setRecordingDetails] = useState<any>({
+    name: '',
+    note: '',
+  });
 
   const [route, setRoute] = useState<any>([]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -52,6 +75,9 @@ const RecordHikingRoute = () => {
   const [speed, setSpeed] = useState<any>(0);
   const [elevation, setElevation] = useState<any>(0);
   const [totalDistance, setTotalDistance] = useState(0);
+
+  const [progress, setProgress] = useState(0);
+  const [addRouteReport] = useAddRouteReportMutation();
 
   const dispatch = useDispatch();
 
@@ -164,7 +190,7 @@ const RecordHikingRoute = () => {
         : [];
     const routeData = {
       user_route: {
-        name: recordingDetails,
+        name: recordingDetails?.name,
         route_type: 'hiking_trail_route',
         color: PFColors.Blue.Dark,
         weight: '4',
@@ -186,8 +212,7 @@ const RecordHikingRoute = () => {
 
       if (isRecordingStarted) {
         setLiveLocation([longitude, latitude]);
-        // setRoute(prev => [...prev, [longitude, latitude]]);
-        const speedMph = speed ? (speed * 2.23694).toFixed(2) : '0.00';
+        const speedMph = speed ? (speed * 2.23694).toFixed(1) : '0.00';
         const elevationFeet = altitude
           ? (altitude * 3.28084).toFixed(0)
           : '0.00';
@@ -196,14 +221,11 @@ const RecordHikingRoute = () => {
           if (prev.length > 0) {
             const lastPoint = prev[prev.length - 1];
             const newPoint = {latitude, longitude};
-
-            // Calculate distance using Haversine formula
             const distanceBetween = haversine(
               {lat: lastPoint[1], lon: lastPoint[0]},
               newPoint,
             );
 
-            // Convert meters to miles and update total distance
             setTotalDistance(
               prevDistance => prevDistance + distanceBetween * 0.000621371,
             );
@@ -231,6 +253,84 @@ const RecordHikingRoute = () => {
     startTimer();
   };
 
+  const toggleReport = () => {
+    setTimeout(() => {
+      setReportsVisible(true);
+    }, 300);
+  };
+  const handleCloseReportModal = () => {
+    setReportsVisible(false);
+    setTimeout(() => {}, 300);
+  };
+  const handleSelectReport = (item: (typeof REPORTS_LIST)[0]) => {
+    setSelectedReport(item);
+    setReportsVisible(false);
+    setTimeout(() => {
+      setConfirmReportVisible(true);
+    }, 400);
+  };
+  useEffect(() => {
+    let interval: any;
+    if (confirmReportVisible) {
+      interval = setInterval(() => {
+        if (progress < 1) {
+          setProgress(prevProgress =>
+            prevProgress >= 1 ? 0 : prevProgress + 0.01,
+          );
+        } else {
+          handleCloseConfirmReport();
+          const data = {
+            route_report: {
+              report_type: selectedReport?.key,
+              latitude: liveLocation[1],
+              longitude: liveLocation[0],
+              name: 'ucp',
+            },
+          };
+          addRouteReport(data)
+            .unwrap()
+            .then(res => {
+              refetch();
+            })
+            .catch(e => console.log(e));
+        }
+      }, 1);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [confirmReportVisible, progress]);
+  const handleCloseConfirmReport = () => {
+    setProgress(0);
+    setConfirmReportVisible(false);
+    setTimeout(() => {}, 300);
+  };
+
+  const centerToLiveLocation = () => {
+    if (cameraRef.current && liveLocation) {
+      const [longitude, latitude] = liveLocation;
+
+      const adjustedLatitude =
+        latitude + BOTTOM_SHEET_HEIGHT * PIXEL_TO_COORDINATE_FACTOR;
+
+      cameraRef.current.flyTo([longitude, adjustedLatitude], 1000);
+    }
+  };
+  const BOTTOM_SHEET_HEIGHT = -8; // Adjust based on your bottom sheet height
+  const PIXEL_TO_COORDINATE_FACTOR = 0.0002; // App
+  const adjustLocationForBottomSheet = location => {
+    if (!location) return null;
+
+    // const {latitude, longitude} = location.coords;
+    const latitude = location[1];
+    const longitude = location[0];
+
+    // Adjust latitude to move the focus upward
+    const adjustedLatitude =
+      latitude + BOTTOM_SHEET_HEIGHT * PIXEL_TO_COORDINATE_FACTOR;
+
+    return [longitude, adjustedLatitude];
+  };
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Record Route" />
@@ -240,16 +340,25 @@ const RecordHikingRoute = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
+        // centerOffset={[0, 200]}
         compassEnabled
         compassPosition={{top: 8, left: 10}}>
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={16}
-          followUserLocation={true}
+          // followUserLocation={true}
           followZoomLevel={16}
-          centerCoordinate={liveLocation}
+          // centerCoordinate={liveLocation}
+          centerCoordinate={adjustLocationForBottomSheet(liveLocation)}
         />
-        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+        <MapboxGL.UserLocation
+          visible
+          onUpdate={handleLocationUpdate}
+          minDisplacement={10}
+          requestsAlwaysUse
+          // showsUserHeadingIndicator
+          androidRenderMode="gps"
+        />
 
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
@@ -277,6 +386,23 @@ const RecordHikingRoute = () => {
             />
           </MapboxGL.ShapeSource>
         )}
+        {allReports?.length > 0 &&
+          allReports?.map((report: any) => {
+            return (
+              <MapboxGL.MarkerView
+                coordinate={[report?.longitude, report?.latitude]}>
+                <View style={styles.markerReport}>
+                  <Image
+                    source={
+                      REPORTS_LIST.find(rep => rep.key == report?.report_type)
+                        ?.icon
+                    }
+                    style={styles.report}
+                  />
+                </View>
+              </MapboxGL.MarkerView>
+            );
+          })}
       </MapboxGL.MapView>
 
       {!isRecordingStarted && (
@@ -294,6 +420,74 @@ const RecordHikingRoute = () => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
+      <View>
+        {isRecordingStarted && (
+          <>
+            <AppButton
+              title="Emergency"
+              icon={svgIcon.EmergencyCall}
+              handleClick={() => Linking.openURL(`tel:911`)}
+              buttonStyle={styles.emergencyBtn}
+            />
+            <AppButton
+              title="Recenter"
+              icon={svgIcon.PaperPlane}
+              handleClick={() => centerToLiveLocation()}
+              buttonStyle={styles.recenterBtn}
+            />
+            <AppButton
+              title="Report"
+              handleClick={toggleReport}
+              buttonStyle={styles.reportAction}
+            />
+          </>
+        )}
+      </View>
+      <GeneralModal
+        title={'Add a report'}
+        visible={reportsVisible}
+        onClose={handleCloseReportModal}>
+        <FlatList
+          numColumns={2}
+          data={REPORTS_LIST}
+          columnWrapperStyle={{justifyContent: 'space-between'}}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleSelectReport(item)}
+                style={styles.reportCard}>
+                <Image source={item.icon} style={styles.reportIcon} />
+                <Text style={styles.reportCardTitle}>{item.name}</Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </GeneralModal>
+      <GeneralModal
+        visible={confirmReportVisible}
+        title="Adding report"
+        onClose={handleCloseConfirmReport}>
+        <View style={styles.confirmReportContainer}>
+          <ProgressCircle
+            imageSource={selectedReport?.icon}
+            progress={progress}
+            size={WP('16')}
+            color={PFColors.Standard.Black}
+          />
+          <Text
+            style={[
+              styles.reportCardTitle,
+              {marginVertical: WP('4')},
+            ]}>{`Add ${selectedReport?.name} to the map`}</Text>
+          <AppButton
+            title="Undo"
+            buttonStyle={{width: WP('90')}}
+            handleClick={handleCloseConfirmReport}
+          />
+        </View>
+      </GeneralModal>
 
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}
@@ -313,7 +507,7 @@ const RecordHikingRoute = () => {
           elevation={elevation}
           distance={totalDistance}
           value={recordingDetails}
-          onChange={text => setRecordingDetails(text)}
+          onChange={setRecordingDetails}
           // setModalVisible={()=>}
         />
       )}
