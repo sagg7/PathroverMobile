@@ -184,7 +184,7 @@ const SearchTrailLatLng = () => {
   useEffect(() => {
     getTimeDistanceDetails();
   }, [currentLocation]);
-  
+
   useEffect(() => {
     if (liveLocation) getTimeDistanceDetails();
   }, [liveLocation]);

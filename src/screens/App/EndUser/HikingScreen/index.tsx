@@ -179,6 +179,11 @@ const HikingScreen = () => {
           zoomLevel={12}
           centerCoordinate={currentLocation}
         />
+        {currentLocation && (
+          <MapboxGL.MarkerView coordinate={currentLocation}>
+            {svgIcon.CurrentLocation}
+          </MapboxGL.MarkerView>
+        )}
       </MapboxGL.MapView>
 
       <TouchableOpacity

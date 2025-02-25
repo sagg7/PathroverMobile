@@ -230,7 +230,7 @@ const CreateHikeRoute = () => {
         user_route: {
           name: routeName,
           locations_attributes: locationsAttributes,
-          route_type: 'track_route',
+          route_type: 'hiking_custom_route',
           color: routeLineColor,
           weight: routeLineHeight,
           pinned_points: pinnedPoints,

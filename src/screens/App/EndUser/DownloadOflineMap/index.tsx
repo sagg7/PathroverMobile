@@ -13,11 +13,12 @@ import {
   HP,
   isIOS,
   mapBoxToken,
+  PFColors,
   showAlert,
   WP,
 } from '../../../../shared/exporter';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {SaveRouteSheet} from '../../../../components';
+import {AppHeader, SaveRouteSheet} from '../../../../components';
 import styles from './styles';
 import useLocation from '../../../../hooks/getLocation';
 
@@ -28,13 +29,13 @@ const {width, height} = Dimensions.get('window');
 const PADDING = 50; // Space from screen edges
 const SQUARE_SIZE = Math.min(width, height) - PADDING * 2; // Adjusted square size
 
-const MIN_AREA_KM = 10; // Minimum area to download (10km x 10km)
-const MAX_AREA_KM = 500; // Maximum area to download (500km x 500km)
+// const MIN_AREA_KM = 10; // Minimum area to download (10km x 10km)
+// const MAX_AREA_KM = 500; // Maximum area to download (500km x 500km)
 
 const DEFAULT_ZOOM = 12; // Default zoom level
 
 const DownloadOfflineMap = ({navigation}: any) => {
-  const mapRef = useRef(null);
+  const mapRef = useRef<any>(null);
   const [bounds, setBounds] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -45,6 +46,9 @@ const DownloadOfflineMap = ({navigation}: any) => {
   const {location} = useLocation();
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const [showNameSheet, setShowNameSheet] = useState<boolean>(false);
+  const [widthYards, setWidthYards] = useState(null);
+  const [heightYards, setHeightYards] = useState(null);
+  const KM_TO_YARD = 1093.61;
 
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   useEffect(() => {
@@ -69,6 +73,13 @@ const DownloadOfflineMap = ({navigation}: any) => {
     }
   };
 
+  const MIN_AREA_KM = 10; // Minimum 10km x 10km
+  const MAX_AREA_KM = 500; // Maximum 500km x 500km
+
+  const kmToLatDegrees = km => km / 111;
+  const kmToLngDegrees = (km, latitude) =>
+    km / (111 * Math.cos(latitude * (Math.PI / 180)));
+
   const getFixedSquareBounds = async () => {
     if (!isMapLoaded || !mapRef.current) {
       Alert.alert('Error', 'Map is not loaded yet.');
@@ -77,7 +88,6 @@ const DownloadOfflineMap = ({navigation}: any) => {
 
     try {
       let visibleBounds = await mapRef.current.getVisibleBounds();
-      console.log('Visible Bounds:', visibleBounds);
 
       if (
         !visibleBounds ||
@@ -88,17 +98,15 @@ const DownloadOfflineMap = ({navigation}: any) => {
         return;
       }
 
-      const [swLng, swLat] = visibleBounds[0]; // SW corner
-      const [neLng, neLat] = visibleBounds[1]; // NE corner
+      const [swLng, swLat] = visibleBounds[0];
+      const [neLng, neLat] = visibleBounds[1];
 
       const centerLng = (swLng + neLng) / 2;
       const centerLat = (swLat + neLat) / 2;
 
-      // Calculate area size in km
-      const latRangeKm = (neLat - swLat) * 111;
+      const latRangeKm: any = Math.abs(neLat - swLat) * 111;
       const lngRangeKm =
-        (neLng - swLng) * (111 * Math.cos(centerLat * (Math.PI / 180)));
-      const areaSizeKm = Math.min(latRangeKm, lngRangeKm);
+        Math.abs(neLng - swLng) * (111 * Math.cos(centerLat * (Math.PI / 180)));
 
       console.log(
         `Selected Area Size: ${latRangeKm.toFixed(2)}km x ${lngRangeKm.toFixed(
@@ -106,38 +114,25 @@ const DownloadOfflineMap = ({navigation}: any) => {
         )}km`,
       );
 
-      // Handle area restrictions
-      if (areaSizeKm < MIN_AREA_KM) {
-        Alert.alert(
-          'Error',
-          `The selected area is too small! Minimum size is ${MIN_AREA_KM} km.`,
-        );
-        return;
-      }
-      if (areaSizeKm > MAX_AREA_KM) {
-        Alert.alert(
-          'Error',
-          `The selected area is too large! Maximum size is ${MAX_AREA_KM} km.`,
-        );
-        return;
-      }
-
-      console.log('Final Area Size (km):', areaSizeKm);
+      console.log('✅ Final Area Size (km):', latRangeKm, lngRangeKm);
+      const widthInYards: any = parseFloat(lngRangeKm) * KM_TO_YARD;
+      const heightInYards: any = parseFloat(latRangeKm) * KM_TO_YARD;
+      setWidthYards(widthInYards.toFixed(2));
+      setHeightYards(heightInYards.toFixed(2));
 
       // Convert km back to degrees
-      const latDiff = kmToLatDegrees(areaSizeKm / 2);
-      const lngDiff = kmToLngDegrees(areaSizeKm / 2, centerLat);
+      const latDiff = kmToLatDegrees(latRangeKm / 2);
+      const lngDiff = kmToLngDegrees(lngRangeKm / 2, centerLat);
 
-      const newBounds = {
+      const newBounds: any = {
         northEast: [centerLng + lngDiff, centerLat + latDiff],
         southWest: [centerLng - lngDiff, centerLat - latDiff],
       };
 
       setBounds(newBounds);
       setIsSelected(true);
-      console.log('Adjusted Bounds:', newBounds);
+      console.log('✅ Adjusted Bounds:', newBounds);
     } catch (error) {
-      console.error('Error getting bounds:', error);
       Alert.alert('Error', 'Failed to get map bounds.');
     }
   };
@@ -206,9 +201,12 @@ const DownloadOfflineMap = ({navigation}: any) => {
     setShowNameSheet(false);
     downloadOfflineMap(routeName);
   };
+  console.log('===>YARD1', widthYards);
+  console.log('===>YARD2', heightYards);
 
   return (
     <View style={{flex: 1}}>
+      <AppHeader title="Download Map" />
       <MapboxGL.MapView
         ref={mapRef}
         style={{flex: 1}}
@@ -229,11 +227,10 @@ const DownloadOfflineMap = ({navigation}: any) => {
           width: SQUARE_SIZE,
           height: SQUARE_SIZE + 300,
           borderWidth: 3,
-          borderColor: 'red',
+          borderColor: PFColors.Red.ErrorColor,
           backgroundColor: 'rgba(255, 0, 0, 0.2)',
-        }}
-      />
-
+        }}></View>
+      {/*  */}
       {/* Action Buttons */}
       <View style={{position: 'absolute', bottom: 20, left: 10, right: 10}}>
         {!isDownloading && (
@@ -255,9 +252,9 @@ const DownloadOfflineMap = ({navigation}: any) => {
           </View>
         )}
       </View>
-
       {showNameSheet && (
         <SaveRouteSheet
+          title="Map Name"
           modalVisible={showNameSheet}
           routeName={routeName}
           onChangeText={(text: any) => setRouteName(text)}

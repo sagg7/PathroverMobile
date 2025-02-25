@@ -346,6 +346,7 @@ const ViewSaveRoutes = ({route}: any) => {
       paddingBottom: 180,
     };
   };
+  const hasCustom = selectedRoute?.route_type.includes('custom');
 
   return (
     <MainWrapper style={styles.container}>
@@ -390,17 +391,18 @@ const ViewSaveRoutes = ({route}: any) => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-        {selectedRoute?.pinned_points?.map(point => (
-          <MapboxGL.MarkerView
-            key={point.id}
-            coordinate={[
-              parseFloat(point.longitude),
-              parseFloat(point.latitude),
-            ]} // Convert to numbers
-          >
-            {svgIcon.RedPin}
-          </MapboxGL.MarkerView>
-        ))}
+        {!hasCustom &&
+          selectedRoute?.pinned_points?.map(point => (
+            <MapboxGL.MarkerView
+              key={point.id}
+              coordinate={[
+                parseFloat(point.longitude),
+                parseFloat(point.latitude),
+              ]} // Convert to numbers
+            >
+              {svgIcon.RedPin}
+            </MapboxGL.MarkerView>
+          ))}
 
         {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
@@ -431,7 +433,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
-        {/* {route?.params?.item?.route_type === 'custom_route' &&
+        {hasCustom &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -439,7 +441,7 @@ const ViewSaveRoutes = ({route}: any) => {
               coordinate={coordinate}>
               <View style={styles.routeStopStyles} />
             </MapboxGL.PointAnnotation>
-          ))} */}
+          ))}
         <View style={styles.bottomView}>
           <View style={styles.routeInfoView}>
             <Text>
