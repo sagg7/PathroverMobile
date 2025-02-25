@@ -9,12 +9,14 @@ interface GeneralModalProps {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  hideCross?: boolean;
 }
 
 const GeneralModal = (props: GeneralModalProps) => {
-  const {visible, title, onClose, children} = props;
+  const {visible, title, onClose, children, hideCross} = props;
   return (
     <Modal
+      key={visible ? 'visible' : 'hidden'}
       isVisible={visible}
       useNativeDriver
       onBackdropPress={onClose}
@@ -25,8 +27,8 @@ const GeneralModal = (props: GeneralModalProps) => {
       <View style={styles.modalContent}>
         <View style={styles.header}>
           <Text style={styles.heading}>{title}</Text>
-          <TouchableOpacity activeOpacity={0.7} onPress={onClose}>
-            {svgIcon.CancelIcon}
+          <TouchableOpacity disabled={hideCross} activeOpacity={0.7} onPress={onClose}>
+            {!hideCross && svgIcon.CancelIcon}
           </TouchableOpacity>
         </View>
         <View style={styles.container}>{children}</View>

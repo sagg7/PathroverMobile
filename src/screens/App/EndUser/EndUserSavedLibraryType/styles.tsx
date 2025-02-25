@@ -49,5 +49,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingTop: WP('50'),
   },
+  menuOption: {
+    padding: WP('4.5'),
+    backgroundColor: PFColors.Gray.WhisperGray,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: WP('2'),
+  },
+  menuOptionText: {
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    color: PFColors.Standard.Black,
+    paddingLeft: WP('5'),
+  },
+  deletedDesc: {
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    color: PFColors.Standard.Black,
+    textAlign: 'center',
+    paddingBottom: WP('5'),
+  },
+  cancelBtn: {
+    width: '49%',
+    marginRight: '1%',
+    backgroundColor: PFColors.Gray.WhisperGray,
+  },
+  deleteBtn: {
+    width: '49%',
+  },
 });
 export default styles;

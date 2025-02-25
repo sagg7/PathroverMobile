@@ -47,6 +47,24 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    deleteRoute: builder.mutation({
+      query: id => {
+        return {
+          url: `user_routes/${id}`,
+          method: 'delete',
+        };
+      },
+    }),
+    editRoute: builder.mutation({
+      query: data => {
+        const {id, ...user_route} = data;
+        return {
+          url: `user_routes/${id}`,
+          method: 'put',
+          body: {user_route},
+        };
+      },
+    }),
   }),
 
   overrideExisting: true,
@@ -58,4 +76,6 @@ export const {
   useAddRouteReportMutation,
   useGetRouteReportQuery,
   useCreateSubscriptionsMutation,
+  useDeleteRouteMutation,
+  useEditRouteMutation,
 } = enduserApiSlice;
