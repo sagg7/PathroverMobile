@@ -180,6 +180,40 @@ export const chatApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getUserCall: builder.query({
+      query: () => {
+        return {
+          url: 'calls',
+          method: 'GET',
+        };
+      },
+    }),
+    getAgoraToken: builder.query({
+      query: channelName => {
+        return {
+          url: `agora_integrations/generate_agora_token?channel_name=${channelName}`,
+          method: 'GET',
+        };
+      },
+    }),
+    createCall: builder.mutation({
+      query: data => {
+        return {
+          url: 'calls',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
+    updateCall: builder.mutation({
+      query: data => {
+        return {
+          url: 'calls/update_call_status',
+          method: 'PUT',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -206,4 +240,8 @@ export const {
   useAddMembersMutation,
   useReadGroupChatMessageMutation,
   useGetChatCountMutation,
+  useGetUserCallQuery,
+  useLazyGetAgoraTokenQuery,
+  useCreateCallMutation,
+  useUpdateCallMutation,
 } = chatApiSlice;
