@@ -1,5 +1,12 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   PFColors,
   PFFontSize,
@@ -20,6 +27,8 @@ interface RouteToWellSheetProps {
   routeName: string;
   onpressCancel: () => void;
   show: any;
+  selectedData: any;
+  routeLength?: any;
 }
 
 export const ActionButtons = ({
@@ -72,8 +81,11 @@ const RouteToWellSheet = ({
   distanceInfo,
   routeName,
   onpressCancel,
+  selectedData,
   show = true,
+  routeLength = 3,
 }: RouteToWellSheetProps) => {
+  const isEmpty = routeLength > 2 ? false : true;
   return (
     <View style={[styles.modalContainer, styles.innerContainer]}>
       <View style={styles.titleView}>
@@ -82,72 +94,96 @@ const RouteToWellSheet = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      <View style={styles.routeInfoView}>
-        <Text>
-          {svgIcon.MapWindow}
-          <View style={{width: 5}} />
+      {!isEmpty ? (
+        <View>
+          <View style={styles.routeInfoView}>
+            <Text>
+              {svgIcon.MapWindow}
+              <View style={{width: 5}} />
 
-          <Text style={styles.routeInfoText}>
-            {distanceInfo?.distance ? distanceInfo?.distance : 'calculating'}
-          </Text>
-        </Text>
-        <View style={{marginLeft: 40}} />
-        <Text>
-          {svgIcon.BlueClock}
-          <View style={{width: 5}} />
-          <Text style={styles.routeInfoText}>
-            {distanceInfo?.distance ? distanceInfo?.duration : 'calculating'}
-          </Text>
-        </Text>
-        {show && (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={onPressShare}
-            style={styles.shareIcon}
-            disabled={!onPressShare}>
-            {svgIcon.ShareWellPath}
-          </TouchableOpacity>
-        )}
-      </View>
-      {show && (
-        <View style={styles.actionBtnView}>
-          <ActionButtons
-            icon={appIcons.Directions}
-            title={'Directions'}
-            selected={actionBtn.direction}
-            onPressActionBtn={onPressDirection}
-            disabled={true}
-          />
-          <ActionButtons
-            icon={appIcons.paperPlane}
-            title="Start"
-            selected={false}
-            onPressActionBtn={onPressStart}
-          />
-          <ActionButtons
-            icon={appIcons.pinIcon}
-            title="Pin"
-            selected={false}
-            onPressActionBtn={onPressPin}
-          />
+              <Text style={styles.routeInfoText}>
+                {distanceInfo?.distance
+                  ? distanceInfo?.distance
+                  : 'calculating'}
+              </Text>
+            </Text>
+            <View style={{marginLeft: 40}} />
+            <Text>
+              {svgIcon.BlueClock}
+              <View style={{width: 5}} />
+              <Text style={styles.routeInfoText}>
+                {distanceInfo?.distance
+                  ? distanceInfo?.duration
+                  : 'calculating'}
+              </Text>
+            </Text>
+            {show && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={onPressShare}
+                style={styles.shareIcon}
+                disabled={!onPressShare}>
+                {svgIcon.ShareWellPath}
+              </TouchableOpacity>
+            )}
+          </View>
+          {show && (
+            <View style={styles.actionBtnView}>
+              <ActionButtons
+                icon={appIcons.Directions}
+                title={'Directions'}
+                selected={actionBtn.direction}
+                onPressActionBtn={onPressDirection}
+                disabled={true}
+              />
+              <ActionButtons
+                icon={appIcons.paperPlane}
+                title="Start"
+                selected={false}
+                onPressActionBtn={onPressStart}
+              />
+              <ActionButtons
+                icon={appIcons.pinIcon}
+                title="Pin"
+                selected={false}
+                onPressActionBtn={onPressPin}
+              />
+            </View>
+          )}
+          {!show && (
+            <View style={styles.actionBtnViewSecond}>
+              <ActionButtons
+                icon={appIcons.Directions}
+                title={'Directions'}
+                selected={actionBtn.direction}
+                onPressActionBtn={onPressDirection}
+                disabled={true}
+              />
+              <ActionButtons
+                icon={appIcons.paperPlane}
+                title="Start"
+                selected={false}
+                onPressActionBtn={onPressStart}
+              />
+            </View>
+          )}
+          {selectedData?.notes && (
+            <View style={{maxHeight: 110}}>
+              <ScrollView>
+                <Text
+                  style={[
+                    styles.noteText,
+                    {fontFamily: PFFonts.Foundation.SemiBold},
+                  ]}>
+                  Note
+                </Text>
+                <Text style={styles.noteText}>{selectedData?.notes}</Text>
+              </ScrollView>
+            </View>
+          )}
         </View>
-      )}
-      {!show && (
-        <View style={styles.actionBtnViewSecond}>
-          <ActionButtons
-            icon={appIcons.Directions}
-            title={'Directions'}
-            selected={actionBtn.direction}
-            onPressActionBtn={onPressDirection}
-            disabled={true}
-          />
-          <ActionButtons
-            icon={appIcons.paperPlane}
-            title="Start"
-            selected={false}
-            onPressActionBtn={onPressStart}
-          />
-        </View>
+      ) : (
+        <Text style={styles.noFound}>No Route details found</Text>
       )}
     </View>
   );
@@ -230,5 +266,17 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     justifyContent: 'space-between',
     width: WP('65'),
+  },
+  noteText: {
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.Regular,
+  },
+  noFound: {
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    textAlign: 'center',
+    paddingVertical: 20,
   },
 });

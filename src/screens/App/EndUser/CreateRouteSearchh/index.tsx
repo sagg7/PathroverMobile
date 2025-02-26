@@ -89,7 +89,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         start: '',
         end: '',
       });
-      console.log('HERE 11');
     } else if (searchStartCoords && searchEndCoords && !isAddressSelected) {
       setSearchValues({
         start: searchStartCoords,
@@ -101,7 +100,6 @@ const CreateRouteSearch = ({route, navigation}: any) => {
         start: '',
         end: '',
       });
-      console.log('HERE 22');
     }
     navigation.goBack();
   };

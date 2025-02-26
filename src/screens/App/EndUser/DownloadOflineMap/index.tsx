@@ -18,7 +18,12 @@ import {
   WP,
 } from '../../../../shared/exporter';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {AppHeader, SaveRouteSheet} from '../../../../components';
+import {
+  AppButton,
+  AppHeader,
+  MainWrapper,
+  SaveRouteSheet,
+} from '../../../../components';
 import styles from './styles';
 import useLocation from '../../../../hooks/getLocation';
 
@@ -28,9 +33,6 @@ const {width, height} = Dimensions.get('window');
 
 const PADDING = 50; // Space from screen edges
 const SQUARE_SIZE = Math.min(width, height) - PADDING * 2; // Adjusted square size
-
-// const MIN_AREA_KM = 10; // Minimum area to download (10km x 10km)
-// const MAX_AREA_KM = 500; // Maximum area to download (500km x 500km)
 
 const DEFAULT_ZOOM = 12; // Default zoom level
 
@@ -63,12 +65,10 @@ const DownloadOfflineMap = ({navigation}: any) => {
 
   const handleMapLoaded = () => {
     setIsMapLoaded(true);
-    console.log('Map is loaded');
   };
 
   const handleRegionChange = e => {
     if (e.properties.zoom) {
-      console.log('Zoom Level Updated:', e.properties.zoom);
       setZoomLevel(e.properties.zoom);
     }
   };
@@ -114,7 +114,6 @@ const DownloadOfflineMap = ({navigation}: any) => {
         )}km`,
       );
 
-      console.log('✅ Final Area Size (km):', latRangeKm, lngRangeKm);
       const widthInYards: any = parseFloat(lngRangeKm) * KM_TO_YARD;
       const heightInYards: any = parseFloat(latRangeKm) * KM_TO_YARD;
       setWidthYards(widthInYards.toFixed(2));
@@ -131,7 +130,6 @@ const DownloadOfflineMap = ({navigation}: any) => {
 
       setBounds(newBounds);
       setIsSelected(true);
-      console.log('✅ Adjusted Bounds:', newBounds);
     } catch (error) {
       Alert.alert('Error', 'Failed to get map bounds.');
     }
@@ -201,11 +199,9 @@ const DownloadOfflineMap = ({navigation}: any) => {
     setShowNameSheet(false);
     downloadOfflineMap(routeName);
   };
-  console.log('===>YARD1', widthYards);
-  console.log('===>YARD2', heightYards);
 
   return (
-    <View style={{flex: 1}}>
+    <MainWrapper>
       <AppHeader title="Download Map" />
       <MapboxGL.MapView
         ref={mapRef}
@@ -222,25 +218,29 @@ const DownloadOfflineMap = ({navigation}: any) => {
         pointerEvents="none"
         style={{
           position: 'absolute',
-          top: (height - SQUARE_SIZE) / 6,
+          top: isIOS()
+            ? (height - SQUARE_SIZE) / 5
+            : (height - SQUARE_SIZE) / 6,
           left: (width - SQUARE_SIZE) / 2,
           width: SQUARE_SIZE,
           height: SQUARE_SIZE + 300,
           borderWidth: 3,
           borderColor: PFColors.Red.ErrorColor,
           backgroundColor: 'rgba(255, 0, 0, 0.2)',
-        }}></View>
-      {/*  */}
-      {/* Action Buttons */}
+        }}
+      />
       <View style={{position: 'absolute', bottom: 20, left: 10, right: 10}}>
         {!isDownloading && (
           <>
             {!isSelected ? (
-              <Button title="Select Area" onPress={getFixedSquareBounds} />
+              <AppButton
+                title="Select Area"
+                handleClick={getFixedSquareBounds}
+              />
             ) : (
-              <Button
+              <AppButton
                 title="Download Offline Map"
-                onPress={() => setShowNameSheet(true)}
+                handleClick={() => setShowNameSheet(true)}
               />
             )}
           </>
@@ -255,14 +255,15 @@ const DownloadOfflineMap = ({navigation}: any) => {
       {showNameSheet && (
         <SaveRouteSheet
           title="Map Name"
-          modalVisible={showNameSheet}
+          // modalVisible={showNameSheet}
           routeName={routeName}
           onChangeText={(text: any) => setRouteName(text)}
           onPressSave={() => handleSaveRouteBtn()}
           onPressCancel={() => setShowNameSheet(false)}
+          btnTitle="Save Map"
         />
       )}
-    </View>
+    </MainWrapper>
   );
 };
 

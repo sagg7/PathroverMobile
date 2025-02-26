@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
   recordBtn: {
     position: 'absolute',
-    bottom: 20,
+    bottom: isIOS() ? WP('10') : 20,
     width: WP('90'),
     alignSelf: 'center',
   },
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: PFColors.Red.RadiantRed,
     height: 40,
     alignItems: 'center',
-    bottom: WP('100'),
+    bottom: isIOS() ? WP('70') : WP('100'),
   },
   recenterBtn: {
     position: 'absolute',
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#A0AFC3',
     height: 40,
     alignItems: 'center',
-    bottom: WP('100'),
+    bottom: isIOS() ? WP('70') : WP('100'),
   },
   reportAction: {
     position: 'absolute',
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     right: WP('3'),
     height: 40,
     alignItems: 'center',
-    bottom: WP('175'),
+    bottom: isIOS() ? WP('172') : WP('175'),
   },
 });
 export default styles;

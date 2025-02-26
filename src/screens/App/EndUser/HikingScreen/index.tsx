@@ -31,11 +31,6 @@ const MY_DATA_MODAL_CONTENT = [
     type: 'hiking_custom_route',
     icon: svgIcon.Track,
   },
-  // {
-  //   title: 'Offline maps',
-  //   type: '',
-  //   icon: svgIcon.MapWindow,
-  // },
 ];
 
 const HikingScreen = () => {
@@ -66,13 +61,14 @@ const HikingScreen = () => {
     const fetchWeatherData = async () => {
       try {
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${location?.latitude}&lon=${location?.longitude}&cnt=7&appid=${WEATHER_API_KEY}&units=metric`,
+          `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${location?.latitude}&lon=${location?.longitude}&cnt=7&appid=${WEATHER_API_KEY}&units=imperial`,
         );
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Failed to fetch weather data: ${errorText}`);
         }
         const data = await response.json();
+
         setWeather(data);
       } catch (error) {
         console.error('Error fetching weather data:', error.message);
@@ -134,20 +130,7 @@ const HikingScreen = () => {
   };
 
   const moveToCurrentLocation = () => {
-    if (
-      !currentLocation ||
-      !Array.isArray(currentLocation) ||
-      currentLocation.length !== 2
-    ) {
-      console.error('Invalid coordinates:', currentLocation);
-      return;
-    }
-
-    if (cameraRef?.current) {
-      cameraRef.current?.setCamera({
-        centerCoordinate: currentLocation,
-      });
-    }
+    cameraRef.current.flyTo(currentLocation, 100);
   };
   const ActionBtn = ({icon, onPress}: any) => (
     <TouchableOpacity onPress={onPress}>
@@ -185,7 +168,11 @@ const HikingScreen = () => {
           </MapboxGL.MarkerView>
         )}
       </MapboxGL.MapView>
-
+      <TouchableOpacity
+        style={styles.centerMapStyles}
+        onPress={() => moveToCurrentLocation()}>
+        {svgIcon.MapWhiteBg}
+      </TouchableOpacity>
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => setMapLayerSheeet(true)}>

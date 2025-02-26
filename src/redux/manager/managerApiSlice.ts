@@ -16,11 +16,14 @@ export const managerApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     createRoute: builder.mutation({
-      query: data => ({
-        url: 'user_routes',
-        method: 'POST',
-        body: data,
-      }),
+      query: data => {
+        console.log('🚀 createRoute data:', data); // Log data before sending request
+        return {
+          url: 'user_routes',
+          method: 'POST',
+          body: data,
+        };
+      },
     }),
     updateRoute: builder.mutation({
       query: ({data, id}) => ({

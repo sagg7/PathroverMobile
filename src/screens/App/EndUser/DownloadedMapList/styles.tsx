@@ -1,5 +1,11 @@
 import {StyleSheet} from 'react-native';
-import {PFColors, PFFonts, PFFontSize, WP} from '../../../../shared/exporter';
+import {
+  isIOS,
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  WP,
+} from '../../../../shared/exporter';
 
 const styles = StyleSheet.create({
   listConatainer: {
@@ -44,7 +50,7 @@ const styles = StyleSheet.create({
   },
   btnStyles: {
     position: 'absolute',
-    bottom: 20,
+    bottom: isIOS() ? WP('20') : WP('8'),
     width: WP('90'),
     alignSelf: 'center',
   },

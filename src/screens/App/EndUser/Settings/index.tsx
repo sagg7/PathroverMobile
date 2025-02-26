@@ -169,12 +169,22 @@ const Settings = ({navigation}: any) => {
   return (
     <MainWrapper>
       <AppHeader title="Settings" clickBackIcon={() => navigation.pop()} />
-      <View style={styles.userProfileContainer}>
-        <Image source={appIcons.userPlaceholder} style={styles.userPicture} />
-        <View style={styles.userProfileInner}>
-          <Text style={styles.profileTextStyles}>{userName}</Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate(Routes.ManageProfile)}>
+        <View style={styles.userProfileContainer}>
+          <Image
+            source={
+              loginUser?.avatar
+                ? {uri: loginUser?.avatar}
+                : appIcons.userPlaceholder
+            }
+            style={styles.userPicture}
+          />
+          <View style={styles.userProfileInner}>
+            <Text style={styles.profileTextStyles}>{userName}</Text>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <FlatList
         data={EndUserProfileMenu}

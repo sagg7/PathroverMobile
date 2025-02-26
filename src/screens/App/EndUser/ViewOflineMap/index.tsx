@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, Dimensions} from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import {mapBoxToken} from '../../../../shared/exporter';
-import {AppHeader} from '../../../../components';
+import {AppHeader, MainWrapper} from '../../../../components';
 
 MapboxGL.setAccessToken(mapBoxToken);
 
@@ -40,7 +40,7 @@ const ViewOfflineMap = ({route}: any) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <MainWrapper>
       <AppHeader title={item?.name} />
       <MapboxGL.MapView
         ref={mapRef}
@@ -80,7 +80,7 @@ const ViewOfflineMap = ({route}: any) => {
           />
         )}
       </MapboxGL.MapView>
-    </View>
+    </MainWrapper>
   );
 };
 
