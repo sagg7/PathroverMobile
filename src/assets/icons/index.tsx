@@ -51,4 +51,7 @@ export const appIcons = {
   mute: require('../icons/mute.png'),
   muted: require('../icons/muted.png'),
   endCall: require('../icons/endCall.png'),
+  flipCamera: require('../icons/flip.png'),
+  showVideo: require('../icons/video.png'),
+  hideVideo: require('../icons/hideVideo.png'),
 };
