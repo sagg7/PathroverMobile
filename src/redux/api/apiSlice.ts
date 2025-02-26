@@ -20,7 +20,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReAuth = async (args, api, extraOptions) => {
   const { dispatch, getState } = api;
   const result = await baseQuery(args, api, extraOptions);
-  console.log(" baseQueryWithReAuth ~ args==>", args)
+  // console.log(" baseQueryWithReAuth ~ args==>", args)
 
   if (result?.meta?.response?.headers) {
     const newToken = result.meta.response.headers.get('authorization');

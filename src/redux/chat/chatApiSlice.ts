@@ -180,6 +180,16 @@ export const chatApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getChatContacts: builder.mutation({
+      query: (data) => {
+        console.log(" data==>", data)
+        return {
+          url: 'chats/invited_users',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -206,4 +216,5 @@ export const {
   useAddMembersMutation,
   useReadGroupChatMessageMutation,
   useGetChatCountMutation,
+  useGetChatContactsMutation,
 } = chatApiSlice;

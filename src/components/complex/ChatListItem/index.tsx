@@ -41,9 +41,6 @@ function RightAction(
 
 const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
   const ref = React.useRef(null);
-  console.log('==============item======================');
-  console.log(item);
-  console.log('====================================');
   const handleClose = () => {
     ref.current?.close();
     onPressDelete();
