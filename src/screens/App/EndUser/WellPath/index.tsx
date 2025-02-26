@@ -15,6 +15,7 @@ import {
   Default_Map_Style,
   HP,
   isIOS,
+  mapBoxToken,
   MapTypes,
   PFColors,
   Routes,
@@ -34,10 +35,10 @@ import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice'
 import {Image, Platform, TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
-import {debounce} from 'lodash';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
+import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -57,13 +58,14 @@ const WellPath = () => {
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(false);
+  const [showRouteStartedSheet, setShowRouteStartedSheet] =
+    useState<boolean>(false);
   const [zoom, setZoom] = useState<any>(12);
   const [results, setResults] = useState<null>(null);
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,
     start: false,
   });
-
   const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
   const [showAddEntranceSheet, setShowAddEntranceSheet] =
     useState<boolean>(false);
@@ -91,7 +93,6 @@ const WellPath = () => {
     refetch,
   } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
-  console.log(" WellPath ~ location==>", location)
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
 
@@ -148,6 +149,44 @@ const WellPath = () => {
     }
   }, [nearbyWells, allWellLocations]);
 
+  const fetchRoute = async (start, end) => {
+    const accessToken = mapBoxToken;
+    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data.routes[0]?.geometry?.coordinates;
+      return route;
+    } catch (error) {
+      console.error('Error fetching route:', error);
+      showAlert('Error', 'No route exists between the entered locations.');
+      return [];
+    }
+  };
+
+  const getRoute = async () => {
+    if (searchLocation && currentLocation) {
+      const fetchedRoute = await fetchRoute(currentLocation, searchLocation);
+      setRoute(fetchedRoute);
+    }
+  };
+  useEffect(() => {
+    if (searchLocation && currentLocation) getRoute();
+  }, [searchLocation, currentLocation]);
+
+  useEffect(() => {
+    const getResults = async () => {
+      const locResults: any = await getTimeAndDistance(
+        currentLocation,
+        searchLocation,
+      );
+
+      setResults(locResults);
+    };
+    getResults();
+  }, [currentLocation, searchLocation]);
+
   useEffect(() => {
     if (searchLocation?.length > 0) {
       setTimeout(() => {
@@ -159,10 +198,12 @@ const WellPath = () => {
             latitude: searchLocation[1],
             longitude: searchLocation[0],
           });
-          navigation.navigate(Routes.ViewWellPathNavigation, {
-            entranceCoords: searchLocation,
-            entranceName: searchLocationName,
-          });
+          setShowRouteActionSheet(true);
+
+          // navigation.navigate(Routes.ViewWellPathNavigation, {
+          //   entranceCoords: searchLocation,
+          //   entranceName: searchLocationName,
+          // });
           refetch();
         } else {
           showAlert(
@@ -378,10 +419,11 @@ const WellPath = () => {
             id="searchMarker"
             coordinate={searchLocation}
             onSelected={() => {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
-                entranceCoords: searchLocation,
-                entranceName: searchLocationName,
-              });
+              setShowRouteActionSheet(true);
+              // navigation.navigate(Routes.ViewWellPathNavigation, {
+              //   entranceCoords: searchLocation,
+              //   entranceName: searchLocationName,
+              // });
             }}>
             {svgIcon.BlueMapMarker}
           </MapboxGL.PointAnnotation>
@@ -404,18 +446,7 @@ const WellPath = () => {
             shape={wellsToGeoJSON(allWells)}
             cluster
             clusterRadius={20}
-            clusterMaxZoom={10}
-            // clusterRadius={20}
-            // clusterMaxZoom={20}
-          >
-            {/* <MapboxGL.SymbolLayer
-              id="markerLayer"
-              style={{
-                iconImage: 'marker',
-                iconSize: 1,
-                iconAllowOverlap: true,
-              }}
-            /> */}
+            clusterMaxZoom={10}>
             <MapboxGL.SymbolLayer
               id="markerLayer"
               style={{
@@ -489,12 +520,18 @@ const WellPath = () => {
         onPressClear={() => onPressMapSettingClear()}
       />
       <PinLocationAddress
-        // onPressShare={() => navigation.navigate('Chat')}
+        onPressShare={() => {
+          // navigation.navigate(Routes.ChatUsers, {
+          //   // shareTrail: { startingPoint, endingPoint },
+          // });
+        }}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
         selectedWell={selectedWellName || ['', '']}
         setModalVisible={() => setShowPinAddress(false)}
         onPresAddEntrance={() => {
+          setShowRouteActionSheet(false);
+
           setShowPinAddress(false);
           setTimeout(() => {
             setShowAddEntranceSheet(true);
@@ -530,6 +567,36 @@ const WellPath = () => {
             setShowAddEntranceSheet(false);
             setEntranceName(null);
           }}
+        />
+      )}
+      {showRouteActionSheet && (
+        <RouteToWellSheet
+          routeLength={route?.length}
+          onpressCancel={() => {
+            setRoute([]);
+            setShowRouteActionSheet(false);
+            // cameraRef.current.flyTo(currentLocation, 1000);
+          }}
+          routeName={searchLocationName}
+          distanceInfo={results}
+          actionBtn={actionBtn}
+          onPressDirection={() => {
+            // getRoute();
+            setActionBtn({
+              ...actionBtn,
+              direction: true,
+            });
+            // centerMap();
+          }}
+          onPressStart={() => {
+            setShowRouteActionSheet(false);
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: searchLocation,
+              entranceName: searchLocationName,
+            });
+          }}
+          // onPressPin={() => handlePinBtn()}
+          show={false}
         />
       )}
 

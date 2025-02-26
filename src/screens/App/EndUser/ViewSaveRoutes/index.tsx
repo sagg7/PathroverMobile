@@ -72,11 +72,10 @@ const ViewSaveRoutes = ({route}: any) => {
   useEffect(() => {
     if (route) {
       const selectedRoute = route?.params?.item;
-      console.log('selectedRoute', selectedRoute?.pinned_points);
 
       const endCoordinates = [
-        parseFloat(selectedRoute?.dropoff_location.longitude),
-        parseFloat(selectedRoute?.dropoff_location.latitude),
+        parseFloat(selectedRoute?.dropoff_location?.longitude),
+        parseFloat(selectedRoute?.dropoff_location?.latitude),
       ];
       const startCoordinates = [
         parseFloat(selectedRoute?.pickup_location?.longitude),
@@ -84,12 +83,14 @@ const ViewSaveRoutes = ({route}: any) => {
       ];
       setStartPoint(startCoordinates);
       setEndPoint(endCoordinates);
-      const formattedPoints = selectedRoute?.middle_location_points
-        .filter((point: any) => point.latitude && point.longitude)
-        .map((point: any) => [
-          parseFloat(point.longitude),
-          parseFloat(point.latitude),
-        ]);
+      const formattedPoints =
+        selectedRoute?.middle_location_points &&
+        selectedRoute?.middle_location_points
+          .filter((point: any) => point?.latitude && point?.longitude)
+          .map((point: any) => [
+            parseFloat(point?.longitude),
+            parseFloat(point?.latitude),
+          ]);
 
       setDestination(endCoordinates);
       formattedPoints.unshift(startCoordinates);
@@ -117,12 +118,22 @@ const ViewSaveRoutes = ({route}: any) => {
   const getTimeDistanceDetails = async () => {
     const locResults: any = await getTimeAndDistance(liveLocation, startPoint);
     setTimeDistance(locResults);
-    const match = locResults?.distance?.match(/([\d.]+)\s*(km|m)/);
-    const distanceValue = match
-      ? parseFloat(match[1]) * (match[2] === 'km' ? 1000 : 1)
-      : Number(locResults?.distance) || 0;
 
-    if (distanceValue < 300) {
+    let distanceValue = 0;
+
+    if (typeof locResults?.distance === 'string') {
+      const match = locResults?.distance.match(/([\d.]+)\s*miles/);
+      if (match) {
+        distanceValue = parseFloat(match[1]); // Distance is already in miles
+      }
+    } else if (typeof locResults?.distance === 'number') {
+      distanceValue = locResults.distance; // Already in miles
+    }
+
+    console.log('===sdistanceValue', distanceValue); // Debugging
+
+    if (distanceValue < 0.186) {
+      // 300 meters ≈ 0.186 miles
       setRouteStartedFromCurrent(true);
       setShowReachModal(true);
     }
@@ -295,6 +306,7 @@ const ViewSaveRoutes = ({route}: any) => {
       parseFloat(selectedRoute?.pickup_location?.longitude),
       parseFloat(selectedRoute?.pickup_location?.latitude),
     ];
+    setEndPoint(endCoordinates);
 
     const formattedPoints = selectedRoute?.middle_location_points
       .filter((point: any) => point.latitude && point.longitude)
@@ -316,12 +328,15 @@ const ViewSaveRoutes = ({route}: any) => {
     setShowRouteActionSheet(false);
     setIsStartBtnPressed(true);
     const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
+    console.log('===888routeResults', routeResults);
+
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
     setRoute([]);
   };
+
   const calculateBounds = coordinates => {
     if (!coordinates || coordinates.length === 0) return undefined;
 
@@ -362,28 +377,6 @@ const ViewSaveRoutes = ({route}: any) => {
           zoomLevel={10}
           centerCoordinate={currentLocation}
           bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
-          // bounds={
-          //   routes?.length > 0 && {
-          //     ne: routes?.reduce(
-          //       (acc, coord) => [
-          //         Math.max(acc[0], coord[0]),
-          //         Math.max(acc[1], coord[1]),
-          //       ],
-          //       [-Infinity, -Infinity],
-          //     ),
-          //     sw: routes.reduce(
-          //       (acc, coord) => [
-          //         Math.min(acc[0], coord[0]),
-          //         Math.min(acc[1], coord[1]),
-          //       ],
-          //       [Infinity, Infinity],
-          //     ),
-          //     paddingLeft: 30,
-          //     paddingRight: 30,
-          //     paddingTop: 30,
-          //     paddingBottom: 180,
-          //   }
-          // }
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
         {startPoint && (
@@ -469,7 +462,7 @@ const ViewSaveRoutes = ({route}: any) => {
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
-          routeInfo={timeDistance}
+          routeInfo={results}
         />
       )}
       {modalKey === 1 && isStartBtnPressed && (
@@ -480,6 +473,8 @@ const ViewSaveRoutes = ({route}: any) => {
       )}
       {showRouteActionSheet && (
         <RouteToWellSheet
+          routeLength={routes?.length}
+          selectedData={selectedRoute}
           onpressCancel={() => {
             setShowRouteActionSheet(false);
             setShowRouteStartedSheet(false);
@@ -487,7 +482,7 @@ const ViewSaveRoutes = ({route}: any) => {
               navigation.goBack();
             }, 500);
           }}
-          routeName={route?.params?.entranceName}
+          routeName={route?.params?.entranceName || selectedRoute?.name}
           distanceInfo={results}
           actionBtn={actionBtn}
           onPressDirection={() => {

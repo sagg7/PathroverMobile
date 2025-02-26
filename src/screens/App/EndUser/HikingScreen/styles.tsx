@@ -26,21 +26,13 @@ const styles = StyleSheet.create({
     bottom: isIOS() ? WP('10') : WP('5'),
     left: 10,
   },
-  hikeIconStyle: {
-    position: 'absolute',
-    bottom: isIOS() ? WP('25') : WP('20'),
-    left: 10,
-  },
+
   recenter: {
     position: 'absolute',
     bottom: isIOS() ? WP('32') : WP('27'),
     left: 10,
   },
-  searcRoute: {
-    position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
-    right: 10,
-  },
+
   undoRedoContainer: {
     flexDirection: 'row',
     position: 'absolute',
@@ -90,9 +82,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     position: 'absolute',
     zIndex: 1,
-    top: WP('20'),
+    top: isIOS() ? WP('35') : WP('20'),
     width: WP('100'),
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
+    marginLeft: 5,
   },
   actionBtnStyles: {
     height: scale(36),
@@ -117,6 +110,23 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.Medium,
     fontSize: PFFontSize.FONT_SIZE_14,
     marginLeft: WP('5'),
+  },
+  centerMapStyles: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('10') : WP('5'),
+    right: 7,
+    zIndex: 1,
+  },
+  hikeIconStyle: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('25') : WP('20'),
+    left: 10,
+  },
+  searcRoute: {
+    position: 'absolute',
+    bottom: isIOS() ? WP('25') : WP('20'),
+
+    right: 10,
   },
 });
 export default styles;

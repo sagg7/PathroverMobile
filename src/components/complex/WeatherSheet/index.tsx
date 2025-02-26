@@ -85,7 +85,7 @@ const WeatherSheet = ({
             </Text>
 
             <Text style={styles.temp}>
-              {Math.round(currentWeather.temp?.day)}°
+              {Math.round(currentWeather.temp?.day)}° F
             </Text>
             <Text style={styles.condition}>
               {currentWeather.weather[0].description}
@@ -145,7 +145,7 @@ const WeatherSheet = ({
                             : PFColors.Standard.Black,
                       },
                     ]}>
-                    {Math.round(item.temp.min)}°
+                    {Math.round(item.temp.min)}° F
                   </Text>
                   <Image
                     source={{
@@ -163,7 +163,7 @@ const WeatherSheet = ({
                             : PFColors.Standard.Black,
                       },
                     ]}>
-                    {Math.round(item.temp.max)}°
+                    {Math.round(item.temp.max)}° F
                   </Text>
                 </View>
               </TouchableOpacity>
