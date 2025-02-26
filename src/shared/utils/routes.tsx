@@ -68,4 +68,7 @@ export const Routes = {
   EndUserSavedLibraryType: 'EndUserSavedLibraryType',
   ViewSaveRoutes: 'ViewSaveRoutes',
   RecordRoute: 'RecordRoute',
+  CalllSreen: 'CalllSreen',
+  VoiceCalling: 'VoiceCalling',
+  VideoCalling: 'VideoCalling',
 };
