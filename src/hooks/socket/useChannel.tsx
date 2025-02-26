@@ -32,7 +32,7 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
   }, []);
 
   const subscribe = (data: SubscriptionData, callbacks?: Callbacks) => {
-    console.log('Subscribing to channel =>', data);
+    // console.log('Subscribing to channel =>', data);
 
     const channel = actionCable.subscriptions.create({
       channel: data.channel,
@@ -41,21 +41,21 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
 
     channel
       .on('received', (message: any) => {
-        console.log('Received message from', data.channel, message);
+        // console.log('Received message from', data.channel, message);
         if (callbacks?.received) callbacks.received(message);
       })
       .on('connected', () => {
-        console.log('Connected to', data.channel);
+        // console.log('Connected to', data.channel);
         setConnected(true);
         if (callbacks?.connected) callbacks.connected();
       })
       .on('rejected', () => {
-        console.log('Subscription rejected for', data.channel);
+        // console.log('Subscription rejected for', data.channel);
         setConnected(false);
         if (callbacks?.rejected) callbacks.rejected();
       })
       .on('disconnected', () => {
-        console.log('Disconnected from', data.channel);
+        // console.log('Disconnected from', data.channel);
         setConnected(false);
         if (callbacks?.disconnected) callbacks.disconnected();
       });
@@ -65,25 +65,25 @@ export const useChannel = (actionCable: Cable): UseChannelReturn => {
 
   const send = (type: string, payload: any) => {
     if (!connected) {
-      console.error('useChannel - ERROR: not connected');
+      // console.error('useChannel - ERROR: not connected');
       return;
     }
 
     if (!channelRef.current) {
-      console.error('useChannel - ERROR: no channel reference');
+      // console.error('useChannel - ERROR: no channel reference');
       return;
     }
 
     try {
       channelRef.current.perform(type, payload);
     } catch (e) {
-      console.error('useChannel - ERROR:', e);
+      // console.error('useChannel - ERROR:', e);
     }
   };
 
   const unsubscribe = () => {
     if (channelRef.current) {
-      console.log('Unsubscribing from', channelRef.current.identifier);
+      // console.log('Unsubscribing from', channelRef.current.identifier);
       actionCable.subscriptions.remove(channelRef.current);
       channelRef.current = null;
     }
