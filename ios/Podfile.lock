@@ -1051,6 +1051,8 @@ PODS:
   - React-Mapbuffer (0.74.5):
     - glog
     - React-debug
+  - react-native-contacts (8.0.4):
+    - React-Core
   - react-native-document-picker (9.3.1):
     - DoubleConversion
     - glog
@@ -1710,6 +1712,7 @@ DEPENDENCIES:
   - React-jsitracing (from `../node_modules/react-native/ReactCommon/hermes/executor/`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - react-native-contacts (from `../node_modules/react-native-contacts`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
@@ -1867,6 +1870,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-contacts:
+    :path: "../node_modules/react-native-contacts"
   react-native-document-picker:
     :path: "../node_modules/react-native-document-picker"
   react-native-fbsdk-next:
@@ -2033,6 +2038,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 3b6060bbf5317663667e1dd93560c7943ab86ccc
   React-logger: 257858bd55f3a4e1bc0cf07ddc8fb9faba6f8c7c
   React-Mapbuffer: 6c1cacdbf40b531f549eba249e531a7d0bfd8e7f
+  react-native-contacts: cdeb7709dcc626e5fd7ee3d3e3685357e877cbd5
   react-native-document-picker: c4f197741c327270453aa9840932098e0064fd52
   react-native-fbsdk-next: 1baeeacf0ecdeb839cca16ca75cb16a9bbbf8e03
   react-native-geolocation: 67d909c955daedea3f8c30d912f004f806edff64
@@ -2081,7 +2087,7 @@ SPEC CHECKSUMS:
   RNIap: 2fba6c91f79fb7c71fcc44465f606061653caf01
   RNImageCropPicker: 8e39c01f205e00d739c31e682f068aac315587bf
   rnmapbox-maps: 86b215fe77632a897b34a2dbf0c3ad4e9e8c3570
-  RNPermissions: c2eeb3da6ea070223a52aab012a60528841b459e
+  RNPermissions: bc8ca7e43b9cdcf09eb32dedd2f6e44171fa0f32
   RNReanimated: b0728bed09875d78b9a3a0ba0e2d1171f63f8b5a
   RNScreens: 6b641f232990a9d505a6d139fd18c3c759c9d290
   RNSVG: e451741721b9fd3db71b06aafe9335d09a189692
@@ -2099,6 +2105,6 @@ SPEC CHECKSUMS:
   Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
   Yoga: 2246eea72aaf1b816a68a35e6e4b74563653ae09
 
-PODFILE CHECKSUM: 05fa4578a156e567881502fb67b6e10ad8594c20
+PODFILE CHECKSUM: 24348ccbdd3644391781f2a0a9a90973e3ccf8c9
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

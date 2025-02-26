@@ -20,7 +20,14 @@ const UsersListView = ({usersList, onPress}: UsersListViewProps) => {
       <TouchableOpacity
         style={styles.topIconStyle}
         onPress={() => onPress(item)}>
-        <Image source={appIcons.userPlaceholder} style={styles.imageStyle} />
+        <Image
+          source={
+            item?.profile_image
+              ? {uri: item?.profile_image}
+              : appIcons.userPlaceholder
+          }
+          style={styles.imageStyle}
+        />
 
         <View style={styles.removeIconView}>{svgIcon.RemoveIcon}</View>
       </TouchableOpacity>

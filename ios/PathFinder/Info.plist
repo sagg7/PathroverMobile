@@ -80,6 +80,8 @@
 	<string>We need your location to show your current position on the map</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show nearby places</string>
+	<key>NSContactsUsageDescription</key>
+	<string>We need to access your contacts to start chat with other users</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>

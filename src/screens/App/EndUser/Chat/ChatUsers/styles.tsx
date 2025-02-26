@@ -22,12 +22,16 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.SemiBold,
-    marginBottom: 4,
+    marginLeft:10
   },
   textView: {
     flexDirection: 'column',
     width: '84%',
   },
+  rowContainer:{
+    flexDirection: 'row',
+    alignItems: 'center',
+  }
 });
 
 export default styles;
