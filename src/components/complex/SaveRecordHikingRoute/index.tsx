@@ -13,24 +13,20 @@ import {AppInput} from '../../primitive/AppInput';
 
 interface SaveRecordHikingRouteSheetProps {
   setModalVisible?: () => void;
-  recordingDetails: any;
-  setDetails: any;
   onPressSave: () => void;
   onPressResume: () => void;
   onPressPause: () => void;
-  onPressEnd: () => void;
+  onPressEnd?: () => void;
   time: string;
   speed?: string;
   elevation?: string;
-  value: string;
+  value: any;
   onChange: any;
   distance: any;
+  setHideActionBtn: any;
 }
 
 const SaveRecordHikingRouteSheet = ({
-  setModalVisible,
-  recordingDetails,
-  setDetails,
   onPressSave,
   onPressResume,
   onPressPause,
@@ -41,8 +37,10 @@ const SaveRecordHikingRouteSheet = ({
   value,
   onChange,
   distance,
+  setHideActionBtn,
 }: SaveRecordHikingRouteSheetProps) => {
   const [btnStatus, setBtnStatus] = useState('play');
+
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
@@ -84,7 +82,7 @@ const SaveRecordHikingRouteSheet = ({
           )}
           <View style={styles.recordingDetailsView}>
             <View style={styles.detailInnerView}>
-              <Text style={styles.digitsText}>{elevation}</Text>
+              <Text style={styles.digitsText}>{elevation || '478'}</Text>
               <Text style={styles.digitTitleText}>Elevation (ft)</Text>
             </View>
             <View style={styles.detailInnerView}>
@@ -119,6 +117,7 @@ const SaveRecordHikingRouteSheet = ({
                 handleClick={() => {
                   setBtnStatus('pause');
                   onPressPause();
+                  setHideActionBtn(true);
                 }}
                 title="Pause"
               />
@@ -130,6 +129,7 @@ const SaveRecordHikingRouteSheet = ({
                   handleClick={() => {
                     setBtnStatus('play');
                     onPressResume();
+                    setHideActionBtn(false);
                   }}
                 />
                 {/* <AppButton
@@ -141,7 +141,8 @@ const SaveRecordHikingRouteSheet = ({
                   handleClick={onPressSave}
                   title="Save"
                   buttonStyle={styles.entranceBtn}
-                  disabled={!value}
+                  // disabled={value.name || value.note}
+                  disabled={!value.name || !value.note}
                 />
               </>
             ) : null}

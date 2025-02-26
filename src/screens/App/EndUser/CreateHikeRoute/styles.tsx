@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   centerMapStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('35') : WP('10'),
+    bottom: isIOS() ? WP('24') : WP('10'),
     left: 10,
   },
   redoBtn: {

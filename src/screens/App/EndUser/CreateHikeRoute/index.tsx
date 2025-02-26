@@ -173,6 +173,8 @@ const CreateHikeRoute = () => {
           Bottom: 80,
         },
       );
+    } else {
+      cameraRef.current.flyTo(currentLocation, 100);
     }
   };
 

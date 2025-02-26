@@ -41,9 +41,9 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [routes, setRoute] = useState<any>([]);
   const [results, setResults] = useState<null>(null);
   const [destination, setDestination] = useState<any>(null);
-  const [tourStarted, setTourStarted] = useState<boolean>(false);
+  const [tourStarted, setTourStarted] = useState<boolean>(true);
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [searchLocation, setSearchLocation] = useState<any>(null);
 
   const [simpleSearch, setSimpleSearch] = useState<string>('');
@@ -58,10 +58,8 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
   const [showAddEntranceSheet, setShowAddEntranceSheet] =
     useState<boolean>(false);
-  const [selectedWell, setSelectedWell] = useState<any>(null);
-  const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
-    useState<boolean>(true);
+    useState<boolean>(false);
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,
     start: false,
@@ -318,8 +316,8 @@ const ViewWellPathNavigation = ({route}: any) => {
     }
 
     setShowPinAddress(true);
-    setSelectedWell([selected?.log, selected?.lat]);
-    setSelectedWellName(selected);
+    // setSelectedWell([selected?.log, selected?.lat]);
+    // setSelectedWellName(selected);
   };
 
   return (
@@ -349,13 +347,7 @@ const ViewWellPathNavigation = ({route}: any) => {
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
-        {searchLocation && (
-          <MapboxGL.PointAnnotation
-            id="searchMarker"
-            coordinate={searchLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.PointAnnotation>
-        )}
+
         {/* Route Line */}
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
@@ -368,12 +360,11 @@ const ViewWellPathNavigation = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
-        <MapboxGL.Images
+        {/* <MapboxGL.Images
           images={{
             marker: require('../../../../assets/icons/wellsMarker.png'),
           }}
         />
-        {/* Clustering Source */}
         {allWells?.length > 0 && (
           <MapboxGL.ShapeSource
             onPress={onPressMarker}
@@ -381,32 +372,21 @@ const ViewWellPathNavigation = ({route}: any) => {
             shape={wellsToGeoJSON(allWells)}
             cluster
             clusterRadius={20}
-            clusterMaxZoom={10}
-            // clusterRadius={20}
-            // clusterMaxZoom={20}
-          >
-            {/* <MapboxGL.SymbolLayer
-              id="markerLayer"
-              style={{
-                iconImage: 'marker',
-                iconSize: 1,
-                iconAllowOverlap: true,
-              }}
-            /> */}
+            clusterMaxZoom={10}>
             <MapboxGL.SymbolLayer
               id="markerLayer"
               style={{
                 iconImage: 'marker', // Reference the registered image name
                 iconSize: Platform.OS === 'android' ? 0.7 : 0.5,
                 iconIgnorePlacement: true,
-                // iconAllowOverlap: true,
               }}
             />
           </MapboxGL.ShapeSource>
-        )}
+        )} */}
       </MapboxGL.MapView>
       {showRouteActionSheet && !keyboardVisible && (
         <RouteToWellSheet
+          routeLength={routes?.length}
           onpressCancel={() => navigation.goBack()}
           routeName={route?.params?.entranceName}
           distanceInfo={results}

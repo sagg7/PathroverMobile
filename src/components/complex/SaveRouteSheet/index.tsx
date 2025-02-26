@@ -20,6 +20,7 @@ interface SaveRouteSheetProps {
   onChangeText: any;
   routeName: any;
   title?: string;
+  btnTitle?: string;
 }
 
 const SaveRouteSheet = ({
@@ -28,6 +29,7 @@ const SaveRouteSheet = ({
   routeName,
   onChangeText,
   title = 'Save Route',
+  btnTitle = 'Save Route',
 }: SaveRouteSheetProps) => {
   const handleSave = () => {
     Keyboard.dismiss();
@@ -69,7 +71,7 @@ const SaveRouteSheet = ({
 
             <AppButton
               disabled={routeName?.length < 1}
-              title="Save Route"
+              title={btnTitle}
               isSmall="40%"
               handleClick={() => handleSave()}
             />

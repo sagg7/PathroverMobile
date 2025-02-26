@@ -54,7 +54,7 @@ const AddEntranceSheet = ({
               {svgIcon.MapPinBlue}
               <Text style={styles.placeName}>
                 {' '}
-                {selectedWellName?.name || ''}
+                {selectedWellName?.name || selectedWellName?.well_name || ''}
               </Text>
             </View>
             <TouchableOpacity onPress={onPressShare}>

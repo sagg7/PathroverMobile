@@ -40,6 +40,88 @@ export const fetchSuggestions = async (text: string) => {
   }
 };
 
+// export const getTimeAndDistance = async (start, end, profile = 'driving') => {
+//   if (
+//     !Array.isArray(start) ||
+//     !Array.isArray(end) ||
+//     start.length !== 2 ||
+//     end.length !== 2
+//   ) {
+//     throw new Error(
+//       'Invalid coordinates. Provide [longitude, latitude] for both start and end.',
+//     );
+//   }
+
+//   const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${start[0]},${start[1]};${end[0]},${end[1]}?annotations=distance,duration&overview=false&access_token=${mapBoxToken}`;
+
+//   /**
+//    * Formats duration into hours and minutes.
+//    * @param {number} minutes - Duration in minutes.
+//    * @returns {string} - Formatted duration.
+//    */
+//   const formatDuration = minutes => {
+//     if (minutes >= 60) {
+//       const hours = Math.floor(minutes / 60);
+//       const remainingMinutes = Math.round(minutes % 60);
+//       return `${hours} hr${hours > 1 ? 's' : ''} ${
+//         remainingMinutes > 0
+//           ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+//           : ''
+//       }`;
+//     }
+//     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+//   };
+
+//   /**
+//    * Formats distance into kilometers or meters.
+//    * @param {number} meters - Distance in meters.
+//    * @returns {string} - Formatted distance.
+//    */
+//   const formatDistance = meters => {
+//     if (meters < 1000) {
+//       return `${Math.round(meters)} meters`;
+//     }
+//     return `${(meters / 1000).toFixed(2)} km`;
+//   };
+
+//   try {
+//     const response = await fetch(url);
+//     const data = await response.json();
+
+//     if (data.routes && data.routes.length > 0) {
+//       const route = data.routes[0];
+//       const durationMinutes = route.duration / 60; // Convert seconds to minutes
+//       const distanceMeters = route.distance; // Keep distance in meters
+
+//       return {
+//         duration: formatDuration(durationMinutes),
+//         distance: formatDistance(distanceMeters),
+//       };
+//     } else {
+//       throw new Error('No routes found');
+//     }
+//   } catch (error) {
+//     console.error('Error fetching time and distance:', error);
+//     throw error;
+//   }
+// };
+export const formatDate = (dateString: string) => {
+  if (dateString) {
+    const [day, month, year] = dateString?.split('-')?.map(Number);
+
+    const date = new Date(year, month - 1, day); // Month is 0-based in JavaScript
+
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    const formattedDay = String(date.getDate()).padStart(2, '0');
+    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const formattedYear = date.getFullYear();
+
+    return `${formattedDay}/${formattedMonth}/${formattedYear}`;
+  }
+};
+
 export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   if (
     !Array.isArray(start) ||
@@ -73,15 +155,22 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   };
 
   /**
-   * Formats distance into kilometers or meters.
+   * Converts meters to miles.
    * @param {number} meters - Distance in meters.
-   * @returns {string} - Formatted distance.
+   * @returns {number} - Distance in miles (rounded to 2 decimal places).
+   */
+  const convertToMiles = meters => {
+    const METERS_TO_MILES = 0.000621371; // 1 meter = 0.000621371 miles
+    return (meters * METERS_TO_MILES).toFixed(2);
+  };
+
+  /**
+   * Formats distance into miles.
+   * @param {number} meters - Distance in meters.
+   * @returns {string} - Formatted distance in miles.
    */
   const formatDistance = meters => {
-    if (meters < 1000) {
-      return `${Math.round(meters)} meters`;
-    }
-    return `${(meters / 1000).toFixed(2)} km`;
+    return `${convertToMiles(meters)} miles`;
   };
 
   try {
@@ -95,7 +184,7 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
 
       return {
         duration: formatDuration(durationMinutes),
-        distance: formatDistance(distanceMeters),
+        distance: formatDistance(distanceMeters), // Returns distance in miles
       };
     } else {
       throw new Error('No routes found');
@@ -103,21 +192,5 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   } catch (error) {
     console.error('Error fetching time and distance:', error);
     throw error;
-  }
-};
-export const formatDate = (dateString: string) => {
-  if (dateString) {
-    const [day, month, year] = dateString?.split('-')?.map(Number);
-
-    const date = new Date(year, month - 1, day); // Month is 0-based in JavaScript
-
-    if (isNaN(date.getTime())) {
-      return 'Invalid Date';
-    }
-    const formattedDay = String(date.getDate()).padStart(2, '0');
-    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
-    const formattedYear = date.getFullYear();
-
-    return `${formattedDay}/${formattedMonth}/${formattedYear}`;
   }
 };

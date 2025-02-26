@@ -117,7 +117,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const renderView = ({item}: any) => (
     <TouchableOpacity
       style={styles.listConatainer}
-      onPress={() => handleNavigation(item)}>
+      onPress={() => handleNavigation(item)}
+      // onPress={() => console.log('item', item)}
+    >
       <View style={styles.innerContainer}>
         <View style={styles.iconContainer}>{svgIcon.MapWindow}</View>
         <Text style={styles.listOptionText}>{item?.name}</Text>

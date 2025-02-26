@@ -65,6 +65,7 @@ const RecordHikingRoute = () => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const [hideActionBtn, setHideActionBtn] = useState(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -80,6 +81,8 @@ const RecordHikingRoute = () => {
   const [addRouteReport] = useAddRouteReportMutation();
 
   const dispatch = useDispatch();
+  const BOTTOM_SHEET_HEIGHT = -8;
+  const PIXEL_TO_COORDINATE_FACTOR = 0.0002;
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -178,6 +181,11 @@ const RecordHikingRoute = () => {
   };
 
   const handleSaveBtn = async () => {
+    if (route?.length < 2) {
+      showAlert('Alert', 'Please make a route to proceed further.');
+      return;
+    }
+
     const locationsAttributes =
       route?.length > 0
         ? [
@@ -191,12 +199,14 @@ const RecordHikingRoute = () => {
     const routeData = {
       user_route: {
         name: recordingDetails?.name,
+        notes: recordingDetails?.note,
         route_type: 'hiking_trail_route',
         color: PFColors.Blue.Dark,
         weight: '4',
         locations_attributes: locationsAttributes,
       },
     };
+
     const resp = await createRoute(routeData);
     setSaveRouteSheet(false);
     if (resp?.data) {
@@ -216,6 +226,7 @@ const RecordHikingRoute = () => {
         const elevationFeet = altitude
           ? (altitude * 3.28084).toFixed(0)
           : '0.00';
+        console.log('ELEVATION', elevationFeet);
 
         setRoute(prev => {
           if (prev.length > 0) {
@@ -316,16 +327,12 @@ const RecordHikingRoute = () => {
       cameraRef.current.flyTo([longitude, adjustedLatitude], 1000);
     }
   };
-  const BOTTOM_SHEET_HEIGHT = -8; // Adjust based on your bottom sheet height
-  const PIXEL_TO_COORDINATE_FACTOR = 0.0002; // App
+
   const adjustLocationForBottomSheet = location => {
     if (!location) return null;
-
-    // const {latitude, longitude} = location.coords;
     const latitude = location[1];
     const longitude = location[0];
 
-    // Adjust latitude to move the focus upward
     const adjustedLatitude =
       latitude + BOTTOM_SHEET_HEIGHT * PIXEL_TO_COORDINATE_FACTOR;
 
@@ -421,7 +428,7 @@ const RecordHikingRoute = () => {
         {svgIcon.MapLayer}
       </TouchableOpacity>
       <View>
-        {isRecordingStarted && (
+        {isRecordingStarted && !hideActionBtn && (
           <>
             <AppButton
               title="Emergency"
@@ -508,7 +515,7 @@ const RecordHikingRoute = () => {
           distance={totalDistance}
           value={recordingDetails}
           onChange={setRecordingDetails}
-          // setModalVisible={()=>}
+          setHideActionBtn={setHideActionBtn}
         />
       )}
       {PinLoading && <AppLoader />}
