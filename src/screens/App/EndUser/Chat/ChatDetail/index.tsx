@@ -183,6 +183,16 @@ const ChatDetail = () => {
       <Header
         onPressBack={() => navigation.navigate('Chat')}
         title={params?.item || 'Group Chat'}
+        onPressPhone={() => {
+          console.log(params?.item?.user);
+          navigation.navigate('VoiceCalling', {
+            user: params?.item?.user,
+            channel: Platform.OS === 'android' ? 'call_501222' : '',
+          });
+        }}
+        onPressVideo={() => {
+          navigation.navigate('VideoCalling', {user: params?.item?.user, channel: Platform.OS === 'android' ? 'testChannel' : '',});
+        }}
       />
       <View style={styles.container}>
         <GiftedChat
