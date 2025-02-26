@@ -12,10 +12,7 @@ import {
 import MobileAds from 'react-native-google-mobile-ads';
 import {useSelector} from 'react-redux';
 import {Ads, AskMe, MainWrapper} from '../../../../components';
-import {
-  createNotifyChannel,
-  getFCMToken,
-} from '../../../../hooks/NotificationHook';
+import {getFCMToken} from '../../../../hooks/NotificationHook';
 import {
   PFColors,
   PFFontSize,
@@ -73,7 +70,7 @@ const Home = ({navigation}) => {
       const token = await getFCMToken();
       if (token?.fcmToken) {
         setFCMToken(token?.fcmToken);
-        createNotifyChannel();
+        // createNotifyChannel();
       }
     })();
   }, []);
@@ -112,7 +109,7 @@ const Home = ({navigation}) => {
         placeholder={'Ask me anything...'}
         onChangeText={txt => setSearch(txt)}
         onPress={() => {
-          navigation.navigate('AiChat', { search })
+          navigation.navigate('AiChat', {search});
           setSearch('');
         }}
       />
