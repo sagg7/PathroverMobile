@@ -18,6 +18,7 @@ import {
 } from '../../../../../redux/chat/chatApiSlice';
 import CallScreen from '../CallScreen';
 import {AGORA_KEY} from '../../../../../shared/utils/constant';
+import {formatTime} from '../../../../../helpers/getFormatTime';
 
 const appId = AGORA_KEY;
 
@@ -25,18 +26,20 @@ const VoiceCalling = () => {
   const {params} = useRoute();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const agoraEngineRef = useRef<IRtcEngine>(); // IRtcEngine instance
-  const [isJoined, setIsJoined] = useState(false); // Whether the local user has joined the channel
-  const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
-  const [isMuted, setIsMuted] = useState(false); // Set mute status
-  const [isSpeakerOn, setIsSpeakerOn] = useState(false); // Set speaker status
-  const [channel, setChannel] = useState('');
-  const eventHandler = useRef<IRtcEngineEventHandler>(); // Implement callback functions
 
-  // Calculate call time
-  const [elapsedTime, setElapsedTime] = useState(0); // State to store elapsed time
+  const agoraEngineRef = useRef<IRtcEngine>(); // IRtcEngine instance
+  const eventHandler = useRef<IRtcEngineEventHandler>(); // Implement callback functions
   const startTimeRef = useRef(null); // Ref to store the start time
   const timerIntervalRef = useRef(null); // Ref to store the interval ID
+
+  const [controls, setControls] = useState({
+    isJoined: false,
+    remoteUid: 0,
+    isMuted: false,
+    isSpeakerOn: false,
+    channel: '',
+    elapsedTime: 0,
+  });
 
   // APIs
   const [fetchAgoraToken, {isLoading}] = useLazyGetAgoraTokenQuery(undefined);
@@ -50,31 +53,14 @@ const VoiceCalling = () => {
     startTimeRef.current = Date.now(); // Record the start time
     timerIntervalRef.current = setInterval(() => {
       const now = Date.now();
-      setElapsedTime(now - startTimeRef.current); // Update elapsed time
+      setControls(prev => ({...prev, elapsedTime: now - startTimeRef.current}));
     }, 1000); // Update every second
-  };
-
-  // Function to format time in hh:mm:ss
-  const formatTime = milliseconds => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    // Pad with leading zeros
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0',
-    )}:${String(seconds).padStart(2, '0')}`;
   };
 
   // Function to stop the timer
   const stopTimer = () => {
     clearInterval(timerIntervalRef.current); // Stop the interval
-    // setElapsedTime(0); // Reset elapsed time
   };
-
-  // Store State
 
   useEffect(() => {
     const init = async () => {
@@ -83,7 +69,7 @@ const VoiceCalling = () => {
       join();
     };
     if (isFocused) {
-      setElapsedTime(0);
+      setControls(prev => ({...prev, elapsedTime: 0}));
       init();
     }
     return () => {
@@ -94,32 +80,23 @@ const VoiceCalling = () => {
   const setupEventHandler = () => {
     eventHandler.current = {
       onJoinChannelSuccess: () => {
-        setIsJoined(true);
+        setControls(prev => ({...prev, isJoined: true}));
       },
       onUserJoined: (_connection: RtcConnection, uid: number) => {
-        setRemoteUid(uid);
+        setControls(prev => ({...prev, remoteUid: uid}));
         startTimer();
       },
       onUserOffline: (_connection: RtcConnection, uid: number) => {
-        setRemoteUid(uid);
+        setControls(prev => ({...prev, remoteUid: uid}));
         stopTimer();
         setTimeout(() => {
           leave();
         }, 1500);
       },
-      onRejoinChannelSuccess: (_connection: RtcConnection, elapsed) => {
-        //
-      },
       onConnectionStateChanged: (_connection: RtcConnection, state, reason) => {
         if (state === 1 || state === 5) {
           stopTimer();
         }
-      },
-      onLeaveChannel: (_connection: RtcConnection, stats) => {
-        //
-      },
-      onUserStateChanged: (_connection: RtcConnection, remoteUid, state) => {
-        //
       },
     };
     agoraEngineRef.current?.registerEventHandler(eventHandler.current);
@@ -177,12 +154,12 @@ const VoiceCalling = () => {
   };
 
   const join = async () => {
-    if (isJoined) {
+    if (controls.isJoined) {
       return;
     }
     const channelName = params?.channel ? params?.channel : 'call_501222'; // Added user id to track specific user calls
     //   : `call_${loginUser?.id}_${uuid.v4()}`; // Added user id to track specific user calls
-    setChannel(channelName);
+    setControls(prev => ({...prev, channel: channelName}));
     if (!params?.channel) {
       callInitiated(channelName);
     }
@@ -201,21 +178,18 @@ const VoiceCalling = () => {
         // Automatically subscribe to all audio streams
         autoSubscribeAudio: true,
       });
-      setIsJoined(true);
+      setControls(prev => ({...prev, isJoined: true}));
       agoraEngineRef.current?.enableLocalAudio(true);
     } catch (e) {
       //
     }
   };
 
-  // Define the leave method called after clicking the leave channel button
   const leave = () => {
     try {
-      // Call leaveChannel method to leave the channel
       agoraEngineRef.current?.leaveChannel();
 
-      setRemoteUid(0);
-      setIsJoined(false);
+      setControls(prev => ({...prev, remoteUid: 0, isJoined: false}));
       updateCallStatus();
       navigation.goBack();
     } catch (e) {
@@ -246,31 +220,24 @@ const VoiceCalling = () => {
 
   // Toggle publishing the local audio stream
   const mute = () => {
-    const hasMuted = !isMuted;
-    setIsMuted(hasMuted);
+    const hasMuted = !controls.isMuted;
+    setControls(prev => ({...prev, isMuted: hasMuted}));
     agoraEngineRef.current?.muteLocalAudioStream(hasMuted);
-  };
-
-  // Toggle subscribing to the audio stream of the remote user
-  const muteRemoteUser = () => {
-    const hasMuted = !isMuted;
-    setIsMuted(hasMuted);
-    agoraEngineRef.current?.muteRemoteAudioStream(remoteUid, hasMuted);
   };
 
   // Toggle Speaker Volume
   const toggleSpeaker = () => {
-    const newSpeakerState = !isSpeakerOn;
+    const newSpeakerState = !controls.isSpeakerOn;
     agoraEngineRef.current?.setEnableSpeakerphone(newSpeakerState);
-    setIsSpeakerOn(newSpeakerState);
+    setControls(prev => ({...prev, isSpeakerOn: newSpeakerState}));
   };
 
   return (
     <CallScreen
       onPressLeave={() => leave()}
-      isMute={isMuted}
-      isSpeakerOn={isSpeakerOn}
-      timer={formatTime(elapsedTime)}
+      isMute={controls.isMuted}
+      isSpeakerOn={controls.isSpeakerOn}
+      timer={formatTime(controls.elapsedTime)}
       onPressMute={() => mute()}
       onPressSpeaker={() => toggleSpeaker()}
       user={params?.user}

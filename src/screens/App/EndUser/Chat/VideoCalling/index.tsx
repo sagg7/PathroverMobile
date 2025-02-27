@@ -27,6 +27,7 @@ import {
 import {PFColors} from '../../../../../shared/exporter';
 import styles from './styles';
 import {AGORA_KEY} from '../../../../../shared/utils/constant';
+import {formatTime} from '../../../../../helpers/getFormatTime';
 
 const APP_ID = AGORA_KEY;
 
@@ -36,20 +37,22 @@ const VideoCalling = () => {
   const {params} = useRoute();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [joinChannelSuccess, setJoinChannelSuccess] = useState(false);
-  const [remoteUsers, setRemoteUsers] = useState<number[]>([]);
-  const [renderByTextureView, setRenderByTextureView] = useState(true);
-  const [isMute, setIsMute] = useState(false); // Set mute status
-  const [isSpeakerOn, setIsSpeakerOn] = useState(false); // Set speaker status
-  const [remoteUserCamera, setRemoteUserCamera] = useState(false); // Set speaker status
-  const [elapsedTime, setElapsedTime] = useState(0); // State to store elapsed time
+
   const startTimeRef = useRef(null); // Ref to store the start time
   const timerIntervalRef = useRef(null); // Ref to store the interval IDstatus
 
-  const [setupMode, setSetupMode] = useState(
-    VideoViewSetupMode.VideoViewSetupReplace,
-  );
-  const [engine, setEngine] = useState<any>(null);
+  const [controls, setControls] = useState({
+    engine: null,
+    isMute: false,
+    elapsedTime: 0,
+    remoteUsers: [],
+    isSpeakerOn: false,
+    remoteUserCamera: false,
+    renderByTextureView: true,
+    joinChannelSuccess: false,
+    setupMode: VideoViewSetupMode.VideoViewSetupReplace,
+  });
+
   const [fetchAgoraToken, {isLoading}] = useLazyGetAgoraTokenQuery(undefined);
   const [createCall, {data}] = useCreateCallMutation();
   const [updateCall] = useUpdateCallMutation();
@@ -65,7 +68,7 @@ const VideoCalling = () => {
       agoraEngine.registerEventHandler(eventHandler);
       agoraEngine.enableVideo();
 
-      setRenderByTextureView(true);
+      setControls(prev => ({...prev, renderByTextureView: true}));
       agoraEngine.enableLocalVideo(true);
       agoraEngine.muteLocalVideoStream(false);
 
@@ -77,55 +80,56 @@ const VideoCalling = () => {
       }
 
       agoraEngine.startPreview();
-      setEngine(agoraEngine);
+      setControls(prev => ({...prev, engine: agoraEngine}));
       // joinChannel();
     };
 
     initRtcEngine();
 
     return () => {
-      if (engine) {
+      if (controls.engine) {
         cleanupAgoraEngine();
       }
     };
   }, []);
 
   useEffect(() => {
-    console.log('engine', engine);
-
     if (isFocused) {
-      setElapsedTime(0);
+      // setElapsedTime(0);
+      setControls(prev => ({...prev, elapsedTime: 0}));
     }
-    if (isFocused && engine) {
+    if (isFocused && controls.engine) {
       joinChannel();
     } else {
       // onPressLeave();
       cleanupAgoraEngine();
     }
-  }, [isFocused, engine]);
+  }, [isFocused, controls.engine]);
 
   const eventHandler: IRtcEngineEventHandler = {
     onJoinChannelSuccess: () => {
-      setJoinChannelSuccess(true);
+      setControls(prev => ({...prev, joinChannelSuccess: true}));
     },
     onUserJoined: (connection, remoteUid) => {
-      setRemoteUsers(prevUsers => [...prevUsers, remoteUid]);
+      setControls(prev => ({
+        ...prev,
+        remoteUsers: [...prev.remoteUsers, remoteUid],
+      }));
       startTimer();
     },
     onUserOffline: (connection, remoteUid) => {
       stopTimer();
-      setRemoteUsers(prevUsers => {
-        const updatedUsers = prevUsers.filter(uid => uid !== remoteUid);
+      setControls(prev => ({
+        ...prev,
+        remoteUsers: prev.remoteUsers.filter(uid => uid !== remoteUid),
+      }));
 
-        if (updatedUsers.length === 0) {
-          // onPressLeave();
-        }
-
-        return updatedUsers;
-      });
+      if (controls.remoteUsers.length === 0) {
+        onPressLeave();
+      }
     },
     onUserMuteVideo: (connection, remoteUser, muted) => {
-      setRemoteUserCamera(muted);
+      setControls(prev => ({...prev, remoteUserCamera: muted}));
     },
     onConnectionStateChanged: (connection, state) => {
       if (state === 1 || state === 5) {
@@ -136,8 +140,8 @@ const VideoCalling = () => {
 
   const cleanupAgoraEngine = () => {
     return () => {
-      engine.unregisterEventHandler(eventHandler);
-      engine.release();
+      controls.engine.unregisterEventHandler(eventHandler);
+      controls.engine.release();
     };
   };
 
@@ -146,28 +150,13 @@ const VideoCalling = () => {
     startTimeRef.current = Date.now(); // Record the start time
     timerIntervalRef.current = setInterval(() => {
       const now = Date.now();
-      setElapsedTime(now - startTimeRef.current); // Update elapsed time
+      setControls(prev => ({...prev, elapsedTime: now - startTimeRef.current}));
     }, 1000); // Update every second
-  };
-
-  // Function to format time in hh:mm:ss
-  const formatTime = milliseconds => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    // Pad with leading zeros
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0',
-    )}:${String(seconds).padStart(2, '0')}`;
   };
 
   // Function to stop the timer
   const stopTimer = () => {
     clearInterval(timerIntervalRef.current); // Stop the interval
-    // setElapsedTime(0); // Reset elapsed time
   };
 
   const fetchToken = async () => {
@@ -181,7 +170,7 @@ const VideoCalling = () => {
   };
 
   const joinChannel = async () => {
-    if (!engine) {
+    if (!controls.engine) {
       return;
     }
 
@@ -190,56 +179,59 @@ const VideoCalling = () => {
     }
     const token = await fetchToken();
 
-    engine.joinChannel(token, CHANNEL_NAME, 0, {
+    controls.engine.joinChannel(token, CHANNEL_NAME, 0, {
       clientRoleType: ClientRoleType.ClientRoleBroadcaster,
     });
     // engine.joinChannel(TOKEN, CHANNEL_NAME, 0, {
     //   clientRoleType: ClientRoleType.ClientRoleBroadcaster,
     // });
-    engine.enableInstantMediaRendering();
+    controls.engine.enableInstantMediaRendering();
   };
 
   const onPressFlip = () => {
-    if (!engine) {
+    if (!controls.engine) {
       return;
     }
-    engine.switchCamera();
+    controls.engine.switchCamera();
   };
 
   const onPressCamera = () => {
-    if (!engine) {
+    if (!controls.engine) {
       return;
     }
-    const hasPreview = !renderByTextureView;
-    setRenderByTextureView(hasPreview);
-    engine.enableLocalVideo(hasPreview);
-    engine.muteLocalVideoStream(!hasPreview);
+    const hasPreview = !controls.renderByTextureView;
+    setControls(prev => ({...prev, renderByTextureView: hasPreview}));
+    controls.engine.enableLocalVideo(hasPreview);
+    controls.engine.muteLocalVideoStream(!hasPreview);
   };
 
   const onPressMute = () => {
-    if (!engine) {
+    if (!controls.engine) {
       return;
     }
-    const hasMuted = !isMute;
-    setIsMute(hasMuted);
-    engine?.muteLocalAudioStream(hasMuted);
+    const hasMuted = !controls.isMute;
+    setControls(prev => ({...prev, isMute: hasMuted}));
+    controls.engine?.muteLocalAudioStream(hasMuted);
   };
 
   const onPressSpeaker = () => {
-    const newSpeakerState = !isSpeakerOn;
-    setIsSpeakerOn(newSpeakerState);
-    engine?.setEnableSpeakerphone(newSpeakerState);
+    const newSpeakerState = !controls.isSpeakerOn;
+    setControls(prev => ({...prev, isSpeakerOn: newSpeakerState}));
+    controls.engine?.setEnableSpeakerphone(newSpeakerState);
   };
 
   const onPressLeave = () => {
     try {
-      setJoinChannelSuccess(false);
-      setRemoteUsers([]);
+      setControls(prev => ({
+        ...prev,
+        joinChannelSuccess: false,
+        remoteUsers: [],
+      }));
 
-      if (engine) {
-        engine.leaveChannel();
+      if (controls.engine) {
+        controls.engine.leaveChannel();
       }
-      setEngine(null);
+      setControls(prev => ({...prev, engine: null}));
       updateCallStatus();
 
       setTimeout(() => {
@@ -284,18 +276,20 @@ const VideoCalling = () => {
     return (
       <View style={styles.callButtonView}>
         <TouchableOpacity style={styles.iconDetails} onPress={onPressSpeaker}>
-          <View style={styles.iconBackGround(isSpeakerOn)}>
+          <View style={styles.iconBackGround(controls.isSpeakerOn)}>
             <Image
-              source={isSpeakerOn ? appIcons.speakerOn : appIcons.speakerOff}
+              source={
+                controls.isSpeakerOn ? appIcons.speakerOn : appIcons.speakerOff
+              }
               style={styles.iconStyle}
             />
           </View>
           <Text style={styles.iconTextStyle}>Speaker</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconDetails} onPress={onPressMute}>
-          <View style={styles.iconBackGround(!isMute)}>
+          <View style={styles.iconBackGround(!controls.isMute)}>
             <Image
-              source={isMute ? appIcons.muted : appIcons.mute}
+              source={controls.isMute ? appIcons.muted : appIcons.mute}
               style={styles.iconStyle}
             />
           </View>
@@ -308,10 +302,12 @@ const VideoCalling = () => {
           <Text style={styles.iconTextStyle}>Flip</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconDetails} onPress={onPressCamera}>
-          <View style={styles.iconBackGround(renderByTextureView)}>
+          <View style={styles.iconBackGround(controls.renderByTextureView)}>
             <Image
               source={
-                renderByTextureView ? appIcons.showVideo : appIcons.hideVideo
+                controls.renderByTextureView
+                  ? appIcons.showVideo
+                  : appIcons.hideVideo
               }
               style={styles.iconStyle}
             />
@@ -329,21 +325,24 @@ const VideoCalling = () => {
   };
 
   const renderVideo = (user: {uid: number}) => {
-    const cameraHeight = remoteUsers?.length > 0 ? (height - 130) / 2 : height;
+    const cameraHeight =
+      controls.remoteUsers?.length > 0 ? (height - 130) / 2 : height;
     const showUserCamera =
-      user?.uid === 0 ? renderByTextureView : !remoteUserCamera;
+      user?.uid === 0
+        ? controls.renderByTextureView
+        : !controls.remoteUserCamera;
     return showUserCamera ? (
       <RtcSurfaceView
         style={{
           width: width - 10,
           height: cameraHeight,
         }}
-        canvas={{uid: user?.uid, setupMode}}
+        canvas={{uid: user?.uid, setupMode: controls.setupMode}}
       />
     ) : Platform.OS === 'android' ? (
       <RtcTextureView
         style={{width: width, height: cameraHeight}}
-        canvas={{uid: user?.uid, setupMode}}
+        canvas={{uid: user?.uid, setupMode: controls.setupMode}}
       />
     ) : (
       <View
@@ -358,11 +357,11 @@ const VideoCalling = () => {
 
   return (
     <View style={styles.cameraView}>
-      {joinChannelSuccess && (
+      {controls.joinChannelSuccess && (
         <View style={{height: height - 115}}>
           {/* Remote video streams */}
           <View style={styles.containerView}>
-            {remoteUsers?.map(uid => renderVideo({uid}))}
+            {controls.remoteUsers?.map(uid => renderVideo({uid}))}
             <Text style={styles.userName}>
               {params?.user?.first_name ?? 'User'}{' '}
               {params?.user?.last_name ?? ''}
@@ -371,7 +370,9 @@ const VideoCalling = () => {
 
           {/* Local video stream */}
           <View style={styles.containerView}>{renderVideo({uid: 0})}</View>
-          <Text style={styles.counterText}>{formatTime(elapsedTime)}</Text>
+          <Text style={styles.counterText}>
+            {formatTime(controls.elapsedTime)}
+          </Text>
         </View>
       )}
       <View style={styles.iconContainer}>{iconsView()}</View>
