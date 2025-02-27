@@ -16,10 +16,10 @@ export const useActionCable = (
 
   useEffect(() => {
     // ActionCable.startDebugging();
-    console.log('Action Cable Connected');
+    // console.log('Action Cable Connected');
 
     return () => {
-      console.log('Action Cable Disconnected');
+      // console.log('Action Cable Disconnected');
       actionCable.disconnect();
     };
   }, [actionCable]);

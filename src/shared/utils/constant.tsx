@@ -31,6 +31,7 @@ export const STRIPE_KEY = isProduction ? PRODUCTION_KEY : TEST_KEY;
 export const OPEN_AI_URL = 'https://api.openai.com/v1/';
 export const OPEN_AI_KEY =
   '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';
+export const AGORA_KEY = '7f325faacba441eabb5bfca254aef699';
 
 type IntroSlidesTypes = {
   key: number;
