@@ -10,16 +10,21 @@ import UsersListView from '../../../../../components/complex/UsersListView';
 import {
   useAddMembersMutation,
   useGetAllUsersMutation,
+  useGetChatContactsMutation,
 } from '../../../../../redux/chat/chatApiSlice';
 import {showAlert} from '../../../../../shared/exporter';
+import {Platform} from 'react-native';
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import Contacts from 'react-native-contacts';
+import RenderEmptyUser from '../RenderEmptyUser';
 
 const MemberList = () => {
-  const {params} = useRoute();
+  const {params} = useRoute<any>();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [addMembers] = useAddMembersMutation();
-  const [getAllUsers, {isLoading, data: userData}] = useGetAllUsersMutation();
-
+  const [addMembers] = useAddMembersMutation<any>();
+  const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
+  const [allContactsList, setAllContactsList] = useState<any[]>([]);
   const [data, setData] = useState({
     search: '',
     showSearch: false,
@@ -27,63 +32,101 @@ const MemberList = () => {
     selectedMembers: [],
   });
 
+  const [getAllUsers, {isLoading, data: allData}] =
+    useGetChatContactsMutation();
+
+  const requestContactsPermission = async () => {
+    let permission;
+
+    if (Platform.OS === 'ios') {
+      permission = PERMISSIONS.IOS.CONTACTS;
+    } else {
+      permission = PERMISSIONS.ANDROID.READ_CONTACTS;
+    }
+
+    const result = await check(permission);
+
+    if (result === RESULTS.GRANTED) {
+      return true;
+    } else {
+      const requestResult = await request(permission);
+      return requestResult === RESULTS.GRANTED;
+    }
+  };
+
   useEffect(() => {
     (async () => {
       if (isFocused) {
-        await getAllUsers();
+        const permissionGranted = await requestContactsPermission();
+        if (permissionGranted) {
+          const allContacts = await Contacts.getAll();
+          const allUsers = await getAllUsers({users: allContacts}).unwrap();
+          const formattedContacts = formatContacts(allUsers?.data);
+
+          // Save full contacts list
+          setAllContactsList(formattedContacts);
+          setMatchedUsers(formattedContacts);
+        } else {
+          console.warn('Contacts permission denied');
+        }
       }
     })();
   }, [isFocused]);
 
+  const formatContacts = (contacts: any = []) => {
+    const sortedContacts = [...contacts].sort((a: any, b: any) => {
+      const nameA = a?.givenName || '';
+      const nameB = b?.givenName || '';
+
+      if (a.is_exist === b.is_exist) {
+        return nameA.localeCompare(nameB);
+      } else {
+        return b.is_exist - a.is_exist;
+      }
+    });
+    return sortedContacts;
+  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (data.search.length > 0 && data.members?.length > 0) {
+      if (data.search?.length > 0) {
         const searchText = data.search.toLowerCase();
-        setData(prevState => ({
-          ...prevState,
-          members: data.members?.filter(
-            user =>
-              user?.first_name?.toLowerCase()?.includes(searchText) ||
-              user?.last_name?.toLowerCase()?.includes(searchText),
-          ),
-        }));
+        const filteredContacts = allContactsList.filter(
+          (user: any) =>
+            user?.givenName?.toLowerCase()?.includes(searchText) ||
+            user?.familyName?.toLowerCase()?.includes(searchText),
+        );
+        setMatchedUsers(filteredContacts);
       } else {
-        setData(prevState => ({
-          ...prevState,
-          members: userData?.users,
-        }));
+        setMatchedUsers(allContactsList);
       }
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [data.search]);
+  }, [data.search, allContactsList]);
 
-  useEffect(() => {
-    if (userData?.users.length > 0) {
-      setData(prev => ({...prev, members: userData.users}));
-    }
-  }, [userData]);
-
-  const onPressItem = (item: object) => {
-    const exists = data.selectedMembers.some(obj => obj.id === item.id);
+  const onPressItem = (item: any) => {
+    const exists = data.selectedMembers.some((obj: any) => obj.id === item.id);
 
     if (exists) {
       setData(prevData => ({
         ...prevData,
         selectedMembers: prevData.selectedMembers.filter(
-          obj => obj.id !== item.id,
+          (obj: any) => obj.id !== item.id,
         ),
       }));
     } else {
-      setData(prevData => ({
+      setData((prevData: any) => ({
         ...prevData,
         selectedMembers: [...prevData.selectedMembers, item],
       }));
     }
   };
 
-  const renderItem = ({item}) => {
-    const exists = data.selectedMembers.some(member => member.id === item.id);
+  const renderItem = ({item}: any) => {
+    const exists = data.selectedMembers.some(
+      (member: any) => member.id === item.id,
+    );
 
     return (
       <TouchableOpacity
@@ -92,16 +135,16 @@ const MemberList = () => {
         <View>
           <Image
             source={
-              item?.avatar ? {uri: item?.avatar} : appIcons.userPlaceholder
+              item?.profile_image
+                ? {uri: item?.profile_image}
+                : appIcons.userPlaceholder
             }
             style={styles.imageStyle}
           />
           {exists && <View style={styles.iconView}>{svgIcon.AddedIcon}</View>}
         </View>
         <View style={styles.textView}>
-          <Text style={styles.nameText}>
-            {item?.first_name || 'User'} {item?.last_name || ''}
-          </Text>
+          <Text style={styles.nameText}>{item?.givenName || 'User'}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -112,7 +155,7 @@ const MemberList = () => {
       if (params?.isAdd) {
         const obj = {
           group_id: params?.item?.id,
-          user_ids: data.selectedMembers?.map(i => i?.id),
+          user_ids: data.selectedMembers?.map((i: any) => i?.id),
         };
 
         const response = await addMembers(obj);
@@ -173,12 +216,13 @@ const MemberList = () => {
         <AppLoader />
       ) : (
         <FlatList
-          data={data.members}
+          data={matchedUsers}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={listHeaderComponent}
           contentContainerStyle={styles.flatListStyle}
           keyExtractor={(item, index) => item + index.toString()}
+          ListEmptyComponent={isLoading ? <></> : <RenderEmptyUser />}
         />
       )}
       <TouchableOpacity

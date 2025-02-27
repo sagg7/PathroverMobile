@@ -141,7 +141,20 @@ import Mute from './mute.svg';
 import Muted from './muted.svg';
 import SpeakerOn from './speakerOn.svg';
 import SpeakerOff from './speakerOff.svg';
-
+import FilterOrange from './filterOrange.svg';
+import WeatherIcon from './weatherIcon.svg';
+import SearchView from './searchView.svg';
+import Wind from './wind.svg';
+import Humiity from './humidity.svg';
+import Cross from './cross.svg';
+import CheckCircle from './checkCircle.svg';
+import Track from './track.svg';
+import SearchRoute from './searchRoute.svg';
+import MyLocation from './myLocation.svg';
+import EmergencyCall from './emergency_call.svg';
+import PaperPlane from './paper_plane.svg';
+import HikeRoute from './HikeRoute.svg';
+import ChatIcon from './chatIcon.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -173,7 +186,7 @@ export const svgIcon = {
   CrossCirlce: <CrossCirlce />,
   RightChevron: <RightChevron />,
   LeftChevron: <LeftChevron />,
-  BlueMarker: <BlueMarker />,
+  BlueMarker: <BlueMarker stroke={'#13488A'} />,
   MyRequest: <MyRequest />,
   CreateRoute: <CreateRoute />,
   RequestHistory: <RequestHistory />,
@@ -208,7 +221,7 @@ export const svgIcon = {
   Sattelite: <Sattelite />,
   DragablePin: <DragablePin />,
   CurrentLocation: <CurrentLocation />,
-  Edit: <Edit />,
+  Edit: <Edit fill="#CF4727"/>,
   MiniPin: <MiniPin />,
   MiniRatingIcon: <MiniRatingIcon />,
   VanFilledIcon: <VanFilledIcon />,
@@ -229,7 +242,7 @@ export const svgIcon = {
   SendMsg: <SendMsg />,
   AddButton: <AddButton />,
   LockIcon: <LockIcon />,
-  ChatDelete: <ChatDelete />,
+  ChatDelete: <ChatDelete fill="white"/>,
   AddedIcon: <AddedIcon />,
   RemoveIcon: <RemoveIcon />,
   Exit: <Exit />,
@@ -286,4 +299,18 @@ export const svgIcon = {
   Muted: <Muted />,
   SpeakerOn: <SpeakerOn />,
   SpeakerOff: <SpeakerOff />,
+  FilterOrange: <FilterOrange />,
+  WeatherIcon: <WeatherIcon />,
+  SearchView: <SearchView />,
+  Wind: <Wind />,
+  Humiity: <Humiity />,
+  Cross: <Cross />,
+  CheckCircle: <CheckCircle />,
+  Track: <Track />,
+  SearchRoute: <SearchRoute />,
+  MyLocation: <MyLocation />,
+  EmergencyCall: <EmergencyCall />,
+  PaperPlane: <PaperPlane />,
+  HikeRoute: <HikeRoute />,
+  ChatIcon: <ChatIcon />,
 };

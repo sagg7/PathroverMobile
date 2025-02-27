@@ -1,29 +1,27 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {Text, TouchableOpacity, View} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import {useSelector} from 'react-redux';
+import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
-import styles from './styles';
+import {svgIcon} from '../../../../assets/svg';
 import {
   AppHeader,
   MainWrapper,
   MapLayerSheet,
   StartPointModal,
 } from '../../../../components';
+import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
+import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {
   Default_Map_Style,
-  isIOS,
   mapBoxToken,
   MapTypes,
   PFColors,
   showAlert,
-  WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
-import {Text, TouchableOpacity, View} from 'react-native';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
-import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
-import Geolocation from 'react-native-geolocation-service';
-import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
-import {useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
+import styles from './styles';
 
 const ViewSaveRoutes = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -74,9 +72,10 @@ const ViewSaveRoutes = ({route}: any) => {
   useEffect(() => {
     if (route) {
       const selectedRoute = route?.params?.item;
+
       const endCoordinates = [
-        parseFloat(selectedRoute?.dropoff_location.longitude),
-        parseFloat(selectedRoute?.dropoff_location.latitude),
+        parseFloat(selectedRoute?.dropoff_location?.longitude),
+        parseFloat(selectedRoute?.dropoff_location?.latitude),
       ];
       const startCoordinates = [
         parseFloat(selectedRoute?.pickup_location?.longitude),
@@ -84,12 +83,14 @@ const ViewSaveRoutes = ({route}: any) => {
       ];
       setStartPoint(startCoordinates);
       setEndPoint(endCoordinates);
-      const formattedPoints = selectedRoute?.middle_location_points
-        .filter((point: any) => point.latitude && point.longitude)
-        .map((point: any) => [
-          parseFloat(point.longitude),
-          parseFloat(point.latitude),
-        ]);
+      const formattedPoints =
+        selectedRoute?.middle_location_points &&
+        selectedRoute?.middle_location_points
+          .filter((point: any) => point?.latitude && point?.longitude)
+          .map((point: any) => [
+            parseFloat(point?.longitude),
+            parseFloat(point?.latitude),
+          ]);
 
       setDestination(endCoordinates);
       formattedPoints.unshift(startCoordinates);
@@ -117,12 +118,22 @@ const ViewSaveRoutes = ({route}: any) => {
   const getTimeDistanceDetails = async () => {
     const locResults: any = await getTimeAndDistance(liveLocation, startPoint);
     setTimeDistance(locResults);
-    const match = locResults?.distance?.match(/([\d.]+)\s*(km|m)/);
-    const distanceValue = match
-      ? parseFloat(match[1]) * (match[2] === 'km' ? 1000 : 1)
-      : Number(locResults?.distance) || 0;
 
-    if (distanceValue < 300) {
+    let distanceValue = 0;
+
+    if (typeof locResults?.distance === 'string') {
+      const match = locResults?.distance.match(/([\d.]+)\s*miles/);
+      if (match) {
+        distanceValue = parseFloat(match[1]); // Distance is already in miles
+      }
+    } else if (typeof locResults?.distance === 'number') {
+      distanceValue = locResults.distance; // Already in miles
+    }
+
+    console.log('===sdistanceValue', distanceValue); // Debugging
+
+    if (distanceValue < 0.186) {
+      // 300 meters ≈ 0.186 miles
       setRouteStartedFromCurrent(true);
       setShowReachModal(true);
     }
@@ -295,6 +306,7 @@ const ViewSaveRoutes = ({route}: any) => {
       parseFloat(selectedRoute?.pickup_location?.longitude),
       parseFloat(selectedRoute?.pickup_location?.latitude),
     ];
+    setEndPoint(endCoordinates);
 
     const formattedPoints = selectedRoute?.middle_location_points
       .filter((point: any) => point.latitude && point.longitude)
@@ -313,15 +325,43 @@ const ViewSaveRoutes = ({route}: any) => {
   };
   const onPressStartBtn = async () => {
     getRoute();
-    setIsStartBtnPressed(true);
     setShowRouteActionSheet(false);
+    setIsStartBtnPressed(true);
     const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
+    console.log('===888routeResults', routeResults);
+
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
     setRoute([]);
   };
+
+  const calculateBounds = coordinates => {
+    if (!coordinates || coordinates.length === 0) return undefined;
+
+    let minLng = Infinity,
+      maxLng = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+
+    for (const [lng, lat] of coordinates) {
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+    }
+
+    return {
+      ne: [maxLng, maxLat], // North-East (Top-Right)
+      sw: [minLng, minLat], // South-West (Bottom-Left)
+      paddingLeft: 30,
+      paddingRight: 30,
+      paddingTop: 30,
+      paddingBottom: 180,
+    };
+  };
+  const hasCustom = selectedRoute?.route_type.includes('custom');
 
   return (
     <MainWrapper style={styles.container}>
@@ -336,50 +376,39 @@ const ViewSaveRoutes = ({route}: any) => {
           ref={cameraRef}
           zoomLevel={10}
           centerCoordinate={currentLocation}
-          bounds={
-            routes?.length > 0 && {
-              ne: routes?.reduce(
-                (acc, coord) => [
-                  Math.max(acc[0], coord[0]),
-                  Math.max(acc[1], coord[1]),
-                ],
-                [-Infinity, -Infinity],
-              ),
-              sw: routes.reduce(
-                (acc, coord) => [
-                  Math.min(acc[0], coord[0]),
-                  Math.min(acc[1], coord[1]),
-                ],
-                [Infinity, Infinity],
-              ),
-              paddingLeft: 30,
-              paddingRight: 30,
-              paddingTop: 30,
-              paddingBottom: 180,
-            }
-          }
+          bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
-
         {startPoint && (
           <MapboxGL.MarkerView coordinate={startPoint}>
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
+        {!hasCustom &&
+          selectedRoute?.pinned_points?.map(point => (
+            <MapboxGL.MarkerView
+              key={point.id}
+              coordinate={[
+                parseFloat(point.longitude),
+                parseFloat(point.latitude),
+              ]} // Convert to numbers
+            >
+              {svgIcon.RedPin}
+            </MapboxGL.MarkerView>
+          ))}
+
         {destination && (
           <MapboxGL.MarkerView coordinate={destination}>
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
-
-        {/* Route Line */}
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               key={route?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight,
+                lineWidth: routeLineHeight || 4,
                 lineColor: routeLineColor,
               }}
             />
@@ -391,13 +420,13 @@ const ViewSaveRoutes = ({route}: any) => {
               key={routeToStartPoint?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight,
+                lineWidth: routeLineHeight || 4,
                 lineColor: routeLineColor,
               }}
             />
           </MapboxGL.ShapeSource>
         )}
-        {route?.params?.item?.route_type === 'custom_route' &&
+        {hasCustom &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -427,15 +456,13 @@ const ViewSaveRoutes = ({route}: any) => {
       </MapboxGL.MapView>
       {showRouteStartedSheet && (
         <RouteToWellStartedSheet
+          setModalVisible={() => navigation.goBack()}
           routeName={
             modalKey === 1
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
-          routeInfo={timeDistance}
-          setModalVisible={() => {
-            setShowRouteStartedSheet(false);
-          }}
+          routeInfo={results}
         />
       )}
       {modalKey === 1 && isStartBtnPressed && (
@@ -446,17 +473,23 @@ const ViewSaveRoutes = ({route}: any) => {
       )}
       {showRouteActionSheet && (
         <RouteToWellSheet
-          onpressCancel={() => navigation.goBack()}
-          routeName={route?.params?.entranceName}
+          routeLength={routes?.length}
+          selectedData={selectedRoute}
+          onpressCancel={() => {
+            setShowRouteActionSheet(false);
+            setShowRouteStartedSheet(false);
+            setTimeout(() => {
+              navigation.goBack();
+            }, 500);
+          }}
+          routeName={route?.params?.entranceName || selectedRoute?.name}
           distanceInfo={results}
           actionBtn={actionBtn}
           onPressDirection={() => {
-            // getRoute();
             setActionBtn({
               ...actionBtn,
               direction: true,
             });
-            // centerMap();
           }}
           onPressStart={() => onPressStartBtn()}
           show={false}

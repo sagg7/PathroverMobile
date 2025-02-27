@@ -5,15 +5,17 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import {WP, PFColors, PFFontSize, PFFonts} from '../../../shared/exporter';
 
 interface AppButtonProps {
   icon?: any;
   title: string;
-  textStyle?: any;
+  textStyle?: TextStyle;
   isEmpty?: boolean;
-  buttonStyle?: any;
+  buttonStyle?: ViewStyle;
   disabled?: boolean;
   handleClick?: () => void;
   isSmall?: string;

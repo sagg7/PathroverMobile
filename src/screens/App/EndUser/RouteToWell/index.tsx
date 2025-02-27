@@ -61,8 +61,6 @@ const RouteToWell = ({route}: any) => {
   }, [mapLayerStyle]);
 
   const fetchRoute = async (start, end) => {
-    console.log('start', start);
-
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
@@ -239,6 +237,7 @@ const RouteToWell = ({route}: any) => {
       </MapboxGL.MapView>
       {showRouteActionSheet && (
         <RouteToWellSheet
+          routeLength={routes?.length}
           onpressCancel={() => navigation.goBack()}
           routeName={route?.params?.entranceName}
           distanceInfo={results}

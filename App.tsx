@@ -8,6 +8,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {firebase} from '@react-native-firebase/app';
+import { withIAPContext } from 'react-native-iap';
 
 const App = () => {
   MapboxGL.setAccessToken(
@@ -34,4 +35,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default withIAPContext(App);

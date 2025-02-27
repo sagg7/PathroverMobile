@@ -1,5 +1,12 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   PFColors,
   PFFontSize,
@@ -13,66 +20,72 @@ interface RouteToWellSheetProps {
   setModalVisible?: () => void;
   onPressDirection: () => void;
   onPressStart: () => void;
-  onPressPin: () => void;
+  onPressPin?: () => void;
+  onPressShare?: () => void;
   actionBtn: any;
   distanceInfo?: any;
   routeName: string;
   onpressCancel: () => void;
   show: any;
+  selectedData: any;
+  routeLength?: any;
 }
+
+export const ActionButtons = ({
+  icon,
+  title,
+  selected,
+  onPressActionBtn,
+  disabled,
+}: any) => {
+  return (
+    <TouchableOpacity
+      disabled={disabled}
+      onPress={onPressActionBtn}
+      style={[
+        styles.buttonContainer,
+        {
+          backgroundColor: selected ? PFColors.Blue.Dark : '#ECEFF3',
+          borderColor: selected ? '#ECEFF3' : PFColors.Blue.Dark,
+        },
+      ]}>
+      <Image
+        source={icon}
+        style={[
+          styles.actionIcon,
+          {
+            tintColor: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
+          },
+        ]}
+      />
+      <Text
+        style={[
+          styles.buttonText,
+          {
+            color: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
+          },
+        ]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const RouteToWellSheet = ({
   setModalVisible,
   onPressDirection,
+  onPressShare,
   onPressStart,
   onPressPin,
   actionBtn,
   distanceInfo,
   routeName,
   onpressCancel,
+  selectedData,
   show = true,
+  routeLength = 3,
 }: RouteToWellSheetProps) => {
-  const ActionButtons = ({
-    icon,
-    title,
-    selected,
-    onPressActionBtn,
-    disabled,
-  }: any) => {
-    return (
-      <TouchableOpacity
-        disabled={disabled}
-        onPress={onPressActionBtn}
-        style={[
-          styles.buttonContainer,
-          {
-            backgroundColor: selected ? PFColors.Blue.Dark : '#ECEFF3',
-            borderColor: selected ? '#ECEFF3' : PFColors.Blue.Dark,
-          },
-        ]}>
-        <Image
-          source={icon}
-          style={[
-            styles.actionIcon,
-            {
-              tintColor: selected
-                ? PFColors.Standard.White
-                : PFColors.Blue.Dark,
-            },
-          ]}
-        />
-        <Text
-          style={[
-            styles.buttonText,
-            {
-              color: selected ? PFColors.Standard.White : PFColors.Blue.Dark,
-            },
-          ]}>
-          {title}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  const isEmpty = routeLength > 2 ? false : true;
   return (
     <View style={[styles.modalContainer, styles.innerContainer]}>
       <View style={styles.titleView}>
@@ -81,68 +94,96 @@ const RouteToWellSheet = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      <View style={styles.routeInfoView}>
-        <Text>
-          {svgIcon.MapWindow}
-          <View style={{width: 5}} />
+      {!isEmpty ? (
+        <View>
+          <View style={styles.routeInfoView}>
+            <Text>
+              {svgIcon.MapWindow}
+              <View style={{width: 5}} />
 
-          <Text style={styles.routeInfoText}>
-            {distanceInfo?.distance ? distanceInfo?.distance : 'calculating'}
-          </Text>
-        </Text>
-        <View style={{marginLeft: 40}} />
-        <Text>
-          {svgIcon.BlueClock}
-          <View style={{width: 5}} />
-          <Text style={styles.routeInfoText}>
-            {distanceInfo?.distance ? distanceInfo?.duration : 'calculating'}
-          </Text>
-        </Text>
-        {show && (
-          <TouchableOpacity style={styles.shareIcon} disabled>
-            {svgIcon.ShareWellPath}
-          </TouchableOpacity>
-        )}
-      </View>
-      {show && (
-        <View style={styles.actionBtnView}>
-          <ActionButtons
-            icon={appIcons.Directions}
-            title={'Directions'}
-            selected={actionBtn.direction}
-            onPressActionBtn={onPressDirection}
-            disabled={true}
-          />
-          <ActionButtons
-            icon={appIcons.paperPlane}
-            title="Start"
-            selected={false}
-            onPressActionBtn={onPressStart}
-          />
-          <ActionButtons
-            icon={appIcons.pinIcon}
-            title="Pin"
-            selected={false}
-            onPressActionBtn={onPressPin}
-          />
+              <Text style={styles.routeInfoText}>
+                {distanceInfo?.distance
+                  ? distanceInfo?.distance
+                  : 'calculating'}
+              </Text>
+            </Text>
+            <View style={{marginLeft: 40}} />
+            <Text>
+              {svgIcon.BlueClock}
+              <View style={{width: 5}} />
+              <Text style={styles.routeInfoText}>
+                {distanceInfo?.distance
+                  ? distanceInfo?.duration
+                  : 'calculating'}
+              </Text>
+            </Text>
+            {show && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={onPressShare}
+                style={styles.shareIcon}
+                disabled={!onPressShare}>
+                {svgIcon.ShareWellPath}
+              </TouchableOpacity>
+            )}
+          </View>
+          {show && (
+            <View style={styles.actionBtnView}>
+              <ActionButtons
+                icon={appIcons.Directions}
+                title={'Directions'}
+                selected={actionBtn.direction}
+                onPressActionBtn={onPressDirection}
+                disabled={true}
+              />
+              <ActionButtons
+                icon={appIcons.paperPlane}
+                title="Start"
+                selected={false}
+                onPressActionBtn={onPressStart}
+              />
+              <ActionButtons
+                icon={appIcons.pinIcon}
+                title="Pin"
+                selected={false}
+                onPressActionBtn={onPressPin}
+              />
+            </View>
+          )}
+          {!show && (
+            <View style={styles.actionBtnViewSecond}>
+              <ActionButtons
+                icon={appIcons.Directions}
+                title={'Directions'}
+                selected={actionBtn.direction}
+                onPressActionBtn={onPressDirection}
+                disabled={true}
+              />
+              <ActionButtons
+                icon={appIcons.paperPlane}
+                title="Start"
+                selected={false}
+                onPressActionBtn={onPressStart}
+              />
+            </View>
+          )}
+          {selectedData?.notes && (
+            <View style={{maxHeight: 110}}>
+              <ScrollView>
+                <Text
+                  style={[
+                    styles.noteText,
+                    {fontFamily: PFFonts.Foundation.SemiBold},
+                  ]}>
+                  Note
+                </Text>
+                <Text style={styles.noteText}>{selectedData?.notes}</Text>
+              </ScrollView>
+            </View>
+          )}
         </View>
-      )}
-      {!show && (
-        <View style={styles.actionBtnViewSecond}>
-          <ActionButtons
-            icon={appIcons.Directions}
-            title={'Directions'}
-            selected={actionBtn.direction}
-            onPressActionBtn={onPressDirection}
-            disabled={true}
-          />
-          <ActionButtons
-            icon={appIcons.paperPlane}
-            title="Start"
-            selected={false}
-            onPressActionBtn={onPressStart}
-          />
-        </View>
+      ) : (
+        <Text style={styles.noFound}>No Route details found</Text>
       )}
     </View>
   );
@@ -225,5 +266,17 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     justifyContent: 'space-between',
     width: WP('65'),
+  },
+  noteText: {
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.Regular,
+  },
+  noFound: {
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    textAlign: 'center',
+    paddingVertical: 20,
   },
 });

@@ -23,6 +23,7 @@ export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
 export const DOMAIN_BASE_URL = 'https://staging.pathfinder-app.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
+export const WEATHER_API_KEY = 'deaad5f174ef065c55f06d98b520e02c';
 const TEST_KEY =
   'pk_test_51HCPWGDPRo9kCaKXRY8AILjgfyJhLlmkDUlsvsbU4SbGRZQ4jTBe4Boq4LiL9oHCq40mqRZSn7KRBn4A13RYtd7u00lAzNP0Dc';
 const PRODUCTION_KEY = '';
@@ -99,6 +100,8 @@ export const APP_ROLE = {
   MANAGER: 'manager',
 };
 export const Default_Map_Style = 'mapbox://styles/mapbox/streets-v12';
+
+export const MESSAGE_CONTAINS_LOCATION = 'messageContainsLocation';
 
 export const VehicleTypes: VehicleTypes[] = [
   {
@@ -912,3 +915,48 @@ export const EndUserSetting = [
 //   'ca-app-pub-8139629720293753/2997034745',
 //   'ca-app-pub-8139629720293753/8461114412',
 // ];
+
+export const REPORTS_LIST = [
+  {
+    id: 1,
+    name: 'Crash',
+    icon: appIcons.accident,
+    key: 'crash',
+  },
+  {
+    id: 2,
+    name: 'Slowdown',
+    icon: appIcons.slowdown,
+    key: 'slow_down',
+  },
+  {
+    id: 1,
+    name: 'Police',
+    icon: appIcons.police,
+    key: 'police',
+  },
+  {
+    id: 1,
+    name: 'Construction',
+    icon: appIcons.workInProgress,
+    key: 'construction',
+  },
+  {
+    id: 1,
+    name: 'Lane closure',
+    icon: appIcons.laneClosure,
+    key: 'lane_closure',
+  },
+  {
+    id: 1,
+    name: 'Object on road',
+    icon: appIcons.object,
+    key: 'object_on_road',
+  },
+  {
+    id: 1,
+    name: 'Stalled vehicle',
+    icon: appIcons.warning,
+    key: 'stalled_vehicle',
+  },
+];

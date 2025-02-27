@@ -16,6 +16,8 @@ import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType'
 import AudioMessage from './AudioMessage';
 import VideoMessage from './VideoMessage';
 import FileMessage from './FileMessage';
+import {MESSAGE_CONTAINS_LOCATION} from '../../../shared/utils/constant';
+import LocationMessage from './LocationMessage';
 
 const THRESHOLD = 60 * 1000;
 
@@ -39,6 +41,7 @@ const ChatBubble = ({props}) => {
   const isLeft = position === 'left';
 
   const {content, created_at, image, message_attachment, text} = currentMessage;
+  const isLocation = content?.includes(MESSAGE_CONTAINS_LOCATION);
   const showTime = getShowTime(currentMessage, nextMessage);
   const fileType =
     message_attachment &&
@@ -83,6 +86,10 @@ const ChatBubble = ({props}) => {
       ),
     );
   };
+
+  if (isLocation) {
+    return <LocationMessage content={content} isLeft={isLeft} showTime={showTime} />;
+  }
 
   return (
     <View style={styles.main}>
@@ -158,11 +165,11 @@ const ChatBubble = ({props}) => {
         useNativeDriver={true}
         style={styles.modalContainer}>
         <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
-            <Image
-              source={{uri: selectedImage}}
-              style={styles.fullImageStyle}
-              resizeMode="contain"
-            />
+          <Image
+            source={{uri: selectedImage}}
+            style={styles.fullImageStyle}
+            resizeMode="contain"
+          />
         </TouchableWithoutFeedback>
       </Modal>
     </View>

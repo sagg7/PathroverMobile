@@ -161,6 +161,10 @@ const RecordRoute = () => {
   };
 
   const handleSaveBtn = async () => {
+    if (route?.length < 2) {
+      showAlert('Alert', 'Please make a route to proceed further.');
+      return;
+    }
     // setSaveRouteSheet(false);
     const locationsAttributes =
       route?.length > 0
@@ -175,6 +179,8 @@ const RecordRoute = () => {
     const routeData = {
       user_route: {
         name: recordingDetails?.name,
+        notes: recordingDetails?.notes,
+
         route_type: 'recording_route',
         color: PFColors.Blue.Dark,
         weight: '4',

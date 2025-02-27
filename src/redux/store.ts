@@ -3,24 +3,28 @@ import {persistReducer, persistStore} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {apiSlice} from './api/apiSlice';
 import authReducer from './auth/authSlice';
+import endUserReducer from './endUser/endUserSlice';
 import driverSlice from './driver/driverSlice';
 import appRoleReduces from './auth/appRoleSlice';
 import managerSlice from './manager/managerSlice';
 import chatSlice from './chat/chatSlice';
+import Enduserslice from './endUser/endUserSlice';
 
 const rootReduer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authReducer,
+  endUser: endUserReducer,
   driver: driverSlice,
   appRole: appRoleReduces,
   manager: managerSlice,
   chat: chatSlice,
+  endUser: Enduserslice,
 });
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'driver', 'chat', 'manager'],
+  whitelist: ['auth', 'driver', 'chat', 'manager', 'endUser'],
   blacklist: [],
 };
 
@@ -39,7 +43,5 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,
     }).concat(apiSlice.middleware),
-
-  // devTools: true
 });
 export const persistor = persistStore(store);

@@ -78,8 +78,9 @@ const styles = StyleSheet.create({
     fontFamily: PFFonts.Foundation.Regular,
     fontSize: PFFontSize.FONT_SIZE_14,
     color: PFColors.Standard.Black,
-    paddingLeft: WP('6'),
+    paddingHorizontal: WP('6'),
     paddingVertical: 5,
+    width:'100%'
   },
   cancelBtn: {
     backgroundColor: PFColors.Standard.White,

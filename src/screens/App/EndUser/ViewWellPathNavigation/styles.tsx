@@ -1,0 +1,180 @@
+import {StyleSheet} from 'react-native';
+import {
+  isIOS,
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  scale,
+  WP,
+} from '../../../../shared/exporter';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: PFColors.Standard.White,
+  },
+  map: {
+    flex: 1,
+  },
+  inputStyles: {
+    position: 'absolute',
+    zIndex: 1111,
+    top: isIOS() ? WP('12') : 1,
+  },
+  maplayerStyles: {
+    position: 'absolute',
+    top: isIOS() ? WP('45') : WP('35'),
+    right: 20,
+  },
+  undoRedoContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: WP('20'),
+    right: 20,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  button: {
+    marginHorizontal: 5,
+  },
+  createRouteBtn: {
+    position: 'absolute',
+    bottom: 20,
+    width: WP('90'),
+    alignSelf: 'center',
+  },
+  headerView: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: WP('94'),
+    alignSelf: 'center',
+    marginVertical: WP('3'),
+  },
+  titleStyles: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_16,
+  },
+  freeFeatureText: {
+    color: PFColors.Blue.Dark,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    paddingRight: 10,
+  },
+  centerSwitchWrapper: {
+    position: 'absolute',
+    left: '35%',
+    transform: [{translateX: -25}],
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleContainer: {
+    width: 50,
+    height: 25,
+    borderRadius: 25,
+    padding: 5,
+    // right: 20,
+  },
+  circleStyle: {
+    width: 18,
+    height: 18,
+    borderRadius: 10,
+  },
+  toggleView: {
+    flexDirection: 'row',
+  },
+  searchView: {
+    flexDirection: 'row',
+    position: 'absolute',
+    top: isIOS() ? 120 : 60,
+    zIndex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: WP('95'),
+    alignSelf: 'center',
+  },
+  searchbar: {
+    height: scale(44),
+    width: WP('65'),
+  },
+  filterIcon: {
+    height: scale(44),
+    width: scale(44),
+  },
+  routeStopStyles: {
+    height: 16,
+    width: 16,
+    borderRadius: 20 / 2,
+    backgroundColor: PFColors.Red.RadiantRed,
+  },
+
+  routeInfoText: {
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    color: PFColors.Standard.Black,
+  },
+  routeInfoView: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  shareIcon: {
+    position: 'absolute',
+    right: 2,
+    top: 5,
+  },
+  actionBtnView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+  },
+  bottomView: {
+    backgroundColor: PFColors.Standard.White,
+    height: 100,
+    position: 'absolute',
+    bottom: 0,
+    width: WP('100'),
+    borderTopEndRadius: 20,
+    borderTopLeftRadius: 20,
+    padding: 20,
+  },
+  searchBox: {
+    width: WP('90'),
+    height: scale(44),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 10,
+    borderRadius: scale(12),
+    marginBottom: scale(16),
+    alignSelf: 'center',
+    backgroundColor: PFColors.Gray.LightMist,
+    position: 'absolute',
+    top: WP('15'),
+  },
+  input: {
+    fontSize: scale(14),
+    fontFamily: PFFonts.Foundation.Medium,
+    color: PFColors.Standard.Black,
+    width: scale(300),
+    paddingLeft: isIOS() ? 10 : 3,
+  },
+  inputContainerStyle: {
+    width: WP('82'),
+  },
+  suggestionContainer: {
+    width: WP('90'),
+    alignSelf: 'center',
+    // position: 'absolute',
+    // top: 30,
+    // backgroundColor: 'red',
+  },
+  listStyles: {
+    backgroundColor: PFColors.Standard.White,
+    position: 'absolute',
+    flex: 1,
+    zIndex: 1,
+    alignSelf: 'center',
+    top: isIOS() ? WP('20') : WP('25'),
+  },
+});
+export default styles;

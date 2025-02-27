@@ -16,11 +16,12 @@ import {
   SaveRouteSheet,
   WellPathMenuSheet,
 } from '../../../../components';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
   Default_Map_Style,
   HP,
   isIOS,
+  mapBoxToken,
   MapTypes,
   PFColors,
   Routes,
@@ -31,11 +32,11 @@ import {
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
 import SearchView from './SearchView';
-import {MapSettingSheet} from '../../../../components';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
 
 const CreateRouteEndUser = () => {
   const navigation: any = useNavigation();
@@ -44,10 +45,9 @@ const CreateRouteEndUser = () => {
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
-  const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
-  const [nearbyPins, setNearbyPins] = useState<boolean>(false);
-  const [nearbyWells, setNearbyWells] = useState<boolean>(false);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
+  const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);
+
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [routeName, setRouteName] = useState<string>('');
@@ -55,6 +55,9 @@ const CreateRouteEndUser = () => {
   const [endingPointName, setEndingPointName] = useState<string>('');
   const [showRouteLineCustomizeSheet, setShowRouteLineCustomizeSheet] =
     useState(false);
+  const isFocused = useIsFocused();
+  const [waypoints, setWaypoints] = useState<any>([]);
+
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
@@ -93,9 +96,11 @@ const CreateRouteEndUser = () => {
     };
   }, []);
 
-  const isCoordinates =
+  const isAdddress =
     Array.isArray(searchValuesByAddress?.start) &&
-    searchValuesByAddress.start.length === 2;
+    searchValuesByAddress?.start.length === 2;
+  const isCoordinates =
+    Array.isArray(searchValues?.start) && searchValues?.start.length === 2;
 
   useEffect(() => {
     if (location) {
@@ -108,43 +113,50 @@ const CreateRouteEndUser = () => {
     }
   }, [mapLayerStyle]);
 
-  const onPressMap = event => {
+  const updateLongRoute = async (start, end, updatedWaypoints) => {
+    const fetchedRoute = await fetchRoute(start, end, updatedWaypoints);
+    setRoute(fetchedRoute);
+  };
+
+  const onPressMap = async event => {
     try {
       const {geometry} = event;
-      if (geometry && Array.isArray(geometry.coordinates)) {
-        setRoute((prevCoordinates: any) => {
-          const start = searchValuesByAddress?.start
-            ? searchValuesByAddress?.start
-            : searchValues?.start
-            ? searchValues?.start.map(Number)
-            : null;
-          const end = searchValuesByAddress?.end
-            ? searchValuesByAddress?.end
-            : searchValues?.end
-            ? searchValues?.end.map(Number)
-            : null;
-
-          const newPoint = geometry.coordinates;
-
-          if (!start || !end) {
-            return [...prevCoordinates, newPoint];
-          }
-
-          let filteredRoute = prevCoordinates.filter(
-            (point: any) =>
-              !(
-                (point[0] === start[0] && point[1] === start[1]) ||
-                (point[0] === end[0] && point[1] === end[1])
-              ),
-          );
-
-          return [start, ...filteredRoute, newPoint, end];
+      if (searchValues?.end || searchValuesByAddress?.start) {
+        const [longitude, latitude] = geometry.coordinates;
+        setWaypoints(prevWaypoints => {
+          const newWaypoints = [...prevWaypoints, [longitude, latitude]];
+          setUndoStack([...undoStack, prevWaypoints]);
+          setRedoStack([]);
+          return newWaypoints;
         });
-
-        setUndoStack([...undoStack, route]);
-        setRedoStack([]);
+        if (searchValuesByAddress?.start) {
+          updateLongRoute(
+            searchValuesByAddress?.start,
+            searchValuesByAddress?.end,
+            [...waypoints, [longitude, latitude]],
+          );
+        } else {
+          const updatedState = {
+            end: searchValues?.end.map(Number),
+            start: searchValues?.start.map(Number),
+          };
+          updateLongRoute(updatedState?.start, updatedState?.end, [
+            ...waypoints,
+            [longitude, latitude],
+          ]);
+        }
       } else {
-        console.error('Invalid coordinates:', geometry);
+        if (geometry && Array.isArray(geometry.coordinates)) {
+          setRoute((prevCoordinates: any) => [
+            ...prevCoordinates,
+            geometry.coordinates,
+          ]);
+
+          setUndoStack([...undoStack, route]);
+          setRedoStack([]);
+        } else {
+          console.error('Invalid coordinates:', geometry);
+        }
       }
     } catch (error) {
       console.error('Error in onPressMap:', error);
@@ -180,9 +192,6 @@ const CreateRouteEndUser = () => {
   };
 
   const centerMap = () => {
-    const isEmptyLatLng = Object.values(searchValues)?.every(
-      value => value === '',
-    );
     const isEmptyAdress = Object.values(searchValuesByAddress)?.every(
       value => value === '',
     );
@@ -198,36 +207,7 @@ const CreateRouteEndUser = () => {
       Array.isArray(searchValuesByAddress?.end) &&
       searchValuesByAddress?.end.length > 0;
 
-    if (isEmptyAdress && hasSearchValues) {
-      const convertedState = {
-        start: searchValues.start?.map(Number),
-        end: searchValues?.end.map(Number),
-      };
-      const {start, end} = convertedState;
-      const minLongitude = Math.min(start[0], end[0]);
-      const maxLongitude = Math.max(start[0], end[0]);
-      const minLatitude = Math.min(start[1], end[1]);
-      const maxLatitude = Math.max(start[1], end[1]);
-
-      const buffer = 0.09;
-      const adjustedMinLongitude = minLongitude - buffer;
-      const adjustedMaxLongitude = maxLongitude + buffer;
-      const adjustedMinLatitude = minLatitude - buffer;
-      const adjustedMaxLatitude = maxLatitude + buffer;
-
-      cameraRef.current.fitBounds(
-        [adjustedMinLongitude, adjustedMinLatitude],
-        [adjustedMaxLongitude, adjustedMaxLatitude],
-        {
-          Left: 100,
-          Right: 100,
-          Top: 80,
-          Bottom: 80,
-        },
-      );
-    }
-
-    if (isEmptyLatLng && hasAddressValues) {
+    if (hasAddressValues) {
       const {start, end} = searchValuesByAddress;
       const minLongitude = Math.min(start[0], end[0]);
       const maxLongitude = Math.max(start[0], end[0]);
@@ -251,7 +231,7 @@ const CreateRouteEndUser = () => {
         },
       );
     }
-    if (route?.length > 2 && isEmptyLatLng && isEmptyAdress) {
+    if (route?.length > 2 && isEmptyAdress) {
       const allPoints = route;
       const longitudes = allPoints?.map(point => point[0]);
       const latitudes = allPoints?.map(point => point[1]);
@@ -281,19 +261,55 @@ const CreateRouteEndUser = () => {
 
   const undoRoutes = () => {
     if (undoStack?.length > 0) {
-      const previousState = undoStack.pop();
-      setRedoStack([...redoStack, route]);
-      setRoute(previousState);
-      setUndoStack([...undoStack]);
+      const prevState = undoStack.pop();
+
+      if (prevState) {
+        setRedoStack(prev => [...prev, waypoints]); // Store current state in redoStack before changing
+
+        setRoute(prevState);
+        setWaypoints(prevState);
+
+        if (searchValuesByAddress?.start) {
+          updateLongRoute(
+            searchValuesByAddress?.start,
+            searchValuesByAddress?.end,
+            prevState,
+          );
+        } else if (searchValues?.start) {
+          const updatedState = {
+            end: searchValues?.end?.map(Number),
+            start: searchValues?.start?.map(Number),
+          };
+          updateLongRoute(updatedState?.start, updatedState?.end, prevState);
+        }
+      }
     }
   };
 
   const redoRoutes = () => {
     if (redoStack.length > 0) {
-      const lastState = redoStack[redoStack.length - 1];
-      setRoute(lastState);
-      setRedoStack(redoStack.slice(0, redoStack.length - 1));
-      setUndoStack(prevHistory => [...prevHistory, route]);
+      setUndoStack(prev => [...prev, waypoints]);
+
+      const nextState = redoStack.pop();
+
+      if (nextState) {
+        setRoute(nextState);
+        setWaypoints(nextState);
+
+        if (searchValuesByAddress?.start) {
+          updateLongRoute(
+            searchValuesByAddress?.start,
+            searchValuesByAddress?.end,
+            nextState,
+          );
+        } else if (searchValues?.start) {
+          const updatedState = {
+            end: searchValues?.end?.map(Number),
+            start: searchValues?.start?.map(Number),
+          };
+          updateLongRoute(updatedState?.start, updatedState?.end, nextState);
+        }
+      }
     }
   };
 
@@ -310,6 +326,17 @@ const CreateRouteEndUser = () => {
               })),
             ]
           : [];
+      const pinnedPoints =
+        waypoints?.length > 0
+          ? [
+              ...waypoints?.map(([longitude, latitude], index) => ({
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
+                name: `Point ${index + 1}`,
+              })),
+            ]
+          : [];
+
       const routeData = {
         user_route: {
           name: routeName,
@@ -317,6 +344,7 @@ const CreateRouteEndUser = () => {
           route_type: 'custom_route',
           color: routeLineColor,
           weight: routeLineHeight,
+          pinned_points: pinnedPoints,
         },
       };
 
@@ -325,9 +353,11 @@ const CreateRouteEndUser = () => {
       if (resp?.data) {
         setUndoStack([]);
         setRedoStack([]);
+        setWaypoints([]);
         setRoute([]);
         setRouteName('');
         showAlert('Alert', 'Your route has been created successfully.');
+        dispatch(setCreateRouteDataEmpty({}));
       } else {
         showAlert('Error', UNEXPECTED_ERROR);
       }
@@ -336,40 +366,55 @@ const CreateRouteEndUser = () => {
     }
   };
 
-  useEffect(() => {
-    if (searchValuesByAddress?.end || searchValues?.start) {
-      if (searchValuesByAddress?.end != '') {
-        const temp = updateRoute(searchValuesByAddress);
-        setRoute(temp);
-      } else if (searchValues?.end?.length > 0) {
-        const updatedState = {
-          end: searchValues?.end.map(Number),
-          start: searchValues?.start.map(Number),
-        };
-        const temp = updateRoute(updatedState);
-        setRoute(temp);
-      }
-      setTimeout(() => {
-        centerMap();
-      }, 1000);
+  const fetchRoute = async (start, end, waypoints = []) => {
+    const accessToken = mapBoxToken;
+    let url = null;
+    const waypointString = waypoints.map(wp => `${wp[0]},${wp[1]}`).join(';');
+    waypoints?.length > 0
+      ? (url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${waypointString};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`)
+      : (url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`);
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data.routes[0]?.geometry?.coordinates;
+
+      return route;
+    } catch (error) {
+      console.error('Error fetching route:', error);
+      showAlert('Error', 'No route exists between the entered locations.');
+      return [];
     }
-  }, [searchValuesByAddress]);
+  };
 
-  function updateRoute(dataArr) {
-    const start = dataArr?.start;
-    const end = dataArr?.end;
+  useEffect(() => {
+    if (isFocused) {
+      const fetchRoutes = async () => {
+        if (
+          'start' in createRouteData &&
+          createRouteData?.start?.coords?.length &&
+          createRouteData?.end?.coords?.length
+        ) {
+          setSearchValuesByAddress({
+            start: createRouteData?.start?.coords,
+            end: createRouteData?.end?.coords,
+          });
+          const fetchedRoute = await fetchRoute(
+            createRouteData?.start?.coords,
+            createRouteData?.end?.coords,
+            waypoints,
+          );
 
-    if (!start || !end) return route;
-    let filteredRoute = route.filter(
-      point =>
-        !(
-          (point[0] === start[0] && point[1] === start[1]) ||
-          (point[0] === end[0] && point[1] === end[1])
-        ),
-    );
+          setRoute(fetchedRoute);
 
-    return [start, ...filteredRoute, end];
-  }
+          setTimeout(() => {
+            centerMap();
+          }, 1000);
+        }
+      };
+      fetchRoutes();
+    }
+  }, [createRouteData, isFocused]);
 
   return (
     <MainWrapper style={styles.container}>
@@ -387,7 +432,6 @@ const CreateRouteEndUser = () => {
             setEndingPointName,
           })
         }
-        onPressFilter={() => setShowMapSettigs(true)}
         onPressMenu={() => setShowOptionsSheet(true)}
       />
       <MapboxGL.MapView
@@ -427,14 +471,22 @@ const CreateRouteEndUser = () => {
           </MapboxGL.MarkerView>
         )}
 
-        {route?.map((coordinate, index) => (
-          <MapboxGL.PointAnnotation
-            key={`pin-${index}`}
-            id={`pin-${index}`}
-            coordinate={coordinate}>
-            <View style={[styles.routeStopStyles]} />
-          </MapboxGL.PointAnnotation>
-        ))}
+        {!isCoordinates &&
+          !isAdddress &&
+          route?.map((coordinate, index) => (
+            <MapboxGL.PointAnnotation
+              key={`pin-${index}`}
+              id={`pin-${index}`}
+              coordinate={coordinate}>
+              <View style={[styles.routeStopStyles]} />
+            </MapboxGL.PointAnnotation>
+          ))}
+        {(isCoordinates || isAdddress) &&
+          waypoints?.map((waypoint: any, index: number) => (
+            <MapboxGL.MarkerView key={index} coordinate={waypoint}>
+              {svgIcon.RedPin}
+            </MapboxGL.MarkerView>
+          ))}
 
         {/* Route Line */}
         {route?.length > 1 && (
@@ -456,7 +508,6 @@ const CreateRouteEndUser = () => {
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
-      {/* {isCoordinates && ( */}
       <TouchableOpacity
         style={styles.centerMapStyles}
         onPress={() => centerMap()}>
@@ -515,23 +566,7 @@ const CreateRouteEndUser = () => {
         onPressCancel={() => setMapLayerSheeet(false)}
         onPressSave={() => onPressSave()}
       />
-      <MapSettingSheet
-        setModalVisible={() => setShowMapSettigs(false)}
-        modalVisible={showMapSettigs}
-        onPressCancel={() => setShowMapSettigs(false)}
-        well={nearbyWells}
-        pin={nearbyPins}
-        setPin={setNearbyPins}
-        setWell={setNearbyWells}
-        onPressClear={() => {
-          setNearbyPins(false);
-          setNearbyWells(false);
-          setTimeout(() => {
-            setShowMapSettigs(false);
-            setRoute([]);
-          }, 1000);
-        }}
-      />
+
       <RouteCustomizationSheet
         modalVisible={showRouteLineCustomizeSheet}
         setColor={setRouteLineColor}

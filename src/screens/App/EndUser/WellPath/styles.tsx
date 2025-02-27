@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    bottom: isIOS() ? WP('20') : WP('15'),
+    bottom: isIOS() ? WP('20') : WP('5'),
     left: 10,
   },
   recenter: {
     position: 'absolute',
-    bottom: isIOS() ? WP('32') : WP('27'),
+    bottom: isIOS() ? WP('32') : WP('20'),
     left: 10,
   },
   undoRedoContainer: {

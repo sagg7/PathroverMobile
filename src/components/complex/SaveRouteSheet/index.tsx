@@ -19,6 +19,8 @@ interface SaveRouteSheetProps {
   onPressSave?: any;
   onChangeText: any;
   routeName: any;
+  title?: string;
+  btnTitle?: string;
 }
 
 const SaveRouteSheet = ({
@@ -26,6 +28,8 @@ const SaveRouteSheet = ({
   onPressSave,
   routeName,
   onChangeText,
+  title = 'Save Route',
+  btnTitle = 'Save Route',
 }: SaveRouteSheetProps) => {
   const handleSave = () => {
     Keyboard.dismiss();
@@ -44,13 +48,13 @@ const SaveRouteSheet = ({
         keyboardShouldPersistTaps="handled">
         <View style={styles.modalContainer}>
           <View style={styles.titleView}>
-            <Text style={styles.headerText}>Save Route</Text>
+            <Text style={styles.headerText}>{title}</Text>
             <TouchableOpacity onPress={onPressCancel}>
               {svgIcon.CancelIcon}
             </TouchableOpacity>
           </View>
           <AppInput
-            placeholder="Route Name"
+            placeholder=" Name"
             inputContainerStyle={styles.inputStyles}
             onChangeText={onChangeText}
             value={routeName}
@@ -67,7 +71,7 @@ const SaveRouteSheet = ({
 
             <AppButton
               disabled={routeName?.length < 1}
-              title="Save Route"
+              title={btnTitle}
               isSmall="40%"
               handleClick={() => handleSave()}
             />

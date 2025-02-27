@@ -214,6 +214,15 @@ export const chatApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getChatContacts: builder.mutation({
+      query: (data) => {
+        return {
+          url: 'chats/invited_users',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -244,4 +253,5 @@ export const {
   useLazyGetAgoraTokenQuery,
   useCreateCallMutation,
   useUpdateCallMutation,
+  useGetChatContactsMutation,
 } = chatApiSlice;

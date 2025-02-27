@@ -54,6 +54,12 @@ const PinLocationAddress = ({
       </View> */}
 
       <View style={styles.blueBox}>
+        {/* TODO SET COMPANY NAME  */}
+        {/* <View style={styles.detailSection}>
+          <DetailView title="Operator" value={selectedWell?.api || 'N/A'} />
+        </View>
+        <View style={styles.horizontalLine} /> */}
+
         <View style={styles.detailSection}>
           <DetailView title="API" value={selectedWell?.api || 'N/A'} />
         </View>

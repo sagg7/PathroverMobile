@@ -77,7 +77,7 @@ const AiChat = () => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Meta AI" clickBackIcon={() => navigation.pop()} />
+      <AppHeader title="Chat gpt" clickBackIcon={() => navigation.pop()} />
       <View style={styles.container}>
         <GiftedChat
           user={{
