@@ -116,9 +116,6 @@ const GroupChatDetail = () => {
 
   const onSend = async (message: string) => {
     try {
-      console.log('=======message=============================');
-      console.log(message);
-      console.log('====================================');
       const {item} = params;
       const form = new FormData();
 
