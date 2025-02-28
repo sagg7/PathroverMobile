@@ -3,16 +3,17 @@ import React, {useEffect, useState} from 'react';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
 import {AppButton, AppHeader, MainWrapper} from '../../../../components';
-import {mapBoxToken, Routes} from '../../../../shared/exporter';
+import {mapBoxToken, Routes, showAlert} from '../../../../shared/exporter';
 import MapboxGL from '@rnmapbox/maps';
 import {useIsFocused} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
 
 const DownloadedMapList = ({navigation}: any) => {
   MapboxGL.setAccessToken(mapBoxToken);
   const isFocused = useIsFocused();
 
   const [downloadedMaps, setDownloadedMaps] = useState<any>([]);
-
+  const {downloadMap} = useSelector(state => state?.endUser?.trailRoute);
   useEffect(() => {
     if (isFocused) checkDownloadedMaps();
   }, [isFocused]);
@@ -20,21 +21,25 @@ const DownloadedMapList = ({navigation}: any) => {
   const checkDownloadedMaps = async () => {
     try {
       const packs = await MapboxGL.offlineManager.getPacks();
-      setDownloadedMaps(packs);
+      const completedMaps = packs.filter(
+        (pack: any) => pack?.pack?.state === 'complete',
+      );
+
+      setDownloadedMaps(completedMaps);
     } catch (error) {
       console.error('Check Offline Maps Error:', error);
-      Alert.alert('Error', 'Failed to check offline maps.');
+      showAlert('Error', 'Failed to check offline maps.');
     }
   };
 
   const deleteMap = async (name: string) => {
     try {
       await MapboxGL.offlineManager.deletePack(name);
-      Alert.alert('Deleted', `Offline map "${name}" has been deleted.`);
+      showAlert('Deleted', `Offline map "${name}" has been deleted.`);
       checkDownloadedMaps(); // Refresh list after deletion
     } catch (error) {
       console.error('Delete Offline Map Error:', error);
-      Alert.alert('Error', 'Failed to delete the offline map.');
+      showAlert('Error', 'Failed to delete the offline map.');
     }
   };
 
@@ -58,7 +63,7 @@ const DownloadedMapList = ({navigation}: any) => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Save Library" />
+      <AppHeader title="Map Library" />
       <FlatList
         ListHeaderComponent={
           <Text style={styles.titleText}>Your Map Library</Text>
@@ -66,11 +71,21 @@ const DownloadedMapList = ({navigation}: any) => {
         data={downloadedMaps}
         renderItem={renderView}
       />
-      <AppButton
-        title="Add Map"
-        buttonStyle={styles.btnStyles}
-        handleClick={() => navigation.navigate(Routes.DownloadOfflineMap)}
-      />
+
+      {'downloadSize' in downloadMap && downloadMap?.downloading ? (
+        <View style={styles.downloadView}>
+          <Text style={styles.titleStyles}>
+            You already have a download in progress. Currently downloaded...{' '}
+            {downloadMap?.downloadSize}%
+          </Text>
+        </View>
+      ) : (
+        <AppButton
+          title="Add Map"
+          buttonStyle={styles.btnStyles}
+          handleClick={() => navigation.navigate(Routes.DownloadOfflineMap)}
+        />
+      )}
     </MainWrapper>
   );
 };

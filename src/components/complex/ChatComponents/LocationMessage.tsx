@@ -10,27 +10,39 @@ import {
   setStartingPoint,
 } from '../../../redux/endUser/endUserSlice';
 import {useNavigation} from '@react-navigation/native';
+import useLocation from '../../../hooks/getLocation';
 
 const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const {location} = useLocation();
 
   const {startingPoint, endingPoint} =
     JSON.parse(content)?.messageContainsLocation;
 
-  const hanldeClick = () => {
-    dispatch(
-      setStartingPoint([
-        parseFloat(startingPoint?.[0]),
-        parseFloat(startingPoint?.[1]),
-      ]),
-    );
-    dispatch(
-      setEndingPoint([
-        parseFloat(endingPoint?.[0]),
-        parseFloat(endingPoint?.[1]),
-      ]),
-    );
+  const handleClick = () => {
+    if (startingPoint?.length > 0) {
+      dispatch(
+        setStartingPoint([
+          parseFloat(startingPoint[0]),
+          parseFloat(startingPoint[1]),
+        ]),
+      );
+    } else {
+      if (location?.longitude && location?.latitude) {
+        dispatch(setStartingPoint([location.longitude, location.latitude]));
+      }
+    }
+
+    if (endingPoint?.length > 0) {
+      dispatch(
+        setEndingPoint([
+          parseFloat(endingPoint[0]),
+          parseFloat(endingPoint[1]),
+        ]),
+      );
+    }
+
     navigation.navigate(Routes.SearchTrailLatLng);
   };
 
@@ -43,7 +55,7 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         ]}>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={hanldeClick}
+          onPress={handleClick}
           style={[
             styles.locContainer,
             {flexDirection: isLeft ? 'row-reverse' : 'row'},
