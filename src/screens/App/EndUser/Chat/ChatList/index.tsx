@@ -21,8 +21,10 @@ const ChatList = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
+
   const [search, setSearch] = useState('');
   const [chats, setChats] = useState([]);
+  const [loader, setLoader] = useState(false);
   const [searchedChats, setSearchedChats] = useState([]);
 
   const [deleteChat] = useDeleteChatMutation();
@@ -59,17 +61,20 @@ const ChatList = () => {
   useEffect(() => {
     (async () => {
       if (isFocused) {
+        setLoader(true);
         await getChats();
+
+        setTimeout(() => {
+          setLoader(false);
+        }, 300);
       }
     })();
   }, [isFocused]);
 
   useEffect(() => {
-    if (data?.chats?.length > 0) {
-      setChats(data?.chats);
-    } else {
-      setChats([]);
-    }
+    if(data){
+      setChats(data?.chats ?? []);
+      }
   }, [data]);
 
   useEffect(() => {
@@ -88,7 +93,7 @@ const ChatList = () => {
       } else {
         setSearchedChats([]);
       }
-    }, 300);
+    }, 800);
 
     return () => clearTimeout(handler);
   }, [search]);
@@ -124,11 +129,16 @@ const ChatList = () => {
     );
   };
 
+  if (loader) {
+    // isLoading || 
+    return (
+        <AppLoader />
+      ) 
+  };
+
   return (
     <View style={styles.container}>
-      {isLoading ? (
-        <AppLoader />
-      ) : chats?.length === 0 ? (
+      {chats?.length === 0 ? (
         <EmptyChatView
           buttonText={'Initiate Chat'}
           onPress={() => {

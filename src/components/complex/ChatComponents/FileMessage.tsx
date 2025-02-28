@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image, Platform} from 'react-native';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
 import FileViewer from 'react-native-file-viewer';
@@ -30,17 +30,14 @@ const FileMessage = ({currentMessage, position}) => {
   const {message_attachment} = currentMessage;
   const isLeft = position === 'left';
 
-  console.log('================currentMessage====================');
-  console.log(currentMessage);
-  console.log('====================================');
-
   const onPreview = () => {
     try {
       const getFileName = getFileNameFromUrl(message_attachment?.url);
 
       const localFile = `${RNFS.DocumentDirectoryPath}/${
-        getFileName || 'file.pdf'
-      }`;
+        message_attachment?.file_name  || 'file.pdf'
+        }`;
+     
       const options = {
         fromUrl: message_attachment?.url,
         toFile: localFile,

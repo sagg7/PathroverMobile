@@ -1,6 +1,7 @@
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  BackHandler,
   Dimensions,
   Image,
   PermissionsAndroid,
@@ -28,6 +29,7 @@ import {PFColors} from '../../../../../shared/exporter';
 import styles from './styles';
 import {AGORA_KEY} from '../../../../../shared/utils/constant';
 import {formatTime} from '../../../../../helpers/getFormatTime';
+import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 
 const APP_ID = AGORA_KEY;
 
@@ -40,10 +42,12 @@ const VideoCalling = () => {
 
   const startTimeRef = useRef(null); // Ref to store the start time
   const timerIntervalRef = useRef(null); // Ref to store the interval IDstatus
+  const sensorSubscriptionRef = useRef<SubscriptionRef | null>(null);
 
   const [controls, setControls] = useState({
     engine: null,
     isMute: false,
+    isNear: false,
     elapsedTime: 0,
     remoteUsers: [],
     isSpeakerOn: false,
@@ -105,6 +109,32 @@ const VideoCalling = () => {
       cleanupAgoraEngine();
     }
   }, [isFocused, controls.engine]);
+
+  useEffect(() => {
+      const backAction = () => {
+        return true; // Block the back button
+      };
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
+  }, []);
+
+   useEffect(() => {
+    sensorSubscriptionRef.current = proximity.subscribe((values) => {
+          if (values.distance > 4) {
+            setControls(prev => ({...prev, isNear: false}))
+            
+          } else {
+            setControls(prev => ({...prev, isNear: true}))
+          }          
+    });
+
+    return () => {
+      if (sensorSubscriptionRef.current) {
+        sensorSubscriptionRef.current.unsubscribe();
+        sensorSubscriptionRef.current = null;
+      }
+    };
+    }, []);
 
   const eventHandler: IRtcEngineEventHandler = {
     onJoinChannelSuccess: () => {
@@ -274,7 +304,7 @@ const VideoCalling = () => {
 
   const iconsView = () => {
     return (
-      <View style={styles.callButtonView}>
+      <View style={styles.callButtonView} pointerEvents={controls.isNear ? 'none' : 'auto'} >
         <TouchableOpacity style={styles.iconDetails} onPress={onPressSpeaker}>
           <View style={styles.iconBackGround(controls.isSpeakerOn)}>
             <Image
@@ -361,18 +391,22 @@ const VideoCalling = () => {
         <View style={{height: height - 115}}>
           {/* Remote video streams */}
           <View style={styles.containerView}>
-            {controls.remoteUsers?.map(uid => renderVideo({uid}))}
+            {controls.remoteUsers?.map(uid => renderVideo({ uid }))}
+            <View style={styles.userNameTextView}>
             <Text style={styles.userName}>
               {params?.user?.first_name ?? 'User'}{' '}
               {params?.user?.last_name ?? ''}
             </Text>
           </View>
+          </View>
 
           {/* Local video stream */}
-          <View style={styles.containerView}>{renderVideo({uid: 0})}</View>
+          <View style={styles.containerView}>{renderVideo({ uid: 0 })}</View>
+          <View style={styles.timerTextView}>
           <Text style={styles.counterText}>
             {formatTime(controls.elapsedTime)}
-          </Text>
+            </Text>
+            </View>
         </View>
       )}
       <View style={styles.iconContainer}>{iconsView()}</View>

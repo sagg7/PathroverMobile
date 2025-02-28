@@ -48,7 +48,8 @@ const GroupChatBubble = ({props}) => {
   const {avatar, name} = user;
   const fileType =
     message_attachment &&
-    identifyAttachmentTypeFromUrl(message_attachment?.url);
+    identifyAttachmentTypeFromUrl(message_attachment?.content_type);
+    // identifyAttachmentTypeFromUrl(message_attachment?.url);
 
   // const showAvatar =
   //   !previousMessage ||

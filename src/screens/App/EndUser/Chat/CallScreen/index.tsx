@@ -15,6 +15,7 @@ import styles from './styles';
 interface CallScreenProps {
   onPressLeave: () => void;
   isMute: boolean;
+  isNear: boolean;
   isSpeakerOn: boolean;
   timer: string;
   onPressSpeaker: () => void;
@@ -30,10 +31,11 @@ const CallScreen = ({
   onPressSpeaker,
   onPressMute,
   user,
+  isNear,
 }: CallScreenProps) => {
   const iconsView = () => {
     return (
-      <View style={styles.callButtonView}>
+      <View style={styles.callButtonView} pointerEvents={isNear ? 'none' : 'auto'}>
         <TouchableOpacity style={styles.iconDetails} onPress={onPressSpeaker}>
           <View style={styles.iconBackGround(isSpeakerOn)}>
             <Image
@@ -67,14 +69,14 @@ const CallScreen = ({
       <ImageBackground
         source={user?.avatar ? {uri: user?.avatar} : appImages.userPlaceholder}
         style={styles.callerBackGround}>
-        <TouchableOpacity onPress={onPressLeave} style={styles.backIconStyle}>
+        {/* <TouchableOpacity onPress={onPressLeave} style={styles.backIconStyle}>
           {svgIcon.BackArrow}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.userConatiner}>
           <Text style={styles.callerNameTextStyle}>
             {user?.first_name ?? 'User'} {user?.last_name ?? ''}
           </Text>
-          <Text style={styles.callTime}>{timer}</Text>
+            <Text style={styles.callTime}>{timer}</Text>
         </View>
         {/* <Image
           source={appImages.appIntroFour}

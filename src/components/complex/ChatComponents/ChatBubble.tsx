@@ -45,8 +45,9 @@ const ChatBubble = ({props}) => {
   const showTime = getShowTime(currentMessage, nextMessage);
   const fileType =
     message_attachment &&
-    identifyAttachmentTypeFromUrl(message_attachment?.url);
-
+    identifyAttachmentTypeFromUrl(message_attachment?.content_type);
+  // identifyAttachmentTypeFromUrl(message_attachment?.url);
+    
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;

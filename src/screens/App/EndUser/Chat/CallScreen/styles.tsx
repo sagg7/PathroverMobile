@@ -16,7 +16,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: PFColors.Standard.Disable,
   },
-
   singleCallerImage: {
     width: WP('25'),
     height: WP('30'),
@@ -27,19 +26,26 @@ const styles = StyleSheet.create({
   },
   userConatiner: {
     position: 'absolute',
-    top: '8%',
+    top: '5%',
     left: WP('5'),
+    backgroundColor: `${PFColors.Gray.CharcoalGray}20`,
+    marginTop: WP('2'),
+    paddingHorizontal: scale(8),
+    paddingTop: scale(3),
+    paddingBottom: scale(6),
+    borderRadius: 9,
   },
-
   callerNameTextStyle: {
     color: PFColors.Standard.White,
     fontSize: PFFontSize.FONT_SIZE_26,
     fontFamily: PFFonts.Foundation.SemiBold,
+    textAlignVertical: 'center',
   },
   callTime: {
-    marginTop: WP('2'),
     color: PFColors.Standard.White,
     fontSize: PFFontSize.FONT_SIZE_14,
+    fontFamily: PFFonts.Foundation.SemiBold,
+     textAlignVertical: 'center',
   },
   callerAction: {
     width: '100%',
