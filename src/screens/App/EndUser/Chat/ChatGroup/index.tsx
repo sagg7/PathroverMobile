@@ -20,9 +20,12 @@ const ChatGroup = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
+
   const [search, setSearch] = useState('');
   const [chats, setChats] = useState([]);
+  const [loader, setLoader] = useState(false);
   const [searchedChats, setSearchedChats] = useState([]);
+
   const [getGroupChats, {isLoading, data}] = useGetGroupChatsMutation();
   const [deleteGroup] = useDeleteGroupMutation();
 
@@ -57,15 +60,18 @@ const ChatGroup = () => {
   useEffect(() => {
     (async () => {
       if (isFocused) {
+        setLoader(true);
         await getGroupChats();
+        setTimeout(() => {
+          setLoader(false);
+        },300);
       }
     })();
   }, [isFocused]);
+  
 
   useEffect(() => {
-    if (data) {
-      setChats(data);
-    }
+      setChats(data ?? []);
   }, [data]);
 
   useEffect(() => {
@@ -119,11 +125,16 @@ const ChatGroup = () => {
     );
   };
 
+  //  if (isLoading || loader) {
+  //     return (
+  //         <AppLoader />
+  //       ) 
+  //   };
+  
+
   return (
     <View style={styles.container}>
-      {isLoading ? (
-        <AppLoader />
-      ) : chats?.length === 0 ? (
+      {chats?.length === 0 ? (
         <EmptyChatView
           buttonText={'Initiate Chat'}
           onPress={() => {
