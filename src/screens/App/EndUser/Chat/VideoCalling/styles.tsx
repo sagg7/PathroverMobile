@@ -39,17 +39,11 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.White,
     fontFamily: PFFonts.Foundation.Bold,
     fontSize: PFFontSize.FONT_SIZE_16,
-    position: 'absolute',
-    top: 30,
-    left: 16,
   },
   counterText: {
     color: PFColors.Standard.White,
     fontFamily: PFFonts.Foundation.Bold,
     fontSize: PFFontSize.FONT_SIZE_16,
-    position: 'absolute',
-    top: 30,
-    right: 16,
   },
   iconBackGroundRed: {
     width: WP('15'),
@@ -86,6 +80,24 @@ const styles = StyleSheet.create({
     borderColor: PFColors.Gray.LightGray,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  userNameTextView: {
+    backgroundColor: `${PFColors.Gray.CharcoalGray}20`,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(6),
+    borderRadius: 9,
+     position: 'absolute',
+    top: 30,
+    left: 16,
+  },
+timerTextView: {
+    backgroundColor: `${PFColors.Gray.CharcoalGray}20`,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(6),
+  borderRadius: 9,
+    position: 'absolute',
+    top: 30,
+    right: 16,
   },
 });
 

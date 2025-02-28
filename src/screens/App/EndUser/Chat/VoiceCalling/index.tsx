@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {PermissionsAndroid, Platform} from 'react-native';
+import {BackHandler, PermissionsAndroid, Platform} from 'react-native';
 // import uuid from 'react-native-uuid';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {
@@ -18,7 +18,8 @@ import {
 } from '../../../../../redux/chat/chatApiSlice';
 import CallScreen from '../CallScreen';
 import {AGORA_KEY} from '../../../../../shared/utils/constant';
-import {formatTime} from '../../../../../helpers/getFormatTime';
+import { formatTime } from '../../../../../helpers/getFormatTime';
+import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 
 const appId = AGORA_KEY;
 
@@ -28,7 +29,8 @@ const VoiceCalling = () => {
   const isFocused = useIsFocused();
 
   const agoraEngineRef = useRef<IRtcEngine>(); // IRtcEngine instance
-  const eventHandler = useRef<IRtcEngineEventHandler>(); // Implement callback functions
+  const eventHandler = useRef<IRtcEngineEventHandler>();
+  const sensorSubscriptionRef = useRef<SubscriptionRef | null>(null);
   const startTimeRef = useRef(null); // Ref to store the start time
   const timerIntervalRef = useRef(null); // Ref to store the interval ID
 
@@ -39,6 +41,7 @@ const VoiceCalling = () => {
     isSpeakerOn: false,
     channel: '',
     elapsedTime: 0,
+    isNear: false,
   });
 
   // APIs
@@ -76,6 +79,32 @@ const VoiceCalling = () => {
       cleanupAgoraEngine(); // Ensure this is synchronous
     };
   }, [isFocused]); // Empty dependency array ensures it runs only once
+
+  useEffect(() => {
+    const backAction = () => {
+       return true; // Block the back button
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, []);
+  
+  useEffect(() => {
+    sensorSubscriptionRef.current = proximity.subscribe((values) => {
+          if (values.distance > 4) {
+            setControls(prev => ({...prev, isNear: false}))
+            
+          } else {
+            setControls(prev => ({...prev, isNear: true}))
+          }
+    });
+
+    return () => {
+      if (sensorSubscriptionRef.current) {
+        sensorSubscriptionRef.current.unsubscribe();
+        sensorSubscriptionRef.current = null;
+      }
+    };
+    }, []);
 
   const setupEventHandler = () => {
     eventHandler.current = {
@@ -241,6 +270,7 @@ const VoiceCalling = () => {
       onPressMute={() => mute()}
       onPressSpeaker={() => toggleSpeaker()}
       user={params?.user}
+      isNear={controls.isNear}
     />
   );
 };
