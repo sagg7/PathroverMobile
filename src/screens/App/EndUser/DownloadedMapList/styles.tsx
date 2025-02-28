@@ -54,5 +54,23 @@ const styles = StyleSheet.create({
     width: WP('90'),
     alignSelf: 'center',
   },
+  downloadView: {
+    marginTop: 20,
+    alignItems: 'center',
+    backgroundColor: PFColors.Standard.White,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 10,
+    borderColor: PFColors.Blue.Dark,
+    bottom: 30,
+    width: '90%',
+    alignSelf: 'center',
+  },
+  titleStyles: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    textAlign: 'center',
+  },
 });
 export default styles;
