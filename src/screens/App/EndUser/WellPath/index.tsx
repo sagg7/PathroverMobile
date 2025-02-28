@@ -127,6 +127,11 @@ const WellPath = () => {
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
+      const tempMap = mapTypesArr.map(item => ({
+        ...item,
+        isSelected: item.type === mapLayerStyle,
+      }));
+      setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
   const filterByType = (type: string) => {
@@ -521,9 +526,14 @@ const WellPath = () => {
       />
       <PinLocationAddress
         onPressShare={() => {
-          // navigation.navigate(Routes.ChatUsers, {
-          //   // shareTrail: { startingPoint, endingPoint },
-          // });
+          selectedWell.map(Number);
+          const formatedArr = selectedWell.map(Number);
+          navigation.navigate(Routes.ChatUsers, {
+            shareTrail: {
+              startingPoint: [],
+              endingPoint: formatedArr,
+            },
+          });
         }}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
@@ -548,6 +558,16 @@ const WellPath = () => {
       />
       {showAddEntranceSheet && (
         <AddEntranceSheet
+          onPressShare={() => {
+            selectedWell.map(Number);
+            const formatedArr = selectedWell.map(Number);
+            navigation.navigate(Routes.ChatUsers, {
+              shareTrail: {
+                startingPoint: entranceCoords,
+                endingPoint: formatedArr,
+              },
+            });
+          }}
           selectedWellName={selectedWellName}
           selectedPin={selectedWell}
           onChangeEntranceName={(text: string) => setEntranceName(text)}
