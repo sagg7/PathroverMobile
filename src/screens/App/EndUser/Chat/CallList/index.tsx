@@ -1,29 +1,48 @@
-import React, {useEffect, useState} from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
   FlatList,
   Image,
+  Text,
   TouchableOpacity,
-  Platform,
+  View
 } from 'react-native';
-import styles from './styles';
-import {svgIcon} from '../../../../../assets/svg';
-import {useIsFocused} from '@react-navigation/native';
+import { svgIcon } from '../../../../../assets/svg';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
-import {useGetUserCallQuery} from '../../../../../redux/chat/chatApiSlice';
-import {Routes} from '../../../../../shared/exporter';
+import { useGetUserCallQuery } from '../../../../../redux/chat/chatApiSlice';
+import styles from './styles';
 
 const CallList = ({navigation}: any) => {
   const isFocused = useIsFocused();
   const {data, refetch} = useGetUserCallQuery();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchedChats, setSearchedChats] = useState([]);
 
   useEffect(() => {
     if (isFocused) {
       refetch();
     }
   }, [isFocused, refetch]);
+
+  useEffect(() => {
+      const handler = setTimeout(() => {
+        if (searchQuery?.trim().length > 0 && searchQuery?.length > 0) {
+          const searchText = searchQuery?.toLowerCase();
+  
+          const filteredChats = data?.call_logs?.filter(
+            item =>
+              item?.user_info?.first_name?.toLowerCase().includes(searchText) ||
+              item?.user_info?.last_name?.toLowerCase().includes(searchText)
+          );
+  
+          setSearchedChats(filteredChats);
+        } else {
+          setSearchedChats([]);
+        }
+      }, 300);
+  
+      return () => clearTimeout(handler);
+    }, [searchQuery]);
 
   const formatCallingTime = callingTime => {
     if (!callingTime) {
@@ -52,12 +71,6 @@ const CallList = ({navigation}: any) => {
     return `${dateLabel}, ${date.toLocaleTimeString()}`;
   };
 
-  // Filter call logs based on searchQuery
-  const filteredCallLogs = data?.user_info?.filter(item => {
-    const fullName =
-      `${item?.user_info?.first_name} ${item?.user_info?.last_name}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase());
-  });
   const renderItem = ({ item }: any) => {
     return (
       <View style={styles.userCallLog}>
@@ -127,7 +140,7 @@ const CallList = ({navigation}: any) => {
       <View style={styles.callContainer}>
         <FlatList
           renderItem={renderItem}
-          data={data?.call_logs}
+          data={searchQuery?.length > 0 ? searchedChats : data?.call_logs}
           keyExtractor={(item, index) => index.toString()}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={() => (
