@@ -64,7 +64,7 @@ const ChatGroup = () => {
         await getGroupChats();
         setTimeout(() => {
           setLoader(false);
-        },300);
+        },800);
       }
     })();
   }, [isFocused]);
@@ -125,11 +125,12 @@ const ChatGroup = () => {
     );
   };
 
-  //  if (isLoading || loader) {
-  //     return (
-  //         <AppLoader />
-  //       ) 
-  //   };
+  if (loader) {
+    //  isLoading || 
+      return (
+          <AppLoader />
+        ) 
+    };
   
 
   return (

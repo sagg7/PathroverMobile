@@ -93,7 +93,7 @@ const ChatList = () => {
       } else {
         setSearchedChats([]);
       }
-    }, 300);
+    }, 800);
 
     return () => clearTimeout(handler);
   }, [search]);
@@ -129,11 +129,12 @@ const ChatList = () => {
     );
   };
 
-  // if (isLoading || loader) {
-  //   return (
-  //       <AppLoader />
-  //     ) 
-  // };
+  if (loader) {
+    // isLoading || 
+    return (
+        <AppLoader />
+      ) 
+  };
 
   return (
     <View style={styles.container}>
