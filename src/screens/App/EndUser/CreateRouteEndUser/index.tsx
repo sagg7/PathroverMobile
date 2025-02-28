@@ -110,6 +110,11 @@ const CreateRouteEndUser = () => {
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
+      const tempMap = mapTypesArr.map(item => ({
+        ...item,
+        isSelected: item.type === mapLayerStyle,
+      }));
+      setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
 
@@ -592,8 +597,14 @@ const CreateRouteEndUser = () => {
             modalVisible={refScrollable}
             routeName={routeName}
             onChangeText={(text: any) => setRouteName(text)}
-            onPressSave={() => handleSaveRouteBtn()}
+            onPressSave={() => {
+              setTimeout(() => {
+                Keyboard.dismiss();
+              }, 1000);
+              handleSaveRouteBtn();
+            }}
             onPressCancel={() => refScrollable.current.close()}
+            onEndEditing={() => console.log('isss')}
           />
         </RBSheet>
       </KeyboardAvoidingView>

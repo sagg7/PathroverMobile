@@ -442,7 +442,7 @@ const SearchTrailLatLng = () => {
 
       {showRouteActionSheet && (
         <RouteToWellSheet
-          routeLength={routeToStartPoint?.length}
+          routeLength={routes?.length}
           onpressCancel={() => navigation.navigate('Hiking')}
           routeName={'Enroute to starting point'}
           distanceInfo={results}

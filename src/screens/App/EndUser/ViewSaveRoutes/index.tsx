@@ -66,6 +66,11 @@ const ViewSaveRoutes = ({route}: any) => {
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
+      const tempMap = mapTypesArr.map(item => ({
+        ...item,
+        isSelected: item.type === mapLayerStyle,
+      }));
+      setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
 
@@ -129,8 +134,6 @@ const ViewSaveRoutes = ({route}: any) => {
     } else if (typeof locResults?.distance === 'number') {
       distanceValue = locResults.distance; // Already in miles
     }
-
-    console.log('===sdistanceValue', distanceValue); // Debugging
 
     if (distanceValue < 0.186) {
       // 300 meters ≈ 0.186 miles

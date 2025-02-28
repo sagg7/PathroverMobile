@@ -1,13 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {
-  View,
-  Button,
-  Alert,
-  Dimensions,
-  ActivityIndicator,
-  Text,
-  KeyboardAvoidingView,
-} from 'react-native';
+import {View, Alert, Dimensions, Text} from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import {
   HP,
@@ -17,7 +9,6 @@ import {
   showAlert,
   WP,
 } from '../../../../shared/exporter';
-import RBSheet from 'react-native-raw-bottom-sheet';
 import {
   AppButton,
   AppHeader,
@@ -26,15 +17,18 @@ import {
 } from '../../../../components';
 import styles from './styles';
 import useLocation from '../../../../hooks/getLocation';
+import {setdownloadMap} from '../../../../redux/endUser/endUserSlice';
+import {useDispatch} from 'react-redux';
+import {useIsFocused} from '@react-navigation/native';
 
 MapboxGL.setAccessToken(mapBoxToken);
 
 const {width, height} = Dimensions.get('window');
 
-const PADDING = 50; // Space from screen edges
-const SQUARE_SIZE = Math.min(width, height) - PADDING * 2; // Adjusted square size
+const PADDING = 50;
+const SQUARE_SIZE = Math.min(width, height) - PADDING * 2;
 
-const DEFAULT_ZOOM = 12; // Default zoom level
+const DEFAULT_ZOOM = 8;
 
 const DownloadOfflineMap = ({navigation}: any) => {
   const mapRef = useRef<any>(null);
@@ -51,7 +45,8 @@ const DownloadOfflineMap = ({navigation}: any) => {
   const [widthYards, setWidthYards] = useState(null);
   const [heightYards, setHeightYards] = useState(null);
   const KM_TO_YARD = 1093.61;
-
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   useEffect(() => {
     MapboxGL.offlineManager.setTileCountLimit(1000);
@@ -73,12 +68,39 @@ const DownloadOfflineMap = ({navigation}: any) => {
     }
   };
 
-  const MIN_AREA_KM = 10; // Minimum 10km x 10km
-  const MAX_AREA_KM = 500; // Maximum 500km x 500km
+  useEffect(() => {
+    if (isFocused && progress > 99) {
+      showOnScreenIndication();
+    }
+  }, [isFocused, progress]);
+
+  const showOnScreenIndication = () => {
+    showAlert('Alert', 'Your map has been saved.');
+    navigation.goBack();
+  };
 
   const kmToLatDegrees = km => km / 111;
   const kmToLngDegrees = (km, latitude) =>
     km / (111 * Math.cos(latitude * (Math.PI / 180)));
+
+  const MAX_TILES = 750;
+  const estimateTileCount = (northEast, southWest, minZoom, maxZoom) => {
+    const latDiff = Math.abs(northEast[1] - southWest[1]);
+    const lngDiff = Math.abs(northEast[0] - southWest[0]);
+
+    const latKm = latDiff * 111;
+    const lngKm =
+      lngDiff *
+      (111 * Math.cos(((northEast[1] + southWest[1]) / 2) * (Math.PI / 180)));
+
+    // Tile estimation per zoom level
+    const zoomLevels = maxZoom - minZoom + 1;
+    const estimatedTiles = latKm * lngKm * zoomLevels * 0.1; // Adjusted factor for better accuracy
+
+    console.log(`Estimated Tiles: ${estimatedTiles.toFixed(2)}`);
+
+    return estimatedTiles;
+  };
 
   const getFixedSquareBounds = async () => {
     if (!isMapLoaded || !mapRef.current) {
@@ -98,39 +120,44 @@ const DownloadOfflineMap = ({navigation}: any) => {
         return;
       }
 
-      const [swLng, swLat] = visibleBounds[0];
-      const [neLng, neLat] = visibleBounds[1];
+      const [swLng, swLat] = visibleBounds[0]; // SW corner
+      const [neLng, neLat] = visibleBounds[1]; // NE corner
 
       const centerLng = (swLng + neLng) / 2;
       const centerLat = (swLat + neLat) / 2;
 
-      const latRangeKm: any = Math.abs(neLat - swLat) * 111;
+      // ✅ Ensure non-negative values (absolute difference)
+      const latRangeKm = Math.abs(neLat - swLat) * 111;
       const lngRangeKm =
         Math.abs(neLng - swLng) * (111 * Math.cos(centerLat * (Math.PI / 180)));
 
       console.log(
-        `Selected Area Size: ${latRangeKm.toFixed(2)}km x ${lngRangeKm.toFixed(
+        `Selected Area: ${latRangeKm.toFixed(2)}km x ${lngRangeKm.toFixed(
           2,
         )}km`,
       );
 
-      const widthInYards: any = parseFloat(lngRangeKm) * KM_TO_YARD;
-      const heightInYards: any = parseFloat(latRangeKm) * KM_TO_YARD;
+      // ✅ Convert to Yards (Optional)
+      const widthInYards = latRangeKm * KM_TO_YARD;
+      const heightInYards = lngRangeKm * KM_TO_YARD;
       setWidthYards(widthInYards.toFixed(2));
       setHeightYards(heightInYards.toFixed(2));
 
-      // Convert km back to degrees
+      // ✅ Convert km back to degrees
       const latDiff = kmToLatDegrees(latRangeKm / 2);
       const lngDiff = kmToLngDegrees(lngRangeKm / 2, centerLat);
 
-      const newBounds: any = {
+      // ✅ Adjust Bounds
+      const newBounds = {
         northEast: [centerLng + lngDiff, centerLat + latDiff],
         southWest: [centerLng - lngDiff, centerLat - latDiff],
       };
 
       setBounds(newBounds);
       setIsSelected(true);
+      console.log('✅ Adjusted Bounds:', newBounds);
     } catch (error) {
+      console.error('❌ Error getting bounds:', error);
       Alert.alert('Error', 'Failed to get map bounds.');
     }
   };
@@ -140,9 +167,35 @@ const DownloadOfflineMap = ({navigation}: any) => {
       setIsDownloading(true);
       setProgress(0);
       setDownloadSize(0);
+      dispatch(
+        setdownloadMap({
+          downloading: true,
+          downloadSize: 0,
+          isError: false,
+        }),
+      );
 
       const {northEast, southWest} = bounds;
-      const boundsArray = [southWest, northEast];
+      const boundsArray: any = [southWest, northEast];
+
+      const estimatedTiles = estimateTileCount(northEast, southWest, 14, 20);
+
+      if (estimatedTiles > MAX_TILES) {
+        Alert.alert(
+          'Download Error',
+          `Selected area exceeds offline map limits. Try reducing the area size or zoom in.`,
+        );
+        setIsDownloading(false);
+        setIsSelected(false);
+        dispatch(
+          setdownloadMap({
+            downloading: false,
+            downloadSize: 0,
+            isError: true,
+          }),
+        );
+        return;
+      }
 
       await MapboxGL.offlineManager.createPack(
         {
@@ -158,30 +211,57 @@ const DownloadOfflineMap = ({navigation}: any) => {
               (status.completedResourceCount / status.requiredResourceCount) *
                 100,
             );
-            const sizeInMB = (
+            const sizeInMB: any = (
               status.completedResourceSize /
               (1024 * 1024)
             ).toFixed(2); // Convert bytes to MB
             setProgress(percentage);
             setDownloadSize(sizeInMB);
+            dispatch(
+              setdownloadMap({
+                downloading: true,
+                downloadSize: percentage,
+                isError: false,
+              }),
+            );
           }
 
           if (status.percentage === 100) {
             setIsDownloading(false);
-            showAlert('Alert', 'Your map has been saved.');
-            navigation.goBack();
+            dispatch(
+              setdownloadMap({
+                downloading: false,
+                downloadSize: 100,
+                isError: false,
+                propgress: progress,
+              }),
+            );
+
             console.log('Download Complete!');
           }
         },
         (pack, error) => {
           console.log('Download Failed:', error);
           setIsDownloading(false);
+          dispatch(
+            setdownloadMap({
+              downloading: false,
+              downloadSize: 0,
+              isError: true,
+              propgress: progress,
+            }),
+          );
         },
       );
-
-      console.log('Download Started');
     } catch (err: any) {
       setIsDownloading(false);
+      dispatch(
+        setdownloadMap({
+          downloading: false,
+          downloadSize: 0,
+          isError: true,
+        }),
+      );
       if (
         err?.message
           ?.toLowerCase()
@@ -209,8 +289,11 @@ const DownloadOfflineMap = ({navigation}: any) => {
         compassEnabled={false}
         onDidFinishLoadingMap={handleMapLoaded}
         onRegionDidChange={handleRegionChange}>
-        {currentLocation?.length > 1 && (
-          <MapboxGL.Camera zoomLevel={12} centerCoordinate={currentLocation} />
+        {location && 'latitude' in location && (
+          <MapboxGL.Camera
+            zoomLevel={11}
+            centerCoordinate={[location?.longitude, location?.latitude]}
+          />
         )}
       </MapboxGL.MapView>
 
@@ -229,6 +312,7 @@ const DownloadOfflineMap = ({navigation}: any) => {
           backgroundColor: 'rgba(255, 0, 0, 0.2)',
         }}
       />
+
       <View style={{position: 'absolute', bottom: 20, left: 10, right: 10}}>
         {!isDownloading && (
           <>
