@@ -146,10 +146,6 @@ const GroupChatDetail = () => {
       form.append('message[read]', false);
       form.append('message[group_id]', item?.id);
 
-      console.log('==================form==================');
-      console.log(form.getParts());
-      console.log('====================================');
-
       const res = await createGroupMessage({data: form, id: item?.id});
       if (res) {
         await getGroupChatMessages(item?.id);
