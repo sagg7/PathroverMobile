@@ -138,6 +138,26 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       setError('Route name cannot be empty');
     }
   };
+  const extractCoordinates = location => {
+    if (!location || !location.latitude || !location.longitude) return null;
+
+    return [Number(location.longitude), Number(location.latitude)];
+  };
+  const handdleShareOption = (routeData: any) => {
+    // const hasCustom = routeData?.route_type.includes('custom');
+    const startingPoint = extractCoordinates(routeData?.pickup_location);
+    const endingPoint = extractCoordinates(routeData?.dropoff_location);
+
+    if (routeData?.route_type) {
+      // console.log('DATA===>', routeData);
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: startingPoint,
+          endingPoint: endingPoint,
+        },
+      });
+    }
+  };
 
   return (
     <MainWrapper>
@@ -161,6 +181,13 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         title="Action"
         visible={modalType === 'menu'}
         onClose={() => handleModal(null, null)}>
+        <TouchableOpacity
+          style={styles.menuOption}
+          onPress={() => handdleShareOption(selectedRoute)}>
+          {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}
+          {svgIcon.Share}
+          <Text style={styles.menuOptionText}>Share</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuOption}
           onPress={() => handleModal(selectedRoute, 'edit')}>

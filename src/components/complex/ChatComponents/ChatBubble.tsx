@@ -89,7 +89,14 @@ const ChatBubble = ({props}) => {
   };
 
   if (isLocation) {
-    return <LocationMessage content={content} isLeft={isLeft} showTime={showTime} />;
+    return (
+      <LocationMessage
+        content={content}
+        isLeft={isLeft}
+        showTime={showTime}
+        created_at={created_at}
+      />
+    );
   }
 
   return (

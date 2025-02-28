@@ -94,6 +94,11 @@ const HikingScreen = () => {
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
+      const tempMap = mapTypesArr.map(item => ({
+        ...item,
+        isSelected: item.type === mapLayerStyle,
+      }));
+      setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
 

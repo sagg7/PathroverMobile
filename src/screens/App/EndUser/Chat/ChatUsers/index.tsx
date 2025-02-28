@@ -36,6 +36,7 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
+  console.log(" ChatUsers ~ allContactsList==>", allContactsList[1])
 
   // API
   // const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
@@ -81,12 +82,12 @@ const ChatUsers = () => {
   }, [isFocused]);
 
   const normalizePhoneNumber = (phone: any) => {
-    return phone.replace(/[\s\-()]/g, '').replace(/^\+1/, '');
+    return phone.replace(/[\s\-()]/g, '')
   };
 
   const formatContacts = (contacts: any = []) => {
     const sortedContacts = [...contacts].sort((a: any, b: any) => {
-      const nameA = a?.givenName || ''; // Default to an empty string if null/undefined
+      const nameA = a?.givenName || ''; 
       const nameB = b?.givenName || '';
 
       if (a.is_exist === b.is_exist) {
@@ -137,17 +138,20 @@ const ChatUsers = () => {
     }
   };
 
-  const inviteUser = ({phone_number}: any) => {
-    const phoneNumber = phone_number?.startsWith('+')
-      ? phone_number
-      : `+1${phone_number}`;
-    let url = `sms:${phoneNumber}`;
+  const inviteUser = (data: any) => {
+    const phone_number = data?.phoneNumbers?.[0]?.number;
+    const phoneNumber =
+      phone_number?.startsWith('+') || phone_number?.startsWith('0')
+        ? phone_number
+        : `+1${phone_number}`;
+    let url = `sms:${normalizePhoneNumber(phoneNumber)}`;
     const separator = Platform.OS === 'ios' ? '&' : '?';
     url += `${separator}body=${encodeURIComponent(
       `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free`,
     )}`;
+    console.log(" inviteUser ~ url==>", url)
 
-    Linking.openURL(url).catch(err => console.error('Error opening SMS:', err));
+    Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));
   };
 
   const renderItem = ({item, index}: any) => {

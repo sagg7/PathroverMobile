@@ -44,14 +44,14 @@ const PinLocationAddress = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      {/* <View style={styles.actionIcon}>
+      <View style={styles.actionIcon}>
         <TouchableOpacity onPress={onPressShare} style={{right: 10}}>
           {svgIcon.ShareWellPath}
         </TouchableOpacity>
-        <TouchableOpacity onPress={onPressPin}>
+        {/* <TouchableOpacity onPress={onPressPin}>
           {svgIcon.PinLocation}
-        </TouchableOpacity>
-      </View> */}
+        </TouchableOpacity> */}
+      </View>
 
       <View style={styles.blueBox}>
         {/* TODO SET COMPANY NAME  */}

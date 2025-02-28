@@ -21,6 +21,8 @@ interface SaveRouteSheetProps {
   routeName: any;
   title?: string;
   btnTitle?: string;
+  onEndEditing?: () => void;
+  onSubmitEditing?: () => void;
 }
 
 const SaveRouteSheet = ({
@@ -30,6 +32,8 @@ const SaveRouteSheet = ({
   onChangeText,
   title = 'Save Route',
   btnTitle = 'Save Route',
+  onEndEditing,
+  onSubmitEditing,
 }: SaveRouteSheetProps) => {
   const handleSave = () => {
     Keyboard.dismiss();
@@ -58,6 +62,8 @@ const SaveRouteSheet = ({
             inputContainerStyle={styles.inputStyles}
             onChangeText={onChangeText}
             value={routeName}
+            onEndEditing={onEndEditing}
+            onSubmitEditing={onSubmitEditing}
           />
 
           <View style={styles.btnContainer}>
