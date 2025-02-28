@@ -63,10 +63,10 @@ const Header = ({
       </View>
 
       <View style={styles.iconView}>
-        <TouchableOpacity onPress={onPressPhone}>
+        <TouchableOpacity onPress={onPressPhone} hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.BlackPhone}
         </TouchableOpacity>
-        <TouchableOpacity onPress={onPressVideo}>
+        <TouchableOpacity onPress={onPressVideo} hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.VideoIcon}
         </TouchableOpacity>
       </View>
@@ -87,8 +87,8 @@ const ChatDetail = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage] = useCreateChatMessageMutation();
-  const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
-
+  const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
+  
   useEffect(() => {
     try {
       subscribe(
@@ -179,8 +179,9 @@ const ChatDetail = () => {
       if (res) {
         await getChatMessage(item?.id);
       }
+      
     } catch (error) {
-      //
+      //      
     }
   };
 
