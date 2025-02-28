@@ -28,39 +28,45 @@ import {
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {useSelector} from 'react-redux';
 
-const SUBSCRIPTIONS_SLIDES = [
-  {
-    key: 1,
-    title: 'Unlimited Rewinds. Go back and try again!',
-    heading: 'How your free trial works',
-    description:
-      'No network? No problem! Premium users can download detailed maps to use while offline and far away from cell service. Reliable navigation to keep you safe on trail.',
-    bullets: [
-      'Get instant access and see how it can change your life.',
-      'We’ll remind you with an email or notification that your trial is ending',
-      "You'll be charged on June 14, cancel anytime before.",
-    ],
-    footer: 'Unlimited free access for 7 days, then $19.99 per month.',
-    button: 'Start Free Trial',
-  },
-  {
-    key: 2,
-    title: 'Unlimited Rewinds. Go back and try again!',
-    heading: 'Subscription for 1 Month',
-    description:
-      'No network? No problem! Premium users can download detailed maps to use while offline and far away from cell service. Reliable navigation to keep you safe on trail.',
-    bullets: [
-      'Chat options',
-      'Update to WellPath',
-      'Recording',
-      'Share routes with their phone contact list',
-      'Offline Maps',
-    ],
-    footer: 'Unlimited free access for 7 days, then $19.99 per month.',
-    button: 'Purchase Subscription',
-  },
-];
+const SUBSCRIPTIONS_SLIDES = (isTrailAvailed: boolean) =>
+  [
+    !isTrailAvailed && {
+      key: 1,
+      title: 'Start Your Trial Today!',
+      heading: 'How your free trial works',
+      description:
+        'No network? No problem! Premium users can download detailed maps to use while offline and far away from cell service. Reliable navigation to keep you safe on trail.',
+      bullets: [
+        'Get instant access and see how it can change your life.',
+        'We’ll remind you with an email or notification that your trial is ending',
+        `You'll be charged on ${new Date(
+          new Date().setDate(new Date().getDate() + 7),
+        ).toDateString()}, cancel anytime before.`,
+      ],
+      footer: 'Unlimited free access for 7 days, then $19.99 per month.',
+      button: 'Start Free Trial',
+    },
+    {
+      key: 2,
+      title: 'Unlock Premium Access!',
+      heading: 'Subscription for 1 Month',
+      description:
+        'No network? No problem! Premium users can download detailed maps to use while offline and far away from cell service. Reliable navigation to keep you safe on trail.',
+      bullets: [
+        'Chat options',
+        'Update to WellPath',
+        'Recording',
+        'Share routes with their phone contact list',
+        'Offline Maps',
+      ],
+      footer: !isTrailAvailed
+        ? 'Unlimited free access for 7 days, then $19.99 per month.'
+        : '',
+      button: 'Purchase Subscription',
+    },
+  ].filter(Boolean);
 
 const subscriptionSkus = ['com.pathrover.monthly'];
 
@@ -71,6 +77,8 @@ const Subscription = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
+  const {loginUser} = useSelector((state:any) => state?.auth);
+  console.log(" Subscription ~ loginUser==>", loginUser)
   const [createSubscriptions] = useCreateSubscriptionsMutation();
 
   useEffect(() => {
@@ -116,6 +124,7 @@ const Subscription = () => {
     try {
       const offerToken =
         subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
+      console.log(" handleBuySubscription ~ offerToken==>", offerToken)
       await requestSubscription({
         sku,
         ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
@@ -181,7 +190,7 @@ const Subscription = () => {
         ref={scrollRef}
         onScroll={handleScroll}
         scrollEventThrottle={16}>
-        {SUBSCRIPTIONS_SLIDES.map((slide, index) => (
+        {SUBSCRIPTIONS_SLIDES(loginUser?.is_aval_trial).map((slide, index) => (
           <View key={slide.key} style={styles.container}>
             <Text style={styles.title}>{slide.title}</Text>
             <View style={styles.cardContainer}>
@@ -204,7 +213,11 @@ const Subscription = () => {
             <View style={styles.buttonWrapper}>
               <AppButton
                 disabled={isLoading}
-                title={slide.button}
+                title={
+                  loginUser?.is_aval_trial
+                    ? 'Purchase Subscription'
+                    : 'Start Free Trial'
+                }
                 handleClick={handleNextSlide}
                 buttonStyle={styles.button}
                 textStyle={styles.buttonText}
@@ -214,7 +227,7 @@ const Subscription = () => {
         ))}
       </ScrollView>
       <View style={styles.pagination}>
-        {SUBSCRIPTIONS_SLIDES.map((_, index) => (
+        {SUBSCRIPTIONS_SLIDES(loginUser?.is_aval_trial).map((_, index) => (
           <View
             key={index}
             style={[styles.dot, {opacity: index === selectedIndex ? 1 : 0.5}]}

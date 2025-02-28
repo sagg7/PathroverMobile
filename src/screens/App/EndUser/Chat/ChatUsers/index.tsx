@@ -36,6 +36,7 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
+  console.log(" ChatUsers ~ allContactsList==>", allContactsList[1])
 
   // API
   // const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();

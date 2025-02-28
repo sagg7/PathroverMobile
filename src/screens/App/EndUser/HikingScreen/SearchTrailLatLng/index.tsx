@@ -39,7 +39,7 @@ import {
   REPORTS_LIST,
   UNEXPECTED_ERROR,
 } from '../../../../../shared/utils/constant';
-import {getTimeAndDistance} from '../../../../../shared/utils/helpers';
+import {getTimeAndDistance, isIOS} from '../../../../../shared/utils/helpers';
 import styles from './styles';
 
 const SearchTrailLatLng = () => {
@@ -166,20 +166,42 @@ const SearchTrailLatLng = () => {
   };
 
   const getTimeDistanceDetails = async () => {
-    const locResults: any = await getTimeAndDistance(
-      liveLocation,
-      startingPoint,
-    );
+    const locResults: any = await getTimeAndDistance(liveLocation, startingPoint);
     setTimeDistance(locResults);
-    const match = locResults?.distance?.match(/([\d.]+)\s*(km|m)/);
-    const distanceValue = match
-      ? parseFloat(match[1]) * (match[2] === 'km' ? 1000 : 1)
-      : Number(locResults?.distance) || 0;
-
-    if (distanceValue < 300) {
+ 
+    let distanceValue = 0;
+ 
+    if (typeof locResults?.distance === 'string') {
+      const match = locResults?.distance.match(/([\d.]+)\s*miles/);
+      if (match) {
+        distanceValue = parseFloat(match[1]); // Distance is already in miles
+      }
+    } else if (typeof locResults?.distance === 'number') {
+      distanceValue = locResults.distance; // Already in miles
+    }
+ 
+    if (distanceValue < 0.186) {
+      // 300 meters ≈ 0.186 miles
+      // setRouteStartedFromCurrent(true);
       setShowReachModal(true);
     }
   };
+
+  // const getTimeDistanceDetails = async () => {
+  //   const locResults: any = await getTimeAndDistance(
+  //     liveLocation,
+  //     startingPoint,
+  //   );
+  //   setTimeDistance(locResults);
+  //   const match = locResults?.distance?.match(/([\d.]+)\s*(km|m)/);
+  //   const distanceValue = match
+  //     ? parseFloat(match[1]) * (match[2] === 'km' ? 1000 : 1)
+  //     : Number(locResults?.distance) || 0;
+
+  //   if (distanceValue < 300) {
+  //     setShowReachModal(true);
+  //   }
+  // };
 
   useEffect(() => {
     getTimeDistanceDetails();
@@ -432,6 +454,7 @@ const SearchTrailLatLng = () => {
           }}
         />
       )}
+
       {modalKey === 1 && isStartBtnPressed && (
         <StartPointModal
           modalVisible={showReachModal}
@@ -500,7 +523,7 @@ const SearchTrailLatLng = () => {
               right: WP('3'),
               height: 40,
               alignItems: 'center',
-              top: WP('5'),
+              top: isIOS() ? WP('15') : WP('5'),
             }}
           />
         </>
