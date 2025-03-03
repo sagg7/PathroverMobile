@@ -22,6 +22,7 @@ import {
 } from '../../../../shared/exporter';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import styles from './styles';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const ViewSaveRoutes = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -46,7 +47,8 @@ const ViewSaveRoutes = ({route}: any) => {
   const [isStartBtnPressed, setIsStartBtnPressed] = useState<boolean>(false);
   const [showReachModal, setShowReachModal] = useState(false);
   const [modalKey, setModalKey] = useState(1);
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,
     start: false,
@@ -503,7 +505,7 @@ const ViewSaveRoutes = ({route}: any) => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>

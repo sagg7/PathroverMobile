@@ -39,6 +39,7 @@ import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet'
 import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -78,8 +79,9 @@ const WellPath = () => {
     longitude: null,
     radius: 50,
   });
-
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
 
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
@@ -87,11 +89,7 @@ const WellPath = () => {
     name: '',
   });
 
-  const {
-    data: allWellLocations,
-    isLoading,
-    refetch,
-  } = useGetAllWellsQuery(queryParams);
+  const {data: allWellLocations, refetch} = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
@@ -384,14 +382,18 @@ const WellPath = () => {
       <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
       <SearchView
         onPressSearch={() =>
-          navigation.navigate(Routes.SearchWellPath, {
-            searchLocation,
-            setSearchLocation,
-            searchLocationName,
-            setSearchLocationNames,
-          })
+          subscription
+            ? navigation.navigate(Routes.SearchWellPath, {
+                searchLocation,
+                setSearchLocation,
+                searchLocationName,
+                setSearchLocationNames,
+              })
+            : showPremiumAlert({})
         }
-        onPressFilter={() => setShowMapSettigs(true)}
+        onPressFilter={() => {
+          subscription ? setShowMapSettigs(true) : showPremiumAlert({});
+        }}
         onPressMenu={() => setShowOptionsSheet(true)}
       />
 
@@ -484,7 +486,9 @@ const WellPath = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
+        onPress={() => {
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
+        }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
       <WellPathMenuSheet
@@ -494,14 +498,22 @@ const WellPath = () => {
         onPressRecordRoute={() => {
           setShowOptionsSheet(false);
           setTimeout(() => {
-            navigation.navigate(Routes.RecordRoute);
+            {
+              subscription
+                ? navigation.navigate(Routes.RecordRoute)
+                : showPremiumAlert({});
+            }
           }, 1000);
         }}
         onPressCreateRoute={() => {
           setShowOptionsSheet(false);
           dispatch(setCreateRouteDataEmpty({}));
           setTimeout(() => {
-            navigation.navigate(Routes.CreateRouteEndUser);
+            {
+              subscription
+                ? navigation.navigate(Routes.CreateRouteEndUser)
+                : showPremiumAlert({});
+            }
           }, 1000);
         }}
       />

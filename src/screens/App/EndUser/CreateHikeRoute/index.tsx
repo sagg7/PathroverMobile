@@ -34,6 +34,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const CreateHikeRoute = () => {
   const navigation: any = useNavigation();
@@ -50,14 +51,14 @@ const CreateHikeRoute = () => {
     useState(false);
   const isFocused = useIsFocused();
   const [waypoints, setWaypoints] = useState<any>([]);
-
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
   const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const dispatch = useDispatch();
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   const refScrollable = useRef<any>();
 
   const {location} = useLocation();
@@ -303,7 +304,7 @@ const CreateHikeRoute = () => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>

@@ -5,7 +5,7 @@ import {appIcons} from '../../../../assets/icons';
 
 interface SearchViewProp {
   onPressSearch: () => void;
-  onPressFilter: any;
+  onPressFilter?: any;
   onPressMenu: any;
 }
 

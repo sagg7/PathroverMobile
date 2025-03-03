@@ -41,6 +41,7 @@ import {
 } from '../../../../../shared/utils/constant';
 import {getTimeAndDistance, isIOS} from '../../../../../shared/utils/helpers';
 import styles from './styles';
+import usePremiumAlert from '../../../../../hooks/usePremiumAlert';
 
 const SearchTrailLatLng = () => {
   const {location} = useLocation();
@@ -71,7 +72,8 @@ const SearchTrailLatLng = () => {
     direction: true,
     start: false,
   });
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   // API
   const [addRouteReport] = useAddRouteReportMutation();
   const {data: allReports, refetch} = useGetRouteReportQuery({});
@@ -166,11 +168,14 @@ const SearchTrailLatLng = () => {
   };
 
   const getTimeDistanceDetails = async () => {
-    const locResults: any = await getTimeAndDistance(liveLocation, startingPoint);
+    const locResults: any = await getTimeAndDistance(
+      liveLocation,
+      startingPoint,
+    );
     setTimeDistance(locResults);
- 
+
     let distanceValue = 0;
- 
+
     if (typeof locResults?.distance === 'string') {
       const match = locResults?.distance.match(/([\d.]+)\s*miles/);
       if (match) {
@@ -179,7 +184,7 @@ const SearchTrailLatLng = () => {
     } else if (typeof locResults?.distance === 'number') {
       distanceValue = locResults.distance; // Already in miles
     }
- 
+
     if (distanceValue < 0.186) {
       // 300 meters ≈ 0.186 miles
       // setRouteStartedFromCurrent(true);
@@ -368,9 +373,11 @@ const SearchTrailLatLng = () => {
   };
 
   const onPressShare = () => {
-    navigation.navigate(Routes.ChatUsers, {
-      shareTrail: {startingPoint, endingPoint},
-    });
+    subscription
+      ? navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {startingPoint, endingPoint},
+        })
+      : showPremiumAlert({});
   };
 
   return (

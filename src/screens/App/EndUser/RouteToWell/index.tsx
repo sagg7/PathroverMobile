@@ -21,6 +21,7 @@ import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {useSelector} from 'react-redux';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const RouteToWell = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -41,7 +42,8 @@ const RouteToWell = ({route}: any) => {
     start: false,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
 
   const {location} = useLocation();
@@ -136,9 +138,11 @@ const RouteToWell = ({route}: any) => {
   };
 
   const onPressShare = () => {
-    navigation.navigate(Routes.ChatUsers, {
-      shareTrail: {startingPoint: [], endingPoint: destination},
-    });
+    subscription
+      ? navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {startingPoint: [], endingPoint: destination},
+        })
+      : showPremiumAlert({});
   };
 
   const routeGeoJSON = {
@@ -290,7 +294,7 @@ const RouteToWell = ({route}: any) => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>

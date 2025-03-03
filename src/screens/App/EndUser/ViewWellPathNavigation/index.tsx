@@ -31,6 +31,7 @@ import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWel
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {useSelector} from 'react-redux';
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -66,7 +67,8 @@ const ViewWellPathNavigation = ({route}: any) => {
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const {
     data: allWellLocations,
@@ -427,7 +429,7 @@ const ViewWellPathNavigation = ({route}: any) => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>

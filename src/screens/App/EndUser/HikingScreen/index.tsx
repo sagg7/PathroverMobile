@@ -19,6 +19,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import styles from './styles';
 import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -42,9 +43,7 @@ const HikingScreen = () => {
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
   const [weather, setWeather] = useState<any>([]);
   const dispatch = useDispatch();
-  const {loginUser} = useSelector(state => state.auth);
   const [isMyDataVisible, setIsMyDataVisible] = useState(false);
-
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
     longitude: null,
@@ -52,7 +51,8 @@ const HikingScreen = () => {
   });
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
   const {location} = useLocation();
 
   const cameraRef = useRef<any>(null);
@@ -150,10 +150,11 @@ const HikingScreen = () => {
   return (
     <MainWrapper style={styles.container}>
       <HeaderView
-        userPicture={loginUser?.avatar}
         onPressFilter={() => {}}
         onPressSearch={() => {}}
-        onPressWeather={() => setShowWeatherSheet(true)}
+        onPressWeather={() => {
+          subscription ? setShowWeatherSheet(true) : showPremiumAlert({});
+        }}
       />
 
       <MapboxGL.MapView
@@ -180,12 +181,18 @@ const HikingScreen = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
+        onPress={() => {
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
+        }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.hikeIconStyle}
-        onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
+        onPress={() => {
+          subscription
+            ? navigation.navigate(Routes.CreateHikeRoute)
+            : showPremiumAlert({});
+        }}>
         {svgIcon.HikeRoute}
       </TouchableOpacity>
 
@@ -209,11 +216,19 @@ const HikingScreen = () => {
       <View style={styles.actionBtnView}>
         <ActionBtn
           icon={appIcons.recordTrack}
-          onPress={() => navigation.navigate(Routes.RecordHikingRoute)}
+          onPress={() => {
+            subscription
+              ? navigation.navigate(Routes.RecordHikingRoute)
+              : showPremiumAlert({});
+          }}
         />
         <ActionBtn
           icon={appIcons.offlineMap}
-          onPress={() => navigation.navigate(Routes.DownloadedMapList)}
+          onPress={() => {
+            subscription
+              ? navigation.navigate(Routes.DownloadedMapList)
+              : showPremiumAlert({});
+          }}
         />
         <ActionBtn
           icon={appIcons.myData}

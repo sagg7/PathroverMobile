@@ -37,6 +37,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const CreateRouteEndUser = () => {
   const navigation: any = useNavigation();
@@ -46,7 +47,9 @@ const CreateRouteEndUser = () => {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
-  const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);
+  const {createRouteData} = useSelector(
+    (state: any) => state?.endUser?.trailRoute,
+  );
 
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
@@ -62,7 +65,9 @@ const CreateRouteEndUser = () => {
     PFColors.Blue.Dark,
   );
   const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
-  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const mapLayerStyle = useSelector(
+    (state: any) => state?.manager?.mapLayerStyle,
+  );
   const dispatch = useDispatch();
 
   const [searchValues, setSearchValues] = useState<any>({
@@ -79,6 +84,8 @@ const CreateRouteEndUser = () => {
   const cameraRef = useRef<any>(null);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const {subscription} = useSelector((state: any) => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -118,17 +125,21 @@ const CreateRouteEndUser = () => {
     }
   }, [mapLayerStyle]);
 
-  const updateLongRoute = async (start, end, updatedWaypoints) => {
+  const updateLongRoute = async (
+    start: any,
+    end: any,
+    updatedWaypoints: any,
+  ) => {
     const fetchedRoute = await fetchRoute(start, end, updatedWaypoints);
     setRoute(fetchedRoute);
   };
 
-  const onPressMap = async event => {
+  const onPressMap = async (event: any) => {
     try {
       const {geometry} = event;
       if (searchValues?.end || searchValuesByAddress?.start) {
         const [longitude, latitude] = geometry.coordinates;
-        setWaypoints(prevWaypoints => {
+        setWaypoints((prevWaypoints: any) => {
           const newWaypoints = [...prevWaypoints, [longitude, latitude]];
           setUndoStack([...undoStack, prevWaypoints]);
           setRedoStack([]);
@@ -188,7 +199,7 @@ const CreateRouteEndUser = () => {
     }, 500);
   };
 
-  const routeGeoJSON = {
+  const routeGeoJSON: any = {
     type: 'Feature',
     geometry: {
       type: 'LineString',
@@ -238,8 +249,8 @@ const CreateRouteEndUser = () => {
     }
     if (route?.length > 2 && isEmptyAdress) {
       const allPoints = route;
-      const longitudes = allPoints?.map(point => point[0]);
-      const latitudes = allPoints?.map(point => point[1]);
+      const longitudes = allPoints?.map((point: any) => point[0]);
+      const latitudes = allPoints?.map((point: any) => point[1]);
       const minLongitude = Math.min(...longitudes);
       const maxLongitude = Math.max(...longitudes);
       const minLatitude = Math.min(...latitudes);
@@ -324,7 +335,7 @@ const CreateRouteEndUser = () => {
       const locationsAttributes =
         route?.length > 0
           ? [
-              ...route.map(([longitude, latitude], index) => ({
+              ...route.map(([longitude, latitude]: any, index: any) => ({
                 latitude: latitude.toString(),
                 longitude: longitude.toString(),
                 name: `Point ${index + 1}`,
@@ -334,7 +345,7 @@ const CreateRouteEndUser = () => {
       const pinnedPoints =
         waypoints?.length > 0
           ? [
-              ...waypoints?.map(([longitude, latitude], index) => ({
+              ...waypoints?.map(([longitude, latitude]: any, index: any) => ({
                 latitude: latitude.toString(),
                 longitude: longitude.toString(),
                 name: `Point ${index + 1}`,
@@ -371,7 +382,7 @@ const CreateRouteEndUser = () => {
     }
   };
 
-  const fetchRoute = async (start, end, waypoints = []) => {
+  const fetchRoute = async (start: any, end: any, waypoints = []) => {
     const accessToken = mapBoxToken;
     let url = null;
     const waypointString = waypoints.map(wp => `${wp[0]},${wp[1]}`).join(';');
@@ -478,7 +489,7 @@ const CreateRouteEndUser = () => {
 
         {!isCoordinates &&
           !isAdddress &&
-          route?.map((coordinate, index) => (
+          route?.map((coordinate: any, index: any) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
               id={`pin-${index}`}
@@ -509,7 +520,7 @@ const CreateRouteEndUser = () => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
@@ -594,7 +605,6 @@ const CreateRouteEndUser = () => {
             },
           }}>
           <SaveRouteSheet
-            modalVisible={refScrollable}
             routeName={routeName}
             onChangeText={(text: any) => setRouteName(text)}
             onPressSave={() => {
