@@ -14,7 +14,7 @@ import styles from './styles';
 
 const CallList = ({navigation}: any) => {
   const isFocused = useIsFocused();
-  const {data, refetch} = useGetUserCallQuery();
+  const {data, refetch} = useGetUserCallQuery({});
   const [searchQuery, setSearchQuery] = useState('');
   const [searchedChats, setSearchedChats] = useState([]);
 
@@ -30,9 +30,8 @@ const CallList = ({navigation}: any) => {
           const searchText = searchQuery?.toLowerCase();
   
           const filteredChats = data?.call_logs?.filter(
-            item =>
-              item?.user_info?.first_name?.toLowerCase().includes(searchText) ||
-              item?.user_info?.last_name?.toLowerCase().includes(searchText)
+            (item: any) =>
+              (`${item?.user_info?.first_name} ${item?.user_info?.last_name}`)?.toLowerCase().includes(searchText)
           );
   
           setSearchedChats(filteredChats);

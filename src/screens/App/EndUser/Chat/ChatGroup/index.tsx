@@ -19,17 +19,18 @@ import styles from './styles';
 const ChatGroup = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [search, setSearch] = useState('');
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<any[]>([]);
   const [loader, setLoader] = useState(false);
-  const [searchedChats, setSearchedChats] = useState([]);
+  const [searchedChats, setSearchedChats] = useState<any[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [getGroupChats, {isLoading, data}] = useGetGroupChatsMutation();
   const [deleteGroup] = useDeleteGroupMutation();
 
-  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const {loginUser, accessToken} = useSelector((state: any) => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
   const {subscribe, unsubscribe} = useChannel(actionCable);
@@ -44,7 +45,7 @@ const ChatGroup = () => {
         {
           received: res => {
             dispatch(setChatCount(res));
-            getGroupChats();
+            getGroupChats({});
           },
           connected: () => {},
         },
@@ -60,18 +61,27 @@ const ChatGroup = () => {
   useEffect(() => {
     (async () => {
       if (isFocused) {
-        setLoader(true);
-        await getGroupChats();
+        if (isInitialLoading) {
+          setLoader(true);
+        }
+        await getGroupChats({});
+        setIsInitialLoading(false);
         setTimeout(() => {
           setLoader(false);
-        },800);
+        }, 800);
       }
     })();
   }, [isFocused]);
-  
 
   useEffect(() => {
-      setChats(data ?? []);
+    if (data) {
+      setChats(prevChats => {
+        if (prevChats.length === 0) return data;
+        const chatMap = new Map(prevChats.map(chat => [chat.id, chat]));
+        data.forEach((chat: any) => chatMap.set(chat.id, chat));
+        return Array.from(chatMap.values());
+      });
+    }
   }, [data]);
 
   useEffect(() => {
@@ -80,7 +90,7 @@ const ChatGroup = () => {
         const searchText = search.toLowerCase();
 
         const filteredChats = chats.filter(
-          chat =>
+          (chat: any) =>
             chat?.name?.toLowerCase().includes(searchText) ||
             chat?.last_message?.toLowerCase().includes(searchText),
         );
@@ -94,18 +104,18 @@ const ChatGroup = () => {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const onPressDelete = async item => {
+  const onPressDelete = async (item: any) => {
     try {
       const res = await deleteGroup(item.id);
       if (res?.data) {
-        await getGroupChats();
+        await getGroupChats({});
       }
     } catch (error) {
       //
     }
   };
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({item, index}: any) => {
     return (
       <ChatListItem
         item={item}
@@ -125,13 +135,9 @@ const ChatGroup = () => {
     );
   };
 
-  if (loader) {
-    //  isLoading || 
-      return (
-          <AppLoader />
-        ) 
-    };
-  
+  if (isInitialLoading && loader) {
+    return <AppLoader />;
+  }
 
   return (
     <View style={styles.container}>

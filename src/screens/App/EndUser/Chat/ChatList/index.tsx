@@ -20,17 +20,18 @@ const ChatList = () => {
   const {params} = useRoute();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [search, setSearch] = useState('');
   const [chats, setChats] = useState([]);
   const [loader, setLoader] = useState(false);
   const [searchedChats, setSearchedChats] = useState([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [deleteChat] = useDeleteChatMutation();
   const [getChats, {isLoading, data}] = useGetChatsMutation();
 
-  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const {loginUser, accessToken} = useSelector((state: any) => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
   const {subscribe, unsubscribe} = useChannel(actionCable);
@@ -45,7 +46,7 @@ const ChatList = () => {
         {
           received: res => {
             dispatch(setChatCount(res));
-            getChats();
+            getChats({});
           },
           connected: () => {},
         },
@@ -61,9 +62,12 @@ const ChatList = () => {
   useEffect(() => {
     (async () => {
       if (isFocused) {
-        setLoader(true);
-        await getChats();
-
+        if (isInitialLoading) {
+          setLoader(true);
+        }
+        await getChats({});
+        setIsInitialLoading(false);
+  
         setTimeout(() => {
           setLoader(false);
         }, 300);
@@ -72,9 +76,9 @@ const ChatList = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    if(data){
+    if (data) {
       setChats(data?.chats ?? []);
-      }
+    }
   }, [data]);
 
   useEffect(() => {
@@ -83,9 +87,10 @@ const ChatList = () => {
         const searchText = search.toLowerCase();
 
         const filteredChats = chats.filter(
-          chat =>
-            chat?.user?.first_name?.toLowerCase().includes(searchText) ||
-            chat?.user?.last_name?.toLowerCase().includes(searchText) ||
+          (chat: any) =>
+            `${chat?.user?.first_name} ${chat?.user?.last_name}`
+              ?.toLowerCase()
+              .includes(searchText) ||
             chat?.last_message?.content?.toLowerCase().includes(searchText),
         );
 
@@ -98,18 +103,18 @@ const ChatList = () => {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const onPressDelete = async item => {
+  const onPressDelete = async (item: any) => {
     try {
       const res = await deleteChat(item.id);
       if (res) {
-        await getChats();
+        await getChats({});
       }
     } catch (error) {
       //
     }
   };
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({item, index}: any) => {
     return (
       <ChatListItem
         item={item}
@@ -129,12 +134,9 @@ const ChatList = () => {
     );
   };
 
-  if (loader) {
-    // isLoading || 
-    return (
-        <AppLoader />
-      ) 
-  };
+  if (isInitialLoading && loader) {
+    return <AppLoader />;
+  }  
 
   return (
     <View style={styles.container}>
@@ -158,7 +160,7 @@ const ChatList = () => {
             data={search?.length > 0 ? searchedChats : chats}
             renderItem={renderItem}
             ListEmptyComponent={listEmptyComponent}
-            keyExtractor={(item, index) => item + index.toString()}
+            keyExtractor={(_, index) => index.toString()}
           />
         </>
       )}

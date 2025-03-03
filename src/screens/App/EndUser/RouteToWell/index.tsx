@@ -9,6 +9,7 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
+  Routes,
   showAlert,
   UNEXPECTED_ERROR,
 } from '../../../../shared/exporter';
@@ -57,6 +58,11 @@ const RouteToWell = ({route}: any) => {
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
+      const tempMap = mapTypesArr.map(item => ({
+        ...item,
+        isSelected: item.type === mapLayerStyle,
+      }));
+      setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
 
@@ -127,6 +133,12 @@ const RouteToWell = ({route}: any) => {
     setTimeout(() => {
       setMapLayerSheeet(false);
     }, 500);
+  };
+
+  const onPressShare = () => {
+    navigation.navigate(Routes.ChatUsers, {
+      shareTrail: {startingPoint: [], endingPoint: destination},
+    });
   };
 
   const routeGeoJSON = {
@@ -242,6 +254,7 @@ const RouteToWell = ({route}: any) => {
           routeName={route?.params?.entranceName}
           distanceInfo={results}
           actionBtn={actionBtn}
+          onPressShare={onPressShare}
           onPressDirection={() => {
             getRoute();
             setActionBtn({
