@@ -10,4 +10,6 @@ export const appImages = {
   yourLocation: require('../images/yourLocation.png'),
   noNotification: require('../images/noNotification.png'),
   userPlaceholder: require('../images/placeholder.jpg'),
+  locationView: require('../images/locationView.jpeg'),
+  sittingView: require('../images/sittingArea.jpeg'),
 };
