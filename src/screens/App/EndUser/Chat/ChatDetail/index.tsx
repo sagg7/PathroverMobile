@@ -139,8 +139,6 @@ const ChatDetail = () => {
 
   useEffect(() => {
     if (isConnected && shareTrail) {
-      console.log('RESP', {[MESSAGE_CONTAINS_LOCATION]: shareTrail});
-
       onSend([
         {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
       ]);

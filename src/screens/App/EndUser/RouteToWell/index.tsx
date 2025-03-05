@@ -137,7 +137,7 @@ const RouteToWell = ({route}: any) => {
 
   const onPressShare = () => {
     navigation.navigate(Routes.ChatUsers, {
-      shareTrail: {startingPoint: [], endingPoint: destination},
+      shareTrail: {startingPoint: [], endingPoint: destination, type: 'route to well'},
     });
   };
 

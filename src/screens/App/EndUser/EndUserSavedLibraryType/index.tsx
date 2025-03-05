@@ -144,16 +144,28 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     return [Number(location.longitude), Number(location.latitude)];
   };
   const handdleShareOption = (routeData: any) => {
+    console.log(' handdleShareOption ~ routeData==>', routeData);
     // const hasCustom = routeData?.route_type.includes('custom');
     const startingPoint = extractCoordinates(routeData?.pickup_location);
     const endingPoint = extractCoordinates(routeData?.dropoff_location);
-
+    const {pickup_location, dropoff_location, ...data} = routeData;
+    handleModal(null, null);
     if (routeData?.route_type) {
-      // console.log('DATA===>', routeData);
       navigation.navigate(Routes.ChatUsers, {
         shareTrail: {
           startingPoint: startingPoint,
           endingPoint: endingPoint,
+          type:
+            routeData.route_type == 'custom_route'
+              ? 'custom route'
+              : routeData.route_type == 'recording_route'
+              ? 'Recording'
+              : routeData.route_type == 'maps_location_pins'
+              ? 'Well pin'
+              : routeData.route_type == 'hiking_trail_route'
+              ? 'trail'
+              : 'route',
+          data,
         },
       });
     }

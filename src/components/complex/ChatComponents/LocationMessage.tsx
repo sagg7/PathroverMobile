@@ -6,7 +6,9 @@ import Svg from '../../../assets/svg/blueMarker.svg';
 import moment from 'moment';
 import {useDispatch} from 'react-redux';
 import {
+  resetTrailRoute,
   setEndingPoint,
+  setRouteData,
   setStartingPoint,
 } from '../../../redux/endUser/endUserSlice';
 import {useNavigation} from '@react-navigation/native';
@@ -17,10 +19,11 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   const navigation = useNavigation();
   const {location} = useLocation();
 
-  const {startingPoint, endingPoint} =
+  const {startingPoint, endingPoint, type, data} =
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
+    dispatch(resetTrailRoute());
     if (startingPoint?.length > 0) {
       dispatch(
         setStartingPoint([
@@ -33,7 +36,6 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         dispatch(setStartingPoint([location.longitude, location.latitude]));
       }
     }
-
     if (endingPoint?.length > 0) {
       dispatch(
         setEndingPoint([
@@ -42,12 +44,14 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         ]),
       );
     }
-
+    if (data) {
+      dispatch(setRouteData(data));
+    }
     navigation.navigate(Routes.SearchTrailLatLng);
   };
 
   return (
-    <View style={{...styles.main, marginLeft: 10}}>
+    <View style={{...styles.main, marginLeft: -10}}>
       <TouchableOpacity
         style={[
           styles.bubbleContainer,
@@ -79,8 +83,9 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             style={{
               ...styles.locText,
               color: isLeft ? PFColors.Orange.Dark : PFColors.Blue.Dark,
+              textAlign: isLeft ? 'right' : 'left',
             }}>
-            {'Shared location'}
+            {`Shared ${type ? type : 'location'}`}
           </Text>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -133,10 +138,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   locText: {
-    width: '80%',
-    textAlign: 'center',
+    width: '75%',
     fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.Medium,
+    textTransform: 'capitalize',
   },
   time: {
     fontSize: PFFontSize.FONT_SIZE_8,

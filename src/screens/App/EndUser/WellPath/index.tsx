@@ -526,12 +526,14 @@ const WellPath = () => {
       />
       <PinLocationAddress
         onPressShare={() => {
+          setShowPinAddress(false);
           selectedWell.map(Number);
           const formatedArr = selectedWell.map(Number);
           navigation.navigate(Routes.ChatUsers, {
             shareTrail: {
               startingPoint: [],
               endingPoint: formatedArr,
+              type: 'Well route',
             },
           });
         }}
@@ -565,6 +567,7 @@ const WellPath = () => {
               shareTrail: {
                 startingPoint: entranceCoords,
                 endingPoint: formatedArr,
+                type: 'Well entrance route',
               },
             });
           }}

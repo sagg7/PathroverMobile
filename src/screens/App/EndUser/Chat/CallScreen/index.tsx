@@ -35,8 +35,8 @@ const CallScreen = ({
 }: CallScreenProps) => {
   const iconsView = () => {
     return (
-      <View style={styles.callButtonView} pointerEvents={isNear ? 'none' : 'auto'}>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressSpeaker}>
+      <View style={styles.callButtonView} pointerEvents={isNear ? 'box-none' : 'auto'}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressSpeaker}>
           <View style={styles.iconBackGround(isSpeakerOn)}>
             <Image
               source={isSpeakerOn ? appIcons.speakerOn : appIcons.speakerOff}
@@ -45,7 +45,7 @@ const CallScreen = ({
           </View>
           <Text style={styles.iiconTextStyle}>Speaker</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressMute}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressMute}>
           <View style={styles.iconBackGround(!isMute)}>
             <Image
               source={isMute ? appIcons.muted : appIcons.mute}
@@ -54,7 +54,7 @@ const CallScreen = ({
           </View>
           <Text style={styles.iiconTextStyle}>Mute</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressLeave}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressLeave}>
           <View style={styles.iconBackGroundRed}>
             <Image source={appIcons.endCall} style={styles.callIconStyle} />
           </View>

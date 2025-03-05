@@ -94,7 +94,7 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
             {item?.last_message && (
               <Text style={styles.detailText} numberOfLines={1}>
                 {typeof item?.last_message === 'object'
-                  ? (item?.last_message?.content || '').includes(MESSAGE_CONTAINS_LOCATION) ? 'Shared Location' : item?.last_message?.content || '' :""}
+                  ? (item?.last_message?.content || '').includes(MESSAGE_CONTAINS_LOCATION) ? `Shared Location` : item?.last_message?.content || '' :""}
               </Text>
             )}
           </View>
