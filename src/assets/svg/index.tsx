@@ -160,6 +160,8 @@ import PinButton from './pinButton.svg';
 import Direction from './directionIcon.svg';
 import StartIcon from './start.svg';
 import RecentIcon from './recent.svg';
+import CheckboxFill from './checkbox_fill.svg';
+import CheckboxBlank from './checkbox_blank.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -199,7 +201,7 @@ export const svgIcon = {
   GalleryBlue: <GalleryBlue />,
   RouteBlue: <RouteBlue />,
   RouteBlack: <RouteBlack />,
-  DownChaveron: <DownChaveron />,
+  DownChaveron: <DownChaveron fill={"#13488A"}/>,
   UpChaveron: <UpChaveron />,
   ClockRed: <Clock />,
   RatingStar: <RatingStar />,
@@ -226,7 +228,7 @@ export const svgIcon = {
   Sattelite: <Sattelite />,
   DragablePin: <DragablePin />,
   CurrentLocation: <CurrentLocation />,
-  Edit: <Edit fill="#CF4727"/>,
+  Edit: <Edit fill="#CF4727" />,
   MiniPin: <MiniPin />,
   MiniRatingIcon: <MiniRatingIcon />,
   VanFilledIcon: <VanFilledIcon />,
@@ -247,7 +249,7 @@ export const svgIcon = {
   SendMsg: <SendMsg />,
   AddButton: <AddButton />,
   LockIcon: <LockIcon />,
-  ChatDelete: <ChatDelete fill="white"/>,
+  ChatDelete: <ChatDelete fill="white" />,
   AddedIcon: <AddedIcon />,
   RemoveIcon: <RemoveIcon />,
   Exit: <Exit />,
@@ -323,4 +325,6 @@ export const svgIcon = {
   Direction: <Direction />,
   StartIcon: <StartIcon />,
   RecentIcon: <RecentIcon />,
+  CheckboxFill: <CheckboxFill />,
+  CheckboxBlank: <CheckboxBlank />,
 };

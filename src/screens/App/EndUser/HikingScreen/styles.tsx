@@ -134,5 +134,8 @@ const styles = StyleSheet.create({
   iconStyle: {
     marginRight: WP('2'),
   },
+  filterContainer:{
+    // padding:20
+  }
 });
 export default styles;

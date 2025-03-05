@@ -1,7 +1,7 @@
 import {View, Text, Image, TouchableOpacity} from 'react-native';
 import React from 'react';
 import styles from './styles';
-import {appIcons, PFColors} from '../../../../shared/exporter';
+import {appIcons, PFColors, WP} from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import {useNavigation} from '@react-navigation/native';
 
@@ -33,11 +33,15 @@ const HeaderView = ({
         />
       </TouchableOpacity>
       <View style={styles.toggleView}>
-        <TouchableOpacity onPress={onPressSearch}  style={styles.iconStyle}>
+        {/*TODO uncomment width from  toggleView class */}
+        <TouchableOpacity onPress={onPressSearch} style={styles.iconStyle}>
           {svgIcon.SearchView}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onPressFilter}  style={styles.iconStyle}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.iconStyle}
+          onPress={onPressFilter}>
           {svgIcon.FilterOrange}
         </TouchableOpacity>
         <TouchableOpacity onPress={onPressWeather}>

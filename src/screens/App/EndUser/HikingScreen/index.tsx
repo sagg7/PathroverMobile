@@ -1,14 +1,14 @@
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
-import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { svgIcon } from '../../../../assets/svg';
-import { MainWrapper, MapLayerSheet, WeatherSheet } from '../../../../components';
+import React, {useEffect, useRef, useState} from 'react';
+import {FlatList, Image, Text, TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {svgIcon} from '../../../../assets/svg';
+import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import useLocation from '../../../../hooks/getLocation';
-import { resetTrailRoute } from '../../../../redux/endUser/endUserSlice';
-import { setMapLayerStyle } from '../../../../redux/manager/managerSlice';
+import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {
   appIcons,
   Default_Map_Style,
@@ -18,6 +18,9 @@ import {
 } from '../../../../shared/exporter';
 import HeaderView from './HeaderView';
 import styles from './styles';
+import AppCheckbox from '../../../../components/complex/AppCheckbox';
+import {HIKING_FILTERS_CHECKLIST} from '../../../../shared/utils/constant';
+import HikingFilter from '../../../../components/complex/HikingFilter';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -39,10 +42,11 @@ const HikingScreen = () => {
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
+  const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
   const [showSheet, setShowSheet] = useState<boolean>(true);
   const [weather, setWeather] = useState<any>([]);
   const dispatch = useDispatch();
-  const { loginUser } = useSelector(state => state.auth);
+  const {loginUser} = useSelector(state => state.auth);
   const [isMyDataVisible, setIsMyDataVisible] = useState(false);
 
   const [queryParams, setQueryParams] = useState<any>({
@@ -53,7 +57,7 @@ const HikingScreen = () => {
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
-  const { location } = useLocation();
+  const {location} = useLocation();
 
   const cameraRef = useRef<any>(null);
 
@@ -104,7 +108,7 @@ const HikingScreen = () => {
 
   const onPressMap = (event: any) => {
     try {
-      const { geometry } = event;
+      const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
       } else {
         console.error('Invalid coordinates:', geometry);
@@ -137,7 +141,7 @@ const HikingScreen = () => {
   const moveToCurrentLocation = () => {
     cameraRef.current.flyTo(currentLocation, 100);
   };
-  const ActionBtn = ({ icon, onPress }: any) => (
+  const ActionBtn = ({icon, onPress}: any) => (
     <TouchableOpacity onPress={onPress}>
       <Image
         source={icon}
@@ -149,113 +153,125 @@ const HikingScreen = () => {
 
   return (
     <MainWrapper style={styles.container}>
-        <HeaderView
-          userPicture={loginUser?.avatar}
-          onPressFilter={() => { }}
-          onPressSearch={() => {navigation.navigate('SearchTrails') }}
-          onPressWeather={() => setShowWeatherSheet(true)}
+      <HeaderView
+        userPicture={loginUser?.avatar}
+        onPressFilter={() => {
+          setShowFilterSheet(true);
+        }}
+        onPressSearch={() => {
+          navigation.navigate('SearchTrails');
+        }}
+        onPressWeather={() => setShowWeatherSheet(true)}
+      />
+      <MapboxGL.MapView
+        key={selectedMapType}
+        styleURL={selectedMapType}
+        style={styles.map}
+        scaleBarEnabled={false}
+        onPress={onPressMap}>
+        <MapboxGL.Camera
+          ref={cameraRef}
+          zoomLevel={12}
+          centerCoordinate={currentLocation}
         />
-        <MapboxGL.MapView
-          key={selectedMapType}
-          styleURL={selectedMapType}
-          style={styles.map}
-          scaleBarEnabled={false}
-          onPress={onPressMap}>
-          <MapboxGL.Camera
-            ref={cameraRef}
-            zoomLevel={12}
-            centerCoordinate={currentLocation}
-          />
-          {currentLocation && (
-            <MapboxGL.MarkerView coordinate={currentLocation}>
-              {svgIcon.CurrentLocation}
-            </MapboxGL.MarkerView>
-          )}
-        </MapboxGL.MapView>
-        <TouchableOpacity
-          style={styles.centerMapStyles}
-          onPress={() => moveToCurrentLocation()}>
-          {svgIcon.MapWhiteBg}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.maplayerStyles}
-          onPress={() => setMapLayerSheeet(true)}>
-          {svgIcon.MapLayer}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.hikeIconStyle}
-          onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
-          {svgIcon.HikeRoute}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.searcRoute}
-          onPress={() => {
-            dispatch(resetTrailRoute());
-            navigation.navigate(Routes.SearchTrailLatLng);
-          }}>
-          {svgIcon.SearchRoute}
-        </TouchableOpacity>
-
-        <MapLayerSheet
-          setModalVisible={() => setMapLayerSheeet(false)}
-          modalVisible={mapLayerSheeet}
-          data={mapTypesArr}
-          onPressCard={onSelectMapType}
-          onPressCancel={() => setMapLayerSheeet(false)}
-          onPressSave={() => onPressSave()}
-        />
-        <View style={styles.actionBtnView}>
-          <ActionBtn
-            icon={appIcons.recordTrack}
-            onPress={() => navigation.navigate(Routes.RecordHikingRoute)}
-          />
-          <ActionBtn
-            icon={appIcons.offlineMap}
-            onPress={() => navigation.navigate(Routes.DownloadedMapList)}
-          />
-          <ActionBtn
-            icon={appIcons.myData}
-            onPress={() => {
-              setIsMyDataVisible(true);
-            }}
-          />
-        </View>
-
-        {weather?.city && (
-          <WeatherSheet
-            modalVisible={showWeatherSheet}
-            coords={[location?.longitude, location?.latitude]}
-            setModalVisible={() => setShowWeatherSheet(false)}
-            weather={weather}
-          />
+        {currentLocation && (
+          <MapboxGL.MarkerView coordinate={currentLocation}>
+            {svgIcon.CurrentLocation}
+          </MapboxGL.MarkerView>
         )}
-        <GeneralModal
-          visible={isMyDataVisible}
-          title={'My data'}
-          onClose={() => setIsMyDataVisible(false)}>
-          <FlatList
-            data={MY_DATA_MODAL_CONTENT}
-            renderItem={({ item }) => {
-              return (
-                <TouchableOpacity
-                  activeOpacity={0.4}
-                  style={styles.tagView}
-                  onPress={() => {
-                    setIsMyDataVisible(false),
-                      navigation.navigate(Routes.EndUserSavedLibraryType, { item });
-                  }}>
-                  <View style={styles.tagRow}>
-                    {item?.icon}
-                    <Text style={styles.tagText}>{item.title}</Text>
-                  </View>
-                  {svgIcon.RightChevron}
-                </TouchableOpacity>
-              );
-            }}
-          />
-        </GeneralModal>
-      </MainWrapper>
+      </MapboxGL.MapView>
+      <TouchableOpacity
+        style={styles.centerMapStyles}
+        onPress={() => moveToCurrentLocation()}>
+        {svgIcon.MapWhiteBg}
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.maplayerStyles}
+        onPress={() => setMapLayerSheeet(true)}>
+        {svgIcon.MapLayer}
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.hikeIconStyle}
+        onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
+        {svgIcon.HikeRoute}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.searcRoute}
+        onPress={() => {
+          dispatch(resetTrailRoute());
+          navigation.navigate(Routes.SearchTrailLatLng);
+        }}>
+        {svgIcon.SearchRoute}
+      </TouchableOpacity>
+
+      <MapLayerSheet
+        setModalVisible={() => setMapLayerSheeet(false)}
+        modalVisible={mapLayerSheeet}
+        data={mapTypesArr}
+        onPressCard={onSelectMapType}
+        onPressCancel={() => setMapLayerSheeet(false)}
+        onPressSave={() => onPressSave()}
+      />
+      <View style={styles.actionBtnView}>
+        <ActionBtn
+          icon={appIcons.recordTrack}
+          onPress={() => navigation.navigate(Routes.RecordHikingRoute)}
+        />
+        <ActionBtn
+          icon={appIcons.offlineMap}
+          onPress={() => navigation.navigate(Routes.DownloadedMapList)}
+        />
+        <ActionBtn
+          icon={appIcons.myData}
+          onPress={() => {
+            setIsMyDataVisible(true);
+          }}
+        />
+      </View>
+
+      {weather?.city && (
+        <WeatherSheet
+          modalVisible={showWeatherSheet}
+          coords={[location?.longitude, location?.latitude]}
+          setModalVisible={() => setShowWeatherSheet(false)}
+          weather={weather}
+        />
+      )}
+
+      {/* My Data Modal */}
+      <GeneralModal
+        visible={isMyDataVisible}
+        title={'My data'}
+        onClose={() => setIsMyDataVisible(false)}>
+        <FlatList
+          data={MY_DATA_MODAL_CONTENT}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                activeOpacity={0.4}
+                style={styles.tagView}
+                onPress={() => {
+                  setIsMyDataVisible(false),
+                    navigation.navigate(Routes.EndUserSavedLibraryType, {item});
+                }}>
+                <View style={styles.tagRow}>
+                  {item?.icon}
+                  <Text style={styles.tagText}>{item.title}</Text>
+                </View>
+                {svgIcon.RightChevron}
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </GeneralModal>
+
+      {/* Filter Modal */}
+      <HikingFilter
+        showFilterSheet={showFilterSheet}
+        setShowFilterSheet={setShowFilterSheet}
+      />
+    </MainWrapper>
   );
 };
 

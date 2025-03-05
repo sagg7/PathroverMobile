@@ -519,7 +519,6 @@ export const DriverProfileMenu = [
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -558,7 +557,6 @@ export const ManagerProfileMenu = [
     title: 'Notifications',
     icon: appIcons.bellIcon,
   },
-
   {
     id: 7,
     title: 'Privacy Policy',
@@ -579,13 +577,11 @@ export const ManagerProfileMenu = [
     title: 'FAQ',
     icon: appIcons.faq,
   },
-
   {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -604,7 +600,6 @@ export const EndUserProfileMenu = [
     title: 'Switch Account',
     icon: appIcons.logout,
   },
-
   {
     id: 1,
     title: 'Manage Profile',
@@ -640,13 +635,11 @@ export const EndUserProfileMenu = [
     title: 'Privacy Policy',
     icon: appIcons.privacy,
   },
-
   {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -958,5 +951,454 @@ export const REPORTS_LIST = [
     name: 'Stalled vehicle',
     icon: appIcons.warning,
     key: 'stalled_vehicle',
+  },
+];
+
+export const HIKING_FILTERS_CHECKLIST = [
+  {
+    id: 1,
+    label: 'Wet weather friendly',
+  },
+  {
+    id: 2,
+    label: 'Family friendly',
+  },
+  {
+    id: 1,
+    label: 'Alpine trail',
+  },
+  {
+    id: 1,
+    label: 'Hide closed',
+  },
+];
+
+export const DIRECTIONS = [
+  {
+    id: 0,
+    value: 'Downhill Only',
+    label: 'Downhill Only',
+  },
+  {
+    id: 1,
+    value: 'Downhill Primary',
+    label: 'Downhill Primary',
+  },
+  {
+    id: 2,
+    value: 'Both Directions',
+    label: 'Both Directions',
+  },
+  {
+    id: 3,
+    value: 'Uphill Primary',
+    label: 'Uphill Primary',
+  },
+  {
+    id: 4,
+    value: 'Uphill Only',
+    label: 'Uphill Only',
+  },
+  {
+    id: 5,
+    value: 'One Direction',
+    label: 'One Direction',
+  },
+];
+
+export const DIFFICULTIES = [
+  {
+    id: 0,
+    value: 'Access Road/Trail',
+    label: 'Access Road/Trail',
+  },
+  {
+    id: 1,
+    value: 'Secondary Access Road/Trail',
+    label: 'Secondary Access Road/Trail',
+  },
+  {
+    id: 2,
+    value: 'White',
+    label: 'White',
+  },
+  {
+    id: 3,
+    value: 'Green',
+    label: 'Green',
+  },
+  {
+    id: 4,
+    value: 'Blue',
+    label: 'Blue',
+  },
+  {
+    id: 5,
+    value: 'Advanced',
+    label: 'Advanced',
+  },
+  {
+    id: 6,
+    value: 'Black',
+    label: 'Black',
+  },
+  {
+    id: 7,
+    value: 'Double Black Diamond',
+    label: 'Double Black Diamond',
+  },
+  {
+    id: 8,
+    value: 'Proline',
+    label: 'Proline',
+  },
+  {
+    id: 8,
+    value: 'Lift',
+    label: 'Lift',
+  },
+];
+
+export const TTFs = [
+  {
+    id: 0,
+    value: 'A-Frame',
+    label: 'A-Frame',
+  },
+  {
+    id: 1,
+    value: 'Berm',
+    label: 'Berm',
+  },
+  {
+    id: 2,
+    value: 'Bridge',
+    label: 'Bridge',
+  },
+  {
+    id: 3,
+    value: 'Drop',
+    label: 'Drop',
+  },
+  {
+    id: 4,
+    value: 'Jump',
+    label: 'Jump',
+  },
+  {
+    id: 5,
+    value: 'Gap Jump',
+    label: 'Gap Jump',
+  },
+  {
+    id: 6,
+    value: 'Ladder Bridge',
+    label: 'Ladder Bridge',
+  },
+  {
+    id: 7,
+    value: 'Log Ride',
+    label: 'Log Ride',
+  },
+  {
+    id: 8,
+    value: 'Pump Track',
+    label: 'Pump Track',
+  },
+  {
+    id: 9,
+    value: 'Rock Face',
+    label: 'Rock Face',
+  },
+  {
+    id: 10,
+    value: 'Rock Garden',
+    label: 'Rock Garden',
+  },
+  {
+    id: 11,
+    value: 'Roller Coaster',
+    label: 'Roller Coaster',
+  },
+  {
+    id: 12,
+    value: 'Skinny',
+    label: 'Skinny',
+  },
+  {
+    id: 13,
+    value: 'Teeter Totter',
+    label: 'Teeter Totter',
+  },
+  {
+    id: 14,
+    value: 'Wallride',
+    label: 'Wallride',
+  },
+  {
+    id: 15,
+    value: 'Other',
+    label: 'Other',
+  },
+];
+
+export const BIKE_TYPE = [
+  {
+    id: 0,
+    value: 'Downhill',
+    label: 'Downhill',
+  },
+  {
+    id: 1,
+    value: 'All-Mountain',
+    label: 'All-Mountain',
+  },
+  {
+    id: 2,
+    value: 'Cross-Country',
+    label: 'Cross-Country',
+  },
+  {
+    id: 3,
+    value: 'Dirtjump/Slopstyle',
+    label: 'Dirtjump/Slopstyle',
+  },
+  {
+    id: 4,
+    value: 'Road',
+    label: 'Road',
+  },
+  {
+    id: 5,
+    value: 'Fat Bike',
+    label: 'Fat Bike',
+  },
+  {
+    id: 6,
+    value: 'Adaptive MTB',
+    label: 'Adaptive MTB',
+  },
+  {
+    id: 7,
+    value: 'Cyclo-Cross',
+    label: 'Cyclo-Cross',
+  },
+  {
+    id: 8,
+    value: 'Gravel/Adventure',
+    label: 'Gravel/Adventure',
+  },
+  {
+    id: 9,
+    value: 'Unicycle',
+    label: 'Unicycle',
+  },
+  {
+    id: 10,
+    value: 'BMX',
+    label: 'BMX',
+  },
+  {
+    id: 11,
+    value: 'Trials',
+    label: 'Trials',
+  },
+];
+
+export const TRAIL_TYPE = [
+  {
+    id: 0,
+    value: 'Singletrack',
+    label: 'Singletrack',
+  },
+  {
+    id: 1,
+    value: 'Machine Groomed',
+    label: 'Machine Groomed',
+  },
+  {
+    id: 2,
+    value: 'Doubletrack',
+    label: 'Doubletrack',
+  },
+  {
+    id: 3,
+    value: 'Mixed',
+    label: 'Mixed',
+  },
+  {
+    id: 4,
+    value: 'Dirt/Gravel Road',
+    label: 'Dirt/Gravel Road',
+  },
+  {
+    id: 5,
+    value: 'Asphalt/Tarmac Road',
+    label: 'Asphalt/Tarmac Road',
+  },
+  {
+    id: 6,
+    value: 'Paved Path',
+    label: 'Paved Path',
+  },
+  {
+    id: 7,
+    value: 'Gravel Path',
+    label: 'Gravel Path',
+  },
+  {
+    id: 8,
+    value: 'Rail Trail',
+    label: 'Rail Trail',
+  },
+  {
+    id: 9,
+    value: 'Wilderness Trail',
+    label: 'Wilderness Trail',
+  },
+  {
+    id: 10,
+    value: 'Hike-a-Bike',
+    label: 'Hike-a-Bike',
+  },
+  {
+    id: 11,
+    value: 'Primitive',
+    label: 'Primitive',
+  },
+  {
+    id: 12,
+    value: 'Grass',
+    label: 'Grass',
+  },
+  {
+    id: 13,
+    value: 'Boardwalk',
+    label: 'Boardwalk',
+  },
+  {
+    id: 14,
+    value: 'Sandy',
+    label: 'Sandy',
+  },
+  {
+    id: 15,
+    value: 'Ski Run (Piste)',
+    label: 'Ski Run (Piste)',
+  },
+  {
+    id: 16,
+    value: 'Ski Run (Off-Piste)',
+    label: 'Ski Run (Off-Piste)',
+  },
+  {
+    id: 17,
+    value: 'Other',
+    label: 'Other',
+  },
+];
+
+export const NEW_TRAILS = [
+  {
+    id: 0,
+    value: '1 Month',
+    label: '1 Month',
+  },
+  {
+    id: 1,
+    value: '6 months',
+    label: '6 months',
+  },
+  {
+    id: 2,
+    value: '12 months',
+    label: '12 months',
+  },
+];
+
+export const LOCAL_POPULARITY = [
+  {
+    id: 0,
+    value: '10',
+    label: '10',
+  },
+  {
+    id: 1,
+    value: '20',
+    label: '20',
+  },
+  {
+    id: 2,
+    value: '30',
+    label: '30',
+  },
+  {
+    id: 3,
+    value: '40',
+    label: '40',
+  },
+  {
+    id: 4,
+    value: '50',
+    label: '50',
+  },
+  {
+    id: 5,
+    value: '60',
+    label: '60',
+  },
+  {
+    id: 6,
+    value: '70',
+    label: '70',
+  },
+  {
+    id: 7,
+    value: '80',
+    label: '80',
+  },
+  {
+    id: 8,
+    value: '90',
+    label: '90',
+  },
+];
+
+export const TRAILS_COMPLETION = [
+  {
+    id: 0,
+    value: 'Completed',
+    label: 'Completed',
+  },
+  {
+    id: 1,
+    value: 'Not Completed',
+    label: 'Not Completed',
+  },
+];
+
+export const TRAILS_ON_WHISHLIST = [
+  {
+    id: 0,
+    value: 'Yes',
+    label: 'Yes',
+  },
+  {
+    id: 1,
+    value: 'No',
+    label: 'No',
+  },
+];
+
+export const UNSANCTIONED = [
+  {
+    id: 0,
+    value: 'No',
+    label: 'No',
+  },
+  {
+    id: 1,
+    value: 'Yes',
+    label: 'Yes',
   },
 ];
