@@ -33,14 +33,13 @@ const HeaderView = ({
         />
       </TouchableOpacity>
       <View style={styles.toggleView}>
-        {/*TODO uncomment width from  toggleView class */}
-        {/* <TouchableOpacity onPress={onPressSearch}>
+        <TouchableOpacity onPress={onPressSearch}  style={styles.iconStyle}>
           {svgIcon.SearchView}
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
-        {/* <TouchableOpacity onPress={onPressFilter}>
+        <TouchableOpacity onPress={onPressFilter}  style={styles.iconStyle}>
           {svgIcon.FilterOrange}
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <TouchableOpacity onPress={onPressWeather}>
           {svgIcon.WeatherIcon}
         </TouchableOpacity>
