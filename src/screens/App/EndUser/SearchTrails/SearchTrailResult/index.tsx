@@ -8,6 +8,7 @@ import { svgIcon } from '../../../../../assets/svg';
 import { MainWrapper, MapLayerSheet } from '../../../../../components';
 import useLocation from '../../../../../hooks/getLocation';
 import {
+    AppHeader,
     Default_Map_Style,
     MapTypes
 } from '../../../../../shared/exporter';
@@ -62,6 +63,7 @@ const SearchTrailResult = () => {
     return (
         <GestureHandlerRootView style={styles.gestureView}>
             <MainWrapper style={styles.container}>
+                <AppHeader  clickBackIcon={() => navigation.goBack()} />
                 <MapboxGL.MapView
                     key={selectedMapType}
                     styleURL={selectedMapType}
