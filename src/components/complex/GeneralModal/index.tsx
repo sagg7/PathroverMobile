@@ -1,33 +1,39 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import Modal from 'react-native-modal';
+import Modal, {ModalProps} from 'react-native-modal';
 import {PFColors, PFFonts, PFFontSize, WP} from '../../../shared/exporter';
 import {svgIcon} from '../../../assets/svg';
 
-interface GeneralModalProps {
+interface GeneralModalProps extends Partial<ModalProps> {
   visible: boolean;
   title: string;
   onClose: () => void;
   children: React.ReactNode;
   hideCross?: boolean;
+  onSwipeComplete?: () => void;
 }
 
 const GeneralModal = (props: GeneralModalProps) => {
-  const {visible, title, onClose, children, hideCross} = props;
+  const {visible, title, onClose, children, hideCross, ...rest} = props;
   return (
     <Modal
+      {...rest}
       key={visible ? 'visible' : 'hidden'}
       isVisible={visible}
       useNativeDriver
       onBackdropPress={onClose}
       onBackButtonPress={onClose}
-      onSwipeComplete={onClose}
       swipeDirection={'down'}
+      animationIn={'slideInUp'}
+      animationOut={'slideOutDown'}
       style={styles.modal}>
       <View style={styles.modalContent}>
         <View style={styles.header}>
           <Text style={styles.heading}>{title}</Text>
-          <TouchableOpacity disabled={hideCross} activeOpacity={0.7} onPress={onClose}>
+          <TouchableOpacity
+            disabled={hideCross}
+            activeOpacity={0.7}
+            onPress={onClose}>
             {!hideCross && svgIcon.CancelIcon}
           </TouchableOpacity>
         </View>

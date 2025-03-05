@@ -9919,6 +9919,13 @@ react-native-document-picker@^9.3.1:
   dependencies:
     invariant "^2.2.4"
 
+react-native-element-dropdown@^2.12.4:
+  version "2.12.4"
+  resolved "https://registry.yarnpkg.com/react-native-element-dropdown/-/react-native-element-dropdown-2.12.4.tgz#259db84e673b9f4fc03090a54760efd4f4a1456c"
+  integrity sha512-abZc5SVji9FIt7fjojRYrbuvp03CoeZJrgvezQoDoSOrpiTqkX69ix5m+j06W2AVncA0VWvbT+vCMam8SoVadw==
+  dependencies:
+    lodash "^4.17.21"
+
 react-native-fbsdk-next@^13.3.0:
   version "13.4.1"
   resolved "https://registry.yarnpkg.com/react-native-fbsdk-next/-/react-native-fbsdk-next-13.4.1.tgz#e2cb0d0c40ac00abcecceb2ee24473e74c9d8e18"
@@ -10516,6 +10523,11 @@ rn-proximity-sensor@^0.2.5:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/rn-proximity-sensor/-/rn-proximity-sensor-0.2.5.tgz#fdc55dacefec7e101a07d8b9ee92ee58e6e290ab"
   integrity sha512-TKjxQU64Eu5AzL+Y+SozwjoswnVvabR5QgxDjmb5E4F5vs2F0YJEbYTRQ3mfRHo4zmNwSdWEoZDpg6P2RaqAZA==
+
+rn-range-slider@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/rn-range-slider/-/rn-range-slider-2.2.2.tgz#bab4abf12f028df55364e041af6fce29ad46d7ea"
+  integrity sha512-34qdWz0oPEa6Wa9+B0+IihxolfydGPfzKvIyjieCyz4+YzVuSizalwpwRufxAnojfFPxqX1Kt/CTBckt8K7eEQ==
 
 robust-predicates@^2.0.4:
   version "2.0.4"
