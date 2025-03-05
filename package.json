@@ -15,6 +15,7 @@
     "bundleRelease": "cd android && ./gradlew bundleRelease && open app/build/outputs/bundle/release && cd .."
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5",
     "@invertase/react-native-apple-authentication": "^2.4.0",
     "@kesha-antonov/react-native-action-cable": "^1.1.5",
     "@notifee/react-native": "^9.1.8",
