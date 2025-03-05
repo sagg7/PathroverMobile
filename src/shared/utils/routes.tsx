@@ -82,4 +82,6 @@ export const Routes = {
   CreateHikeRoute: 'CreateHikeRoute',
   DownloadedMapList: 'DownloadedMapList',
   ViewOfflineMap: 'ViewOfflineMap',
+  SearchTrails: 'SearchTrails',
+  SearchTrailResult: 'SearchTrailResult',
 };
