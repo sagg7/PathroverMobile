@@ -7,8 +7,7 @@ import {
   scale,
   WP,
 } from '../../../../shared/exporter';
-const screenWidth = Dimensions.get('window').width;
-
+const screenWidth = Dimensions.get('screen').width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -24,7 +23,7 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    top: isIOS() ? WP('45') : WP('35'),
+    top: isIOS() ? WP('35') : WP('25'),
     right: 20,
   },
   undoRedoContainer: {
@@ -139,54 +138,15 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     padding: 20,
   },
-  searchBox: {
-    width: WP('90'),
-    height: scale(44),
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: 10,
-    borderRadius: scale(12),
-    marginBottom: scale(16),
-    alignSelf: 'center',
-    backgroundColor: PFColors.Gray.LightMist,
-    position: 'absolute',
-    top: WP('15'),
-  },
-  input: {
-    fontSize: scale(14),
-    fontFamily: PFFonts.Foundation.Medium,
-    color: PFColors.Standard.Black,
-    width: scale(300),
-    paddingLeft: isIOS() ? 10 : 3,
-  },
-  inputContainerStyle: {
-    width: WP('82'),
-  },
-  directonIcon: {height: 20, width: 20},
-  suggestionContainer: {
-    width: WP('90'),
-    alignSelf: 'center',
-  },
-  listStyles: {
-    backgroundColor: PFColors.Standard.White,
-    position: 'absolute',
-    flex: 1,
-    zIndex: 1,
-    alignSelf: 'center',
-    top: isIOS() ? WP('20') : WP('25'),
+  greenView: {
+    backgroundColor: '#093E37',
+    padding: 10,
   },
   instructionText: {
     fontFamily: PFFonts.Foundation.Medium,
     fontSize: PFFontSize.FONT_SIZE_16,
     color: PFColors.Standard.White,
     paddingLeft: WP('5'),
-    width: '80%',
-  },
-  distanceText: {
-    fontFamily: PFFonts.Foundation.Medium,
-    fontSize: PFFontSize.FONT_SIZE_16,
-    color: PFColors.Standard.White,
-    // paddingLeft: WP('5'),
   },
 
   stepsContainer: {
@@ -196,40 +156,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   instructionCard: {
-    width: WP('97'),
-    marginHorizontal: 5,
-    backgroundColor: '#093E37',
-    flexDirection: 'row',
+    width: screenWidth * 0.8,
+    marginHorizontal: 10,
+    backgroundColor: 'pink',
     padding: 15,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    alignItems: 'center',
-  },
-  navigationInfoView: {
-    backgroundColor: PFColors.Blue.SoftGlacier,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: PFColors.Blue.Dark,
-    justifyContent: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  headerText: {
-    fontFamily: PFFonts.Foundation.SemiBold,
-    fontSize: PFFontSize.FONT_SIZE_16,
-    color: PFColors.Standard.Black,
-    alignSelf: 'center',
-    paddingVertical: 10,
-  },
-  titleView: {
-    alignSelf: 'flex-end',
-    // marginVertical: 5,
   },
 });
 export default styles;

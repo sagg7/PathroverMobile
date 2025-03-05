@@ -4,75 +4,58 @@ import styles from './styles';
 import {AppHeader, MainWrapper, MapLayerSheet} from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
+  appIcons,
   Default_Map_Style,
   isIOS,
   mapBoxToken,
   MapTypes,
   PFColors,
   showAlert,
+  StartPointModal,
   UNEXPECTED_ERROR,
+  WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
 import {
+  Dimensions,
   FlatList,
-  Keyboard,
+  Image,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
-import {
-  fetchSuggestions,
-  getTimeAndDistance,
-} from '../../../../shared/utils/helpers';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
-import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {useSelector} from 'react-redux';
-import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
+import {InteractionManager} from 'react-native';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.275364, 31.454158,
+  ]);
   const [routes, setRoute] = useState<any>([]);
-  const [results, setResults] = useState<null>(null);
+  const [results, setResults] = useState<any>(null);
   const [destination, setDestination] = useState<any>(null);
   const [tourStarted, setTourStarted] = useState<boolean>(true);
+  const [routeSteps, setRouteSteps] = useState<any>([]);
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(true);
-  const [searchLocation, setSearchLocation] = useState<any>(null);
+  const [heading, setHeading] = useState(0);
+  const [tourStops, setTourStops] = useState<any>([]);
+  const [activeItem, setActiveItem] = useState(0);
+  const [modalKey, setModalKey] = useState(1);
+  const [showReachModal, setShowReachModal] = useState(false);
+  const [distanceToNext, setDistanceToNext] = useState(25);
+  const [enableFollow, setEnableFollow] = useState(false);
+  const screenWidth = Dimensions.get('window').width;
 
-  const [simpleSearch, setSimpleSearch] = useState<string>('');
-  const debounceTimeout = useRef<any>(null);
-  const [suggestions, setSuggestions] = useState([]);
-  const [queryParams, setQueryParams] = useState<any>({
-    latitude: null,
-    longitude: null,
-    radius: 50,
-  });
-  const [allWells, setAllWells] = useState<any>([]);
-  const [showPinAddress, setShowPinAddress] = useState<boolean>(false);
-  const [showAddEntranceSheet, setShowAddEntranceSheet] =
-    useState<boolean>(false);
-  const [showRouteActionSheet, setShowRouteActionSheet] =
-    useState<boolean>(false);
-  const [actionBtn, setActionBtn] = useState<any>({
-    direction: true,
-    start: false,
-  });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
-  const {
-    data: allWellLocations,
-    isLoading,
-    refetch,
-  } = useGetAllWellsQuery(queryParams);
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
 
@@ -89,28 +72,6 @@ const ViewWellPathNavigation = ({route}: any) => {
       setSelectedMapType(mapLayerStyle);
     }
   }, [mapLayerStyle]);
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => setKeyboardVisible(true),
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => setKeyboardVisible(false),
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-  useEffect(() => {
-    if (allWellLocations) setAllWells(allWellLocations?.wells);
-    console.log(
-      'allWellLocationsallWellLocations',
-      allWellLocations?.wells?.length,
-    );
-  }, [allWellLocations]);
 
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
@@ -120,7 +81,8 @@ const ViewWellPathNavigation = ({route}: any) => {
       const response = await fetch(url);
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
-      return route;
+      setRoute(route);
+      setTourStops(data.routes[0]?.legs[0]?.steps);
     } catch (error) {
       console.error('Error fetching route:', error);
       showAlert('Error', 'No route exists between the entered locations.');
@@ -136,31 +98,36 @@ const ViewWellPathNavigation = ({route}: any) => {
       );
 
       setResults(locResults);
+      if (locResults?.distance <= '0.186' || locResults?.distance <= 0.186) {
+        setShowReachModal(true);
+      }
     };
+
     getResults();
   }, [currentLocation]);
+  // useEffect(() => {
+  //   if (currentLocation && cameraRef.current) {
+  //     cameraRef.current.setCamera({
+  //       centerCoordinate: currentLocation,
+  //       zoomLevel: 18,
+  //       animationMode: 'flyTo',
+  //       animationDuration: 2000,
+  //       pitch: 60,
+  //     });
+
+  //     setTimeout(() => setEnableFollow(true), 1500); // Delay to allow zoom first
+  //   }
+  // }, [currentLocation]);
 
   const getRoute = async () => {
     if (destination && currentLocation) {
-      const fetchedRoute = await fetchRoute(currentLocation, destination);
-      setRoute(fetchedRoute);
+      await fetchRoute(currentLocation, destination);
     }
   };
   useEffect(() => {
     if (destination && currentLocation) getRoute();
-  }, [destination, currentLocation]);
+  }, [currentLocation]);
 
-  const onPressMap = (event: any) => {
-    try {
-      const {geometry} = event;
-      if (geometry && Array.isArray(geometry.coordinates)) {
-      } else {
-        console.error('Invalid coordinates:', geometry);
-      }
-    } catch (error) {
-      console.error('Error in onPressMap:', error);
-    }
-  };
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
       prev.map(v => ({
@@ -168,6 +135,13 @@ const ViewWellPathNavigation = ({route}: any) => {
         isSelected: v.id === item.id,
       })),
     );
+  };
+
+  const handleModalOkButton = () => {
+    setShowReachModal(false);
+    setTimeout(() => {
+      navigation.navigate('Hiking');
+    }, 100);
   };
 
   const onPressSave = () => {
@@ -188,158 +162,161 @@ const ViewWellPathNavigation = ({route}: any) => {
       coordinates: routes,
     },
   };
-  const centerMap = () => {
-    const start = currentLocation;
-    const end = destination;
+  const maneuverIcons = {
+    depart: require('../../../../assets/icons/depart.png'), // Start point
+    turn: {
+      left: require('../../../../assets/icons/turn-left.png'),
+      right: require('../../../../assets/icons/turn-right.png'),
+      straight: require('../../../../assets/icons/destination.png'),
+    },
+    // merge: require('../../../../assets/icons/merge.png'),
+    roundabout: require('../../../../assets/icons/roundAbout.png'),
+    arrive: require('../../../../assets/icons/destination.png'), // End point
+  };
 
-    const minLongitude = Math.min(start[0], end[0]);
-    const maxLongitude = Math.max(start[0], end[0]);
-    const minLatitude = Math.min(start[1], end[1]);
-    const maxLatitude = Math.max(start[1], end[1]);
+  const getManeuverIcon = (maneuver: any) => {
+    const {type, modifier} = maneuver;
 
-    const buffer = 0.09;
-    const adjustedMinLongitude = minLongitude - buffer;
-    const adjustedMaxLongitude = maxLongitude + buffer;
-    const adjustedMinLatitude = minLatitude - buffer;
-    const adjustedMaxLatitude = maxLatitude + buffer;
+    if (type === 'turn' && maneuverIcons.turn[modifier]) {
+      return maneuverIcons.turn[modifier];
+    }
 
-    cameraRef.current.fitBounds(
-      [adjustedMinLongitude, adjustedMinLatitude],
-      [adjustedMaxLongitude, adjustedMaxLatitude],
-      {
-        Left: 100,
-        Right: 100,
-        Top: 80,
-        Bottom: 80,
-      },
+    return maneuverIcons[type] || maneuverIcons.turn.straight;
+  };
+  const activeItemRef = useRef(null);
+  const NavigationSteps = ({tourStops}: any) => {
+    const flatListRef = useRef(null);
+
+    // const handleViewableItemsChanged = ({viewableItems}: any) => {
+    //   if (viewableItems.length > 0) {
+    //     const newActiveItem = viewableItems[0].item;
+    //     setActiveItem(newActiveItem);
+    //     setCurrentLocation(newActiveItem.maneuver.location); // Update location
+    //   }
+    // };
+    const handleViewableItemsChanged = ({viewableItems}: any) => {
+      if (viewableItems.length > 0) {
+      }
+    };
+    return (
+      <FlatList
+        ref={flatListRef}
+        data={tourStops}
+        horizontal
+        pagingEnabled
+        snapToAlignment="center"
+        keyExtractor={(item, index) => index.toString()}
+        getItemLayout={(data, index) => ({
+          length: screenWidth * 0.8,
+          offset: screenWidth * 0.8 * index,
+          index,
+        })}
+        showsHorizontalScrollIndicator={false}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
+        renderItem={({item, index}) => (
+          <View style={styles.instructionCard}>
+            <View>
+              <Image
+                resizeMode="contain"
+                source={getManeuverIcon(tourStops[index]?.maneuver)}
+                style={styles.directonIcon}
+              />
+              <Text style={styles.distanceText}>
+                {item?.distance?.toFixed(0)} m
+              </Text>
+            </View>
+            <Text style={styles.instructionText}>
+              {item.maneuver.instruction}
+            </Text>
+          </View>
+        )}
+      />
     );
   };
-  const handlePinBtn = async () => {
-    const startCoords = {
-      latitude: currentLocation[1],
-      longitude: currentLocation[0],
-      name: 'Start',
-    };
-    const endCoords = {
-      latitude: destination[1],
-      longitude: destination[0],
-      name: 'End Location',
-    };
-
-    const routeData = {
-      user_route: {
-        name: route?.params?.entranceName,
-        route_type: 'maps_location_pins',
-        color: PFColors.Blue.Dark,
-        weight: '4',
-
-        location_start_attributes: startCoords,
-        location_end_attributes: endCoords,
-      },
-    };
-    const resp = await createRoute(routeData);
-    if (resp?.data) {
-      showAlert('Alert', 'Your location has been pined.');
-      navigation.goBack();
-    } else {
-      showAlert('Error', UNEXPECTED_ERROR);
+  const resetCompass = () => {
+    if (cameraRef.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: currentLocation,
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
+      });
     }
   };
-  const handleChangeText = (text: any) => {
-    setSimpleSearch(text);
+  const handleLocationUpdate = async location => {
+    if (location?.coords) {
+      const {latitude, longitude, heading} = location.coords;
+      setCurrentLocation([longitude, latitude]);
+      setHeading(heading);
 
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
+      if (tourStops.length > 0) {
+        const nextStep = tourStops[0];
+        const [stepLng, stepLat] = nextStep.maneuver.location;
+        const distanceToNextStep: any = await getTimeAndDistance(
+          [longitude, latitude],
+          stepLng,
+          stepLat,
+        );
+        setDistanceToNext(distanceToNextStep);
 
-    debounceTimeout.current = setTimeout(async () => {
-      const fetchData = await fetchSuggestions(text);
-      if (fetchData?.message === 'Empty query text') {
-        setSuggestions([]);
-      } else {
-        setSuggestions(fetchData?.features);
+        if (distanceToNextStep <= 0.0124) {
+          // Threshold distance to consider step reached
+          setTourStops(prevStops => prevStops.slice(1));
+        }
       }
-    }, 1500);
-  };
-  const handleSelect = (place: any) => {
-    const [longitude, latitude] = place.center || place;
-    cameraRef.current.moveTo([longitude, latitude], 1500);
-    setSuggestions([]);
-    setSearchLocation([longitude, latitude]);
-    setQueryParams({
-      ...queryParams,
-      latitude: latitude,
-      longitude: longitude,
-    });
-  };
-  const wellsToGeoJSON = (wells: any[]) => ({
-    type: 'FeatureCollection',
-    features: wells.map(well => ({
-      type: 'Feature',
-      properties: {well: well},
 
-      geometry: {
-        type: 'Point',
-        coordinates: [Number(well.log), Number(well.lat)],
-      },
-    })),
-  });
-  const onPressMarker = (e: any) => {
-    const feature = e?.features[0];
-    if (!feature) return;
-
-    const coordinates = feature.geometry?.coordinates;
-    const isCluster = feature.properties?.cluster || false;
-    const pointCount = feature.properties?.point_count || 1;
-    const selected = feature.properties?.well;
-
-    if (!coordinates) return;
-
-    if (isCluster && pointCount > 1) {
-      showAlert(
-        'Alert',
-        'Markers are clustered—zoom in for a closer look!',
-        () => {
-          cameraRef.current?.moveTo(coordinates, 600);
-
-          setTimeout(() => {
-            cameraRef.current?.setCamera({
-              centerCoordinate: coordinates,
-              zoomLevel: Math.min(16, Math.max(12, 18 - Math.log2(pointCount))), // Adjust zoom
-              animationDuration: 800,
-            });
-          }, 500);
-        },
+      const routeResults: any = await getTimeAndDistance(
+        [longitude, latitude],
+        destination,
       );
-
-      return;
+      setResults(routeResults);
     }
-
-    setShowPinAddress(true);
-    // setSelectedWell([selected?.log, selected?.lat]);
-    // setSelectedWellName(selected);
   };
 
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title="View Route" />
+      <View style={styles.stepsContainer}>
+        <NavigationSteps tourStops={tourStops} />
+      </View>
 
       <MapboxGL.MapView
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
-        scaleBarEnabled={false}
-        onPress={onPressMap}>
+        compassEnabled
+        // compassFadeWhenNorth
+
+        compassPosition={{bottom: WP('50'), right: 10}}
+        scaleBarEnabled={false}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={10}
           centerCoordinate={currentLocation}
-          followUserLocation={actionBtn.start}
+          // followUserLocation={true}
+          zoomLevel={18}
+          followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
+          animationMode="flyTo"
+          animationDuration={2000}
+          pitch={60}
+        />
+        <MapboxGL.UserLocation
+          onUpdate={handleLocationUpdate}
+          minDisplacement={5}
+          requestsAlwaysUse
+          visible={true}
         />
 
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
-            {tourStarted ? svgIcon.LiveLocationTracking : svgIcon.BlueMapMarker}
+            <Image
+              source={appIcons.liveLocation}
+              style={{
+                height: 40,
+                width: 40,
+                transform: [{rotate: `${heading}deg`}],
+              }}
+            />
           </MapboxGL.MarkerView>
         )}
         {destination && (
@@ -354,68 +331,15 @@ const ViewWellPathNavigation = ({route}: any) => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 6,
                 lineColor: PFColors.Blue.Dark,
               }}
             />
           </MapboxGL.ShapeSource>
         )}
-        {/* <MapboxGL.Images
-          images={{
-            marker: require('../../../../assets/icons/wellsMarker.png'),
-          }}
-        />
-        {allWells?.length > 0 && (
-          <MapboxGL.ShapeSource
-            onPress={onPressMarker}
-            id="wellsCluster"
-            shape={wellsToGeoJSON(allWells)}
-            cluster
-            clusterRadius={20}
-            clusterMaxZoom={10}>
-            <MapboxGL.SymbolLayer
-              id="markerLayer"
-              style={{
-                iconImage: 'marker', // Reference the registered image name
-                iconSize: Platform.OS === 'android' ? 0.7 : 0.5,
-                iconIgnorePlacement: true,
-              }}
-            />
-          </MapboxGL.ShapeSource>
-        )} */}
       </MapboxGL.MapView>
-      {showRouteActionSheet && !keyboardVisible && (
-        <RouteToWellSheet
-          routeLength={routes?.length}
-          onpressCancel={() => navigation.goBack()}
-          routeName={route?.params?.entranceName}
-          distanceInfo={results}
-          actionBtn={actionBtn}
-          onPressDirection={() => {
-            getRoute();
-            setActionBtn({
-              ...actionBtn,
-              direction: true,
-            });
-            // centerMap();
-          }}
-          onPressStart={() => {
-            getRoute();
-            setActionBtn({
-              ...actionBtn,
-              direction: true,
-            });
-            setTourStarted(true);
-            setShowRouteActionSheet(false);
-            setTimeout(() => {
-              setShowRouteStartedSheet(true);
-            }, 1000);
-          }}
-          onPressPin={() => handlePinBtn()}
-          show={false}
-        />
-      )}
-      {showRouteStartedSheet && (
+
+      {/* {showRouteStartedSheet && (
         <RouteToWellStartedSheet
           routeName={route?.params?.entranceName}
           routeInfo={results}
@@ -423,42 +347,49 @@ const ViewWellPathNavigation = ({route}: any) => {
             setShowRouteStartedSheet(false), navigation.goBack();
           }}
         />
-      )}
-      <TouchableOpacity
-        style={styles.maplayerStyles}
-        onPress={() => {
-          setMapLayerSheeet(true);
-        }}>
+      )} */}
+      <View style={styles.navigationInfoView}>
+        <View style={styles.titleView}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowRouteStartedSheet(false), navigation.goBack();
+            }}>
+            {svgIcon.CancelIcon}
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.headerText}>{route?.params?.entranceName}</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+          }}>
+          <Text>
+            {svgIcon.MapWindow}
+            <View style={{width: 5}} />
+
+            <Text style={styles.routeInfoText}>
+              {results?.distance ? results?.distance : 'calculating'}
+            </Text>
+          </Text>
+          <View style={{marginLeft: 40}} />
+          <Text>
+            {svgIcon.BlueClock}
+            <View style={{width: 5}} />
+            <Text style={styles.routeInfoText}>
+              {results?.duration ? results?.duration : 'calculating'}
+            </Text>
+          </Text>
+        </View>
+      </View>
+      <TouchableOpacity style={styles.maplayerStyles} onPress={resetCompass}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
-      <View style={styles.searchBox}>
-        {svgIcon.Search}
-        <TextInput
-          placeholder="Search"
-          placeholderTextColor={PFColors.Gray.DarkGray}
-          value={simpleSearch}
-          onChangeText={handleChangeText}
-          style={styles.input}
+      {modalKey === 1 && (
+        <StartPointModal
+          modalVisible={showReachModal}
+          title="You have arrived at your destination."
+          onPressSave={() => handleModalOkButton()}
         />
-        {/* {suggestions?.length > 0 && ( */}
-
-        {/* )} */}
-      </View>
-      {suggestions?.length > 0 && (
-        <View style={styles.listStyles}>
-          <FlatList
-            data={suggestions}
-            keyExtractor={(item: any) => item.id}
-            contentContainerStyle={styles.suggestionContainer}
-            renderItem={({item}: any) => (
-              <TouchableOpacity onPress={() => handleSelect(item)}>
-                <Text style={{padding: 10, color: PFColors.Standard.Black}}>
-                  {item.place_name}jjn
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
       )}
 
       <MapLayerSheet

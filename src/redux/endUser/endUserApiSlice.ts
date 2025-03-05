@@ -5,6 +5,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
     getAllWells: builder.query({
       query: ({...params}) => {
         const queryParams = new URLSearchParams({...params}).toString();
+        console.log('\n\nQUERY PARAM HIT\n', queryParams);
         return {
           url: `user_routes/well_location?${queryParams}`,
           method: 'GET',

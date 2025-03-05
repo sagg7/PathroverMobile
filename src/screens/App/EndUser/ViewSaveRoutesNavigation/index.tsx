@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Dimensions, FlatList, Text, TouchableOpacity, View} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
@@ -22,8 +22,9 @@ import {
 } from '../../../../shared/exporter';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import styles from './styles';
+import {getDistance} from 'geolib';
 
-const ViewSaveRoutes = ({route}: any) => {
+const ViewSaveRoutesNavigation = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
@@ -33,7 +34,7 @@ const ViewSaveRoutes = ({route}: any) => {
   ]);
   const [routes, setRoute] = useState<any>([]);
   const [routeToStartPoint, setRouteToStartPoint] = useState<any>([]);
-
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [destination, setDestination] = useState<any>(null);
   const [startPoint, setStartPoint] = useState<any>(null);
   const [endPoint, setEndPoint] = useState<any>(null);
@@ -43,6 +44,8 @@ const ViewSaveRoutes = ({route}: any) => {
   const [timeDistance, setTimeDistance] = useState(null);
   const [routeStartedFromCurrent, setRouteStartedFromCurrent] =
     useState<boolean>(false);
+  const flatListRef = useRef(null);
+  const screenWidth = Dimensions.get('window').width;
   const [isStartBtnPressed, setIsStartBtnPressed] = useState<boolean>(false);
   const [showReachModal, setShowReachModal] = useState(false);
   const [modalKey, setModalKey] = useState(1);
@@ -62,6 +65,7 @@ const ViewSaveRoutes = ({route}: any) => {
     useState<boolean>(false);
   const cameraRef = useRef<any>(null);
   const [results, setResults] = useState<null>(null);
+  const [tourStops, setTourStops] = useState<any>([]);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -200,6 +204,8 @@ const ViewSaveRoutes = ({route}: any) => {
       const response = await fetch(url);
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
+      // setTourStops(data.routes[0]?.legs[0].steps);
+      // setCurrentStepIndex(0);
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
@@ -207,6 +213,21 @@ const ViewSaveRoutes = ({route}: any) => {
       return [];
     }
   };
+  useEffect(() => {
+    if (!liveLocation || tourStops.length === 0) return;
+
+    const currentStep = tourStops[currentStepIndex];
+    const nextStep = tourStops[currentStepIndex + 1];
+
+    if (nextStep) {
+      const stepLocation = nextStep.maneuver.location;
+      const distance = getDistance(liveLocation, stepLocation);
+
+      if (distance < 10) {
+        setCurrentStepIndex(prev => prev + 1);
+      }
+    }
+  }, [liveLocation]);
 
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
@@ -364,10 +385,68 @@ const ViewSaveRoutes = ({route}: any) => {
     };
   };
   const hasCustom = selectedRoute?.route_type.includes('custom');
+  console.log(
+    'currentStepIndex]?.maneuver.instruction',
+    tourStops[currentStepIndex],
+  );
+  const NavigationSteps = ({tourStops, setCurrentLocation}) => {
+    const flatListRef = useRef(null);
+
+    const handleViewableItemsChanged = ({viewableItems}) => {
+      console.log('viewableItems.length', viewableItems.length);
+
+      // if (viewableItems.length > 0) {
+      //   const index = viewableItems[0].index;
+      //   const {location} = tourStops[index]?.maneuver || {};
+      //   console.log('location', location);
+
+      //   if (location) {
+      //     setCurrentLocation(location); // Update map to new lat/lng
+      //   }
+      // }
+    };
+
+    return (
+      <FlatList
+        ref={flatListRef}
+        data={tourStops}
+        horizontal
+        pagingEnabled
+        snapToAlignment="center"
+        keyExtractor={(item, index) => index.toString()}
+        getItemLayout={(data, index) => ({
+          length: screenWidth * 0.8,
+          offset: screenWidth * 0.8 * index,
+          index,
+        })}
+        showsHorizontalScrollIndicator={false}
+        // onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
+        renderItem={({item}) => (
+          <View style={styles.instructionCard}>
+            <Text style={styles.instructionText}>
+              {item.maneuver.instruction}
+            </Text>
+          </View>
+        )}
+      />
+    );
+  };
 
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title={route?.params?.item?.name} />
+      {/* <AppHeader title={route?.params?.item?.name} /> */}
+      {/* <View style={styles.greenView}>
+        <Text style={styles.instructionText}>
+          {tourStops[currentStepIndex]?.maneuver.instruction}
+        </Text>
+      </View> */}
+      <View style={styles.stepsContainer}>
+        <NavigationSteps
+          tourStops={tourStops}
+          setCurrentLocation={setCurrentLocation}
+        />
+      </View>
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -428,15 +507,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
-        {hasCustom &&
-          routes?.map((coordinate, index) => (
-            <MapboxGL.PointAnnotation
-              key={`pin-${index}`}
-              id={`pin-${index}`}
-              coordinate={coordinate}>
-              <View style={styles.routeStopStyles} />
-            </MapboxGL.PointAnnotation>
-          ))}
+
         <View style={styles.bottomView}>
           <View style={styles.routeInfoView}>
             <Text>
@@ -518,4 +589,4 @@ const ViewSaveRoutes = ({route}: any) => {
   );
 };
 
-export default ViewSaveRoutes;
+export default ViewSaveRoutesNavigation;

@@ -82,4 +82,5 @@ export const Routes = {
   CreateHikeRoute: 'CreateHikeRoute',
   DownloadedMapList: 'DownloadedMapList',
   ViewOfflineMap: 'ViewOfflineMap',
+  ViewSaveRoutesNavigation: 'ViewSaveRoutesNavigation',
 };

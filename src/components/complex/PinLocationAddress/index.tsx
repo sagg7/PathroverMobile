@@ -32,6 +32,7 @@ const PinLocationAddress = ({
       <Text style={styles.detailValue}>{value}</Text>
     </View>
   );
+
   return (
     <Modal
       useNativeDriver
@@ -55,10 +56,13 @@ const PinLocationAddress = ({
 
       <View style={styles.blueBox}>
         {/* TODO SET COMPANY NAME  */}
-        {/* <View style={styles.detailSection}>
-          <DetailView title="Operator" value={selectedWell?.api || 'N/A'} />
+        <View style={styles.detailSection}>
+          <DetailView
+            title="Operator"
+            value={selectedWell?.company_operator || 'N/A'}
+          />
         </View>
-        <View style={styles.horizontalLine} /> */}
+        <View style={styles.horizontalLine} />
 
         <View style={styles.detailSection}>
           <DetailView title="API" value={selectedWell?.api || 'N/A'} />
