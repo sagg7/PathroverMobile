@@ -111,19 +111,19 @@ const WellPath = () => {
     }
   }, [allWellLocations]);
 
-  // useEffect(() => {
-  //   if (location) {
-  //     setCurrentLocation([location?.longitude, location?.latitude]);
-  //     setQueryParams({
-  //       ...queryParams,
-  //       latitude: location?.latitude,
-  //       longitude: location?.longitude,
-  //     });
-  //   }
-  // }, [location]);
+  useEffect(() => {
+    if (location) {
+      setCurrentLocation([location?.longitude, location?.latitude]);
+      setQueryParams({
+        ...queryParams,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+      });
+    }
+  }, [location]);
 
   useEffect(() => {
-    if (queryParams) {
+    if (queryParams.latitude) {
       refetch();
     }
   }, [queryParams, refetch]);
@@ -132,7 +132,6 @@ const WellPath = () => {
     if (allWellLocations && allWellLocations?.wells?.length > 0) {
       console.log('ALL LOCATION===>', allWellLocations?.wells?.length);
 
-      // setAllWells(allWellLocations?.wells);
       setAllWells(prev => [...prev, ...allWellLocations.wells]);
     }
   }, [allWellLocations]);
@@ -147,14 +146,16 @@ const WellPath = () => {
       setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
-  const filterByType = (type: string) => {
-    const filtered = allWellLocations?.wells?.filter(
-      (item: any) => item?.well_type,
-    );
 
-    return filtered?.length ? filtered : [];
-  };
+  // TODO AFTER WELL PINS FINAL FIXES
 
+  // const filterByType = (type: string) => {
+  //   const filtered = allWellLocations?.wells?.filter(
+  //     (item: any) => item?.well_type,
+  //   );
+
+  //   return filtered?.length ? filtered : [];
+  // };
   // useEffect(() => {
   //   if (!nearbyPins && nearbyWells) {
   //     setAllWells(filterByType('wells'));

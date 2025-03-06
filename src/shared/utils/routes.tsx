@@ -83,4 +83,6 @@ export const Routes = {
   DownloadedMapList: 'DownloadedMapList',
   ViewOfflineMap: 'ViewOfflineMap',
   ViewSaveRoutesNavigation: 'ViewSaveRoutesNavigation',
+  SearchTrails: 'SearchTrails',
+  SearchTrailResult: 'SearchTrailResult',
 };

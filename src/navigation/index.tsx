@@ -71,6 +71,8 @@ import CreateHikeRoute from '../screens/App/EndUser/CreateHikeRoute';
 import DownloadedMapList from '../screens/App/EndUser/DownloadedMapList';
 import ViewOfflineMap from '../screens/App/EndUser/ViewOflineMap';
 import ViewSaveRoutesNavigation from '../screens/App/EndUser/ViewSaveRoutesNavigation';
+import SearchTrails from '../screens/App/EndUser/SearchTrails';
+import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -209,6 +211,11 @@ const AppNavigation = () => {
         <Stack.Screen
           name={Routes.ViewSaveRoutesNavigation}
           component={ViewSaveRoutesNavigation}
+        />
+        <Stack.Screen name={Routes.SearchTrails} component={SearchTrails} />
+        <Stack.Screen
+          name={Routes.SearchTrailResult}
+          component={SearchTrailResult}
         />
       </Stack.Navigator>
     </NavigationContainer>

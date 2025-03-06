@@ -6,7 +6,7 @@ import {
   PFFontSize,
   scale,
   WP,
-} from '../../../../shared/exporter';
+} from '../../../../../shared/exporter';
 
 const styles = StyleSheet.create({
   container: {
@@ -134,8 +134,5 @@ const styles = StyleSheet.create({
   iconStyle: {
     marginRight: WP('2'),
   },
-  filterContainer:{
-    // padding:20
-  }
 });
 export default styles;

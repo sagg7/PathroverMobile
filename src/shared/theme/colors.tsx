@@ -31,6 +31,7 @@ export const PFColors = {
     SoftSkyBlue: '#b9c9dc',
     SelectedBlue: '#13488A1A',
     lightBlue: '#EAEFF5',
+    SoftBlue: '#A0AFC3',
   },
   Gray: {
     SoftGray: '#efefef',
