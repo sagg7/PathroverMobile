@@ -195,7 +195,6 @@ const HikingScreen = () => {
         onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
         {svgIcon.HikeRoute}
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.searcRoute}
         onPress={() => {

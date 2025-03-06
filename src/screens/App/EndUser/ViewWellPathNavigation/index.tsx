@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {AppHeader, MainWrapper, MapLayerSheet} from '../../../../components';
@@ -6,6 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 import {
   appIcons,
   Default_Map_Style,
+  HP,
   isIOS,
   mapBoxToken,
   MapTypes,
@@ -47,13 +48,13 @@ const ViewWellPathNavigation = ({route}: any) => {
     useState<boolean>(true);
   const [heading, setHeading] = useState(0);
   const [tourStops, setTourStops] = useState<any>([]);
-  const [activeItem, setActiveItem] = useState(0);
+  const [activeItem, setActiveItem] = useState(null);
   const [modalKey, setModalKey] = useState(1);
   const [showReachModal, setShowReachModal] = useState(false);
   const [distanceToNext, setDistanceToNext] = useState(25);
   const [enableFollow, setEnableFollow] = useState(false);
   const screenWidth = Dimensions.get('window').width;
-
+  const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
   const {location} = useLocation();
@@ -185,58 +186,18 @@ const ViewWellPathNavigation = ({route}: any) => {
     return maneuverIcons[type] || maneuverIcons.turn.straight;
   };
   const activeItemRef = useRef(null);
-  const NavigationSteps = ({tourStops}: any) => {
-    const flatListRef = useRef(null);
+  const handleViewableItemsChanged = useCallback(({viewableItems}: any) => {
+    if (viewableItems?.[0]?.index > 0 && viewableItems.length > 0) {
+      const newActiveItem = viewableItems[0].item;
+      setActiveItem(newActiveItem?.maneuver?.location);
+    } else {
+      setActiveItem(null);
+    }
+  }, []);
 
-    // const handleViewableItemsChanged = ({viewableItems}: any) => {
-    //   if (viewableItems.length > 0) {
-    //     const newActiveItem = viewableItems[0].item;
-    //     setActiveItem(newActiveItem);
-    //     setCurrentLocation(newActiveItem.maneuver.location); // Update location
-    //   }
-    // };
-    const handleViewableItemsChanged = ({viewableItems}: any) => {
-      if (viewableItems.length > 0) {
-      }
-    };
-    return (
-      <FlatList
-        ref={flatListRef}
-        data={tourStops}
-        horizontal
-        pagingEnabled
-        snapToAlignment="center"
-        keyExtractor={(item, index) => index.toString()}
-        getItemLayout={(data, index) => ({
-          length: screenWidth * 0.8,
-          offset: screenWidth * 0.8 * index,
-          index,
-        })}
-        showsHorizontalScrollIndicator={false}
-        onViewableItemsChanged={handleViewableItemsChanged}
-        viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
-        renderItem={({item, index}) => (
-          <View style={styles.instructionCard}>
-            <View>
-              <Image
-                resizeMode="contain"
-                source={getManeuverIcon(tourStops[index]?.maneuver)}
-                style={styles.directonIcon}
-              />
-              <Text style={styles.distanceText}>
-                {item?.distance?.toFixed(0)} m
-              </Text>
-            </View>
-            <Text style={styles.instructionText}>
-              {item.maneuver.instruction}
-            </Text>
-          </View>
-        )}
-      />
-    );
-  };
   const resetCompass = () => {
     if (cameraRef.current) {
+      setActiveItem(null);
       cameraRef.current.setCamera({
         centerCoordinate: currentLocation,
         zoomLevel: 18,
@@ -244,8 +205,16 @@ const ViewWellPathNavigation = ({route}: any) => {
         animationDuration: 1000,
         pitch: 60,
       });
+      resetFlatList();
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      resetCompass();
+    }, 300);
+  }, []);
+
   const handleLocationUpdate = async location => {
     if (location?.coords) {
       const {latitude, longitude, heading} = location.coords;
@@ -276,10 +245,49 @@ const ViewWellPathNavigation = ({route}: any) => {
     }
   };
 
+  const userRef = useRef();
+  const flatListRef = useRef(null);
+
+  const resetFlatList = () => {
+    flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+  };
   return (
     <MainWrapper style={styles.container}>
       <View style={styles.stepsContainer}>
-        <NavigationSteps tourStops={tourStops} />
+        <FlatList
+          ref={flatListRef}
+          data={tourStops}
+          horizontal
+          style={{marginTop: isIOS() ? HP('5') : 0}}
+          pagingEnabled
+          snapToAlignment="center"
+          keyExtractor={(item, index) => index.toString()}
+          getItemLayout={(data, index) => ({
+            length: screenWidth * 0.8,
+            offset: screenWidth * 0.8 * index,
+            index,
+          })}
+          showsHorizontalScrollIndicator={false}
+          onViewableItemsChanged={handleViewableItemsChanged}
+          viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
+          renderItem={({item, index}) => (
+            <View style={styles.instructionCard}>
+              <View>
+                <Image
+                  resizeMode="contain"
+                  source={getManeuverIcon(tourStops[index]?.maneuver)}
+                  style={styles.directonIcon}
+                />
+                <Text style={styles.distanceText}>
+                  {item?.distance?.toFixed(0)} m
+                </Text>
+              </View>
+              <Text style={styles.instructionText}>
+                {item.maneuver.instruction}
+              </Text>
+            </View>
+          )}
+        />
       </View>
 
       <MapboxGL.MapView
@@ -287,13 +295,12 @@ const ViewWellPathNavigation = ({route}: any) => {
         styleURL={selectedMapType}
         style={styles.map}
         compassEnabled
-        // compassFadeWhenNorth
-
-        compassPosition={{bottom: WP('50'), right: 10}}
+        compassFadeWhenNorth
+        compassPosition={{top: isIOS() ? HP('62') : HP('66'), right: 20}}
         scaleBarEnabled={false}>
         <MapboxGL.Camera
           ref={cameraRef}
-          centerCoordinate={currentLocation}
+          centerCoordinate={activeItem ?? currentLocation}
           // followUserLocation={true}
           zoomLevel={18}
           followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
@@ -302,14 +309,15 @@ const ViewWellPathNavigation = ({route}: any) => {
           pitch={60}
         />
         <MapboxGL.UserLocation
+          ref={userRef}
+          showsUserHeadingIndicator={true}
           onUpdate={handleLocationUpdate}
           minDisplacement={5}
           requestsAlwaysUse
           visible={true}
         />
-
-        {currentLocation && (
-          <MapboxGL.MarkerView coordinate={currentLocation}>
+        {activeItem && (
+          <MapboxGL.MarkerView coordinate={activeItem}>
             <Image
               source={appIcons.liveLocation}
               style={{
@@ -383,7 +391,7 @@ const ViewWellPathNavigation = ({route}: any) => {
         </View>
       </View>
       <TouchableOpacity style={styles.maplayerStyles} onPress={resetCompass}>
-        {svgIcon.MapLayer}
+        {svgIcon.MapWhiteBg}
       </TouchableOpacity>
       {modalKey === 1 && (
         <StartPointModal

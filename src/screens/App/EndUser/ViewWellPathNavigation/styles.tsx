@@ -1,5 +1,6 @@
 import {Dimensions, StyleSheet} from 'react-native';
 import {
+  HP,
   isIOS,
   PFColors,
   PFFonts,
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    top: isIOS() ? WP('45') : WP('35'),
+    top: HP('75'),
     right: 20,
   },
   undoRedoContainer: {
