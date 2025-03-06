@@ -47,6 +47,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   }, [isFocused]);
 
   const handleNavigation = (selectedItem: any) => {
+    // const hasCustom = selectedItem?.route_type.includes('custom');
+
     if (isHiking) {
       dispatch(
         setStartingPoint([
@@ -62,7 +64,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       );
       navigation.navigate(Routes.SearchTrailLatLng);
     } else {
-      navigation.navigate(Routes.ViewSaveRoutes, {item: selectedItem});
+      navigation.navigate(Routes.ViewSaveRoutesNavigation, {
+        item: selectedItem,
+      });
     }
   };
 

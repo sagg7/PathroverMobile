@@ -1,11 +1,14 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {FlatList, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
+import React, {useEffect, useRef, useState} from 'react';
+import {FlatList, Image, Text, TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {svgIcon} from '../../../../assets/svg';
 import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import useLocation from '../../../../hooks/getLocation';
+import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {
   appIcons,
   Default_Map_Style,
@@ -14,11 +17,10 @@ import {
   WEATHER_API_KEY,
 } from '../../../../shared/exporter';
 import HeaderView from './HeaderView';
-import {Image, TouchableOpacity, View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import styles from './styles';
-import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import AppCheckbox from '../../../../components/complex/AppCheckbox';
+import {HIKING_FILTERS_CHECKLIST} from '../../../../shared/utils/constant';
+import HikingFilter from '../../../../components/complex/HikingFilter';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -40,6 +42,8 @@ const HikingScreen = () => {
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
+  const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
+  const [showSheet, setShowSheet] = useState<boolean>(true);
   const [weather, setWeather] = useState<any>([]);
   const dispatch = useDispatch();
   const {loginUser} = useSelector(state => state.auth);
@@ -151,11 +155,14 @@ const HikingScreen = () => {
     <MainWrapper style={styles.container}>
       <HeaderView
         userPicture={loginUser?.avatar}
-        onPressFilter={() => {}}
-        onPressSearch={() => {}}
+        onPressFilter={() => {
+          setShowFilterSheet(true);
+        }}
+        onPressSearch={() => {
+          navigation.navigate('SearchTrails');
+        }}
         onPressWeather={() => setShowWeatherSheet(true)}
       />
-
       <MapboxGL.MapView
         key={selectedMapType}
         styleURL={selectedMapType}
@@ -188,7 +195,6 @@ const HikingScreen = () => {
         onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>
         {svgIcon.HikeRoute}
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.searcRoute}
         onPress={() => {
@@ -231,6 +237,8 @@ const HikingScreen = () => {
           weather={weather}
         />
       )}
+
+      {/* My Data Modal */}
       <GeneralModal
         visible={isMyDataVisible}
         title={'My data'}
@@ -256,6 +264,12 @@ const HikingScreen = () => {
           }}
         />
       </GeneralModal>
+
+      {/* Filter Modal */}
+      <HikingFilter
+        showFilterSheet={showFilterSheet}
+        setShowFilterSheet={setShowFilterSheet}
+      />
     </MainWrapper>
   );
 };

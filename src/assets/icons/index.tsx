@@ -64,4 +64,5 @@ export const appIcons = {
   slowdown: require('../icons/slowdown.png'),
   warning: require('../icons/warning.png'),
   workInProgress: require('../icons/wip.png'),
+  liveLocation: require('../icons/liveLocation.png'),
 };

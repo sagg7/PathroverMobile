@@ -73,10 +73,15 @@ const WellPath = () => {
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchedPages, setFetchedPages] = useState(new Set()); // Track fetched pages
+
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
     longitude: null,
     radius: 50,
+    per_page: 5000,
+    page: 1,
   });
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -101,6 +106,12 @@ const WellPath = () => {
   // const [allPins, setAllPins] = useState<any>([]);
 
   useEffect(() => {
+    if (allWellLocations && queryParams.page === 1) {
+      setQueryParams(prev => ({...prev, page: 2})); // Set page 2 after page 1 loads
+    }
+  }, [allWellLocations]);
+
+  useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
       setQueryParams({
@@ -110,18 +121,19 @@ const WellPath = () => {
       });
     }
   }, [location]);
+
   useEffect(() => {
-    if (queryParams) {
+    if (queryParams.latitude) {
       refetch();
     }
   }, [queryParams, refetch]);
 
   useEffect(() => {
-    if (allWellLocations) setAllWells(allWellLocations?.wells);
-    console.log(
-      'allWellLocationsallWellLocations',
-      allWellLocations?.wells?.length,
-    );
+    if (allWellLocations && allWellLocations?.wells?.length > 0) {
+      console.log('ALL LOCATION===>', allWellLocations?.wells?.length);
+
+      setAllWells(prev => [...prev, ...allWellLocations.wells]);
+    }
   }, [allWellLocations]);
 
   useEffect(() => {
@@ -134,25 +146,27 @@ const WellPath = () => {
       setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
-  const filterByType = (type: string) => {
-    const filtered = allWellLocations?.wells?.filter(
-      (item: any) => item?.well_type === type,
-    );
 
-    return filtered?.length ? filtered : [];
-  };
+  // TODO AFTER WELL PINS FINAL FIXES
 
-  useEffect(() => {
-    if (!nearbyPins && nearbyWells) {
-      setAllWells(filterByType('well'));
-    } else if (!nearbyWells && nearbyPins) {
-      setAllWells(filterByType('pin'));
-    } else if (nearbyPins && nearbyWells) {
-      setAllWells(allWellLocations?.wells);
-    } else if (!nearbyPins && !nearbyWells) {
-      setAllWells([]);
-    }
-  }, [nearbyWells, allWellLocations]);
+  // const filterByType = (type: string) => {
+  //   const filtered = allWellLocations?.wells?.filter(
+  //     (item: any) => item?.well_type,
+  //   );
+
+  //   return filtered?.length ? filtered : [];
+  // };
+  // useEffect(() => {
+  //   if (!nearbyPins && nearbyWells) {
+  //     setAllWells(filterByType('wells'));
+  //   } else if (!nearbyWells && nearbyPins) {
+  //     setAllWells(filterByType('pin'));
+  //   } else if (nearbyPins && nearbyWells) {
+  //     setAllWells(allWellLocations?.wells);
+  //   } else if (!nearbyPins && !nearbyWells) {
+  //     setAllWells([]);
+  //   }
+  // }, [nearbyWells, allWellLocations]);
 
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
@@ -197,18 +211,16 @@ const WellPath = () => {
       setTimeout(() => {
         if (cameraRef.current) {
           cameraRef.current.moveTo(searchLocation, 1500);
+          console.log('searchLocation', searchLocation);
 
           setQueryParams({
             ...queryParams,
             latitude: searchLocation[1],
             longitude: searchLocation[0],
+            page: 1,
           });
           setShowRouteActionSheet(true);
 
-          // navigation.navigate(Routes.ViewWellPathNavigation, {
-          //   entranceCoords: searchLocation,
-          //   entranceName: searchLocationName,
-          // });
           refetch();
         } else {
           showAlert(
@@ -378,6 +390,7 @@ const WellPath = () => {
     setSelectedWell([selected?.log, selected?.lat]);
     setSelectedWellName(selected);
   };
+  console.log('ALL WELLS==>', allWells?.length);
 
   return (
     <MainWrapper style={styles.container}>
