@@ -331,7 +331,6 @@ const ViewSaveRoutes = ({route}: any) => {
     setShowRouteActionSheet(false);
     setIsStartBtnPressed(true);
     const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
-    console.log('===888routeResults', routeResults);
 
     setResults(routeResults);
     setTimeout(() => {
