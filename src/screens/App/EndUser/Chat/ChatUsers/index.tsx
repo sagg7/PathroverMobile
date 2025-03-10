@@ -70,8 +70,6 @@ const ChatUsers = () => {
           const allContacts = await Contacts.getAll();
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
-
-          // Save full contacts list
           setAllContactsList(formattedContacts);
           setMatchedUsers(formattedContacts);
         } else {

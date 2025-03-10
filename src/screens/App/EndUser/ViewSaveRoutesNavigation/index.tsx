@@ -385,10 +385,6 @@ const ViewSaveRoutesNavigation = ({route}: any) => {
     };
   };
   const hasCustom = selectedRoute?.route_type.includes('custom');
-  console.log(
-    'currentStepIndex]?.maneuver.instruction',
-    tourStops[currentStepIndex],
-  );
   const NavigationSteps = ({tourStops, setCurrentLocation}) => {
     const flatListRef = useRef(null);
 

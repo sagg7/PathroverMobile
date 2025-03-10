@@ -63,10 +63,14 @@ const Header = ({
       </View>
 
       <View style={styles.iconView}>
-        <TouchableOpacity onPress={onPressPhone} hitSlop={{top: 10, bottom: 10}}>
+        <TouchableOpacity
+          onPress={onPressPhone}
+          hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.BlackPhone}
         </TouchableOpacity>
-        <TouchableOpacity onPress={onPressVideo} hitSlop={{top: 10, bottom: 10}}>
+        <TouchableOpacity
+          onPress={onPressVideo}
+          hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.VideoIcon}
         </TouchableOpacity>
       </View>
@@ -87,8 +91,8 @@ const ChatDetail = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage] = useCreateChatMessageMutation();
-  const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
-  
+  const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
+
   useEffect(() => {
     try {
       subscribe(
@@ -138,14 +142,13 @@ const ChatDetail = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    if (isConnected && shareTrail) {
-      console.log('RESP', {[MESSAGE_CONTAINS_LOCATION]: shareTrail});
-
+    console.log('WORKING', isConnected + shareTrail);
+    if (shareTrail) {
       onSend([
         {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
       ]);
     }
-  }, [shareTrail, isConnected]);
+  }, [shareTrail]);
 
   const onSend = async (message: string) => {
     try {
@@ -179,9 +182,8 @@ const ChatDetail = () => {
       if (res) {
         await getChatMessage(item?.id);
       }
-      
     } catch (error) {
-      //      
+      //
     }
   };
 
@@ -206,7 +208,10 @@ const ChatDetail = () => {
           });
         }}
         onPressVideo={() => {
-          navigation.navigate('VideoCalling', {user: params?.item?.user, channel: Platform.OS === 'android' ? 'testChannel' : '',});
+          navigation.navigate('VideoCalling', {
+            user: params?.item?.user,
+            channel: Platform.OS === 'android' ? 'testChannel' : '',
+          });
         }}
       />
       <View style={styles.container}>

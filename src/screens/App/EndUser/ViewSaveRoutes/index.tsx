@@ -331,7 +331,11 @@ const ViewSaveRoutes = ({route}: any) => {
     setShowRouteActionSheet(false);
     setIsStartBtnPressed(true);
     const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
-
+    cameraRef.current.setCamera({
+      centerCoordinate: currentLocation,
+      zoomLevel: 5,
+      animationDuration: 1000,
+    });
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
@@ -353,17 +357,15 @@ const ViewSaveRoutes = ({route}: any) => {
       minLat = Math.min(minLat, lat);
       maxLat = Math.max(maxLat, lat);
     }
-
     return {
-      ne: [maxLng, maxLat], // North-East (Top-Right)
-      sw: [minLng, minLat], // South-West (Bottom-Left)
+      ne: [maxLng, maxLat],
+      sw: [minLng, minLat],
       paddingLeft: 30,
       paddingRight: 30,
       paddingTop: 30,
       paddingBottom: 180,
     };
   };
-  const hasCustom = selectedRoute?.route_type.includes('custom');
 
   return (
     <MainWrapper style={styles.container}>
@@ -377,7 +379,7 @@ const ViewSaveRoutes = ({route}: any) => {
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={10}
-          centerCoordinate={currentLocation}
+          centerCoordinate={isStartBtnPressed ? currentLocation : undefined}
           bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
@@ -386,7 +388,7 @@ const ViewSaveRoutes = ({route}: any) => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-        {!hasCustom &&
+        {selectedRoute?.is_road_route &&
           selectedRoute?.pinned_points?.map(point => (
             <MapboxGL.MarkerView
               key={point.id}
@@ -428,7 +430,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
-        {hasCustom &&
+        {!selectedRoute?.is_road_route &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -464,7 +466,7 @@ const ViewSaveRoutes = ({route}: any) => {
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
-          routeInfo={results}
+          routeInfo={timeDistance}
         />
       )}
       {modalKey === 1 && isStartBtnPressed && (

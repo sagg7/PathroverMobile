@@ -5,6 +5,8 @@ import {
   TextInput,
   FlatList,
   Image,
+  ViewStyle,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
@@ -13,7 +15,9 @@ import {
   PFColors,
   PFFonts,
   PFFontSize,
+  Routes,
   scale,
+  UNEXPECTED_ERROR,
   WP,
 } from '../../../../shared/exporter';
 import styles from './styles';
@@ -26,6 +30,7 @@ import {
 import {svgIcon} from '../../../../assets/svg';
 import {useDispatch, useSelector} from 'react-redux';
 import {setRecentDestSearch} from '../../../../redux/manager/managerSlice';
+import {useWellSearchMutation} from '../../../../redux/endUser/endUserApiSlice';
 
 interface SelectionBoxProps {
   isSelected: boolean;
@@ -34,6 +39,8 @@ interface SelectionBoxProps {
 }
 const SearchWellPath = ({route, navigation}: any) => {
   const {
+    searchedWells,
+    setSearchedWells,
     searchLocation,
     setSearchLocation,
     searchLocationName,
@@ -46,7 +53,9 @@ const SearchWellPath = ({route, navigation}: any) => {
   const {managerRoute, recentDestSearch} = useSelector(
     (state: any) => state.manager,
   );
+  const [searchType, setSearchType] = useState<'wells' | 'places'>('wells');
   const [recentSearches, setRecentSearches] = useState(recentDestSearch);
+  const [wellSearch, {isLoading: isSearchingWell}] = useWellSearchMutation();
   const dispatch = useDispatch();
   const [searchValues, setSearchValues] = useState({
     latitude: '',
@@ -76,10 +85,11 @@ const SearchWellPath = ({route, navigation}: any) => {
   const handleChangeText = (text: any) => {
     setSimpleSearch(text);
 
+    if (searchType == 'wells') return;
+
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
-
     debounceTimeout.current = setTimeout(async () => {
       const fetchData = await fetchSuggestions(text);
       if (fetchData?.message === 'Empty query text') {
@@ -89,6 +99,34 @@ const SearchWellPath = ({route, navigation}: any) => {
       }
     }, 1500);
   };
+
+  const handleSearchWell = async () => {
+    try {
+      const requestData: Record<string, any> = {
+        page: '1',
+        is_search_by_name: isAddressSelected,
+      };
+
+      if (isAddressSelected) {
+        requestData.query = simpleSearch;
+      } else {
+        requestData.latitude = Number(searchValues.latitude);
+        requestData.longitude = Number(searchValues.longitude);
+      }
+
+      const response = await wellSearch(requestData).unwrap();
+      if (response?.wells?.length > 0) {
+        setSearchedWells(response?.wells);
+        navigation.goBack();
+      } else {
+        Alert.alert('Error', 'No wells found');
+      }
+    } catch (error) {
+      Alert.alert('Error', error?.data?.error || UNEXPECTED_ERROR);
+      console.log('handleSearchWell ~ error==>', error);
+    }
+  };
+
   const handleSelect = (place: any) => {
     setSearchLocationNames(place?.place_name);
     const [longitude, latitude] = place.center || place;
@@ -136,7 +174,6 @@ const SearchWellPath = ({route, navigation}: any) => {
       <TouchableOpacity onPress={() => onSelectFromList(item)}>
         <View style={styles.addressCard}>
           <Image source={appIcons.MapFilled} style={styles.mapIcon} />
-
           <View style={styles.infoView}>
             <Text style={styles.addressName}>{item?.placeName}</Text>
           </View>
@@ -224,19 +261,56 @@ const SearchWellPath = ({route, navigation}: any) => {
               }
             }}
           />
-          <AppButton
-            title="Search"
-            buttonStyle={styles.btnStyles}
-            handleClick={() => handleSearchBtn()}
-            disabled={
-              searchValues.latitude?.length < 4 ||
-              searchValues.longitude?.length < 4
-            }
+        </>
+      )}
+      <View style={{...styles.rowView, padding: WP('5')}}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setSearchType('wells')}
+          style={styles.rowView}>
+          {searchType == 'wells' ? svgIcon.RadioActive : svgIcon.RadioInactive}
+          <Text style={styles.searchLabel}>{'Search by wells'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setSearchType('places')}
+          style={styles.rowView}>
+          {searchType == 'places' ? svgIcon.RadioActive : svgIcon.RadioInactive}
+          <Text style={styles.searchLabel}>{'Search by places'}</Text>
+        </TouchableOpacity>
+      </View>
+      {suggestions?.length < 1 && (
+        <>
+          <Text style={styles.recentTitle}>{'Recently Searches'}</Text>
+          <FlatList
+            data={recentSearches}
+            renderItem={renderSearchHistoryList}
           />
         </>
       )}
-      {suggestions?.length < 1 && (
-        <FlatList data={recentSearches} renderItem={renderSearchHistoryList} />
+      {!isAddressSelected && (
+        <AppButton
+          title="Search"
+          buttonStyle={styles.btnStyles}
+          handleClick={
+            searchType == 'wells' ? handleSearchWell : handleSearchBtn
+          }
+          isLoading={isSearchingWell}
+          disabled={
+            searchValues.latitude?.length < 4 ||
+            searchValues.longitude?.length < 4 ||
+            isSearchingWell
+          }
+        />
+      )}
+      {isAddressSelected && searchType == 'wells' && (
+        <AppButton
+          title="Search"
+          isLoading={isSearchingWell}
+          buttonStyle={styles.btnStyles}
+          handleClick={handleSearchWell}
+          disabled={!simpleSearch || isSearchingWell}
+        />
       )}
     </MainWrapper>
   );
@@ -257,4 +331,5 @@ const getOptionTextStyle = (isSelected: boolean) => ({
   fontSize: PFFontSize.FONT_SIZE_12,
   color: isSelected ? PFColors.Standard.White : PFColors.Blue.Dark,
 });
+
 export default SearchWellPath;

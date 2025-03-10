@@ -32,13 +32,21 @@ import {PinLocationAddress} from '../../../../components/complex/PinLocationAddr
 import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
-import {Image, Platform, TouchableOpacity} from 'react-native';
+import {
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import GeneralModal from '../../../../components/complex/GeneralModal';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -54,6 +62,8 @@ const WellPath = () => {
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
+  const [searchedWells, setSearchedWells] = useState<any>(null);
+  console.log(' WellPath ~ searchedWells==>', searchedWells?.[0]);
   const [selectedWell, setSelectedWell] = useState<any>(null);
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
@@ -75,6 +85,31 @@ const WellPath = () => {
   const dispatch = useDispatch();
   const [isFetching, setIsFetching] = useState(false);
   const [fetchedPages, setFetchedPages] = useState(new Set()); // Track fetched pages
+  const [wellDistances, setWellDistances] = useState({});
+
+  useEffect(() => {
+    const fetchDistances = async () => {
+      if (!searchedWells?.length || !currentLocation) return;
+
+      const distances = {};
+      for (const well of searchedWells) {
+        try {
+          const result = await getTimeAndDistance(currentLocation, [
+            well?.log,
+            well?.lat,
+          ]);
+          distances[well?.id] = result.distance;
+        } catch (error) {
+          console.error('Error fetching distance:', error);
+          distances[well?.id] = 'N/A';
+        }
+      }
+
+      setWellDistances(distances);
+    };
+
+    fetchDistances();
+  }, [searchedWells, currentLocation]); // Refetch when wells or location changes
 
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
@@ -286,21 +321,21 @@ const WellPath = () => {
     }, 1000);
   };
 
-  const _handlePinBtn = async () => {
+  const handlePinBtn = async wellData => {
     const startCoords = {
       latitude: currentLocation[1],
       longitude: currentLocation[0],
       name: 'Start',
     };
     const endCoords = {
-      latitude: selectedWell[1],
-      longitude: selectedWell[0],
+      latitude: wellData?.lat,
+      longitude: wellData?.log,
       name: 'End Location',
     };
 
     const routeData = {
       user_route: {
-        name: 'Pin Location',
+        name: wellData?.well_name || 'Pinned Well',
         route_type: 'maps_location_pins',
         color: PFColors.Blue.Dark,
         weight: '4',
@@ -312,7 +347,6 @@ const WellPath = () => {
     const resp = await createRoute(routeData);
     if (resp?.data) {
       showAlert('Alert', 'Your location has been pined.');
-      navigation.goBack();
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
@@ -398,6 +432,8 @@ const WellPath = () => {
       <SearchView
         onPressSearch={() =>
           navigation.navigate(Routes.SearchWellPath, {
+            searchedWells,
+            setSearchedWells,
             searchLocation,
             setSearchLocation,
             searchLocationName,
@@ -539,12 +575,14 @@ const WellPath = () => {
       />
       <PinLocationAddress
         onPressShare={() => {
+          setShowPinAddress(false);
           selectedWell.map(Number);
           const formatedArr = selectedWell.map(Number);
           navigation.navigate(Routes.ChatUsers, {
             shareTrail: {
               startingPoint: [],
               endingPoint: formatedArr,
+              type: 'Well route',
             },
           });
         }}
@@ -578,6 +616,7 @@ const WellPath = () => {
               shareTrail: {
                 startingPoint: entranceCoords,
                 endingPoint: formatedArr,
+                type: 'Well entrance route',
               },
             });
           }}
@@ -652,6 +691,48 @@ const WellPath = () => {
           setValues={setPinYourLocation}
         />
       </RBSheet>
+      <GeneralModal
+        title="Well"
+        swipeDirection={undefined}
+        contentContainerStyle={{maxHeight: HP('70')}}
+        visible={searchedWells?.length > 0}
+        onClose={() => {
+          setSearchedWells([]);
+        }}>
+        <FlatList
+          data={searchedWells}
+          keyboardShouldPersistTaps="always"
+          keyExtractor={item =>
+            item?.id?.toString() || Math.random().toString()
+          }
+          nestedScrollEnabled
+          initialNumToRender={10}
+          renderItem={({item}) => (
+            <View style={styles.searchWellContainer}>
+              <View
+                style={[
+                  styles.searchWellContainer,
+                  {justifyContent: 'flex-start', marginBottom: 0},
+                ]}>
+                <View style={styles.searchWellImage}>
+                  {svgIcon.WellsMarker}
+                </View>
+                <View style={{marginLeft: 10}}>
+                  <Text numberOfLines={1} style={styles.searchWellName}>
+                    {item?.well_name}
+                  </Text>
+                  <Text numberOfLines={1} style={styles.searchWellDistance}>
+                    {wellDistances[item?.id] || 'Calculating...'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => handlePinBtn(item)}>
+                {svgIcon.SearchIcon}
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </GeneralModal>
       {/* {isLoading && <AppLoader />} */}
     </MainWrapper>
   );
