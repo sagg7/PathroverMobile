@@ -1223,7 +1223,7 @@ PODS:
     - Yoga
   - react-native-render-html (6.3.4):
     - React-Core
-  - react-native-safe-area-context (5.2.0):
+  - react-native-safe-area-context (5.3.0):
     - React-Core
   - react-native-video (6.10.2):
     - DoubleConversion
@@ -1528,10 +1528,10 @@ PODS:
     - React-Core
   - RNDateTimePicker (8.3.0):
     - React-Core
-  - RNFBApp (21.11.0):
+  - RNFBApp (21.12.0):
     - Firebase/CoreOnly (= 11.8.0)
     - React-Core
-  - RNFBMessaging (21.11.0):
+  - RNFBMessaging (21.12.0):
     - Firebase/Messaging (= 11.8.0)
     - FirebaseCoreExtension
     - React-Core
@@ -1614,7 +1614,7 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.8)
   - RNNotifee/NotifeeCore (9.1.8):
     - React-Core
-  - RNPermissions (5.2.5):
+  - RNPermissions (5.2.6):
     - React-Core
   - RNReanimated (3.16.7):
     - DoubleConversion
@@ -2121,7 +2121,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
-  RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: 3afceddffa65aee666dafd6f0116f1d975db1584
   RCTRequired: ec1239bc9d8bf63e10fb92bd8b26171a9258e0c1
   RCTTypeSafety: f5ecbc86c5c5fa163c05acb7a1c5012e15b5f994
@@ -2155,7 +2154,7 @@ SPEC CHECKSUMS:
   react-native-image-picker: fb0c2b3adc3eff6caa3cd6a507a34b9dcc9238dd
   react-native-pager-view: 08a2230db2a7393ead43299b160d17337837a15e
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
-  react-native-safe-area-context: 849d7df29ecb2a7155c769c0b76849ba952c2aa3
+  react-native-safe-area-context: f6fd1adb0c0dfb0a528f561c7c6f9297f3391af3
   react-native-video: 5a07eddcabc4823e24cef5cabd12f83a1bf35d9f
   React-nativeconfig: ba9a2e54e2f0882cf7882698825052793ed4c851
   React-NativeModulesApple: 8d11ff8955181540585c944cf48e9e7236952697
@@ -2186,8 +2185,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
   RNCPushNotificationIOS: 64218f3c776c03d7408284a819b2abfda1834bc8
   RNDateTimePicker: a793ed8822283f576dd0a205a0916c5098c2611f
-  RNFBApp: f9c347f09f0c87e1d49ff8a216c7475763bf28a7
-  RNFBMessaging: b7431455a08b889a033d1d9dc57ff8104ecd757d
+  RNFBApp: 7cf039683867cbf8514bc3aafd756e6c5fb18898
+  RNFBMessaging: bacd21eaeee19974b39972e65540f12322d098fe
   RNFileViewer: ce7ca3ac370e18554d35d6355cffd7c30437c592
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 4d82e79c24b18e83040ed9d6f1a178267c5c6aa8
@@ -2197,7 +2196,7 @@ SPEC CHECKSUMS:
   RNImageCropPicker: 8e39c01f205e00d739c31e682f068aac315587bf
   rnmapbox-maps: 86b215fe77632a897b34a2dbf0c3ad4e9e8c3570
   RNNotifee: 4a6ee5c7deaf00e005050052d73ee6315dff7ec9
-  RNPermissions: bc8ca7e43b9cdcf09eb32dedd2f6e44171fa0f32
+  RNPermissions: dca7a9dec73b4876a6222972dcf3f29930fb0d93
   RNReanimated: b0728bed09875d78b9a3a0ba0e2d1171f63f8b5a
   RNScreens: ad9069bfefb73c62aca1717ae47f5d78756f8881
   RNSVG: e451741721b9fd3db71b06aafe9335d09a189692

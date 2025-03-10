@@ -69,10 +69,16 @@ const CreateRouteEndUser = () => {
     start: '',
     end: '',
   });
+  console.log(' CreateRouteEndUser ~ searchValues==>', searchValues);
   const [searchValuesByAddress, setSearchValuesByAddress] = useState<any>({
     start: '',
     end: '',
   });
+  console.log(
+    ' CreateRouteEndUser ~ searchValuesByAddress==>',
+    searchValuesByAddress,
+  );
+
   const refScrollable = useRef<any>();
 
   const {location} = useLocation();
@@ -350,6 +356,7 @@ const CreateRouteEndUser = () => {
           color: routeLineColor,
           weight: routeLineHeight,
           pinned_points: pinnedPoints,
+          is_road_route: searchValuesByAddress?.start?.length > 1,
         },
       };
 

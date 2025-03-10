@@ -1,5 +1,11 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Modal, {ModalProps} from 'react-native-modal';
 import {PFColors, PFFonts, PFFontSize, WP} from '../../../shared/exporter';
 import {svgIcon} from '../../../assets/svg';
@@ -11,10 +17,19 @@ interface GeneralModalProps extends Partial<ModalProps> {
   children: React.ReactNode;
   hideCross?: boolean;
   onSwipeComplete?: () => void;
+  contentContainerStyle?: ViewStyle;
 }
 
 const GeneralModal = (props: GeneralModalProps) => {
-  const {visible, title, onClose, children, hideCross, ...rest} = props;
+  const {
+    visible,
+    title,
+    onClose,
+    children,
+    hideCross,
+    contentContainerStyle,
+    ...rest
+  } = props;
   return (
     <Modal
       {...rest}
@@ -27,7 +42,7 @@ const GeneralModal = (props: GeneralModalProps) => {
       animationIn={'slideInUp'}
       animationOut={'slideOutDown'}
       style={styles.modal}>
-      <View style={styles.modalContent}>
+      <View style={[styles.modalContent, contentContainerStyle]}>
         <View style={styles.header}>
           <Text style={styles.heading}>{title}</Text>
           <TouchableOpacity

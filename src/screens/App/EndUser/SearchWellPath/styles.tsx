@@ -1,5 +1,12 @@
 import {StyleSheet} from 'react-native';
-import {isIOS, PFColors, PFFonts, scale, WP} from '../../../../shared/exporter';
+import {
+  isIOS,
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  scale,
+  WP,
+} from '../../../../shared/exporter';
 
 const styles = StyleSheet.create({
   selectorMainView: {
@@ -12,7 +19,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 10,
   },
-
+  searchLabel: {
+    fontSize: PFFontSize.FONT_SIZE_14,
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    marginLeft: WP('2'),
+    marginRight: WP('6'),
+  },
+  rowView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  recentTitle: {
+    fontSize: scale(14),
+    fontFamily: PFFonts.Foundation.SemiBold,
+    color: PFColors.Standard.Black,
+    marginLeft: WP('5'),
+    marginBottom: WP('2'),
+  },
   searchBox: {
     width: WP('90'),
     height: scale(44),
@@ -40,7 +64,7 @@ const styles = StyleSheet.create({
   },
   btnStyles: {
     marginVertical: WP('10'),
-    width: WP('50'),
+    width: WP('90'),
     alignSelf: 'center',
   },
 

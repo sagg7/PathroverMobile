@@ -9,9 +9,10 @@ const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers, {getState, endpoint}) => {
     const token = getState()?.auth?.accessToken;
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
+    // if (token) {
+    //   headers.set('Authorization', `Bearer ${token}`);
+    // }
+    headers.set('Authorization', `Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0OCwiZXhwIjoxNzQzOTUwNzU4fQ.VckIduT641vjnjULTsOHwdkijYkPYpo9Mw7yAbSH-3k`);
     headers.set('Accept', '*/*');
     return headers;
   },

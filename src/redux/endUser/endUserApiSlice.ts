@@ -37,7 +37,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
           method: 'GET',
         };
       },
-      transformResponse: res => res?.route_reports,
+      transformResponse: (res: any) => res?.route_reports,
     }),
     createSubscriptions: builder.mutation({
       query: data => {
@@ -66,6 +66,23 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    wellSearch: builder.mutation({
+      query: params => {
+        const formData = new FormData();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            formData.append(key, value);
+          }
+        });
+
+        return {
+          url: 'user_routes/well_search',
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
   }),
 
   overrideExisting: true,
@@ -79,4 +96,5 @@ export const {
   useCreateSubscriptionsMutation,
   useDeleteRouteMutation,
   useEditRouteMutation,
+  useWellSearchMutation,
 } = enduserApiSlice;

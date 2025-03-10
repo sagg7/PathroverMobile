@@ -9,11 +9,14 @@ import {
 } from '@react-native-google-signin/google-signin';
 import {firebase} from '@react-native-firebase/app';
 import { withIAPContext } from 'react-native-iap';
+import { LogBox } from 'react-native';
 
 const App = () => {
   MapboxGL.setAccessToken(
     'pk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNseXowMmk5bDJoejEyaXB5Nm43ZzN4OTMifQ.uiO6BX51I9umZzjAK2Ox6g',
   );
+
+  LogBox.ignoreAllLogs()
 
   useEffect(() => {
     if (!firebase.apps.length) {

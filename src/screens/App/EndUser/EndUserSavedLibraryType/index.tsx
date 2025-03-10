@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Text, TouchableOpacity, View} from 'react-native';
-import {useDispatch} from 'react-redux';
 import {useIsFocused} from '@react-navigation/native';
 import {svgIcon} from '../../../../assets/svg';
+import DeleteSvg from '../../../../assets/svg/chatDelete.svg';
+import EditSvg from '../../../../assets/svg/Edit.svg';
 import {
   AppButton,
   AppHeader,
@@ -10,25 +11,17 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../../components';
+import GeneralModal from '../../../../components/complex/GeneralModal';
 import {
   useDeleteRouteMutation,
   useEditRouteMutation,
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
-import {
-  setEndingPoint,
-  setStartingPoint,
-} from '../../../../redux/endUser/endUserSlice';
 import {PFColors, Routes, WP} from '../../../../shared/exporter';
 import styles from './styles';
-import GeneralModal from '../../../../components/complex/GeneralModal';
-import EditSvg from '../../../../assets/svg/Edit.svg';
-import DeleteSvg from '../../../../assets/svg/chatDelete.svg';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
-  const isHiking = !!route?.params?.isHiking;
-  const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [routeName, setRouteName] = useState('');
   const [error, setError] = useState('');
@@ -47,27 +40,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   }, [isFocused]);
 
   const handleNavigation = (selectedItem: any) => {
-    // const hasCustom = selectedItem?.route_type.includes('custom');
-
-    if (isHiking) {
-      dispatch(
-        setStartingPoint([
-          +selectedItem?.pickup_location?.longitude,
-          +selectedItem?.pickup_location?.latitude,
-        ]),
-      );
-      dispatch(
-        setEndingPoint([
-          +selectedItem?.dropoff_location?.longitude,
-          +selectedItem?.dropoff_location?.latitude,
-        ]),
-      );
-      navigation.navigate(Routes.SearchTrailLatLng);
-    } else {
-      navigation.navigate(Routes.ViewSaveRoutesNavigation, {
-        item: selectedItem,
-      });
-    }
+    navigation.navigate(Routes.ViewSaveRoutes, {
+      item: selectedItem,
+    });
   };
 
   const handleModal = (
@@ -106,16 +81,21 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       });
   };
 
-  const handleDelete = () => {
-    deleteRoute(selectedRoute?.id)
-      .unwrap()
-      .then(() => {
-        refetch();
-        handleModal(null, null);
-      })
-      .catch(err => {
-        console.log('err', err);
-      });
+  const handleDelete = async () => {
+    try {
+      if (!selectedRoute?.id) {
+        console.log('No route selected to delete.');
+        return;
+      }
+
+      const res = await deleteRoute(selectedRoute.id).unwrap();
+      console.log('Response:', res);
+
+      refetch();
+      handleModal(null, null);
+    } catch (err) {
+      console.error('Error:', err);
+    }
   };
 
   const renderView = ({item}: any) => (
@@ -245,12 +225,14 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         <View style={styles.innerContainer}>
           <AppButton
             title="Cancel"
+            disabled={isDeleting}
             buttonStyle={styles.cancelBtn}
             handleClick={() => handleModal(null, null)}
             textStyle={{color: PFColors.Standard.Black}}
           />
           <AppButton
             title="Delete"
+            disabled={isDeleting}
             buttonStyle={styles.deleteBtn}
             handleClick={handleDelete}
             isLoading={isDeleting}
