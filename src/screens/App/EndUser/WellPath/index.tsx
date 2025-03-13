@@ -47,13 +47,15 @@ import {setCreateRouteDataEmpty} from '../../../../redux/endUser/endUserSlice';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import GeneralModal from '../../../../components/complex/GeneralModal';
-
+import marker from '../../../../assets/icons/wellsMarker.png';
 const WellPath = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.276313, 31.454005,
+  ]);
   const [route, setRoute] = useState<any>([]);
   const [available, setAvailable] = useState(false);
   const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
@@ -63,13 +65,12 @@ const WellPath = () => {
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
   const [searchedWells, setSearchedWells] = useState<any>(null);
-  console.log(' WellPath ~ searchedWells==>', searchedWells?.[0]);
+
   const [selectedWell, setSelectedWell] = useState<any>(null);
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(false);
-  const [showRouteStartedSheet, setShowRouteStartedSheet] =
-    useState<boolean>(false);
+
   const [zoom, setZoom] = useState<any>(12);
   const [results, setResults] = useState<null>(null);
   const [actionBtn, setActionBtn] = useState<any>({
@@ -181,27 +182,33 @@ const WellPath = () => {
       setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
+  // console.log('ALL WELSS', allWells[3]);
 
   // TODO AFTER WELL PINS FINAL FIXES
 
-  // const filterByType = (type: string) => {
-  //   const filtered = allWellLocations?.wells?.filter(
-  //     (item: any) => item?.well_type,
-  //   );
+  const filterByType = (type: 'wells' | 'pin') => {
+    return (
+      allWellLocations?.wells?.filter((item: any) =>
+        type === 'wells' ? item?.is_well : !item?.is_well,
+      ) ?? []
+    );
+  };
 
-  //   return filtered?.length ? filtered : [];
-  // };
   // useEffect(() => {
+  //   let filteredWells;
+
   //   if (!nearbyPins && nearbyWells) {
-  //     setAllWells(filterByType('wells'));
+  //     filteredWells = filterByType('wells');
   //   } else if (!nearbyWells && nearbyPins) {
-  //     setAllWells(filterByType('pin'));
+  //     filteredWells = filterByType('pin');
   //   } else if (nearbyPins && nearbyWells) {
-  //     setAllWells(allWellLocations?.wells);
-  //   } else if (!nearbyPins && !nearbyWells) {
-  //     setAllWells([]);
+  //     filteredWells = allWellLocations?.wells;
+  //   } else {
+  //     filteredWells = [];
   //   }
-  // }, [nearbyWells, allWellLocations]);
+
+  //   setAllWells(filteredWells);
+  // }, [nearbyWells, nearbyPins, allWellLocations]);
 
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
@@ -242,12 +249,17 @@ const WellPath = () => {
   }, [currentLocation, searchLocation]);
 
   useEffect(() => {
+    const markerImage = require('../../../../assets/icons/wellsMarker.png');
+    (async () => {
+      await MapboxGL.Images.addImageAsync('marker', markerImage);
+    })();
+  }, []);
+
+  useEffect(() => {
     if (searchLocation?.length > 0) {
       setTimeout(() => {
         if (cameraRef.current) {
           cameraRef.current.moveTo(searchLocation, 1500);
-          console.log('searchLocation', searchLocation);
-
           setQueryParams({
             ...queryParams,
             latitude: searchLocation[1],
@@ -371,7 +383,7 @@ const WellPath = () => {
 
   const wellsToGeoJSON = (wells: any[]) => ({
     type: 'FeatureCollection',
-    features: wells.map(well => ({
+    features: wells?.map(well => ({
       type: 'Feature',
       properties: {well: well},
 
@@ -424,6 +436,7 @@ const WellPath = () => {
     setSelectedWell([selected?.log, selected?.lat]);
     setSelectedWellName(selected);
   };
+
   console.log('ALL WELLS==>', allWells?.length);
 
   return (
@@ -487,31 +500,33 @@ const WellPath = () => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-        <MapboxGL.Images
-          images={{
-            marker: require('../../../../assets/icons/wellsMarker.png'),
-          }}
-        />
+        {/* <MapboxGL.Images images={{marker: MARKERPNG}} /> */}
+
         {/* Clustering Source */}
-        {allWells?.length > 0 && (
-          <MapboxGL.ShapeSource
-            onPress={onPressMarker}
-            id="wellsCluster"
-            shape={wellsToGeoJSON(allWells)}
-            cluster
-            clusterRadius={20}
-            clusterMaxZoom={10}>
-            <MapboxGL.SymbolLayer
-              id="markerLayer"
-              style={{
-                iconImage: 'marker', // Reference the registered image name
-                iconSize: Platform.OS === 'android' ? 0.7 : 0.5,
-                iconIgnorePlacement: true,
-                // iconAllowOverlap: true,
-              }}
-            />
-          </MapboxGL.ShapeSource>
-        )}
+        <MapboxGL.ShapeSource
+          onPress={onPressMarker}
+          id="wellsCluster"
+          shape={wellsToGeoJSON(allWells)}
+          cluster
+          clusterRadius={20}
+          clusterMaxZoom={10}>
+          <MapboxGL.SymbolLayer
+            id="markerLayer"
+            style={{
+              iconImage: 'marker', // Reference the registered image name
+              iconSize: Platform.OS === 'android' ? 0.7 : 1,
+              iconIgnorePlacement: true,
+              iconAllowOverlap: true,
+              iconAnchor: 'bottom',
+              // iconColor: 'green',
+            }}
+          />
+          <MapboxGL.Images
+            images={{
+              marker: marker,
+            }}
+          />
+        </MapboxGL.ShapeSource>
 
         {/* Route Line */}
         {route?.length > 1 && (
@@ -709,24 +724,24 @@ const WellPath = () => {
           initialNumToRender={10}
           renderItem={({item}) => (
             <View style={styles.searchWellContainer}>
-              <View
-                style={[
-                  styles.searchWellContainer,
-                  {justifyContent: 'flex-start', marginBottom: 0},
-                ]}>
+              <View style={[styles.searchWellContainer]}>
                 <View style={styles.searchWellImage}>
                   {svgIcon.WellsMarker}
                 </View>
-                <View style={{marginLeft: 10}}>
-                  <Text numberOfLines={1} style={styles.searchWellName}>
-                    {item?.well_name}
-                  </Text>
+                <View
+                  style={{
+                    width: '72%',
+                  }}>
+                  <Text style={styles.searchWellName}>{item?.well_name}</Text>
+
                   <Text numberOfLines={1} style={styles.searchWellDistance}>
                     {wellDistances[item?.id] || 'Calculating...'}
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity activeOpacity={0.7} onPress={() => handlePinBtn(item)}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handlePinBtn(item)}>
                 {svgIcon.SearchIcon}
               </TouchableOpacity>
             </View>

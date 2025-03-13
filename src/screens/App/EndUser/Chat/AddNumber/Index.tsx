@@ -52,7 +52,6 @@ const AddNumber = () => {
         phone_number: removeNonNumbers(values?.phone),
       };
       const res = await addPhoneNumber(data);
-      a;
       // TODO: REVERT FOR COMMENTED/REMOVE OTP FROM ALERT
       if (res?.data) {
         // if (res?.data) {

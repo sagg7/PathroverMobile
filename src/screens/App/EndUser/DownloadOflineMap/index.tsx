@@ -339,7 +339,6 @@ const DownloadOfflineMap = ({navigation}: any) => {
       {showNameSheet && (
         <SaveRouteSheet
           title="Map Name"
-          // modalVisible={showNameSheet}
           routeName={routeName}
           onChangeText={(text: any) => setRouteName(text)}
           onPressSave={() => handleSaveRouteBtn()}

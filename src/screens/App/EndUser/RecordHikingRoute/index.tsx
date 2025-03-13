@@ -12,6 +12,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {
   Default_Map_Style,
+  isIOS,
   MapTypes,
   PFColors,
   showAlert,
@@ -98,7 +99,8 @@ const RecordHikingRoute = () => {
     try {
       Geolocation.getCurrentPosition(
         position => {
-          const {latitude, longitude} = position.coords;
+          const {latitude, longitude, accuracy} = position.coords;
+
           setCurrentLocation([longitude, latitude]);
           setLiveLocation([longitude, latitude]);
         },
@@ -226,7 +228,6 @@ const RecordHikingRoute = () => {
         const elevationFeet = altitude
           ? (altitude * 3.28084).toFixed(0)
           : '0.00';
-        console.log('ELEVATION', elevationFeet);
 
         setRoute(prev => {
           if (prev.length > 0) {
@@ -361,7 +362,7 @@ const RecordHikingRoute = () => {
         <MapboxGL.UserLocation
           visible
           onUpdate={handleLocationUpdate}
-          minDisplacement={10}
+          minDisplacement={isIOS() ? 3 : 10}
           requestsAlwaysUse
           // showsUserHeadingIndicator
           androidRenderMode="gps"

@@ -296,7 +296,7 @@ const ViewSaveRoutes = ({route}: any) => {
       setResults(routeResults);
     }
   };
-  const handleStartModalSaveBtn = () => {
+  const handleStartModalSaveBtn = async () => {
     setRouteToStartPoint([]);
     setShowReachModal(false);
     setModalKey(2);
@@ -327,15 +327,19 @@ const ViewSaveRoutes = ({route}: any) => {
     // setRoute(formattedPoints);
   };
   const onPressStartBtn = async () => {
+    // return;
     getRoute();
     setShowRouteActionSheet(false);
     setIsStartBtnPressed(true);
-    const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
-    cameraRef.current.setCamera({
-      centerCoordinate: currentLocation,
-      zoomLevel: 5,
-      animationDuration: 1000,
-    });
+    const routeResults: any = await getTimeAndDistance(
+      currentLocation,
+      endPoint,
+    );
+    // cameraRef.current.setCamera({
+    //   centerCoordinate: currentLocation,
+    //   zoomLevel: 16,
+    //   animationDuration: 1000,
+    // });
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
@@ -379,8 +383,12 @@ const ViewSaveRoutes = ({route}: any) => {
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={10}
-          centerCoordinate={isStartBtnPressed ? currentLocation : undefined}
-          bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
+          // centerCoordinate={isStartBtnPressed ? currentLocation : undefined}
+          bounds={
+            routes?.length > 0
+              ? calculateBounds(routes)
+              : calculateBounds(routeToStartPoint)
+          }
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
         {startPoint && (
@@ -431,6 +439,7 @@ const ViewSaveRoutes = ({route}: any) => {
           </MapboxGL.ShapeSource>
         )}
         {!selectedRoute?.is_road_route &&
+          selectedRoute?.route_type === 'custom_route' &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -466,7 +475,8 @@ const ViewSaveRoutes = ({route}: any) => {
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
-          routeInfo={timeDistance}
+          // routeInfo={timeDistance}
+          routeInfo={results}
         />
       )}
       {modalKey === 1 && isStartBtnPressed && (

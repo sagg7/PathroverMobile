@@ -142,6 +142,10 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
    * @returns {string} - Formatted duration.
    */
   const formatDuration = minutes => {
+    if (minutes < 1) {
+      return 'A few seconds away';
+    }
+
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = Math.round(minutes % 60);
@@ -151,6 +155,7 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
           : ''
       }`;
     }
+
     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
   };
 
@@ -192,5 +197,18 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   } catch (error) {
     console.error('Error fetching time and distance:', error);
     throw error;
+  }
+};
+
+export const extractType = (content: any): string | undefined => {
+  try {
+    const messageContent = content?.last_message?.content;
+    if (!messageContent) return '';
+
+    const parsedContent = JSON.parse(messageContent);
+    return parsedContent?.messageContainsLocation?.type;
+  } catch (error) {
+    console.error('JSON parsing error:', error);
+    return '';
   }
 };

@@ -127,9 +127,9 @@ const styles = StyleSheet.create({
   searchWellName: {
     color: PFColors.Standard.Black,
     fontFamily: PFFonts.Foundation.SemiBold,
-    fontSize: PFFontSize.FONT_SIZE_16,
-    width:'100%',
-    textTransform:'capitalize'
+    fontSize: PFFontSize.FONT_SIZE_14,
+    // width: '60%',
+    textTransform: 'capitalize',
   },
   searchWellDistance: {
     color: PFColors.Gray.DarkGray,

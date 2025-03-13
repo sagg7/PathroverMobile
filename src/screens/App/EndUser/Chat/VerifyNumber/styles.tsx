@@ -55,11 +55,12 @@ const styles = StyleSheet.create({
     marginBottom: isOpen ? 300 : 40,
   }),
   divider: {
-    position: 'absolute',
+    flex: 1,
     bottom: 0,
     width: '100%',
     alignSelf: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 40,
   },
   container: {
     paddingHorizontal: 12,
