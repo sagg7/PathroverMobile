@@ -100,7 +100,10 @@ const ViewWellPathNavigation = ({route}: any) => {
 
       setResults(locResults);
       // DISTANCE CALCULATED IN MILES
-      if (locResults?.distance <= '0.186' || locResults?.distance <= 0.186) {
+      if (
+        locResults?.distance <= '0.0621371' ||
+        locResults?.distance <= 0.0621371
+      ) {
         setShowReachModal(true);
       }
     };

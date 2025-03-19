@@ -43,7 +43,9 @@ const CreateRouteEndUser = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.276313, 31.454005,
+  ]);
   const [route, setRoute] = useState<any>([]);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const {createRouteData} = useSelector(state => state?.endUser?.trailRoute);

@@ -36,7 +36,7 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
-  console.log(" ChatUsers ~ allContactsList==>", allContactsList[1])
+  console.log(' ChatUsers ~ allContactsList==>', allContactsList[1]);
 
   // API
   // const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
@@ -80,12 +80,12 @@ const ChatUsers = () => {
   }, [isFocused]);
 
   const normalizePhoneNumber = (phone: any) => {
-    return phone.replace(/[\s\-()]/g, '')
+    return phone.replace(/[\s\-()]/g, '');
   };
 
   const formatContacts = (contacts: any = []) => {
     const sortedContacts = [...contacts].sort((a: any, b: any) => {
-      const nameA = a?.givenName || ''; 
+      const nameA = a?.givenName || '';
       const nameB = b?.givenName || '';
 
       if (a.is_exist === b.is_exist) {
@@ -147,7 +147,7 @@ const ChatUsers = () => {
     url += `${separator}body=${encodeURIComponent(
       `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free`,
     )}`;
-    console.log(" inviteUser ~ url==>", url)
+    console.log(' inviteUser ~ url==>', url);
 
     Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));
   };
@@ -164,7 +164,7 @@ const ChatUsers = () => {
             }
             style={styles.imageStyle}
           />
-          <Text style={styles.nameText}>{item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>{item?.displayName || 'User'}</Text>
         </View>
         {item?.is_exist ? (
           <TouchableOpacity

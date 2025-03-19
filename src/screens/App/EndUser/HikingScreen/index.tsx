@@ -40,7 +40,9 @@ const HikingScreen = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.276313, 31.454005,
+  ]);
   const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
   const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
   const [showSheet, setShowSheet] = useState<boolean>(true);

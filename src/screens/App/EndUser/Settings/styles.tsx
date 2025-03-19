@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
     height: WP('14'),
     width: WP('14'),
     borderRadius: WP('14') / 2,
+    backgroundColor: PFColors.Gray.CloudGray,
   },
   userProfileInner: {
     paddingLeft: WP('4'),

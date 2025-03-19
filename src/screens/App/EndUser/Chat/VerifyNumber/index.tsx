@@ -160,7 +160,7 @@ const VerifyNumber = () => {
             handleClick={onPressVerify}
             isLoading={isLoading}
             disabled={isLoading}
-            buttonStyle={styles.btnContainer(keyboardVisible)}
+            // buttonStyle={styles.btnContainer(keyboardVisible)}
           />
         </View>
       </View>

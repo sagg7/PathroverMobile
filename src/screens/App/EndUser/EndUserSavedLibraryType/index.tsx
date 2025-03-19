@@ -87,6 +87,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         console.log('No route selected to delete.');
         return;
       }
+      console.log('selectedRoute.id', selectedRoute.id);
 
       const res = await deleteRoute(selectedRoute.id).unwrap();
       console.log('Response:', res);
