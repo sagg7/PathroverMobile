@@ -85,4 +85,5 @@ export const Routes = {
   ViewSaveRoutesNavigation: 'ViewSaveRoutesNavigation',
   SearchTrails: 'SearchTrails',
   SearchTrailResult: 'SearchTrailResult',
+  TrailDetails: 'TrailDetails',
 };

@@ -23,31 +23,35 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
-    dispatch(resetTrailRoute());
-    if (startingPoint?.length > 0) {
-      dispatch(
-        setStartingPoint([
-          parseFloat(startingPoint[0]),
-          parseFloat(startingPoint[1]),
-        ]),
-      );
+    if (type === 'Chosen Trail') {
+      navigation.navigate(Routes.TrailDetails, {trailInfo: data});
     } else {
-      if (location?.longitude && location?.latitude) {
-        dispatch(setStartingPoint([location.longitude, location.latitude]));
+      dispatch(resetTrailRoute());
+      if (startingPoint?.length > 0) {
+        dispatch(
+          setStartingPoint([
+            parseFloat(startingPoint[0]),
+            parseFloat(startingPoint[1]),
+          ]),
+        );
+      } else {
+        if (location?.longitude && location?.latitude) {
+          dispatch(setStartingPoint([location.longitude, location.latitude]));
+        }
       }
+      if (endingPoint?.length > 0) {
+        dispatch(
+          setEndingPoint([
+            parseFloat(endingPoint[0]),
+            parseFloat(endingPoint[1]),
+          ]),
+        );
+      }
+      if (data) {
+        dispatch(setRouteData(data));
+      }
+      navigation.navigate(Routes.SearchTrailLatLng);
     }
-    if (endingPoint?.length > 0) {
-      dispatch(
-        setEndingPoint([
-          parseFloat(endingPoint[0]),
-          parseFloat(endingPoint[1]),
-        ]),
-      );
-    }
-    if (data) {
-      dispatch(setRouteData(data));
-    }
-    navigation.navigate(Routes.SearchTrailLatLng);
   };
 
   return (

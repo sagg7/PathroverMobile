@@ -83,3 +83,4 @@ export * from './complex/SaveRecordHikingRoute';
 export * from './complex/AppCheckbox';
 export * from './complex/AppDropdown';
 export * from './complex/AppRangeSlider';
+export * from './complex/TrailInfoSheet';
