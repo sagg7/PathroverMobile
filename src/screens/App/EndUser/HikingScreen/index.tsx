@@ -1,26 +1,38 @@
-import {useNavigation} from '@react-navigation/native';
-import MapboxGL from '@rnmapbox/maps';
-import React, {useEffect, useRef, useState} from 'react';
-import {FlatList, Image, Text, TouchableOpacity, View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {svgIcon} from '../../../../assets/svg';
-import {MainWrapper, MapLayerSheet, WeatherSheet} from '../../../../components';
-import GeneralModal from '../../../../components/complex/GeneralModal';
-import useLocation from '../../../../hooks/getLocation';
-import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
-import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+import React, {useState, useEffect, useRef} from 'react';
 import {
+  View,
+  Text,
+  Alert,
+  Image,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+import MapboxGL from '@rnmapbox/maps';
+import Geolocation from 'react-native-geolocation-service';
+import {
+  PFColors,
+  MainWrapper,
+  TrailInfoSheet,
+  fetchSuggestions,
+  AppHeader,
+  WeatherSheet,
   appIcons,
+  MapLayerSheet,
   Default_Map_Style,
-  MapTypes,
   Routes,
+  MapTypes,
   WEATHER_API_KEY,
 } from '../../../../shared/exporter';
-import HeaderView from './HeaderView';
 import styles from './styles';
-import AppCheckbox from '../../../../components/complex/AppCheckbox';
-import {HIKING_FILTERS_CHECKLIST} from '../../../../shared/utils/constant';
+import {svgIcon} from '../../../../assets/svg';
+import HeaderView from '../HikingScreen/HeaderView';
+import {useDispatch, useSelector} from 'react-redux';
 import HikingFilter from '../../../../components/complex/HikingFilter';
+import GeneralModal from '../../../../components/complex/GeneralModal';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
+import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import useLocation from '../../../../hooks/getLocation';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -35,34 +47,32 @@ const MY_DATA_MODAL_CONTENT = [
   },
 ];
 
-const HikingScreen = () => {
-  const navigation: any = useNavigation();
-  const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
-  const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
-  const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.276313, 31.454005,
-  ]);
-  const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
-  const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
-  const [showSheet, setShowSheet] = useState<boolean>(true);
-  const [weather, setWeather] = useState<any>([]);
+const HikingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
-  const {loginUser} = useSelector(state => state.auth);
+  const cameraRef = useRef<any>(null);
+  const debounceTimeout = useRef<any>(null);
+  const [weather, setWeather] = useState<any>([]);
+  const [trailsData, setTrailsData] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
+  const [selectedType, setSelectedType] = useState('hiking');
+  const [simpleSearch, setSimpleSearch] = useState<string>('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [trailInfo, setTrailInfo] = useState<boolean>(null);
   const [isMyDataVisible, setIsMyDataVisible] = useState(false);
-
-  const [queryParams, setQueryParams] = useState<any>({
-    latitude: null,
-    longitude: null,
-    radius: 50,
-  });
-
-  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
+  const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
+  const [showWeatherSheet, setShowWeatherSheet] = useState<boolean>(false);
+  const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
 
   const {location} = useLocation();
 
-  const cameraRef = useRef<any>(null);
+  const [showTrailInfoSheet, setShowTrailInfoSheet] = useState<boolean>(false);
 
+  const {loginUser} = useSelector(state => state.auth);
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+
+  // Get user location
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
@@ -87,15 +97,23 @@ const HikingScreen = () => {
   }, [location]);
 
   useEffect(() => {
-    if (location) {
-      setCurrentLocation([location?.longitude, location?.latitude]);
-      setQueryParams({
-        ...queryParams,
-        latitude: location?.longitude,
-        longitude: location?.latitude,
-      });
+    if (route?.params) {
+      const latitude: any = route?.params?.latitude;
+      const longitude: any = route?.params?.longitude;
+      setUserLocation([longitude, latitude]);
+      fetchNearbyTrails(latitude, longitude);
+    } else {
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setUserLocation([longitude, latitude]);
+          fetchNearbyTrails(latitude, longitude);
+        },
+        error => Alert.alert('Error', error.message),
+        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      );
     }
-  }, [location]);
+  }, [route]);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -108,6 +126,152 @@ const HikingScreen = () => {
     }
   }, [mapLayerStyle]);
 
+  useEffect(() => {
+    if (userLocation) fetchNearbyTrails(userLocation?.[1], userLocation?.[0]);
+  }, [selectedType]);
+
+  const getOverpassQuery = (latitude, longitude, type) => {
+    let filters = '';
+
+    switch (type) {
+      case 'hiking':
+        filters = `
+        way["highway"="path"](around:5000, ${latitude}, ${longitude});
+        way["route"="hiking"](around:5000, ${latitude}, ${longitude});
+        `;
+        // way["sac_scale"](around:5000, ${latitude}, ${longitude});
+        break;
+      // case 'footway':
+      //   filters = `way["highway"="footway"](around:5000, ${latitude}, ${longitude});`;
+      //   break;
+      // case 'steps':
+      //   filters = `way["highway"="steps"](around:5000, ${latitude}, ${longitude});`;
+      //   break;
+      case 'skiing':
+        filters = `way["piste:type"](around:5000, ${latitude}, ${longitude});`;
+        break;
+      case 'mtb':
+        filters = `
+        way["highway"="path"]["bicycle"~"yes|designated"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["bicycle"~"yes|designated"](around:5000, ${latitude}, ${longitude});
+        way["mtb:scale"](around:5000, ${latitude}, ${longitude});
+        `;
+        break;
+      case 'cycleway':
+        filters = `way["highway"="cycleway"](around:5000, ${latitude}, ${longitude});`;
+        break;
+      case 'bridleway':
+        filters = `
+        way["highway"="bridleway"](around:5000, ${latitude}, ${longitude});
+        way["horse"="yes"](around:5000, ${latitude}, ${longitude});
+        `;
+        break;
+      case 'track':
+        filters = `
+        way["highway"="track"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["surface"~"dirt|gravel|sand|unpaved"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["tracktype"~"grade3|grade4|grade5"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["motor_vehicle"="yes"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["motorcycle"="yes"](around:5000, ${latitude}, ${longitude});
+        `;
+        break;
+      default:
+        // Fetch all relevant trails if no specific type is selected
+        filters = ` 
+        way["route"~"hiking|mtb"](around:5000, ${latitude}, ${longitude});
+        way["piste:type"](around:5000, ${latitude}, ${longitude});
+        way["highway"~"footway|cycleway|bridleway|path|track"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["surface"~"dirt|gravel|sand|unpaved"](around:5000, ${latitude}, ${longitude});
+        way["highway"="track"]["tracktype"~"grade3|grade4|grade5"](around:5000, ${latitude}, ${longitude});
+        `;
+    }
+
+    return `
+    [out:json];
+    (
+      ${filters}
+    );
+    out geom;
+    `;
+  };
+
+  // const getOverpassQuery1 = (latitude, longitude, type) => {
+  //   return `
+  //   [out:json];
+  //   (
+  //     way["highway"~"path|track|footway|steps|bridleway|cycleway"](around:5000, ${latitude}, ${longitude});
+  //   );
+  //   out geom;
+  //   `;
+  // };
+
+  // Function to Get Overpass Query
+
+  const getTrailColor = (index: any) => {
+    const colors = ['#13488A'];
+    // const colors = ['#ff7f00', '#1f77b4', '#2ca02c', '#d62728', '#9467bd'];
+    return colors[index % colors.length];
+  };
+
+  const offsetCoordinates = (coords: any, offset: any) =>
+    coords.map(([lon, lat], index) => [
+      lon + (index % 2 === 0 ? offset : -offset),
+      lat + (index % 2 === 0 ? offset : -offset),
+    ]);
+
+  const fetchNearbyTrails = async (latitude: any, longitude: any) => {
+    const overpassQuery = getOverpassQuery(latitude, longitude, selectedType);
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
+      overpassQuery,
+    )}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!data.elements) return;
+
+      // Convert Overpass API response to GeoJSON format
+      const geoJson = {
+        type: 'FeatureCollection',
+        features: data.elements.map((element: any, index: any) => ({
+          type: 'Feature',
+          properties: {tags: element?.tags, color: getTrailColor(index)},
+          geometry: {
+            type: 'LineString',
+            // coordinates: offsetCoordinates(
+            //   element.geometry.map((point: any) => [point.lon, point.lat]),
+            //   0.0001,
+            // ),
+            coordinates: element.geometry.map((point: any) => [
+              point.lon,
+              point.lat,
+            ]),
+          },
+        })),
+      };
+
+      setTrailsData(geoJson?.features);
+    } catch (error) {
+      console.error('Error fetching trails:', error);
+    }
+  };
+
+  const handleCalloutPress = (e: any, trail: any) => {
+    setTrailInfo(trail);
+    setTimeout(() => {
+      setShowTrailInfoSheet(true);
+    }, 300);
+  };
+
+  const handlePlaceSelect = (place: any) => {
+    const [longitude, latitude] = place.center || place;
+    setSimpleSearch(place?.place_name);
+    setSuggestions([]);
+    setUserLocation([longitude, latitude]);
+    fetchNearbyTrails(latitude, longitude);
+  };
+
   const onPressMap = (event: any) => {
     try {
       const {geometry} = event;
@@ -119,6 +283,7 @@ const HikingScreen = () => {
       console.error('Error in onPressMap:', error);
     }
   };
+
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
       prev.map(v => ({
@@ -126,6 +291,25 @@ const HikingScreen = () => {
         isSelected: v.id === item.id,
       })),
     );
+  };
+
+  const onPressShare = (routeData: any) => {
+    const trailPath = routeData?.geometry?.coordinates;
+    const startingPoint = routeData?.geometry?.coordinates?.[0];
+    const endingPoint = routeData?.geometry?.coordinates?.at(-1);
+
+    setShowTrailInfoSheet(false);
+
+    setTimeout(() => {
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: startingPoint,
+          endingPoint: endingPoint,
+          type: 'Chosen Trail',
+          data: routeData,
+        },
+      });
+    }, 300);
   };
 
   const onPressSave = () => {
@@ -141,8 +325,9 @@ const HikingScreen = () => {
   };
 
   const moveToCurrentLocation = () => {
-    cameraRef.current.flyTo(currentLocation, 100);
+    cameraRef.current.flyTo(userLocation, 100);
   };
+
   const ActionBtn = ({icon, onPress}: any) => (
     <TouchableOpacity onPress={onPress}>
       <Image
@@ -157,12 +342,8 @@ const HikingScreen = () => {
     <MainWrapper style={styles.container}>
       <HeaderView
         userPicture={loginUser?.avatar}
-        onPressFilter={() => {
-          setShowFilterSheet(true);
-        }}
-        onPressSearch={() => {
-          navigation.navigate('SearchTrails');
-        }}
+        onPressFilter={() => setShowFilterSheet(true)}
+        onPressSearch={() => navigation.navigate('SearchTrails')}
         onPressWeather={() => setShowWeatherSheet(true)}
       />
       <MapboxGL.MapView
@@ -170,17 +351,47 @@ const HikingScreen = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        onPress={onPressMap}>
+        // styleURL={MapboxGL.StyleURL.Outdoors}
+        // onPress={onPressMap}
+      >
+        {userLocation && (
+          <MapboxGL.Camera zoomLevel={13} centerCoordinate={userLocation} />
+        )}
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={12}
-          centerCoordinate={currentLocation}
+          centerCoordinate={userLocation}
         />
-        {currentLocation && (
-          <MapboxGL.MarkerView coordinate={currentLocation}>
+        {/* Show user location */}
+        {userLocation && (
+          <MapboxGL.MarkerView coordinate={userLocation}>
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
+
+        {/* Render Trails */}
+        {trailsData?.length > 0 &&
+          trailsData?.map((trail: any, index: any) => (
+            <MapboxGL.ShapeSource
+              key={index}
+              id={`trail-${index}`}
+              shape={trail}
+              onPress={e => handleCalloutPress(e, trail)}>
+              <MapboxGL.LineLayer
+                id={`trail-line-${index}`}
+                style={{
+                  lineColor: ['get', 'color'],
+                  lineWidth: 3,
+                }}
+              />
+              {/* <MapboxGL.PointAnnotation
+                id={`trail-point-${index}`}
+                coordinate={trail.geometry.coordinates[0]}
+                onSelected={() => handleCalloutPress(trail)}>
+                <MapboxGL.Callout title={trail.properties.name || 'Trail'} />
+              </MapboxGL.PointAnnotation> */}
+            </MapboxGL.ShapeSource>
+          ))}
       </MapboxGL.MapView>
       <TouchableOpacity
         style={styles.centerMapStyles}
@@ -206,14 +417,6 @@ const HikingScreen = () => {
         {svgIcon.SearchRoute}
       </TouchableOpacity>
 
-      <MapLayerSheet
-        setModalVisible={() => setMapLayerSheeet(false)}
-        modalVisible={mapLayerSheeet}
-        data={mapTypesArr}
-        onPressCard={onSelectMapType}
-        onPressCancel={() => setMapLayerSheeet(false)}
-        onPressSave={() => onPressSave()}
-      />
       <View style={styles.actionBtnView}>
         <ActionBtn
           icon={appIcons.recordTrack}
@@ -230,16 +433,35 @@ const HikingScreen = () => {
           }}
         />
       </View>
-
       {weather?.city && (
         <WeatherSheet
           modalVisible={showWeatherSheet}
-          coords={[location?.longitude, location?.latitude]}
+          coords={[userLocation?.longitude, userLocation?.latitude]}
           setModalVisible={() => setShowWeatherSheet(false)}
           weather={weather}
         />
       )}
-
+      <MapLayerSheet
+        setModalVisible={() => setMapLayerSheeet(false)}
+        modalVisible={mapLayerSheeet}
+        data={mapTypesArr}
+        onPressCard={onSelectMapType}
+        onPressCancel={() => setMapLayerSheeet(false)}
+        onPressSave={() => onPressSave()}
+      />
+      <TrailInfoSheet
+        onPressShare={onPressShare}
+        onPressPin={() => {}}
+        modalVisible={showTrailInfoSheet}
+        trailInfo={trailInfo}
+        setModalVisible={() => setShowTrailInfoSheet(false)}
+        onPressNavigation={() => {
+          setShowTrailInfoSheet(false);
+          setTimeout(() => {
+            navigation.navigate('TrailDetails', {trailInfo});
+          }, 300);
+        }}
+      />
       {/* My Data Modal */}
       <GeneralModal
         visible={isMyDataVisible}
@@ -269,6 +491,10 @@ const HikingScreen = () => {
 
       {/* Filter Modal */}
       <HikingFilter
+        handleTrailTypeChange={(value: any) => {
+          setSelectedType(value);
+          setShowFilterSheet(false);
+        }}
         showFilterSheet={showFilterSheet}
         setShowFilterSheet={setShowFilterSheet}
       />

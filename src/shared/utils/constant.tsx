@@ -1208,6 +1208,20 @@ export const BIKE_TYPE = [
 export const TRAIL_TYPE = [
   {
     id: 0,
+    label: 'Hiking Trails',
+    value: 'hiking',
+  }, // General hiking/walking trails
+  // {id: 1, label: 'Footway', value: 'footway'}, // Sidewalks, pedestrian paths
+  // {id: 2, label: 'Steps', value: 'steps'}, // Stairways and pedestrian-only step paths
+  {id: 3, label: 'Ski Trails', value: 'skiing'}, // Ski routes (piste:type)
+  {id: 4, label: 'Mountain Biking Trails', value: 'mtb'}, // MTB-specific routes
+  {id: 5, label: 'Cycling Paths', value: 'cycleway'}, // Bicycle lanes, tracks
+  {id: 6, label: 'Bridleways (Horse Riding)', value: 'bridleway'}, // Horse-riding trails
+  {id: 7, label: 'Off-Road Trails', value: 'track'}, // Dirt roads, forestry tracks
+];
+export const TRAIL_TYPE1 = [
+  {
+    id: 0,
     value: 'Singletrack',
     label: 'Singletrack',
   },

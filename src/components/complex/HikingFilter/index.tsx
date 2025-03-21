@@ -22,10 +22,13 @@ import AppRangeSlider from '../AppRangeSlider';
 function HikingFilter({
   showFilterSheet,
   setShowFilterSheet,
+  handleTrailTypeChange,
 }: {
   showFilterSheet: boolean;
+  handleTrailTypeChange: any;
   setShowFilterSheet: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const [trailType, setTrailType] = useState<any>(null);
   const [checkedItems, setCheckedItems] = useState<{[key: number]: boolean}>(
     {},
   );
@@ -102,6 +105,7 @@ function HikingFilter({
               data={TRAIL_TYPE}
               label="Trail type"
               style={styles.dropdown}
+              onChange={value => setTrailType(value)}
             />
             <AppDropdown
               data={TRAILS_ON_WHISHLIST}
@@ -142,7 +146,7 @@ function HikingFilter({
             />
             <AppButton
               title="Apply"
-              handleClick={() => console.log('Filters Applied', checkedItems)}
+              handleClick={() => handleTrailTypeChange(trailType)}
               buttonStyle={{width: '49%'}}
             />
           </View>
