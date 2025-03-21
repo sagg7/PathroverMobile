@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   messageText: {
-    fontSize: PFFontSize.FONT_SIZE_12,
+    fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.Regular,
     marginBottom: 3,
   },
