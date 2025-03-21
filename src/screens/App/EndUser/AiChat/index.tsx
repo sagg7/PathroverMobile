@@ -81,7 +81,7 @@ const AiChat = () => {
       <View style={styles.container}>
         <GiftedChat
           user={{
-            _id: 1,
+            _id: 2,
           }}
           messages={messages}
           text={inputValue}
