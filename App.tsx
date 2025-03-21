@@ -24,9 +24,9 @@ const App = () => {
     }
     GoogleSignin.configure({
       webClientId:
-        '259356526485-g0llcedebdppjctams5kt994ghmd9tlu.apps.googleusercontent.com',
+        '123757988773-m693cnqd674b9nvd3kat3bdp6eh1226j.apps.googleusercontent.com',
       iosClientId:
-        '259356526485-7j0t7i4eakbqd9mb4nj5mjpj01j1r4kr.apps.googleusercontent.com',
+        '123757988773-c0sece94e2pm7eqj1g48b3b15b2avm46.apps.googleusercontent.com',
       offlineAccess: true,
     });
   }, []);
