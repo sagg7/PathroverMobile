@@ -56,6 +56,7 @@ const SaveRecordRouteSheet = ({
             }
           />
           <AppInput
+            textAlignVertical={'top'}
             placeholder="Notes"
             inputContainerStyle={styles.notesInputStyles}
             value={recordingDetails?.notes}
@@ -167,6 +168,7 @@ const styles = StyleSheet.create({
   notesInputStyles: {
     width: WP('92'),
     height: WP('30'),
+    paddingTop: 15,
   },
   inputWidth: {
     width: WP('92'),

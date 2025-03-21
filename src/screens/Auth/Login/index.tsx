@@ -53,8 +53,6 @@ const LoginScreen = ({}) => {
     dispatch(setUserRole(APP_ROLE.END_USER));
 
     if (resp?.data) {
-      console.log('Res.data', resp?.data);
-
       navigation.replace('AppStack');
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);

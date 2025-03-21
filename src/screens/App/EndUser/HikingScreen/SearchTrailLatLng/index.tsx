@@ -36,6 +36,7 @@ import {
   WP,
 } from '../../../../../shared/exporter';
 import {
+  CHAT_NON_VERIFIED_TEXT,
   REPORTS_LIST,
   UNEXPECTED_ERROR,
 } from '../../../../../shared/utils/constant';
@@ -76,6 +77,7 @@ const SearchTrailLatLng = () => {
   const [addRouteReport] = useAddRouteReportMutation();
   const {data: allReports, refetch} = useGetRouteReportQuery({});
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const loginUser = useSelector(state => state?.auth?.loginUser);
 
   useEffect(() => {
     if (location) {
@@ -377,9 +379,13 @@ const SearchTrailLatLng = () => {
   };
 
   const onPressShare = () => {
-    navigation.navigate(Routes.ChatUsers, {
-      shareTrail: {startingPoint, endingPoint, type: 'trail'},
-    });
+    if (loginUser?.verified) {
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {startingPoint, endingPoint, type: 'trail'},
+      });
+    } else {
+      showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+    }
   };
 
   return (

@@ -20,7 +20,10 @@ import {
   PFColors,
   showAlert,
 } from '../../../../shared/exporter';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {
+  getTimeAndDistance,
+  getTimeAndDistanceForWaypoint,
+} from '../../../../shared/utils/helpers';
 import styles from './styles';
 
 const ViewSaveRoutes = ({route}: any) => {
@@ -61,6 +64,8 @@ const ViewSaveRoutes = ({route}: any) => {
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
   const cameraRef = useRef<any>(null);
+  const userRef = useRef<any>(null);
+
   const [results, setResults] = useState<null>(null);
 
   useEffect(() => {
@@ -149,7 +154,8 @@ const ViewSaveRoutes = ({route}: any) => {
   }, [startPoint, endPoint]);
 
   const getRouteTotalDistance = async () => {
-    const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
+    const routeResults: any = await getTimeAndDistanceForWaypoint(routes);
+
     setResults(routeResults);
   };
   useEffect(() => {
@@ -289,11 +295,14 @@ const ViewSaveRoutes = ({route}: any) => {
     if (location?.coords) {
       const {latitude, longitude} = location.coords;
       setLiveLocation([longitude, latitude]);
-      const routeResults: any = await getTimeAndDistance(
-        [longitude, latitude],
-        endPoint,
-      );
-      setResults(routeResults);
+
+      if (isStartBtnPressed) {
+        const routeResults: any = await getTimeAndDistance(
+          [longitude, latitude],
+          endPoint,
+        );
+        setResults(routeResults);
+      }
     }
   };
   const handleStartModalSaveBtn = async () => {
@@ -327,13 +336,27 @@ const ViewSaveRoutes = ({route}: any) => {
     // setRoute(formattedPoints);
   };
   const onPressStartBtn = async () => {
-    // return;
-    getRoute();
-    setShowRouteActionSheet(false);
+    setRoute([]);
+
     setIsStartBtnPressed(true);
+    // return;
+    // getRoute();
+    const path = await fetchRoute(currentLocation, startPoint);
+    console.log('PATH==>', cameraRef);
+
+    cameraRef.current.setCamera({
+      centerCoordinate: currentLocation,
+      zoomLevel: 18,
+      heading: 220,
+      animationDuration: 1000,
+      pitch: 60,
+    });
+
+    setRouteToStartPoint(path);
+    setShowRouteActionSheet(false);
     const routeResults: any = await getTimeAndDistance(
       currentLocation,
-      endPoint,
+      startPoint,
     );
     // cameraRef.current.setCamera({
     //   centerCoordinate: currentLocation,
@@ -344,7 +367,6 @@ const ViewSaveRoutes = ({route}: any) => {
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
-    setRoute([]);
   };
 
   const calculateBounds = coordinates => {
@@ -387,6 +409,8 @@ const ViewSaveRoutes = ({route}: any) => {
           bounds={
             routes?.length > 0
               ? calculateBounds(routes)
+              : isStartBtnPressed
+              ? []
               : calculateBounds(routeToStartPoint)
           }
         />
@@ -417,7 +441,7 @@ const ViewSaveRoutes = ({route}: any) => {
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
-              key={route?.length}
+              key={routes?.length}
               id="routeLayer-unique"
               style={{
                 lineWidth: routeLineHeight || 4,
@@ -426,6 +450,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+
         {routeToStartPoint?.length > 0 && (
           <MapboxGL.ShapeSource shape={routeGeoJSONToStart} id="245">
             <MapboxGL.LineLayer
@@ -438,6 +463,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+
         {!selectedRoute?.is_road_route &&
           selectedRoute?.route_type === 'custom_route' &&
           routes?.map((coordinate, index) => (
@@ -507,7 +533,6 @@ const ViewSaveRoutes = ({route}: any) => {
           }}
           onPressStart={() => onPressStartBtn()}
           show={false}
-          // onPressPin={() => handlePinBtn()}
         />
       )}
 

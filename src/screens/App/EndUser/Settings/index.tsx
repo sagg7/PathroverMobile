@@ -37,7 +37,9 @@ const Settings = ({navigation}: any) => {
     useDeleteUserAccountMutation();
 
   const [userName, setUserName] = useState(
-    `${loginUser?.first_name} ${loginUser?.last_name}`,
+    `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+      loginUser?.last_name ? loginUser?.last_name : ''
+    } `,
   );
 
   const handleCard = (v: any) => {

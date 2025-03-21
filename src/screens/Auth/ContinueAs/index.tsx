@@ -65,12 +65,14 @@ const ContinueAs = ({}) => {
     data.append('token', token);
 
     const resp = await socialLogin(data);
+    console.log('resp', resp);
+
     const res = resp?.data?.user;
     dispatch(setLoginUser(res));
 
     if (res) {
       setShowSheet(false);
-      navigation.replace('Home');
+      navigation.replace('AppStack');
     } else {
       showAlert('Error', resp?.error?.data?.errors || UNEXPECTED_ERROR);
     }
