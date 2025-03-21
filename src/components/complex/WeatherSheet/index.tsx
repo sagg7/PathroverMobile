@@ -36,7 +36,13 @@ const WeatherSheet = ({
 
   const dailyForecast = weather.list;
   const currentWeather = dailyForecast[selectedDay];
-
+  const convertKmToMiles = kmString => {
+    const km = parseFloat(kmString); // Convert string to number
+    if (isNaN(km)) return 'Invalid input'; // Handle invalid input
+    const miles = km * 0.621371;
+    return miles.toFixed(2); // Return result rounded to 2 decimal places
+  };
+  const windSpeed = convertKmToMiles(currentWeather.speed);
   return (
     <Modal
       useNativeDriver
@@ -96,7 +102,8 @@ const WeatherSheet = ({
                 <Text style={styles.humidityTextTitle}>Wind</Text>
                 <Text style={styles.miniBar}>|</Text>
                 <Text style={styles.humidityText}>
-                  {currentWeather.speed} km/h
+                  {/* {currentWeather.speed} km/h */}
+                  {windSpeed} miles/h
                 </Text>
               </View>
               <View style={styles.humiityView}>

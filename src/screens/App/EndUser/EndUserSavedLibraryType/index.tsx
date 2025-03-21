@@ -17,7 +17,13 @@ import {
   useEditRouteMutation,
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
-import {PFColors, Routes, WP} from '../../../../shared/exporter';
+import {
+  CHAT_NON_VERIFIED_TEXT,
+  PFColors,
+  Routes,
+  showAlert,
+  WP,
+} from '../../../../shared/exporter';
 import styles from './styles';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
@@ -129,30 +135,35 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     return [Number(location.longitude), Number(location.latitude)];
   };
   const handdleShareOption = (routeData: any) => {
-    console.log(' handdleShareOption ~ routeData==>', routeData);
     // const hasCustom = routeData?.route_type.includes('custom');
     const startingPoint = extractCoordinates(routeData?.pickup_location);
     const endingPoint = extractCoordinates(routeData?.dropoff_location);
     const {pickup_location, dropoff_location, ...data} = routeData;
+    const loginUser = useSelector(state => state?.auth?.loginUser);
+
     handleModal(null, null);
     if (routeData?.route_type) {
-      navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {
-          startingPoint: startingPoint,
-          endingPoint: endingPoint,
-          type:
-            routeData.route_type == 'custom_route'
-              ? 'custom route'
-              : routeData.route_type == 'recording_route'
-              ? 'Recording'
-              : routeData.route_type == 'maps_location_pins'
-              ? 'Well pin'
-              : routeData.route_type == 'hiking_trail_route'
-              ? 'trail'
-              : 'route',
-          data,
-        },
-      });
+      if (loginUser?.verified) {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint: startingPoint,
+            endingPoint: endingPoint,
+            type:
+              routeData.route_type == 'custom_route'
+                ? 'custom route'
+                : routeData.route_type == 'recording_route'
+                ? 'Recording'
+                : routeData.route_type == 'maps_location_pins'
+                ? 'Well pin'
+                : routeData.route_type == 'hiking_trail_route'
+                ? 'trail'
+                : 'route',
+            data,
+          },
+        });
+      } else {
+        showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+      }
     }
   };
 

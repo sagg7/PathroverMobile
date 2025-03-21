@@ -3727,6 +3727,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sayem314/react-native-keep-awake@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@sayem314/react-native-keep-awake@npm:1.3.0"
+  checksum: b2d470870c0be58bd7c38ebca150b827d667fd8ca18817573f82e070b910ef71fdd09c3a65711fb760fe51baef98bf5cabfd8cdb6f72fea34a28e404d724ed5b
+  languageName: node
+  linkType: hard
+
 "@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -6297,6 +6304,7 @@ __metadata:
     "@react-navigation/native-stack": ^6.11.0
     "@reduxjs/toolkit": ^2.2.7
     "@rnmapbox/maps": 10.1.31
+    "@sayem314/react-native-keep-awake": ^1.3.0
     "@stripe/stripe-react-native": ^0.41.0
     "@turf/turf": ^7.2.0
     "@types/react": ^18.2.6

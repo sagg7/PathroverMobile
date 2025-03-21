@@ -50,13 +50,10 @@ const RecordRoute = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
 
-  const {data: allWellLocations, isLoading} = useGetAllWellsQuery(undefined);
   const cameraRef = useRef<any>(null);
   const [isRecordingStarted, setIsRecordingStarted] = useState<boolean>(false);
   const [saveRouteSheet, setSaveRouteSheet] = useState<boolean>(false);
 
-  const [allWells, setAllWells] = useState<any>([]);
-  const [allPins, setAllPins] = useState<any>([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -121,11 +118,6 @@ const RecordRoute = () => {
   const stopTimer = () => {
     setIsRunning(false);
   };
-
-  useEffect(() => {
-    if (allWellLocations) setAllPins(allWellLocations?.pin);
-    setAllWells(allWellLocations?.wells);
-  }, [allWellLocations]);
 
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
@@ -251,49 +243,6 @@ const RecordRoute = () => {
             {svgIcon.CurrentMarker}
           </MapboxGL.MarkerView>
         )} */}
-
-        {allWells
-          ?.filter(
-            (item: any) =>
-              item?.lat !== undefined &&
-              item?.lat !== '' &&
-              item?.log !== undefined &&
-              item?.log !== '' &&
-              !isNaN(Number(item?.lat)) &&
-              !isNaN(Number(item?.log)),
-          )
-          .map((item: any, index: number) => {
-            const coordinates = [Number(item?.log), Number(item?.lat)];
-            return (
-              <MapboxGL.PointAnnotation
-                key={`pin-${index}`}
-                id={`pin-${index}`}
-                coordinate={coordinates}>
-                {svgIcon.CurrentLocation}
-              </MapboxGL.PointAnnotation>
-            );
-          })}
-        {allPins
-          ?.filter(
-            (item: any) =>
-              item?.lat !== undefined &&
-              item?.lat !== '' &&
-              item?.log !== undefined &&
-              item?.log !== '' &&
-              !isNaN(Number(item?.lat)) &&
-              !isNaN(Number(item?.log)),
-          )
-          .map((item: any, index: number) => {
-            const coordinates = [Number(item?.log), Number(item?.lat)];
-            return (
-              <MapboxGL.PointAnnotation
-                key={`pin-${index}`}
-                id={`pin-${index}`}
-                coordinate={coordinates}>
-                {svgIcon.PinMarker}
-              </MapboxGL.PointAnnotation>
-            );
-          })}
 
         {/* Route Line */}
         {route?.length > 1 && (

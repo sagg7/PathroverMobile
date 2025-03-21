@@ -9,7 +9,7 @@ export const useGoogleSignIn = (setGoogleToken: any) => {
     try {
       await GoogleSignin.hasPlayServices();
       const result: any = await GoogleSignin.signIn();
-      // console.log(result?.data?.);
+      console.log(result?.data);
 
       if (result?.data?.idToken) {
         setGoogleToken(result?.data?.idToken);

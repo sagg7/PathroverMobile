@@ -12,6 +12,7 @@ import {
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
+  CHAT_NON_VERIFIED_TEXT,
   Default_Map_Style,
   HP,
   isIOS,
@@ -48,6 +49,7 @@ import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWel
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import marker from '../../../../assets/icons/wellsMarker.png';
+
 const WellPath = () => {
   const navigation: any = useNavigation();
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
@@ -65,6 +67,7 @@ const WellPath = () => {
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
   const [searchedWells, setSearchedWells] = useState<any>(null);
+  const loginUser = useSelector(state => state?.auth?.loginUser);
 
   const [selectedWell, setSelectedWell] = useState<any>(null);
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
@@ -84,9 +87,30 @@ const WellPath = () => {
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const dispatch = useDispatch();
-  const [isFetching, setIsFetching] = useState(false);
-  const [fetchedPages, setFetchedPages] = useState(new Set()); // Track fetched pages
+  const [selectedSearchedWell, setSelectedSearchedWell] = useState<any>(null);
   const [wellDistances, setWellDistances] = useState({});
+
+  const getRadiusForZoomLevel = (zoomLevel: any) => {
+    switch (zoomLevel) {
+      case 12:
+      case 11:
+        return 50;
+      case 10:
+      case 9:
+        return 100;
+      case 8:
+      case 7:
+        return 120;
+      case 6:
+      case 5:
+        return 120;
+      case 4:
+      case 3:
+        return 120;
+      default:
+        return 50;
+    }
+  };
 
   useEffect(() => {
     const fetchDistances = async () => {
@@ -115,12 +139,19 @@ const WellPath = () => {
   const [queryParams, setQueryParams] = useState<any>({
     latitude: null,
     longitude: null,
-    radius: 50,
-    per_page: 5000,
+    radius: getRadiusForZoomLevel(zoom),
+    per_page: 1000,
     page: 1,
   });
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+
+  // useEffect(() => {
+  //   setQueryParams(prev => ({
+  //     ...prev,
+  //     radius: getRadiusForZoomLevel(zoom),
+  //   }));
+  // }, [zoom]);
 
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
@@ -141,11 +172,11 @@ const WellPath = () => {
   const [allWells, setAllWells] = useState<any>([]);
   // const [allPins, setAllPins] = useState<any>([]);
 
-  useEffect(() => {
-    if (allWellLocations && queryParams.page === 1) {
-      setQueryParams(prev => ({...prev, page: 2})); // Set page 2 after page 1 loads
-    }
-  }, [allWellLocations]);
+  // useEffect(() => {
+  //   if (allWellLocations && queryParams.page === 1) {
+  //     setQueryParams(prev => ({...prev, page: 2})); // Set page 2 after page 1 loads
+  //   }
+  // }, [allWellLocations]);
 
   useEffect(() => {
     if (location) {
@@ -165,12 +196,20 @@ const WellPath = () => {
   }, [queryParams, refetch]);
 
   useEffect(() => {
-    if (allWellLocations && allWellLocations?.wells?.length > 0) {
-      console.log('ALL LOCATION===>', allWellLocations?.wells?.length);
+    if (allWellLocations?.length > 0) {
+      setAllWells(prev => {
+        const existingIds = prev.map(well => well.id); // Get existing IDs as an array
+        console.log('EXISTINGS IDDS', existingIds?.length);
 
-      setAllWells(prev => [...prev, ...allWellLocations.wells]);
+        const newWells = allWellLocations.filter(
+          well => !existingIds.includes(well.id),
+        ); // Check duplicates using `includes`
+
+        return [...prev, ...newWells]; // Add only unique wells
+      });
     }
   }, [allWellLocations]);
+  console.log('ALL WELLS LOCAL', allWells?.length);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -397,7 +436,21 @@ const WellPath = () => {
   const onRegionDidChange = async () => {
     if (mapRef.current) {
       const zoom = await mapRef.current.getZoom();
-      setZoom(zoom);
+      const zoomLevel = zoom.toFixed(0);
+      const center = await mapRef.current.getCenter();
+      console.log('\n\n\n==============zoomLevel============', zoomLevel);
+      if (zoomLevel) {
+        setQueryParams({
+          ...queryParams,
+          latitude: center[1],
+          longitude: center[0],
+          page: 1,
+          radius: getRadiusForZoomLevel(zoom),
+        });
+      }
+      console.log('CENTER', center);
+
+      setZoom(zoomLevel);
     }
   };
 
@@ -436,7 +489,21 @@ const WellPath = () => {
     setSelectedWell([selected?.log, selected?.lat]);
     setSelectedWellName(selected);
   };
+  const onPressSearched = (item: any) => {
+    const loc = [Number(item?.log), Number(item?.lat)];
+    cameraRef?.current?.flyTo(loc, 1500);
+    setSearchedWells([]);
 
+    const obj = {
+      ...item,
+      lat: Number(item?.lat),
+      log: Number(item?.log),
+    };
+    setSelectedSearchedWell(obj);
+    setShowPinAddress(true);
+    setSelectedWell(obj);
+    setSelectedWellName(obj);
+  };
   console.log('ALL WELLS==>', allWells?.length);
 
   return (
@@ -472,13 +539,34 @@ const WellPath = () => {
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={12}
+          zoomLevel={14}
           centerCoordinate={currentLocation}
         />
+        <MapboxGL.UserLocation
+          showsUserHeadingIndicator={true}
+          // onUpdate={handleLocationUpdate}
+          minDisplacement={5}
+          requestsAlwaysUse
+          visible={true}
+        />
 
-        {currentLocation && (
+        {/* {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
             {svgIcon.BlueMapMarker}
+          </MapboxGL.MarkerView>
+        )} */}
+
+        {selectedSearchedWell?.log && (
+          <MapboxGL.MarkerView
+            coordinate={[selectedSearchedWell?.log, selectedSearchedWell?.lat]}>
+            <TouchableOpacity
+              onPress={() => onPressSearched(selectedSearchedWell)}>
+              <Image
+                source={require('../../.././../assets/icons/wellsMarker.png')}
+                style={{height: 80, width: 80}}
+              />
+              {/* {svgIcon.BlueMapMarker} */}
+            </TouchableOpacity>
           </MapboxGL.MarkerView>
         )}
         {searchLocation && (
@@ -487,10 +575,6 @@ const WellPath = () => {
             coordinate={searchLocation}
             onSelected={() => {
               setShowRouteActionSheet(true);
-              // navigation.navigate(Routes.ViewWellPathNavigation, {
-              //   entranceCoords: searchLocation,
-              //   entranceName: searchLocationName,
-              // });
             }}>
             {svgIcon.BlueMapMarker}
           </MapboxGL.PointAnnotation>
@@ -500,30 +584,50 @@ const WellPath = () => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-        {/* <MapboxGL.Images images={{marker: MARKERPNG}} /> */}
 
-        {/* Clustering Source */}
         <MapboxGL.ShapeSource
           onPress={onPressMarker}
           id="wellsCluster"
           shape={wellsToGeoJSON(allWells)}
           cluster
-          clusterRadius={20}
-          clusterMaxZoom={10}>
+          clusterRadius={50} // Adjust cluster grouping size
+          clusterMaxZoom={14} // Adjust zoom level for cluster expansion
+        >
+          {/* Cluster Layer (Shows Number of Markers in Cluster) */}
+          <MapboxGL.SymbolLayer
+            id="clusterLayer"
+            filter={['has', 'point_count']} // Only apply to clusters
+            style={{
+              textField: ['get', 'point_count'], // Show number of markers in cluster
+              textSize: 14,
+              textColor: '#FFF',
+              textHaloColor: '#000',
+              textHaloWidth: 2,
+              textIgnorePlacement: true,
+              textAllowOverlap: true,
+              iconImage: 'custom-cluster-icon', // Optional: Add cluster icon
+              iconSize: 1,
+            }}
+          />
+
+          {/* Individual Marker Layer (Shown when zoomed in) */}
           <MapboxGL.SymbolLayer
             id="markerLayer"
+            filter={['!', ['has', 'point_count']]} // Only apply to individual markers
             style={{
               iconImage: 'marker', // Reference the registered image name
-              iconSize: Platform.OS === 'android' ? 0.7 : 1,
+              iconSize: isIOS() ? 1 : 0.7,
               iconIgnorePlacement: true,
               iconAllowOverlap: true,
               iconAnchor: 'bottom',
-              // iconColor: 'green',
             }}
           />
+
+          {/* Load Custom Images for Cluster and Markers */}
           <MapboxGL.Images
             images={{
               marker: marker,
+              'custom-cluster-icon': marker, // Add a custom cluster icon
             }}
           />
         </MapboxGL.ShapeSource>
@@ -590,16 +694,20 @@ const WellPath = () => {
       />
       <PinLocationAddress
         onPressShare={() => {
-          setShowPinAddress(false);
-          selectedWell.map(Number);
-          const formatedArr = selectedWell.map(Number);
-          navigation.navigate(Routes.ChatUsers, {
-            shareTrail: {
-              startingPoint: [],
-              endingPoint: formatedArr,
-              type: 'Well route',
-            },
-          });
+          if (loginUser?.verified) {
+            setShowPinAddress(false);
+            selectedWell.map(Number);
+            const formatedArr = selectedWell.map(Number);
+            navigation.navigate(Routes.ChatUsers, {
+              shareTrail: {
+                startingPoint: [],
+                endingPoint: formatedArr,
+                type: 'Well route',
+              },
+            });
+          } else {
+            showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+          }
         }}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
@@ -618,22 +726,26 @@ const WellPath = () => {
 
           navigation.navigate(Routes.RouteToWell, {
             entranceCoords: selectedWell,
-            entranceName: '',
+            entranceName: selectedWellName?.well_name,
           });
         }}
       />
       {showAddEntranceSheet && (
         <AddEntranceSheet
           onPressShare={() => {
-            selectedWell.map(Number);
-            const formatedArr = selectedWell.map(Number);
-            navigation.navigate(Routes.ChatUsers, {
-              shareTrail: {
-                startingPoint: entranceCoords,
-                endingPoint: formatedArr,
-                type: 'Well entrance route',
-              },
-            });
+            if (loginUser?.verified) {
+              selectedWell.map(Number);
+              const formatedArr = selectedWell.map(Number);
+              navigation.navigate(Routes.ChatUsers, {
+                shareTrail: {
+                  startingPoint: entranceCoords,
+                  endingPoint: formatedArr,
+                  type: 'Well entrance route',
+                },
+              });
+            } else {
+              showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+            }
           }}
           selectedWellName={selectedWellName}
           selectedPin={selectedWell}
@@ -723,28 +835,30 @@ const WellPath = () => {
           nestedScrollEnabled
           initialNumToRender={10}
           renderItem={({item}) => (
-            <View style={styles.searchWellContainer}>
-              <View style={[styles.searchWellContainer]}>
-                <View style={styles.searchWellImage}>
-                  {svgIcon.WellsMarker}
-                </View>
-                <View
-                  style={{
-                    width: '72%',
-                  }}>
-                  <Text style={styles.searchWellName}>{item?.well_name}</Text>
+            <TouchableOpacity onPress={() => onPressSearched(item)}>
+              <View style={styles.searchWellContainer}>
+                <View style={[styles.searchWellContainer]}>
+                  <View style={styles.searchWellImage}>
+                    {svgIcon.WellsMarker}
+                  </View>
+                  <View
+                    style={{
+                      width: '72%',
+                    }}>
+                    <Text style={styles.searchWellName}>{item?.well_name}</Text>
 
-                  <Text numberOfLines={1} style={styles.searchWellDistance}>
-                    {wellDistances[item?.id] || 'Calculating...'}
-                  </Text>
+                    <Text numberOfLines={1} style={styles.searchWellDistance}>
+                      {wellDistances[item?.id] || 'Calculating...'}
+                    </Text>
+                  </View>
                 </View>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => handlePinBtn(item)}>
+                  {svgIcon.SearchIcon}
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => handlePinBtn(item)}>
-                {svgIcon.SearchIcon}
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </GeneralModal>

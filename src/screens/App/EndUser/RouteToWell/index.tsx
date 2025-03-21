@@ -4,6 +4,7 @@ import styles from './styles';
 import {AppHeader, MainWrapper, MapLayerSheet} from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
 import {
+  CHAT_NON_VERIFIED_TEXT,
   Default_Map_Style,
   isIOS,
   mapBoxToken,
@@ -34,6 +35,8 @@ const RouteToWell = ({route}: any) => {
   const [tourStarted, setTourStarted] = useState<boolean>(false);
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
+  const loginUser = useSelector(state => state?.auth?.loginUser);
+
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
   const [actionBtn, setActionBtn] = useState<any>({
@@ -136,9 +139,17 @@ const RouteToWell = ({route}: any) => {
   };
 
   const onPressShare = () => {
-    navigation.navigate(Routes.ChatUsers, {
-      shareTrail: {startingPoint: [], endingPoint: destination, type: 'route to well'},
-    });
+    if (loginUser?.verified) {
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: [],
+          endingPoint: destination,
+          type: 'route to well',
+        },
+      });
+    } else {
+      showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+    }
   };
 
   const routeGeoJSON = {
@@ -206,6 +217,45 @@ const RouteToWell = ({route}: any) => {
     }
   };
 
+  const handleLocationUpdate = async location => {
+    if (location?.coords) {
+      const {latitude, longitude, heading} = location.coords;
+      setCurrentLocation([longitude, latitude]);
+
+      if (routes?.length > 0) {
+        const nextStep = routes[0];
+        const [stepLng, stepLat] = nextStep.maneuver.location;
+        const distanceToNextStep: any = await getTimeAndDistance(
+          [longitude, latitude],
+          stepLng,
+          stepLat,
+        );
+
+        if (distanceToNextStep <= 0.0124) {
+          // Threshold distance to consider step reached
+          setRoute(prevStops => prevStops.slice(1));
+        }
+      }
+
+      const routeResults: any = await getTimeAndDistance(
+        [longitude, latitude],
+        destination,
+      );
+      setResults(routeResults);
+    }
+  };
+  const resetCompass = () => {
+    if (cameraRef.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: currentLocation,
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
+      });
+    }
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Route To Well" />
@@ -218,14 +268,21 @@ const RouteToWell = ({route}: any) => {
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={10}
+          zoomLevel={11}
           centerCoordinate={currentLocation}
           followUserLocation={actionBtn.start}
         />
-
-        {currentLocation && (
+        <MapboxGL.UserLocation
+          // ref={userRef}
+          showsUserHeadingIndicator={true}
+          onUpdate={handleLocationUpdate}
+          minDisplacement={5}
+          requestsAlwaysUse
+          visible={true}
+        />
+        {currentLocation && !tourStarted && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
-            {tourStarted ? svgIcon.LiveLocationTracking : svgIcon.BlueMapMarker}
+            {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
         {destination && (
@@ -274,6 +331,7 @@ const RouteToWell = ({route}: any) => {
             setTimeout(() => {
               setShowRouteStartedSheet(true);
             }, 1000);
+            resetCompass();
           }}
           onPressPin={() => handlePinBtn()}
         />
