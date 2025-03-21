@@ -53,6 +53,9 @@ const VerifyNumber = () => {
       );
     }
   }, [isError]);
+  useEffect(() => {
+    if (value?.length > 3) onPressVerify();
+  }, [value]);
 
   useEffect(() => {
     let interval = null;
@@ -79,8 +82,12 @@ const VerifyNumber = () => {
 
   const onPressVerify = async () => {
     try {
-      const res = await otpVerification({otp: value});
-
+      const obj = {
+        user: {
+          otp: value,
+        },
+      };
+      const res = await otpVerification(obj);
       if (res?.data) {
         dispatch(setLoginUser({...loginUser, verified: true}));
         navigation.navigate('Chat');
@@ -95,17 +102,20 @@ const VerifyNumber = () => {
       setTimer(59);
       setIsResendDisabled(true);
       const res = await addPhoneNumber(params);
-      console.log('=============res=======================');
-      console.log(res);
-      console.log('====================================');
-      Alert.alert('OTP', 'Remember your otp', [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.navigate('VerifyNumber', data);
+      console.log('res', res?.data);
+
+      Alert.alert(
+        'OTP',
+        `Remember your otp ${res?.data?.otp ? res?.data?.otp : ''}`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate('VerifyNumber', params);
+            },
           },
-        },
-      ]);
+        ],
+      );
     }
   };
 
@@ -154,7 +164,7 @@ const VerifyNumber = () => {
               .padStart(2, '0')}`}</Text>
           )}
         </TouchableOpacity>
-        <View style={styles.divider}>
+        {/* <View style={styles.divider}>
           <AppButton
             title="Continue"
             handleClick={onPressVerify}
@@ -162,7 +172,7 @@ const VerifyNumber = () => {
             disabled={isLoading}
             // buttonStyle={styles.btnContainer(keyboardVisible)}
           />
-        </View>
+        </View> */}
       </View>
       {/* {isLoading && <AppLoader />} */}
     </MainWrapper>

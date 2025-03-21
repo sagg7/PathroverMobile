@@ -2,16 +2,60 @@ import {apiSlice} from '../api/apiSlice';
 
 export const enduserApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
+    // getAllWells: builder.query({
+    //   query: ({...params}) => {
+    //     const queryParams = new URLSearchParams({...params}).toString();
+    //     console.log('\n\nQUERY PARAM HIT\n', queryParams);
+    //     return {
+    //       url: `user_routes/well_location?${queryParams}`,
+    //       method: 'GET',
+    //     };
+    //   },
+    // }),
+
     getAllWells: builder.query({
-      query: ({...params}) => {
-        const queryParams = new URLSearchParams({...params}).toString();
-        console.log('\n\nQUERY PARAM HIT\n', queryParams);
-        return {
-          url: `user_routes/well_location?${queryParams}`,
-          method: 'GET',
-        };
+      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+        let allWells: any = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let perPage = 2000;
+        let radius = 70;
+
+        try {
+          // while (currentPage != totalPages) {
+          const queryParams: any = new URLSearchParams({
+            latitude: arg.latitude,
+            longitude: arg.longitude,
+            radius: radius,
+            per_page: perPage,
+            page: currentPage,
+          }).toString();
+
+          console.log('\n\nQUERY PARAM HIT\n', queryParams);
+          const result = await baseQuery(
+            `user_routes/well_location?${queryParams}`,
+            _queryApi,
+            _extraOptions,
+          );
+
+          if (result.error) {
+            throw new Error(result.error.message || 'Failed to fetch wells');
+          }
+          const data: any = result.data;
+          // console.log(
+          //   `Fetched page ${currentPage}/${data.total_pages}, Wells: ${data.wells.length}`,
+          // );
+          allWells = [...allWells, ...data.wells];
+          totalPages = data.total_pages;
+          // }
+          return {data: allWells}; // Return combined data
+        } catch (error) {
+          console.error('Error fetching wells:', error.message);
+          return {error: error.message || 'Unknown error'};
+        }
       },
     }),
+
     getAllSaveRoutes: builder.query({
       query: ({type, ...params}) => {
         const queryParams = new URLSearchParams({...params}).toString();

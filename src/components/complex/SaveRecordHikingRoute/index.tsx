@@ -98,6 +98,7 @@ const SaveRecordHikingRouteSheet = ({
             <>
               <Text style={styles.inputTitle}>Notes</Text>
               <AppInput
+                textAlignVertical={'top'}
                 placeholder="Note"
                 inputContainerStyle={styles.inputWidth}
                 value={value.note}

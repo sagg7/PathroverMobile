@@ -30,6 +30,11 @@ import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useSelector} from 'react-redux';
 import {InteractionManager} from 'react-native';
+// import { activateKeepAwake, deactivateKeepAwake } from 'react-native-keep-awake';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -52,7 +57,6 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [modalKey, setModalKey] = useState(1);
   const [showReachModal, setShowReachModal] = useState(false);
   const [distanceToNext, setDistanceToNext] = useState(25);
-  const [enableFollow, setEnableFollow] = useState(false);
   const screenWidth = Dimensions.get('window').width;
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -73,6 +77,14 @@ const ViewWellPathNavigation = ({route}: any) => {
       setSelectedMapType(mapLayerStyle);
     }
   }, [mapLayerStyle]);
+
+  useEffect(() => {
+    activateKeepAwake();
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, []);
 
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;

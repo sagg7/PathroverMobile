@@ -200,6 +200,59 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   }
 };
 
+export const getTimeAndDistanceForWaypoint = async (
+  coordinates,
+  profile = 'driving',
+) => {
+  if (!Array.isArray(coordinates) || coordinates.length < 2) {
+    throw new Error(
+      'Provide at least two coordinates as [longitude, latitude] pairs.',
+    );
+  }
+
+  const coordsString = coordinates
+    ?.map(coord => `${coord[0]},${coord[1]}`)
+    .join(';');
+
+  const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordsString}?annotations=distance,duration&overview=simplified&access_token=${mapBoxToken}`;
+  const formatDuration = minutes => {
+    if (minutes < 1) return 'A few seconds away';
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = Math.round(minutes % 60);
+      return `${hours} hr${hours > 1 ? 's' : ''} ${
+        remainingMinutes > 0
+          ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+          : ''
+      }`;
+    }
+    return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+  };
+
+  const convertToMiles = meters => (meters * 0.000621371).toFixed(2);
+
+  const formatDistance = meters => `${convertToMiles(meters)} miles`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+
+      return {
+        duration: formatDuration(route.duration / 60), // Convert seconds to minutes
+        distance: formatDistance(route.distance), // Convert meters to miles
+      };
+    } else {
+      throw new Error('No routes found');
+    }
+  } catch (error) {
+    console.error('Error fetching route:', error);
+    throw error;
+  }
+};
+
 export const extractType = (content: any): string | undefined => {
   try {
     const messageContent = content?.last_message?.content;
