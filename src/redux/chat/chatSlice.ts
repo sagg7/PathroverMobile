@@ -1,4 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
+import { Platform } from 'react-native';
 
 const chatSlice = createSlice({
   name: 'chat',
@@ -16,7 +17,9 @@ const chatSlice = createSlice({
           name: 'bot',
           _id: 2,
         },
-        image: action.payload?.[0]?.image,
+        image: action.payload?.[0]?.attachment?.sourceURL,
+        // image: action.payload?.[0]?.attachment?.sourceURL,
+        // image: Platform.OS === 'ios' ? action.payload?.[0]?.attachment?.sourceURL?.replace('///', '//') : action.payload?.[0]?.attachment?.sourceURL,
       });
     },
     addBotMessage: (state, action) => {
