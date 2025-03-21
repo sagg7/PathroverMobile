@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.White,
   },
   customTextStyle: {
-    fontSize: 14,
+    fontSize: 16,
   },
 });
 
