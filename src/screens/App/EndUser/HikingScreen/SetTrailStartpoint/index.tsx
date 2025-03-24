@@ -70,6 +70,8 @@ const SetTrailStartpoint = () => {
     };
     setAutoCompleteSearch(place.place_name);
     if (isStartPoint) {
+      console.log('place?.center', place?.center);
+
       dispatch(setStartingPoint(place?.center));
     } else {
       dispatch(setEndingPoint(place?.center));

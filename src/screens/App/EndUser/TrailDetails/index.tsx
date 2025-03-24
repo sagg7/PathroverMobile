@@ -297,7 +297,8 @@ const SearchTrailResult = ({route, navigation}: any) => {
                       style={styles.directionIcon}
                     />
                     <Text style={styles.distanceText}>
-                      {item?.distance?.toFixed(0)} m
+                      {/* {item?.distance?.toFixed(0)} m */}
+                      {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
                     </Text>
                   </View>
                   <Text style={styles.instructionText}>

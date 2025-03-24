@@ -41,6 +41,10 @@ import {
   useAddRouteReportMutation,
   useGetRouteReportQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 
 const RecordHikingRoute = () => {
   const navigation: any = useNavigation();
@@ -84,6 +88,14 @@ const RecordHikingRoute = () => {
   const dispatch = useDispatch();
   const BOTTOM_SHEET_HEIGHT = -8;
   const PIXEL_TO_COORDINATE_FACTOR = 0.0002;
+
+  useEffect(() => {
+    activateKeepAwake();
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, []);
 
   useEffect(() => {
     if (mapLayerStyle) {

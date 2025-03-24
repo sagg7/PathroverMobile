@@ -64,6 +64,7 @@ const ContinueAs = ({}) => {
     data.append('provider', provider);
     data.append('token', token);
     const resp = await socialLogin(data);
+
     const res = resp?.data?.user;
     dispatch(setLoginUser(res));
 

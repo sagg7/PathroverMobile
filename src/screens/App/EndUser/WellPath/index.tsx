@@ -545,7 +545,8 @@ const WellPath = () => {
 
       <MapboxGL.MapView
         compassEnabled
-        compassPosition={{top: isIOS() ? HP('8') : HP('10'), right: 20}}
+        compassPosition={{top: isIOS() ? HP('8') : HP('10'), right: 8}}
+        compassFadeWhenNorth
         ref={mapRef}
         onRegionDidChange={onRegionDidChange}
         key={selectedMapType}

@@ -236,6 +236,7 @@ const CreateHikeRoute = () => {
           color: routeLineColor,
           weight: routeLineHeight,
           pinned_points: pinnedPoints,
+          is_road_route: false,
         },
       };
 

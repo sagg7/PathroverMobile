@@ -428,11 +428,19 @@ const HikingScreen = ({route, navigation}: any) => {
       };
       const resp = await createRoute(obj);
       if (resp?.data) {
+        showAlert('Alert', 'Your waypoint has been saved.');
+        setPinLocationDetails({
+          latitude: null,
+          longitude: null,
+          name: null,
+        });
         setShowPinLocationSheet(false);
       } else {
         showAlert('Alert', UNEXPECTED_ERROR);
       }
-    } catch (error) {}
+    } catch (error) {
+      showAlert('Alert', UNEXPECTED_ERROR);
+    }
   };
 
   return (
