@@ -1,7 +1,7 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import axios from 'axios';
 import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
+import {Platform, View} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -17,6 +17,7 @@ import RenderMessageImage from '../../../../components/complex/ChatComponents/Re
 import {addBotMessage, addUserMessage} from '../../../../redux/chat/chatSlice';
 import {OPEN_AI_KEY, OPEN_AI_URL} from '../../../../shared/utils/constant';
 import styles from './styles';
+import { useUploadImagesMutation } from '../../../../redux/chat/chatApiSlice';
 
 const AiChat = () => {
   const {params} = useRoute();
@@ -24,6 +25,7 @@ const AiChat = () => {
   const dispatch = useDispatch();
   const {messages} = useSelector(state => state.chat);
   const [inputValue, setInputValue] = useState();
+  const [uploadImages]= useUploadImagesMutation()
 
   useEffect(() => {
     if (params?.search) {
@@ -41,19 +43,30 @@ const AiChat = () => {
 
   const onSend = async (message: string) => {
     try {
-      dispatch(addUserMessage(message));
+      const form = new FormData();
+
+      form.append('file', {
+        uri:
+            Platform.OS === 'ios'
+              ? message[0]?.attachment?.sourceURL?.replace('file://', '')
+              : message[0]?.attachment?.sourceURL,
+        type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
+        name: message[0]?.attachment?.filename ?? '',
+      });
+
+      const res = await uploadImages(form);
+
+      dispatch(addUserMessage([{...message?.[0], url: res?.data?.url}]));
       const data = JSON.stringify({
         messages: [
           {
             role: 'user',
-            content: message?.[0]?.text,
+            content: message[0]?.attachment 
+            ?  res?.data?.url
+            : message?.[0]?.text,
           },
-          // message?.[0]?.image && {
-          //   role: 'user',
-          //   content: message?.[0]?.image?.sourceURL,
-          // },
         ],
-        model: 'gpt-4',
+        model: "gpt-4",
         store: true,
       });
 

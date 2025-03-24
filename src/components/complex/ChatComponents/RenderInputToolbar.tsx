@@ -9,7 +9,7 @@ import {RenderRecordComposer} from './RenderRecordComposer';
 const RenderInputToolbar = (props, onPress, isRecord) => {
   return (
     <View style={styles.mainContainer}>
-      <RenderActions {...props} isRecord />
+      <RenderActions {...props} isRecord={isRecord} />
       {isRecord ? (
         <RenderRecordComposer {...props} />
       ) : (
