@@ -41,6 +41,7 @@ const SearchTrailResult = ({route, navigation}: any) => {
   const [trailStartPoint, setTrailStartPoint] = useState<any>(null);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [showSheet, setShowSheet] = useState<boolean>(false);
+  const [popupcount, setPopupCount] = useState<any>(0);
 
   const routeGeoJSON = {
     type: 'Feature',
@@ -227,7 +228,10 @@ const SearchTrailResult = ({route, navigation}: any) => {
       setTourStops(data.routes[0]?.legs[0]?.steps);
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
+      if (popupcount === 0) {
+        showAlert('Error', 'No route exists between the entered locations.');
+      }
+      setPopupCount(2);
       return [];
     }
   };
@@ -264,7 +268,7 @@ const SearchTrailResult = ({route, navigation}: any) => {
       <MainWrapper style={styles.container}>
         <AppHeader
           title="Trail Details"
-          clickBackIcon={() => navigation.goBack()}
+          // clickBackIcon={() => navigation.goBack()}
         />
         {tourStops?.length > 0 && (
           <View style={styles.stepsContainer}>

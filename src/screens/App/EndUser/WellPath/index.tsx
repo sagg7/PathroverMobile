@@ -89,7 +89,14 @@ const WellPath = () => {
   const dispatch = useDispatch();
   const [selectedSearchedWell, setSelectedSearchedWell] = useState<any>(null);
   const [wellDistances, setWellDistances] = useState({});
-
+  const [pinLocationDetails, setPinLocationDetails] = useState<any>({
+    latitude: null,
+    longitude: null,
+    name: null,
+  });
+  const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
+  const [showPinLocationSheet, setShowPinLocationSheet] =
+    useState<boolean>(false);
   const getRadiusForZoomLevel = (zoomLevel: any) => {
     switch (zoomLevel) {
       case 12:
@@ -322,8 +329,19 @@ const WellPath = () => {
     try {
       const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
+        const coords = geometry.coordinates;
         if (showAddEntranceSheet) {
-          setEntranceCoords(geometry.coordinates);
+          setEntranceCoords(coords);
+        } else {
+          // setPinLocationMarker(coords);
+          // setPinLocationDetails({
+          //   latitude: coords[1],
+          //   longitude: coords[0],
+          //   name: pinLocationDetails?.name ? pinLocationDetails?.name : '',
+          // });
+          // setTimeout(() => {
+          //   setShowPinLocationSheet(true);
+          // }, 1000);
         }
       } else {
         console.error('Invalid coordinates:', geometry);
@@ -438,7 +456,6 @@ const WellPath = () => {
       const zoom = await mapRef.current.getZoom();
       const zoomLevel = zoom.toFixed(0);
       const center = await mapRef.current.getCenter();
-      console.log('\n\n\n==============zoomLevel============', zoomLevel);
       if (zoomLevel) {
         setQueryParams({
           ...queryParams,
@@ -448,7 +465,6 @@ const WellPath = () => {
           radius: getRadiusForZoomLevel(zoom),
         });
       }
-      console.log('CENTER', center);
 
       setZoom(zoomLevel);
     }
@@ -501,10 +517,13 @@ const WellPath = () => {
     };
     setSelectedSearchedWell(obj);
     setShowPinAddress(true);
-    setSelectedWell(obj);
+    // setSelectedWell(obj);
+    // setSelectedWellName(obj);
+
+    setSelectedWell([obj?.log, obj?.lat]);
     setSelectedWellName(obj);
   };
-  console.log('ALL WELLS==>', allWells?.length);
+  // console.log('ALL WELLS==>', allWells?.length);
 
   return (
     <MainWrapper style={styles.container}>
@@ -525,6 +544,8 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        compassEnabled
+        compassPosition={{top: isIOS() ? HP('8') : HP('10'), right: 20}}
         ref={mapRef}
         onRegionDidChange={onRegionDidChange}
         key={selectedMapType}
@@ -539,7 +560,7 @@ const WellPath = () => {
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={14}
+          zoomLevel={16}
           centerCoordinate={currentLocation}
         />
         <MapboxGL.UserLocation
@@ -582,6 +603,11 @@ const WellPath = () => {
         {entranceCoords && (
           <MapboxGL.MarkerView coordinate={entranceCoords}>
             {svgIcon.BlueMapMarker}
+          </MapboxGL.MarkerView>
+        )}
+        {pinLocationMarker?.length > 0 && (
+          <MapboxGL.MarkerView coordinate={pinLocationMarker}>
+            {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
 
@@ -723,7 +749,6 @@ const WellPath = () => {
         }}
         onPressRouteToWell={() => {
           setShowPinAddress(false);
-
           navigation.navigate(Routes.RouteToWell, {
             entranceCoords: selectedWell,
             entranceName: selectedWellName?.well_name,
@@ -798,7 +823,13 @@ const WellPath = () => {
           show={false}
         />
       )}
-
+      {showPinLocationSheet && (
+        <PinYourLocationSheet
+          values={pinLocationDetails}
+          onPressCancel={() => setShowPinLocationSheet(false)}
+          setValues={setPinLocationDetails}
+        />
+      )}
       <RBSheet
         ref={pinLocationSheet}
         customModalProps={{

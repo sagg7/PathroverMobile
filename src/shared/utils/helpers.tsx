@@ -245,7 +245,11 @@ export const getTimeAndDistanceForWaypoint = async (
         distance: formatDistance(route.distance), // Convert meters to miles
       };
     } else {
-      throw new Error('No routes found');
+      return {
+        duration: 'Unable to calculate duration', // Convert seconds to minutes
+        distance: 'Unable to calculate distance', // Convert meters to miles
+      };
+      // throw new Error('No routes found');
     }
   } catch (error) {
     console.error('Error fetching route:', error);

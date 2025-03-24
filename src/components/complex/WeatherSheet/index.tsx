@@ -43,6 +43,8 @@ const WeatherSheet = ({
     return miles.toFixed(2); // Return result rounded to 2 decimal places
   };
   const windSpeed = convertKmToMiles(currentWeather.speed);
+  console.log('coords', coords);
+
   return (
     <Modal
       useNativeDriver
@@ -53,9 +55,11 @@ const WeatherSheet = ({
         <ScrollView>
           <View style={styles.headerView}>
             <View>
-              <Text style={styles.coords}>
-                {coords[0]}, {coords[1]}
-              </Text>
+              {coords?.length > 0 && (
+                <Text style={styles.coords}>
+                  {coords[0]}, {coords[1]}
+                </Text>
+              )}
               <Text style={styles.city}>
                 {weather.city.name}, {weather.city.country}
               </Text>
@@ -256,7 +260,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.White,
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.SemiBold,
-    width: WP('30'),
+    width: WP('35'),
     paddingVertical: 5,
     paddingLeft: 20,
   },

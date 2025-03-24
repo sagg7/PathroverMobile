@@ -11,17 +11,22 @@ import {
 } from '../../../../../redux/chat/chatApiSlice';
 import {showAlert} from '../../../../../shared/exporter';
 
-const GroupButtons = ({onPressAdd}) => {
+const GroupButtons = ({onPressAdd, hide = false}) => {
   return (
     <View style={styles.buttonView}>
-      <TouchableOpacity style={styles.buttonStyle}>
-        {svgIcon.BlackPhone}
-        <Text style={styles.buttonText}>Audio</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.buttonStyle}>
-        {svgIcon.VideoIcon}
-        <Text style={styles.buttonText}>Video</Text>
-      </TouchableOpacity>
+      {!hide && (
+        <>
+          <TouchableOpacity style={styles.buttonStyle}>
+            {svgIcon.BlackPhone}
+            <Text style={styles.buttonText}>Audio</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonStyle}>
+            {svgIcon.VideoIcon}
+            <Text style={styles.buttonText}>Video</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
       <TouchableOpacity style={styles.buttonStyle} onPress={onPressAdd}>
         {svgIcon.PlusIcon}
         <Text style={styles.buttonText}>Add</Text>
@@ -148,7 +153,7 @@ const GroupInfoDetail = () => {
         />
         <Text style={styles.headerText}>{params?.item?.name || ''}</Text>
         <Text style={styles.subHeaderText}>Group| 8 Members</Text>
-        <GroupButtons onPressAdd={onPressAdd} />
+        <GroupButtons onPressAdd={onPressAdd} hide={true} />
       </View>
       <FlatList
         data={members?.users}

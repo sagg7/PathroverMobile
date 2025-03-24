@@ -63,10 +63,7 @@ const ContinueAs = ({}) => {
     const data = new FormData();
     data.append('provider', provider);
     data.append('token', token);
-
     const resp = await socialLogin(data);
-    console.log('resp', resp);
-
     const res = resp?.data?.user;
     dispatch(setLoginUser(res));
 

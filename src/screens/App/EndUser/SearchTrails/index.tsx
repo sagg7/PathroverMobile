@@ -76,6 +76,7 @@ const SearchTrails = ({navigation}: any) => {
 
   return (
     <MainWrapper style={styles.container}>
+      <AppHeader title="Search" />
       <View style={styles.subContainer}>
         {/* <View style={styles.searchContainer}>
           <TouchableOpacity activeOpacity={0.7} onPress={navigation.goBack}>
