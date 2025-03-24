@@ -136,9 +136,10 @@ const styles = StyleSheet.create({
   },
   stepsContainer: {
     position: 'absolute',
-    top: 60,
+    marginTop: isIOS() ? 90 : 60,
     width: '100%',
     zIndex: 1,
+    // backgroundColor: 'transparent',
   },
   instructionCard: {
     width: WP('97'),

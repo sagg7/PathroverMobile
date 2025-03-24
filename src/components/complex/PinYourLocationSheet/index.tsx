@@ -29,7 +29,7 @@ const PinYourLocationSheet = ({
       <AppInput
         placeholder="Name"
         inputContainerStyle={styles.inputStyles}
-        value={values.name}
+        value={values?.name}
         onChangeText={text => {
           setValues({
             ...values,
@@ -38,13 +38,13 @@ const PinYourLocationSheet = ({
         }}
       />
       <AppInput
-        value={values?.longitude}
+        value={values?.longitude?.toString() ?? ''}
         placeholder="Longitude"
         inputContainerStyle={styles.inputStyles}
         editable={false}
       />
       <AppInput
-        value={values?.latitude}
+        value={values?.latitude.toString() ?? ''}
         placeholder="Latitude"
         inputContainerStyle={styles.inputStyles}
         editable={false}
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     paddingVertical: WP('5'),
     backgroundColor: PFColors.Standard.White,
     width: WP('100'),
+    zIndex: 1,
   },
 
   item: {

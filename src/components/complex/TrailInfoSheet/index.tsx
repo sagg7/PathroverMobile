@@ -11,7 +11,7 @@ interface TrailInfoSheetProps {
   setModalVisible?: () => void;
   onPressShare: (trailInfo: any) => void;
   onPressNavigation?: () => void;
-  onPressPin?: () => void;
+  onPressPin: (trailIno: any) => void;
 }
 
 const TrailInfoSheet = ({
@@ -64,7 +64,7 @@ const TrailInfoSheet = ({
           style={{right: 12}}>
           {svgIcon.ShareWellPath}
         </TouchableOpacity>
-        <TouchableOpacity onPress={onPressPin}>
+        <TouchableOpacity onPress={() => onPressPin(trailInfo)}>
           {svgIcon.PinLocation}
         </TouchableOpacity>
       </View>

@@ -36,6 +36,7 @@ const RouteToWell = ({route}: any) => {
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
+  const [count, setCount] = useState<any>(1);
 
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
@@ -79,7 +80,10 @@ const RouteToWell = ({route}: any) => {
       const route = data.routes[0]?.geometry?.coordinates;
       return route;
     } catch (error) {
-      console.error('Error fetching route:', error);
+      if (count === 1) {
+        showAlert('Error', 'No route exists between the entered locations.');
+      }
+      setCount(2);
       showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }

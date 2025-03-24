@@ -17,13 +17,7 @@ import {
   useEditRouteMutation,
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
-import {
-  CHAT_NON_VERIFIED_TEXT,
-  PFColors,
-  Routes,
-  showAlert,
-  WP,
-} from '../../../../shared/exporter';
+import {PFColors, Routes, WP} from '../../../../shared/exporter';
 import styles from './styles';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
@@ -46,9 +40,19 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   }, [isFocused]);
 
   const handleNavigation = (selectedItem: any) => {
-    navigation.navigate(Routes.ViewSaveRoutes, {
-      item: selectedItem,
-    });
+    if (selectedItem?.route_type === 'waypoint_route') {
+      navigation.navigate(Routes.ViewWellPathNavigation, {
+        entranceCoords: [
+          Number(selectedItem?.dropoff_location?.longitude),
+          Number(selectedItem?.dropoff_location?.latitude),
+        ],
+        entranceName: selectedItem?.name,
+      });
+    } else {
+      navigation.navigate(Routes.ViewSaveRoutes, {
+        item: selectedItem,
+      });
+    }
   };
 
   const handleModal = (
@@ -113,7 +117,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     >
       <View style={styles.innerContainer}>
         <View style={styles.iconContainer}>{svgIcon.MapWindow}</View>
-        <Text style={styles.listOptionText}>{item?.name}</Text>
+        <Text style={styles.listOptionText}>{item?.name || 'N/A'}</Text>
       </View>
       <TouchableOpacity hitSlop={20} onPress={() => handleModal(item, 'menu')}>
         {svgIcon.MenuDot}
@@ -134,16 +138,53 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
 
     return [Number(location.longitude), Number(location.latitude)];
   };
-  const handdleShareOption = (routeData: any) => {
-    // const hasCustom = routeData?.route_type.includes('custom');
-    const startingPoint = extractCoordinates(routeData?.pickup_location);
-    const endingPoint = extractCoordinates(routeData?.dropoff_location);
-    const {pickup_location, dropoff_location, ...data} = routeData;
-    const loginUser = useSelector(state => state?.auth?.loginUser);
 
-    handleModal(null, null);
-    if (routeData?.route_type) {
-      if (loginUser?.verified) {
+  const transformData = (data: any) => {
+    return {
+      ...data, // Keep all other key-value pairs unchanged
+      middle_location_points: data.middle_location_points.map((point: any) => [
+        parseFloat(point.longitude), // Convert to float if needed
+        parseFloat(point.latitude),
+      ]),
+    };
+  };
+
+  const handleShareOption = (routeData: any) => {
+    if (routeData?.is_chosen_trail) {
+      const trailPath = routeData?.middle_location_points;
+      const startingPoint = trailPath?.[0];
+      const endingPoint = trailPath?.at(-1);
+
+      const outputPath = transformData(routeData);
+
+      const trailInfo = {
+        geometry: {coordinates: outputPath?.middle_location_points},
+        properties: {
+          color: '#13488A',
+          tags: {name: ''},
+        },
+        type: 'Feature',
+      };
+
+      handleModal(null, null);
+      setTimeout(() => {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint: startingPoint,
+            endingPoint: endingPoint,
+            type: 'Chosen Trail',
+            data: trailInfo,
+          },
+        });
+      }, 300);
+    } else {
+      console.log(' handleShareOption ~ routeData==>', routeData);
+      // const hasCustom = routeData?.route_type.includes('custom');
+      const startingPoint = extractCoordinates(routeData?.pickup_location);
+      const endingPoint = extractCoordinates(routeData?.dropoff_location);
+      const {pickup_location, dropoff_location, ...data} = routeData;
+      handleModal(null, null);
+      if (routeData?.route_type) {
         navigation.navigate(Routes.ChatUsers, {
           shareTrail: {
             startingPoint: startingPoint,
@@ -161,8 +202,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
             data,
           },
         });
-      } else {
-        showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
       }
     }
   };
@@ -191,7 +230,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         onClose={() => handleModal(null, null)}>
         <TouchableOpacity
           style={styles.menuOption}
-          onPress={() => handdleShareOption(selectedRoute)}>
+          onPress={() => handleShareOption(selectedRoute)}>
           {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}
           {svgIcon.Share}
           <Text style={styles.menuOptionText}>Share</Text>

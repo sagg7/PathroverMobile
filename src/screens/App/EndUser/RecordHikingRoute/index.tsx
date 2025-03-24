@@ -206,6 +206,7 @@ const RecordHikingRoute = () => {
         color: PFColors.Blue.Dark,
         weight: '4',
         locations_attributes: locationsAttributes,
+        isChosenTrail: false,
       },
     };
 

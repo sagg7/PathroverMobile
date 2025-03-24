@@ -60,6 +60,7 @@ const ViewWellPathNavigation = ({route}: any) => {
   const screenWidth = Dimensions.get('window').width;
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const [count, setCount] = useState<any>(1);
 
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
@@ -97,8 +98,10 @@ const ViewWellPathNavigation = ({route}: any) => {
       setRoute(route);
       setTourStops(data.routes[0]?.legs[0]?.steps);
     } catch (error) {
-      console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
+      if (count === 1) {
+        showAlert('Error', 'No route exists between the entered locations.');
+      }
+      setCount(2);
       return [];
     }
   };
