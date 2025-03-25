@@ -8,15 +8,53 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {firebase} from '@react-native-firebase/app';
-import { withIAPContext } from 'react-native-iap';
-import { LogBox } from 'react-native';
+import {withIAPContext} from 'react-native-iap';
+import {LogBox, PermissionsAndroid, Platform} from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+let watchID: number | null | any = null;
 
 const App = () => {
   MapboxGL.setAccessToken(
     'pk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNseXowMmk5bDJoejEyaXB5Nm43ZzN4OTMifQ.uiO6BX51I9umZzjAK2Ox6g',
   );
 
-  LogBox.ignoreAllLogs()
+  LogBox.ignoreAllLogs();
+
+  const askForPermissions = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      ]);
+      const allGranted = Object.values(granted).every(
+        status => status === 'granted',
+      );
+      if (allGranted) {
+        // setHasPermission(true);
+      } else {
+        // setError('Permission denied');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (Platform.OS === 'ios') {
+        Geolocation.requestAuthorization('always');
+        // setHasPermission(true);
+      } else {
+        await askForPermissions();
+      }
+    };
+
+    checkPermissions();
+
+    return () => {
+      if (watchID) {
+        Geolocation.clearWatch(watchID);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!firebase.apps.length) {

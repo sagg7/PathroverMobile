@@ -47,7 +47,7 @@ const ChatBubble = ({props}) => {
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.content_type);
   // identifyAttachmentTypeFromUrl(message_attachment?.url);
-    
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -109,7 +109,11 @@ const ChatBubble = ({props}) => {
         {(image || fileType === 'image') && (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => handleImagePress(message_attachment?.url)}>
+            onPress={() =>
+              handleImagePress(
+                message_attachment?.url ?? image ?? image?.sourceURL,
+              )
+            }>
             <Text style={styles.imageTime}>
               {moment(created_at).format('hh:mm a')}
             </Text>
@@ -118,7 +122,9 @@ const ChatBubble = ({props}) => {
                 isLeft ? PFColors.Standard.Black : PFColors.Standard.White
               }
               indicatorSize={'small'}
-              source={{uri: image?.sourceURL ?? message_attachment?.url}}
+              source={{
+                uri: image ?? image?.sourceURL ?? message_attachment?.url,
+              }}
               style={{
                 width: scale(90),
                 height: scale(90),

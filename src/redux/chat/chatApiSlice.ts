@@ -223,6 +223,15 @@ export const chatApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    uploadImages: builder.mutation({
+      query: data => {
+        return {
+          url: 'upload',
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -254,4 +263,5 @@ export const {
   useCreateCallMutation,
   useUpdateCallMutation,
   useGetChatContactsMutation,
+  useUploadImagesMutation,
 } = chatApiSlice;

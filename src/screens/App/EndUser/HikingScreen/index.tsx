@@ -63,7 +63,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const debounceTimeout = useRef<any>(null);
   const [weather, setWeather] = useState<any>([]);
   const [trailsData, setTrailsData] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState<any>(null);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedType, setSelectedType] = useState('hiking');
   const [simpleSearch, setSimpleSearch] = useState<string>('');
@@ -112,6 +112,7 @@ const HikingScreen = ({route, navigation}: any) => {
 
     if (location && location?.latitude) {
       fetchWeatherData();
+      setUserLocation([location.longitude, location.latitude]);
     }
   }, [location]);
 
