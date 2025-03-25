@@ -17,7 +17,7 @@ import RenderMessageImage from '../../../../components/complex/ChatComponents/Re
 import {addBotMessage, addUserMessage} from '../../../../redux/chat/chatSlice';
 import {OPEN_AI_KEY, OPEN_AI_URL} from '../../../../shared/utils/constant';
 import styles from './styles';
-import { useUploadImagesMutation } from '../../../../redux/chat/chatApiSlice';
+import {useUploadImagesMutation} from '../../../../redux/chat/chatApiSlice';
 
 const AiChat = () => {
   const {params} = useRoute();
@@ -25,7 +25,7 @@ const AiChat = () => {
   const dispatch = useDispatch();
   const {messages} = useSelector(state => state.chat);
   const [inputValue, setInputValue] = useState();
-  const [uploadImages]= useUploadImagesMutation()
+  const [uploadImages] = useUploadImagesMutation();
 
   useEffect(() => {
     if (params?.search) {
@@ -47,9 +47,9 @@ const AiChat = () => {
 
       form.append('file', {
         uri:
-            Platform.OS === 'ios'
-              ? message[0]?.attachment?.sourceURL?.replace('file://', '')
-              : message[0]?.attachment?.sourceURL,
+          Platform.OS === 'ios'
+            ? message[0]?.attachment?.sourceURL?.replace('file://', '')
+            : message[0]?.attachment?.path,
         type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
         name: message[0]?.attachment?.filename ?? '',
       });
@@ -61,12 +61,12 @@ const AiChat = () => {
         messages: [
           {
             role: 'user',
-            content: message[0]?.attachment 
-            ?  res?.data?.url
-            : message?.[0]?.text,
+            content: message[0]?.attachment
+              ? res?.data?.url
+              : message?.[0]?.text,
           },
         ],
-        model: "gpt-4",
+        model: 'gpt-4',
         store: true,
       });
 

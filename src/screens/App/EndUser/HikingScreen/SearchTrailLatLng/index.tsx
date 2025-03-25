@@ -127,7 +127,7 @@ const SearchTrailLatLng = () => {
 
   useEffect(() => {
     if (startingPoint?.length > 0 && endingPoint?.length > 0) {
-      // getRoadRoute(startingPoint, endingPoint);
+      getRoadRoute(startingPoint, endingPoint);
       setShowRouteActionSheet(true);
     }
   }, [startingPoint, endingPoint]);

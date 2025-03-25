@@ -41,6 +41,10 @@ import {
   useAddRouteReportMutation,
   useGetRouteReportQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 
 const RecordHikingRoute = () => {
   const navigation: any = useNavigation();
@@ -84,6 +88,14 @@ const RecordHikingRoute = () => {
   const dispatch = useDispatch();
   const BOTTOM_SHEET_HEIGHT = -8;
   const PIXEL_TO_COORDINATE_FACTOR = 0.0002;
+
+  useEffect(() => {
+    activateKeepAwake();
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, []);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -220,8 +232,14 @@ const RecordHikingRoute = () => {
     }
   };
   const handleLocationUpdate = location => {
+    console.log('LOCATION', location);
+
     if (location?.coords) {
       const {latitude, longitude, heading, speed, altitude} = location.coords;
+      console.log(
+        '[JSON.stringify(initialLocation)]',
+        JSON.stringify([longitude, latitude]),
+      );
 
       if (isRecordingStarted) {
         setLiveLocation([longitude, latitude]);
@@ -251,12 +269,12 @@ const RecordHikingRoute = () => {
         setElevation(elevationFeet);
       }
       if (cameraRef.current) {
-        cameraRef?.current.setCamera({
-          centerCoordinate: [longitude, latitude],
-          zoomLevel: 16,
-          animationDuration: 1000, // Smooth animation
-          bearing: heading,
-        });
+        // cameraRef?.current.setCamera({
+        //   centerCoordinate: [longitude, latitude],
+        //   zoomLevel: 16,
+        //   animationDuration: 1000, // Smooth animation
+        //   bearing: heading,
+        // });
       }
     }
   };
@@ -356,14 +374,16 @@ const RecordHikingRoute = () => {
           ref={cameraRef}
           zoomLevel={16}
           // followUserLocation={true}
-          followZoomLevel={16}
+          // followZoomLevel={16}
           // centerCoordinate={liveLocation}
           centerCoordinate={adjustLocationForBottomSheet(liveLocation)}
         />
         <MapboxGL.UserLocation
+          key={route?.length}
           visible
           onUpdate={handleLocationUpdate}
           minDisplacement={isIOS() ? 3 : 10}
+          // minDisplacement={5}
           requestsAlwaysUse
           // showsUserHeadingIndicator
           androidRenderMode="gps"

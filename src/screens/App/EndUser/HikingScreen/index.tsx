@@ -63,7 +63,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const debounceTimeout = useRef<any>(null);
   const [weather, setWeather] = useState<any>([]);
   const [trailsData, setTrailsData] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState<any>(null);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedType, setSelectedType] = useState('hiking');
   const [simpleSearch, setSimpleSearch] = useState<string>('');
@@ -112,6 +112,7 @@ const HikingScreen = ({route, navigation}: any) => {
 
     if (location && location?.latitude) {
       fetchWeatherData();
+      setUserLocation([location.longitude, location.latitude]);
     }
   }, [location]);
 
@@ -428,11 +429,19 @@ const HikingScreen = ({route, navigation}: any) => {
       };
       const resp = await createRoute(obj);
       if (resp?.data) {
+        showAlert('Alert', 'Your waypoint has been saved.');
+        setPinLocationDetails({
+          latitude: null,
+          longitude: null,
+          name: null,
+        });
         setShowPinLocationSheet(false);
       } else {
         showAlert('Alert', UNEXPECTED_ERROR);
       }
-    } catch (error) {}
+    } catch (error) {
+      showAlert('Alert', UNEXPECTED_ERROR);
+    }
   };
 
   return (
