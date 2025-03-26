@@ -1,4 +1,4 @@
-import {View} from 'react-native';
+import {Alert, View} from 'react-native';
 import React from 'react';
 import styles from './styles';
 import {
@@ -36,18 +36,36 @@ const ForgotPassword = ({}) => {
     const {email, phone} = val;
     const obj = {
       user: {
-        ...(email && {email: email}),
+        ...(email && {email: email?.toLowerCase()}),
         ...(phone && {phone_number: removeNonNumbers(phone)}),
       },
     };
 
     const resp = await forgotPassword(obj);
     if (resp?.data) {
-      console.log('[OTP==>]', resp?.data?.data?.otp);
-      navigation.navigate(Routes.VerifyOtp, {
-        selectedValue: isEmail ? email : phone,
-        isEmail: isEmail,
-      });
+      // TODDO CHANGE AFTER OTP
+      // navigation.navigate(Routes.VerifyOtp, {
+      //   selectedValue: isEmail ? email : phone,
+      //   isEmail: isEmail,
+      // });
+
+      Alert.alert(
+        'OTP',
+        `Remember your otp ${
+          resp?.data?.data?.otp ? resp?.data?.data?.otp : ''
+        }`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(Routes.VerifyOtp, {
+                selectedValue: isEmail ? email : phone,
+                isEmail: isEmail,
+              });
+            },
+          },
+        ],
+      );
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }

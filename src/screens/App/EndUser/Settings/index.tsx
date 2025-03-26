@@ -14,6 +14,7 @@ import {AppHeader, MainWrapper, SwitchRoleSheet} from '../../../../components';
 import {
   APP_ROLE,
   EndUserProfileMenu,
+  FAQ_LIST_LINK,
   USER_PROFILE,
 } from '../../../../shared/utils/constant';
 import {useDispatch, useSelector} from 'react-redux';
@@ -101,7 +102,7 @@ const Settings = ({navigation}: any) => {
         screenName = Routes.Notification;
         break;
       case 3:
-        Linking.openURL('https://staging.pathfinder-app.com/faq_list');
+        Linking.openURL(FAQ_LIST_LINK);
         break;
       case 4:
         screenName = Routes.SupportScreen;

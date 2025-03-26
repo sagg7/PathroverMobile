@@ -42,7 +42,7 @@ const LoginScreen = ({}) => {
     const {email, phone, password} = val;
     const obj = {
       user: {
-        ...(email && {email: email}),
+        ...(email && {email: email?.toLowerCase()}),
         ...(phone && {phone_number: removeNonNumbers(phone)}),
         password: password,
       },

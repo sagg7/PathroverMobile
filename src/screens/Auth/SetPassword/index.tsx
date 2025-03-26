@@ -35,7 +35,7 @@ const SetPassword = ({}) => {
   const handleContinueBtn = async (val: any) => {
     const obj = {
       user: {
-        ...(email && {email: email}),
+        ...(email && {email: email?.toLowerCase()}),
         ...(phone && {phone_number: removeNonNumbers(phone)}),
         first_name: firstName,
         last_name: lastName,

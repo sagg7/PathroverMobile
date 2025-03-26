@@ -19,7 +19,7 @@ export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
 export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
 // export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
-
+export const FAQ_LIST_LINK = 'https://staging.path-rover.com/faq_list';
 export const DOMAIN_BASE_URL = 'https://staging.path-rover.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';

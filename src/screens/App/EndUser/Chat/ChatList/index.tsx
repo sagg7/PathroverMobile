@@ -67,7 +67,7 @@ const ChatList = () => {
         }
         await getChats({});
         setIsInitialLoading(false);
-  
+
         setTimeout(() => {
           setLoader(false);
         }, 300);
@@ -136,11 +136,11 @@ const ChatList = () => {
 
   if (isInitialLoading && loader) {
     return <AppLoader />;
-  }  
+  }
 
   return (
     <View style={styles.container}>
-      {chats?.length === 0 ? (
+      {chats?.length === 0 && !loader ? (
         <EmptyChatView
           buttonText={'Initiate Chat'}
           onPress={() => {
@@ -159,7 +159,7 @@ const ChatList = () => {
           <FlatList
             data={search?.length > 0 ? searchedChats : chats}
             renderItem={renderItem}
-            ListEmptyComponent={listEmptyComponent}
+            ListEmptyComponent={!loader && listEmptyComponent}
             keyExtractor={(_, index) => index.toString()}
           />
         </>
