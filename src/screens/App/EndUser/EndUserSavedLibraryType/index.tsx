@@ -52,7 +52,10 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   }, [isFocused]);
 
   const handleNavigation = (selectedItem: any) => {
-    if (selectedItem?.route_type === 'waypoint_route') {
+    if (
+      selectedItem?.route_type === 'waypoint_route' ||
+      selectedItem?.route_type === 'hiking_waypoint'
+    ) {
       navigation.navigate(Routes.ViewWellPathNavigation, {
         entranceCoords: [
           Number(selectedItem?.dropoff_location?.longitude),

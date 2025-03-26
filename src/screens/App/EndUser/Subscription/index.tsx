@@ -77,8 +77,7 @@ const Subscription = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
-  const {loginUser} = useSelector((state:any) => state?.auth);
-  console.log(" Subscription ~ loginUser==>", loginUser)
+  const {loginUser} = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
 
   useEffect(() => {
@@ -124,7 +123,6 @@ const Subscription = () => {
     try {
       const offerToken =
         subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
-      console.log(" handleBuySubscription ~ offerToken==>", offerToken)
       await requestSubscription({
         sku,
         ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
