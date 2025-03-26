@@ -20,7 +20,7 @@ const usePlaceName = () => {
         if (data.features && data.features.length > 0) {
           const place = data.features[0].place_name;
           console.log('PLACE NAME===>', place);
-          setPlaceName(place);
+          setPlaceName(place?.replace(/^Undefined, /, ''));
         } else {
           setPlaceName(null);
           setError('Place not found');

@@ -830,6 +830,12 @@ export const EndUserSetting = [
     icon: svgIcon.BluePin,
     type: 'maps_location_pins',
   },
+  {
+    id: 1,
+    title: 'WayPoint',
+    icon: svgIcon.RouteBlue,
+    type: 'waypoint_route',
+  },
 ];
 
 // export const top_ads_android = [

@@ -101,17 +101,14 @@ const ViewSaveRoutes = ({route}: any) => {
             parseFloat(point?.longitude),
             parseFloat(point?.latitude),
           ]);
-      console.log('formattedPoints', formattedPoints?.length);
 
       setDestination(endCoordinates);
       formattedPoints.unshift(startCoordinates);
       formattedPoints.push(endCoordinates);
       if (selectedRoute?.route_type === 'maps_location_pins') {
         getRoadRoute(startCoordinates, endCoordinates);
-        console.log('HERE 1');
       } else {
         setRoute(formattedPoints);
-        console.log('HERE 2');
       }
       setRouteLineColor(selectedRoute?.color);
       setRouteLineHeight(Number(selectedRoute?.weight));
@@ -157,10 +154,7 @@ const ViewSaveRoutes = ({route}: any) => {
   }, [startPoint, endPoint]);
 
   const getRouteTotalDistance = async () => {
-    console.log('getTimeAndDistanceForWaypoint', routes?.length);
-
     const routeResults: any = await getTimeAndDistanceForWaypoint(routes);
-    console.log('getTimeAndDistance', routeResults);
 
     setResults(routeResults);
   };

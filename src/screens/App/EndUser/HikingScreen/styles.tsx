@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   },
   gestureView: {
     flex: 1,
-    backgroundColor: 'red'
+    backgroundColor: 'red',
   },
   inputStyles: {
     position: 'absolute',
@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: isIOS() ? WP('10') : WP('5'),
     right: 7,
-    zIndex: 1,
   },
   hikeIconStyle: {
     position: 'absolute',
@@ -134,8 +133,8 @@ const styles = StyleSheet.create({
   iconStyle: {
     marginRight: WP('2'),
   },
-  filterContainer:{
+  filterContainer: {
     // padding:20
-  }
+  },
 });
 export default styles;

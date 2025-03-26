@@ -123,7 +123,6 @@ const SearchWellPath = ({route, navigation}: any) => {
       }
     } catch (error) {
       Alert.alert('Error', error?.data?.error || UNEXPECTED_ERROR);
-      console.log('handleSearchWell ~ error==>', error);
     }
   };
 

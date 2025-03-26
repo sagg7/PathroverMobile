@@ -27,6 +27,7 @@ import {
   showAlert,
   UNEXPECTED_ERROR,
   AppLoader,
+  mapBoxToken,
 } from '../../../../shared/exporter';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
@@ -38,6 +39,9 @@ import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
 import useLocation from '../../../../hooks/getLocation';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
+import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
+import usePlaceName from '../../../../hooks/getPlaceName';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -52,7 +56,7 @@ const MY_DATA_MODAL_CONTENT = [
   },
   {
     title: 'WayPoint',
-    type: 'waypoint_route',
+    type: 'hiking_waypoint',
     icon: svgIcon.RouteBlue,
   },
 ];
@@ -60,7 +64,6 @@ const MY_DATA_MODAL_CONTENT = [
 const HikingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const cameraRef = useRef<any>(null);
-  const debounceTimeout = useRef<any>(null);
   const [weather, setWeather] = useState<any>([]);
   const [trailsData, setTrailsData] = useState(null);
   const [userLocation, setUserLocation] = useState<any>(null);
@@ -79,18 +82,28 @@ const HikingScreen = ({route, navigation}: any) => {
     longitude: null,
     name: null,
   });
+  const [results, setResults] = useState<null>(null);
+
   const [showPinLocationSheet, setShowPinLocationSheet] =
     useState<boolean>(false);
+  const [showNavigationSheet, setShowNavigationSheet] =
+    useState<boolean>(false);
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
-
+  const [searchLocationName, setSearchLocationNames] = useState<any>(null);
+  const {placeName, fetchPlaceName, setPlaceName, error, loading} =
+    usePlaceName();
   const {location} = useLocation();
 
   const [showTrailInfoSheet, setShowTrailInfoSheet] = useState<boolean>(false);
+  const [routes, setRoute] = useState<any>([]);
 
   const {loginUser} = useSelector(state => state.auth);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
-
+  const [actionBtn, setActionBtn] = useState<any>({
+    direction: true,
+    start: false,
+  });
   // Get user location
   useEffect(() => {
     const fetchWeatherData = async () => {
@@ -236,12 +249,6 @@ const HikingScreen = ({route, navigation}: any) => {
     return colors[index % colors.length];
   };
 
-  const offsetCoordinates = (coords: any, offset: any) =>
-    coords.map(([lon, lat], index) => [
-      lon + (index % 2 === 0 ? offset : -offset),
-      lat + (index % 2 === 0 ? offset : -offset),
-    ]);
-
   const fetchNearbyTrails = async (latitude: any, longitude: any) => {
     const overpassQuery = getOverpassQuery(latitude, longitude, selectedType);
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
@@ -286,7 +293,20 @@ const HikingScreen = ({route, navigation}: any) => {
       setShowTrailInfoSheet(true);
     }, 300);
   };
+  const fetchRoute = async (start, end) => {
+    const accessToken = mapBoxToken;
+    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data.routes[0]?.geometry?.coordinates;
+      return route;
+    } catch (error) {
+      console.error('Error fetching route:', error);
+      return [];
+    }
+  };
   const handlePlaceSelect = (place: any) => {
     const [longitude, latitude] = place.center || place;
     setSimpleSearch(place?.place_name);
@@ -295,7 +315,7 @@ const HikingScreen = ({route, navigation}: any) => {
     fetchNearbyTrails(latitude, longitude);
   };
 
-  const onPressMap = (event: any) => {
+  const onPressMap = async (event: any) => {
     try {
       const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
@@ -306,8 +326,16 @@ const HikingScreen = ({route, navigation}: any) => {
           longitude: coords[0],
           name: pinLocationDetails?.name ? pinLocationDetails?.name : '',
         });
+
+        fetchPlaceName(coords[1], coords[0]);
+        const fetchedRoute = await fetchRoute(userLocation, coords);
+        setRoute(fetchedRoute);
+        const locResults: any = await getTimeAndDistance(userLocation, coords);
+
+        setResults(locResults);
         setTimeout(() => {
-          setShowPinLocationSheet(true);
+          setShowNavigationSheet(true);
+          fitToBounds();
         }, 1000);
       } else {
         console.error('Invalid coordinates:', geometry);
@@ -413,7 +441,7 @@ const HikingScreen = ({route, navigation}: any) => {
         user_route: {
           name: pinLocationDetails.name,
           weight: '4',
-          route_type: 'waypoint_route',
+          route_type: 'hiking_waypoint',
           notes: null,
           is_road_route: null,
           middle_location_points: [],
@@ -430,18 +458,41 @@ const HikingScreen = ({route, navigation}: any) => {
       const resp = await createRoute(obj);
       if (resp?.data) {
         showAlert('Alert', 'Your waypoint has been saved.');
-        setPinLocationDetails({
-          latitude: null,
-          longitude: null,
-          name: null,
-        });
-        setShowPinLocationSheet(false);
+        clearStates();
       } else {
         showAlert('Alert', UNEXPECTED_ERROR);
       }
     } catch (error) {
       showAlert('Alert', UNEXPECTED_ERROR);
     }
+  };
+
+  const routeGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: routes,
+    },
+  };
+  const clearStates = () => {
+    setRoute([]);
+    setPinLocationMarker([]);
+    setPinLocationDetails({
+      latitude: null,
+      longitude: null,
+      name: null,
+    });
+    setShowPinLocationSheet(false);
+    setShowNavigationSheet(false);
+  };
+
+  const fitToBounds = () => {
+    // if (!userLocation || !pinLocationMarker) return; // Ensure both points exist
+    // cameraRef.current?.fitBounds(
+    //   [userLocation[0], userLocation[1]], // Southwest corner
+    //   [pinLocationMarker[0], pinLocationMarker[1]],
+    //   100, // Northeast corner
+    // );
   };
 
   return (
@@ -478,12 +529,6 @@ const HikingScreen = ({route, navigation}: any) => {
           requestsAlwaysUse
           visible={true}
         />
-        {/* <MapboxGL.Camera
-          ref={cameraRef}
-          zoomLevel={14}
-          centerCoordinate={userLocation}
-        /> */}
-        {/* Show user location */}
 
         {/* Render Trails */}
         {trailsData?.length > 0 &&
@@ -508,6 +553,17 @@ const HikingScreen = ({route, navigation}: any) => {
               </MapboxGL.PointAnnotation> */}
             </MapboxGL.ShapeSource>
           ))}
+        {routes?.length > 1 && (
+          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
+            <MapboxGL.LineLayer
+              id="routeLayer-unique"
+              style={{
+                lineWidth: 3,
+                lineColor: PFColors.Blue.Dark,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
       </MapboxGL.MapView>
       <TouchableOpacity
         style={styles.centerMapStyles}
@@ -622,6 +678,38 @@ const HikingScreen = ({route, navigation}: any) => {
           onPressSave={() => onPressWaypointSave()}
         />
       )}
+
+      {showNavigationSheet && (
+        <RouteToWellSheet
+          routeLength={route?.length}
+          onpressCancel={() => clearStates()}
+          routeName={placeName}
+          distanceInfo={results}
+          actionBtn={actionBtn}
+          onPressDirection={() => {
+            setActionBtn({
+              ...actionBtn,
+              direction: true,
+            });
+          }}
+          onPressPin={() => {
+            setShowNavigationSheet(false);
+            setTimeout(() => {
+              setShowPinLocationSheet(true);
+            }, 500);
+          }}
+          onPressStart={() => {
+            setShowNavigationSheet(false);
+            // navigation.navigate(Routes.ViewWellPathNavigation, {
+            //   entranceCoords: searchLocation,
+            //   entranceName: searchLocationName,
+            // });
+          }}
+          // onPressPin={() => handlePinBtn()}
+          // show={false}
+        />
+      )}
+
       {isLoading && <AppLoader />}
     </MainWrapper>
   );

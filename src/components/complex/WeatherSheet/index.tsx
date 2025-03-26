@@ -43,7 +43,6 @@ const WeatherSheet = ({
     return miles.toFixed(2); // Return result rounded to 2 decimal places
   };
   const windSpeed = convertKmToMiles(currentWeather.speed);
-  console.log('coords', coords);
 
   return (
     <Modal

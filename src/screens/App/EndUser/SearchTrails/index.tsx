@@ -25,8 +25,6 @@ const SearchTrails = ({navigation}: any) => {
     }
 
     debounceTimeout.current = setTimeout(async () => {
-      console.log('Searched Text => ', text);
-
       // setSearchedData([]);
     }, 2000);
   }, []);

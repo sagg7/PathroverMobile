@@ -388,19 +388,7 @@ const ViewSaveRoutesNavigation = ({route}: any) => {
   const NavigationSteps = ({tourStops, setCurrentLocation}) => {
     const flatListRef = useRef(null);
 
-    const handleViewableItemsChanged = ({viewableItems}) => {
-      console.log('viewableItems.length', viewableItems.length);
-
-      // if (viewableItems.length > 0) {
-      //   const index = viewableItems[0].index;
-      //   const {location} = tourStops[index]?.maneuver || {};
-      //   console.log('location', location);
-
-      //   if (location) {
-      //     setCurrentLocation(location); // Update map to new lat/lng
-      //   }
-      // }
-    };
+    const handleViewableItemsChanged = ({viewableItems}) => {};
 
     return (
       <FlatList

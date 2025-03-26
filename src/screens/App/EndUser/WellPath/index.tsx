@@ -49,6 +49,7 @@ import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWel
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import marker from '../../../../assets/icons/wellsMarker.png';
+import usePlaceName from '../../../../hooks/getPlaceName';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -73,7 +74,8 @@ const WellPath = () => {
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(false);
-
+  const [showNavigationSheet, setShowNavigationSheet] =
+    useState<boolean>(false);
   const [zoom, setZoom] = useState<any>(12);
   const [results, setResults] = useState<null>(null);
   const [actionBtn, setActionBtn] = useState<any>({
@@ -94,6 +96,9 @@ const WellPath = () => {
     longitude: null,
     name: null,
   });
+  const [waypointRoute, setWayPointRoute] = useState<any>([]);
+  const {placeName, fetchPlaceName, setPlaceName, error, loading} =
+    usePlaceName();
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
   const [showPinLocationSheet, setShowPinLocationSheet] =
     useState<boolean>(false);
@@ -206,7 +211,6 @@ const WellPath = () => {
     if (allWellLocations?.length > 0) {
       setAllWells(prev => {
         const existingIds = prev.map(well => well.id); // Get existing IDs as an array
-        console.log('EXISTINGS IDDS', existingIds?.length);
 
         const newWells = allWellLocations.filter(
           well => !existingIds.includes(well.id),
@@ -228,7 +232,6 @@ const WellPath = () => {
       setMapTypesArr(tempMap);
     }
   }, [mapLayerStyle]);
-  // console.log('ALL WELSS', allWells[3]);
 
   // TODO AFTER WELL PINS FINAL FIXES
 
@@ -325,23 +328,40 @@ const WellPath = () => {
     }
   }, [searchLocation, searchLocationName]);
 
-  const onPressMap = (event: any) => {
+  const onPressMap = async (event: any) => {
     try {
       const {geometry} = event;
+
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
+
         if (showAddEntranceSheet) {
           setEntranceCoords(coords);
         } else {
-          // setPinLocationMarker(coords);
-          // setPinLocationDetails({
-          //   latitude: coords[1],
-          //   longitude: coords[0],
-          //   name: pinLocationDetails?.name ? pinLocationDetails?.name : '',
-          // });
-          // setTimeout(() => {
-          //   setShowPinLocationSheet(true);
-          // }, 1000);
+          setPinLocationMarker(coords);
+          setPinLocationDetails({
+            latitude: coords[1],
+            longitude: coords[0],
+            name: pinLocationDetails?.name || '',
+          });
+
+          fetchPlaceName(coords[1], coords[0]);
+
+          // Fetch route asynchronously
+          const fetchedRoute = await fetchRoute(currentLocation, coords);
+          setWayPointRoute(fetchedRoute);
+
+          // Fetch time and distance asynchronously
+          const locResults: any = await getTimeAndDistance(
+            currentLocation,
+            coords,
+          );
+          setResults(locResults);
+
+          setTimeout(() => {
+            setShowNavigationSheet(true);
+            // fitToBounds();
+          }, 1000);
         }
       } else {
         console.error('Invalid coordinates:', geometry);
@@ -350,6 +370,7 @@ const WellPath = () => {
       console.error('Error in onPressMap:', error);
     }
   };
+
   const onSelectMapType = (item: any) => {
     setMapTypesArr(prev =>
       prev.map(v => ({
@@ -523,7 +544,57 @@ const WellPath = () => {
     setSelectedWell([obj?.log, obj?.lat]);
     setSelectedWellName(obj);
   };
-  // console.log('ALL WELLS==>', allWells?.length);
+
+  const onPressWaypointSave = async () => {
+    try {
+      const obj = {
+        user_route: {
+          name: pinLocationDetails.name,
+          weight: '4',
+          route_type: 'waypoint_route',
+          notes: null,
+          is_road_route: null,
+          middle_location_points: [],
+          locations_attributes: [
+            {
+              latitude: pinLocationDetails?.latitude,
+              longitude: pinLocationDetails?.longitude,
+              name: 'test',
+            },
+          ],
+          pinned_points: [],
+        },
+      };
+      const resp = await createRoute(obj);
+      if (resp?.data) {
+        showAlert('Alert', 'Your waypoint has been saved.');
+        clearStates();
+      } else {
+        showAlert('Alert', UNEXPECTED_ERROR);
+      }
+    } catch (error) {
+      showAlert('Alert', UNEXPECTED_ERROR);
+    }
+  };
+
+  const waypointRouteGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: waypointRoute,
+    },
+  };
+  const clearStates = () => {
+    setWayPointRoute([]);
+    setPinLocationMarker([]);
+    setPinLocationDetails({
+      latitude: null,
+      longitude: null,
+      name: null,
+    });
+    setShowPinLocationSheet(false);
+    // setShowNavigationSheet(false);
+  };
 
   return (
     <MainWrapper style={styles.container}>
@@ -666,6 +737,19 @@ const WellPath = () => {
               id="routeLayer-unique"
               style={{
                 lineWidth: 3,
+                lineColor: PFColors.Blue.Dark,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
+        {waypointRoute?.length > 1 && (
+          <MapboxGL.ShapeSource
+            shape={waypointRouteGeoJSON}
+            id="routeSource-unique">
+            <MapboxGL.LineLayer
+              id="routeLayer-unique"
+              style={{
+                lineWidth: 4,
                 lineColor: PFColors.Blue.Dark,
               }}
             />
@@ -829,8 +913,40 @@ const WellPath = () => {
           values={pinLocationDetails}
           onPressCancel={() => setShowPinLocationSheet(false)}
           setValues={setPinLocationDetails}
+          onPressSave={() => onPressWaypointSave()}
         />
       )}
+
+      {showNavigationSheet && (
+        <RouteToWellSheet
+          routeLength={waypointRoute?.length}
+          onpressCancel={() => clearStates()}
+          routeName={placeName}
+          distanceInfo={results}
+          actionBtn={actionBtn}
+          onPressDirection={() => {
+            setActionBtn({
+              ...actionBtn,
+              direction: true,
+            });
+          }}
+          onPressPin={() => {
+            setShowNavigationSheet(false);
+            setTimeout(() => {
+              setShowPinLocationSheet(true);
+            }, 500);
+          }}
+          onPressStart={() => {
+            setShowNavigationSheet(false);
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: pinLocationMarker,
+              entranceName: placeName,
+            });
+            clearStates();
+          }}
+        />
+      )}
+
       <RBSheet
         ref={pinLocationSheet}
         customModalProps={{
