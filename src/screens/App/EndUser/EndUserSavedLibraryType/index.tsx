@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FlatList, Text, TouchableOpacity, View} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 import {svgIcon} from '../../../../assets/svg';
@@ -7,7 +7,6 @@ import EditSvg from '../../../../assets/svg/Edit.svg';
 import {
   AppButton,
   AppHeader,
-  AppInput,
   AppLoader,
   MainWrapper,
 } from '../../../../components';
@@ -17,15 +16,21 @@ import {
   useEditRouteMutation,
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
-import {PFColors, Routes, WP} from '../../../../shared/exporter';
+import {
+  PFColors,
+  Routes,
+  SaveRouteSheet,
+  WP,
+} from '../../../../shared/exporter';
 import styles from './styles';
+import RBSheet from 'react-native-raw-bottom-sheet';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
   const isFocused = useIsFocused();
   const [routeName, setRouteName] = useState('');
   const [error, setError] = useState('');
-  const [selectedRoute, setSelectedRoute] = useState<number | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<any | null>(null);
   const [modalType, setModalType] = useState<'menu' | 'edit' | 'delete' | null>(
     null,
   );
@@ -34,6 +39,13 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
+  const refScrollable = useRef<any>();
+
+  useEffect(() => {
+    if (modalType === 'edit') {
+      refScrollable.current.open();
+    }
+  }, [modalType]);
 
   useEffect(() => {
     if (isFocused) refetch();
@@ -56,10 +68,11 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   };
 
   const handleModal = (
-    routeId: number | null,
+    routeId: any | null,
     type: 'menu' | 'edit' | 'delete' | null,
   ) => {
     setSelectedRoute(routeId);
+    setRouteName(routeId?.name);
     setModalType(null);
 
     if (type) {
@@ -85,6 +98,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         refetch();
         setRouteName('');
         handleModal(null, null);
+        refScrollable.current.close();
       })
       .catch(err => {
         console.log('err', err);
@@ -97,11 +111,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         console.log('No route selected to delete.');
         return;
       }
-      console.log('selectedRoute.id', selectedRoute.id);
 
       const res = await deleteRoute(selectedRoute.id).unwrap();
-      console.log('Response:', res);
-
       refetch();
       handleModal(null, null);
     } catch (err) {
@@ -112,9 +123,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const renderView = ({item}: any) => (
     <TouchableOpacity
       style={styles.listConatainer}
-      onPress={() => handleNavigation(item)}
-      // onPress={() => console.log('item', item)}
-    >
+      onPress={() => handleNavigation(item)}>
       <View style={styles.innerContainer}>
         <View style={styles.iconContainer}>{svgIcon.MapWindow}</View>
         <Text style={styles.listOptionText}>{item?.name || 'N/A'}</Text>
@@ -127,7 +136,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
 
   const handleUpdateName = (text: string) => {
     setRouteName(text);
-    if (!!text.trim()) {
+    if (!!text?.trim()) {
       setError('');
     } else {
       setError('Route name cannot be empty');
@@ -249,23 +258,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         </TouchableOpacity>
       </GeneralModal>
       <GeneralModal
-        title="Edit"
-        visible={modalType === 'edit'}
-        onClose={() => handleModal(null, null)}>
-        <AppInput
-          touched={true}
-          errorMessage={`${error}`}
-          placeholder="Enter name"
-          onChangeText={handleUpdateName}
-        />
-        <AppButton
-          title="Save"
-          buttonStyle={{marginTop: WP('2')}}
-          handleClick={handleSave}
-          isLoading={isEditing}
-        />
-      </GeneralModal>
-      <GeneralModal
         title=""
         hideCross
         visible={modalType === 'delete'}
@@ -290,7 +282,29 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           />
         </View>
       </GeneralModal>
-      {isLoading && <AppLoader />}
+      <RBSheet
+        ref={refScrollable}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customStyles={{
+          container: {
+            borderTopLeftRadius: WP('3'),
+            borderTopRightRadius: WP('3'),
+          },
+        }}>
+        <SaveRouteSheet
+          onPressCancel={() => refScrollable.current.close()}
+          title="Edit"
+          routeName={routeName || ''}
+          onChangeText={handleUpdateName}
+          onPressSave={() => handleSave()}
+          btnTitle="Save Map"
+        />
+        {/* )} */}
+      </RBSheet>
+      {(isLoading || isEditing) && <AppLoader />}
     </MainWrapper>
   );
 };

@@ -54,7 +54,7 @@ const EditProfile = () => {
       const {email, phone, password, firstName, lastName} = val;
       const obj = {
         profile: {
-          ...(email && {email: email}),
+          ...(email && {email: email?.toLowerCase()}),
           ...(firstName && {first_name: firstName}),
           ...(lastName && {last_name: lastName}),
           ...(password && {password: password}),

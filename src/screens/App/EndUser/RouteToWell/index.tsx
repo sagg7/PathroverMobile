@@ -80,11 +80,7 @@ const RouteToWell = ({route}: any) => {
       const route = data.routes[0]?.geometry?.coordinates;
       return route;
     } catch (error) {
-      if (count === 1) {
-        showAlert('Error', 'No route exists between the entered locations.');
-      }
-      setCount(2);
-      showAlert('Error', 'No route exists between the entered locations.');
+      // showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };

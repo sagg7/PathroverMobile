@@ -98,10 +98,10 @@ const ViewWellPathNavigation = ({route}: any) => {
       setRoute(route);
       setTourStops(data.routes[0]?.legs[0]?.steps);
     } catch (error) {
-      if (count === 1) {
-        showAlert('Error', 'No route exists between the entered locations.');
-      }
-      setCount(2);
+      // if (count === 1) {
+      //   showAlert('Error', 'No route exists between the entered locations.');
+      // }
+      // setCount(2);
       return [];
     }
   };
@@ -314,7 +314,6 @@ const ViewWellPathNavigation = ({route}: any) => {
         styleURL={selectedMapType}
         style={styles.map}
         compassEnabled
-        compassFadeWhenNorth
         compassPosition={{top: isIOS() ? HP('62') : HP('66'), right: 20}}
         scaleBarEnabled={false}>
         <MapboxGL.Camera

@@ -215,7 +215,7 @@ const ViewSaveRoutes = ({route}: any) => {
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
+      // showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };
