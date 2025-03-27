@@ -74,6 +74,7 @@ import ViewSaveRoutesNavigation from '../screens/App/EndUser/ViewSaveRoutesNavig
 import SearchTrails from '../screens/App/EndUser/SearchTrails';
 import TrailDetails from '../screens/App/EndUser/TrailDetails';
 import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
+import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -219,6 +220,7 @@ const AppNavigation = () => {
           component={SearchTrailResult}
         />
         <Stack.Screen name={Routes.TrailDetails} component={TrailDetails} />
+        <Stack.Screen name={Routes.NewsBlogDetail} component={NewsBlogDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );
