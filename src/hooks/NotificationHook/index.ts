@@ -21,7 +21,7 @@ const requestNotificationPermission = async () => {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL
     );
   } catch (error) {
-    console.error('Error requesting notification permissions', error);
+    // console.error('Error requesting notification permissions', error);
     return false;
   }
 };
@@ -42,7 +42,7 @@ export const getFCMToken = async () => {
 
     if (Platform.OS === 'android') {
       token = await messaging().getToken();
-      console.log('token--------android------>>>>>>>>>>>>>>', token);
+      // console.log('token--------android------>>>>>>>>>>>>>>', token);
       return token;
     } else {
       const authStatus = await messaging().hasPermission();
@@ -55,11 +55,11 @@ export const getFCMToken = async () => {
         }
       }
 
-      console.log('token------------ios-->>>>>>>>>>>>>>', token);
+      // console.log('token------------ios-->>>>>>>>>>>>>>', token);
       return token;
     }
   } catch (error) {
-    console.log('==============getFCMToken==error====================', error);
+    // console.log('==============getFCMToken==error====================', error);
   }
 };
 
@@ -90,9 +90,7 @@ const setupNotificationChannels = async () => {
 
 export const onDisplayNotification = async (message) => {
   try {
-    console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
-
-
+    // console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
     const channelId = await notifee.createChannel({
       id: 'PathRover',
       name: 'PathRover',
@@ -106,7 +104,7 @@ export const onDisplayNotification = async (message) => {
     // Determine notification type from message data
     const notificationType = JSON.parse(message?.data?.data)?.call_type;
 
-    console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
+    // console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
     
     // const notificationType = message?.data?.type;
 
@@ -187,20 +185,20 @@ export const onDisplayNotification = async (message) => {
     await notifee.displayNotification(notificationConfig);
     
   } catch (error) {
-    console.error('Error displaying notification:', error);
+    // console.error('Error displaying notification:', error);
   }
 };
 
 export async function clearAllCallNotifications() {
   try {
-    console.log('[clearAllCallNotifications] Starting...');
+    // console.log('[clearAllCallNotifications] Starting...');
 
     // Get all displayed notifications
     const notifications = await notifee.getDisplayedNotifications();
-    console.log('[clearAllCallNotifications] Raw notifications:', JSON.stringify(notifications, null, 2));
+    // console.log('[clearAllCallNotifications] Raw notifications:', JSON.stringify(notifications, null, 2));
 
     if (!notifications.length) {
-      console.log('[clearAllCallNotifications] No notifications found');
+      // console.log('[clearAllCallNotifications] No notifications found');
       return;
     }
 
@@ -214,7 +212,7 @@ export async function clearAllCallNotifications() {
 
         // Data is already an object - no need to parse
         const notificationData = notification.notification.data;
-        console.log('[clearAllCallNotifications] Notification data:', notificationData);
+        // console.log('[clearAllCallNotifications] Notification data:', notificationData);
 
         // Check if this is a call notification (audio or video)
         const isCallNotification =
@@ -222,10 +220,10 @@ export async function clearAllCallNotifications() {
           notificationData?.call_type === 'video_call' ||
           notification.notification.title === 'Incoming Call'; // Additional safety check
 
-        console.log(`[clearAllCallNotifications] Notification ${notification.notification.id} is call:`, isCallNotification);
+        // console.log(`[clearAllCallNotifications] Notification ${notification.notification.id} is call:`, isCallNotification);
         return isCallNotification;
       } catch (e) {
-        console.error('[clearAllCallNotifications] Error processing notification:', e);
+        // console.error('[clearAllCallNotifications] Error processing notification:', e);
         return false;
       }
     });
@@ -234,7 +232,7 @@ export async function clearAllCallNotifications() {
       callNotifications.map(n => n.notification.id));
 
     if (!callNotifications.length) {
-      console.log('[clearAllCallNotifications] No call notifications found to clear');
+      // console.log('[clearAllCallNotifications] No call notifications found to clear');
       return;
     }
 
@@ -244,9 +242,9 @@ export async function clearAllCallNotifications() {
         notifee.cancelNotification(notification.notification.id)
       ));
 
-    console.log(`[clearAllCallNotifications] Cleared ${callNotifications.length} call notifications`);
+    // console.log(`[clearAllCallNotifications] Cleared ${callNotifications.length} call notifications`);
   } catch (error) {
-    console.error('[clearAllCallNotifications] Error:', error);
+    // console.error('[clearAllCallNotifications] Error:', error);
   }
 }
 
@@ -347,7 +345,7 @@ const handleNotificationPress = (notification, navigation) => {
 };
 
 const handleNotificationAction = (actionId, notification, navigation, updateCallStatus) => {
-  console.log('Action pressed:', actionId);
+  // console.log('Action pressed:', actionId);
   // console.log('Action notification:', notification);
   const data = JSON.parse(notification?.data?.data) ?? {} 
 
@@ -419,7 +417,7 @@ export const onNotifyPress = (notify, navigation) => {
         id: user_call_id ,
       });
 
-      console.log('navifatoihih--------audio_call---------------------------');
+      // console.log('navifatoihih--------audio_call---------------------------');
       
       break;
     case 'video_call':
@@ -429,10 +427,10 @@ export const onNotifyPress = (notify, navigation) => {
         id: user_call_id,
       });
 
-      console.log('navifatoihih--------audio_call---------------------------');
+      // console.log('navifatoihih--------audio_call---------------------------');
       break;
     case 'missed_call':
-      clearCallNotifications()
+      clearAllCallNotifications()
       break;
     case 'alerts':
       // navigation.navigate('AlertsScreen');
@@ -441,7 +439,7 @@ export const onNotifyPress = (notify, navigation) => {
       // navigation.navigate('IssueScreen');
       break;
     default:
-      console.warn('Unhandled notification type:', type);
+      // console.warn('Unhandled notification type:', type);
       break;
   }
 };

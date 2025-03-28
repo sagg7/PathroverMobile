@@ -157,19 +157,19 @@ const VideoCalling = () => {
               {
                 received: res => {
   
-                  console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
+                  // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
   
                   checkCallStatus(res);
                 },
                 connected: () => {
-                  console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
+                  // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                   // setIsConnected(true);
                 },
               },
             );
           }
         } catch (err) {
-          console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
+          // console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
         }
       };
   
@@ -254,9 +254,9 @@ const VideoCalling = () => {
   useEffect(() => {
       if (controls.joinChannelSuccess && isFocused) {
         setTimeout(() => {
-          console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
+          // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
           if (controls.remoteUsers?.length === 0 && controls.call_data) {  // Check ref instead of state
-            console.error("No one joined in 3 mins, ending call...");
+            // console.error("No one joined in 3 mins, ending call...");
             // alert("No one joined in 3 mins, ending call...");
             updateCallStatus('not_attended');
             // leave();
@@ -383,7 +383,7 @@ const VideoCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    console.log('item----------->>>>>>>>>>>>>>', item);
+    // console.log('item----------->>>>>>>>>>>>>>', item);
     // leave();
   }
 

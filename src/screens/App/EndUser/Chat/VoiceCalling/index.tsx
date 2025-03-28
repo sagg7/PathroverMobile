@@ -30,9 +30,6 @@ const VoiceCalling = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
-  console.log('paramsparamsparamsparams----',params);
-
-
   const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
@@ -90,19 +87,19 @@ const VoiceCalling = () => {
             {
               received: res => {
 
-                console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
+                // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
 
                 checkCallStatus(res);
               },
               connected: () => {
-                console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
+                // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                 // setIsConnected(true);
               },
             },
           );
         }
       } catch (err) {
-        console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
+        // console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
       }
     };
 
@@ -146,9 +143,9 @@ const VoiceCalling = () => {
   useEffect(() => {
     if (controls.isJoined && isFocused) {
       setTimeout(() => {
-        console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
+        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
         if (controls.remoteUid === 0 && controls.call_data) {  // Check ref instead of state
-          console.error("No one joined in 3 mins, ending call...");
+          // console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
           leave();
@@ -181,7 +178,7 @@ const VoiceCalling = () => {
   const setupEventHandler = () => {
     eventHandler.current = {
       onJoinChannelSuccess: () => {
-        console.log('onJoinChannelSuccess----------->>>>>>>>>>>>>>');
+        // console.log('onJoinChannelSuccess----------->>>>>>>>>>>>>>');
         setControls(prev => ({ ...prev, isJoined: true }));
       },
       onUserJoined: (_connection: RtcConnection, uid: number) => {
@@ -226,7 +223,7 @@ const VoiceCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    console.log('item----------->>>>>>>>>>>>>>', item);
+    // console.log('item----------->>>>>>>>>>>>>>', item);
     // leave();
   }
 
@@ -241,25 +238,22 @@ const VoiceCalling = () => {
         },
       };
 
-      console.log('call obj----------->>>>>>>>>>>>>>', obj);
-
+      // console.log('call obj----------->>>>>>>>>>>>>>', obj);
 
       const res = await createCall(obj);
       if (res?.data) {
         setControls(prev => ({ ...prev, call_data: res?.data }));
       }
 
-      console.log('call res----------->>>>>>>>>>>>>>', data);
-
-
+      // console.log('call res----------->>>>>>>>>>>>>>', data);
     } catch (error) {
       setControls(prev => ({ ...prev, call_data: {} }));
-      console.log('call error----------->>>>>>>>>>>>>>', error);
+      // console.log('call error----------->>>>>>>>>>>>>>', error);
     }
   };
 
   const updateCallStatus = async (status) => {
-    console.log('controls.call_data', controls.call_data);
+    // console.log('controls.call_data', controls.call_data);
 
     try {
       const obj = {
@@ -267,7 +261,7 @@ const VoiceCalling = () => {
         id: params?.channel?  params?.id: data?.call_log?.id ?? controls?.call_data?.call_log?.id,
       };
 
-      console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
+      // console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
 
       await updateCall(obj);
     } catch (error) {
@@ -304,8 +298,7 @@ const VoiceCalling = () => {
       agoraEngineRef.current?.enableLocalAudio(true);
     } catch (e) {
       //
-      console.log('error----------->>>>>>>>>>>>>>', e);
-
+      // console.log('error----------->>>>>>>>>>>>>>', e);
     }
   };
 
@@ -317,7 +310,7 @@ const VoiceCalling = () => {
       updateCallStatus();
       navigation.goBack();
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   };
 
