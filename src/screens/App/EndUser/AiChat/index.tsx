@@ -47,16 +47,16 @@ const AiChat = () => {
 
       form.append('file', {
         uri:
-          Platform.OS === 'ios'
-            ? message[0]?.attachment?.sourceURL?.replace('file://', '')
-            : message[0]?.attachment?.path,
+            Platform.OS === 'ios'
+              ? message[0]?.attachment?.sourceURL?.replace('file://', '')
+              : message[0]?.attachment?.path,
         type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
         name: message[0]?.attachment?.filename ?? '',
       });
 
       const res = await uploadImages(form);
 
-      dispatch(addUserMessage([{...message?.[0], url: res?.data?.url}]));
+      dispatch(addUserMessage([{ ...message?.[0], url: res?.data?.url }]));
       const data = JSON.stringify({
         messages: [
           {

@@ -142,7 +142,7 @@ const ChatDetail = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    console.log('WORKING', isConnected + shareTrail);
+    // console.log('WORKING', isConnected + shareTrail);
     if (shareTrail) {
       onSend([
         {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
@@ -202,15 +202,16 @@ const ChatDetail = () => {
         title={params?.item || 'Group Chat'}
         onPressPhone={() => {
           console.log(params?.item?.user);
+          // navigation.navigate('VoiceCalling');
           navigation.navigate('VoiceCalling', {
             user: params?.item?.user,
-            channel: Platform.OS === 'android' ? 'call_501222' : '',
+            // channel: Platform.OS === 'android' ? 'call_501222' : '',
           });
         }}
         onPressVideo={() => {
           navigation.navigate('VideoCalling', {
             user: params?.item?.user,
-            channel: Platform.OS === 'android' ? 'testChannel' : '',
+            // channel: Platform.OS === 'android' ? 'testChannel' : '',
           });
         }}
       />

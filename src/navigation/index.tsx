@@ -78,6 +78,7 @@ import SearchTrails from '../screens/App/EndUser/SearchTrails';
 import TrailDetails from '../screens/App/EndUser/TrailDetails';
 import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
 import ViewSharedRoutes from '../screens/App/EndUser/ViewSharedRoutes';
+import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -228,6 +229,7 @@ const AppNavigation = () => {
           name={Routes.ViewSharedRoutes}
           component={ViewSharedRoutes}
         />
+        <Stack.Screen name={Routes.NewsBlogDetail} component={NewsBlogDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

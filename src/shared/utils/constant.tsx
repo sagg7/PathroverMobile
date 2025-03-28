@@ -11,13 +11,17 @@ export function showAlert(type: string, des: string, onPress?: () => void) {
 }
 
 export const isProduction = false;
-export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'ws://bedbug-trusting-starling.ngrok-free.app/cable?';
+export const REQ_LIST_SOCKET_URL = 'wss://staging.path-rover.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
 // export const REQ_LIST_SOCKET_URL =
 //   'wss://nice-mink-thankfully.ngrok-free.app/cable?';
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
+// export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
 export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
+// export const BASE_URL = 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
 // export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
 export const FAQ_LIST_LINK = 'https://staging.path-rover.com/faq_list';
 export const DOMAIN_BASE_URL = 'https://staging.path-rover.com/';
@@ -738,6 +742,55 @@ export const RIDE_STATUS = {
   COMPLETE_RIDE: 'complete_ride',
   ORDER_DELIVERED: 'order_delivered',
 };
+
+export const ANDROID_ADS = [
+  'ca-app-pub-8139629720293753/3060338255',
+  'ca-app-pub-8139629720293753/8121093246',
+  'ca-app-pub-8139629720293753/5494929901',
+  // 'ca-app-pub-8139629720293753/2868766563',
+  // 'ca-app-pub-8139629720293753/2163781875',
+  // 'ca-app-pub-8139629720293753/7929521557',
+  // 'ca-app-pub-8139629720293753/9850700209',
+  // 'ca-app-pub-8139629720293753/8537618532',
+  // 'ca-app-pub-8139629720293753/7635600407',
+  // 'ca-app-pub-8139629720293753/5911455198',
+  // 'ca-app-pub-8139629720293753/8099205650',
+  // 'ca-app-pub-8139629720293753/8099205650',
+  // 'ca-app-pub-8139629720293753/5473042310',
+  // 'ca-app-pub-8139629720293753/7737949860',
+  // 'ca-app-pub-8139629720293753/5111786528',
+  // 'ca-app-pub-8139629720293753/2485623181',
+  // 'ca-app-pub-8139629720293753/1172541514',
+  // 'ca-app-pub-8139629720293753/4595074911',
+  // 'ca-app-pub-8139629720293753/1968911576',
+  // 'ca-app-pub-8139629720293753/1523895301',
+  // 'ca-app-pub-8139629720293753/7897731965',
+  // 'ca-app-pub-8139629720293753/9655829902',
+];
+
+export const IOS_ADS = [
+  'ca-app-pub-8139629720293753/9019241945',
+  'ca-app-pub-8139629720293753/7879713807',
+  'ca-app-pub-8139629720293753/9255803838',
+  // 'ca-app-pub-8139629720293753/6649821792',
+  // 'ca-app-pub-8139629720293753/7942722166',
+  // 'ca-app-pub-8139629720293753/5253550468',
+  // 'ca-app-pub-8139629720293753/2589564961',
+  // 'ca-app-pub-8139629720293753/7650319959',
+  // 'ca-app-pub-8139629720293753/9621043021',
+  // 'ca-app-pub-8139629720293753/5024156612',
+  // 'ca-app-pub-8139629720293753/3776817262',
+  // 'ca-app-pub-8139629720293753/2463735594',
+  // 'ca-app-pub-8139629720293753/4888425246',
+  // 'ca-app-pub-8139629720293753/5145168432',
+  // 'ca-app-pub-8139629720293753/3832086766',
+  // 'ca-app-pub-8139629720293753/9001223784',
+  // 'ca-app-pub-8139629720293753/4291822588',
+  // 'ca-app-pub-8139629720293753/4291822588',
+  // 'ca-app-pub-8139629720293753/8636098564',
+  // 'ca-app-pub-8139629720293753/7688142118',
+  // 'ca-app-pub-8139629720293753/7323016894',
+];
 
 export const top_ads_android = [
   'ca-app-pub-8139629720293753/3060338255',

@@ -7,38 +7,88 @@ import {APP_ROLE, Routes} from '../../shared/exporter';
 import {EndUserTabs} from './EndUserTabs';
 import AuthStack from '../stacks/authStack';
 import {
-  NotificationListener,
-  notificationListener,
+  onDisplayNotification,
   onNotifyPress,
+  setupActionHandlers,
 } from '../../hooks/NotificationHook';
 import PushNotification from 'react-native-push-notification';
 import notifee, {EventType} from '@notifee/react-native';
 import {Linking} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useUpdateCallMutation} from '../../redux/chat/chatApiSlice';
+import messaging, {getMessaging} from '@react-native-firebase/messaging';
 
 const Tab = createBottomTabNavigator();
 const AppStack = () => {
+  const navigation = useNavigation();
   const userRole = useSelector(state => state.appRole.userRole);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const navigation = useNavigation();
+  const [updateCall, {error}] = useUpdateCallMutation();
 
   useEffect(() => {
-    NotificationListener(onNotifyPress);
+    NotificationListener(navigation);
   }, []);
 
-  useEffect(() => {
-    return notifee.onBackgroundEvent(async ({type, detail}) => {
-      const {notification} = detail;
-      onNotifyPress(notification, type);
+  const updateCallStatus = async (status, id) => {
+    try {
+      const obj = {
+        status: status ?? '',
+        id: id ?? '',
+      };
+      console.log('updateCall obj----------->>>>>>>>>>>>>>', obj);
+      const res = await updateCall(obj);
+
+      // console.log('updateCall res------------------', res);
+    } catch (error) {
+      console.log('error in update call status------------------', error);
+    }
+  };
+
+  // Modified NotificationListener
+  const NotificationListener = navigation => {
+    // Setup action handlers first
+    setupActionHandlers(navigation, updateCallStatus);
+
+    // Firebase message handlers
+    getMessaging().onNotificationOpenedApp(remoteMessage => {
+      // console.log('App opened from background:', remoteMessage);
+      onNotifyPress(remoteMessage, navigation);
     });
-  }, []);
 
-  useEffect(() => {
-    return notifee.onForegroundEvent(async ({type, detail}) => {
-      const {notification} = detail;
-      onNotifyPress(notification, type);
+    // useEffect(() => {
+    //   const unsubscribeNotificationListener: any = notificationListener();
+    //   return () => {
+    //     // Cleanup notification listeners
+    //     unsubscribeNotificationListener();
+
+    //     // Clear all delivered and local notifications
+    //     PushNotification.getDeliveredNotifications((all: any) => {
+    //       PushNotification.removeAllDeliveredNotifications();
+    //       PushNotification.cancelAllLocalNotifications();
+    //     });
+    //   };
+    // }, []);
+
+    messaging().onMessage(async remoteMessage => {
+      // console.log('Foreground message received:', remoteMessage);
+      // Only display, don't auto-handle
+      onDisplayNotification(remoteMessage);
     });
-  }, []);
+
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      // console.log('Background message received:', remoteMessage);
+      onDisplayNotification(remoteMessage);
+    });
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          // console.log('App opened from quit state:', remoteMessage);
+          // onNotifyPress(remoteMessage, navigation);
+        }
+      });
+  };
 
   const extractParams = (url: string) => {
     const fixedUrl = url.replace(/\?(?=.*\?)/, '&');
@@ -100,20 +150,6 @@ const AppStack = () => {
       subscription.remove();
     };
   }, []);
-
-  // useEffect(() => {
-  //   const unsubscribeNotificationListener: any = notificationListener();
-  //   return () => {
-  //     // Cleanup notification listeners
-  //     unsubscribeNotificationListener();
-
-  //     // Clear all delivered and local notifications
-  //     PushNotification.getDeliveredNotifications((all: any) => {
-  //       PushNotification.removeAllDeliveredNotifications();
-  //       PushNotification.cancelAllLocalNotifications();
-  //     });
-  //   };
-  // }, []);
 
   return loginUser ? (
     userRole === APP_ROLE.DRIVER ? (
