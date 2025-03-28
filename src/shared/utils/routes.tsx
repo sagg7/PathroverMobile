@@ -86,5 +86,6 @@ export const Routes = {
   SearchTrails: 'SearchTrails',
   SearchTrailResult: 'SearchTrailResult',
   TrailDetails: 'TrailDetails',
+  ViewSharedRoutes: 'ViewSharedRoutes',
   NewsBlogDetail: 'NewsBlogDetail',
 };

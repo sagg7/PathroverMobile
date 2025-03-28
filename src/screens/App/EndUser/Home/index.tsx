@@ -24,7 +24,7 @@ MobileAds()
   .then(() => {
     // Request config successfully set!
   });
- 
+
 MobileAds()
   .initialize()
   .then(adapterStatuses => {
@@ -35,6 +35,7 @@ const Home = ({navigation}: any) => {
   const [ads, setAds] = useState<any[]>([]);
   const [fcmToken, setFCMToken] = useState(false);
   const [fcmTokenUpdate] = useFcmTokenUpdateMutation();
+  const [data, setData] = useState<any>([]);
   const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
   useEffect(() => {
     (async () => {
@@ -57,25 +58,30 @@ const Home = ({navigation}: any) => {
     const checkPlatform = Platform.OS === 'ios';
     setAds(checkPlatform ? IOS_ADS : ANDROID_ADS);
   }, []);
+  useEffect(() => {
+    if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
+  }, [allNewsBlogs, ads]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];
     let adIndex = 0;
 
-    for (let i = 0; i < data.length; i++) {
-      newData.push(data[i]);
+    for (let i = 0; i < data?.length; i++) {
+      newData?.push(data[i]);
 
-      if ((i + 1) % 20 === 0 && ads.length > 0) {
-        newData.push({isAd: true, adData: ads[adIndex % ads.length]}); // Cycle through ads
+      if ((i + 1) % 20 === 0 && ads?.length > 0) {
+        newData?.push({isAd: true, adData: ads[adIndex % ads?.length]}); // Cycle through ads
         adIndex++;
       }
     }
+    setData(newData);
     return newData;
   };
   const renderItem = ({item, index}: any) => {
     if (item?.isAd) {
       return <Ads item={ads[index / 21]} />; // Pass ad sequentially
     }
+
     return (
       <TouchableOpacity
         activeOpacity={0.7}
@@ -94,7 +100,7 @@ const Home = ({navigation}: any) => {
       </TouchableOpacity>
     );
   };
- 
+
   return (
     <MainWrapper>
       <View style={styles.headerContainer}>
@@ -107,7 +113,7 @@ const Home = ({navigation}: any) => {
           />
         </TouchableOpacity>
       </View>
- 
+
       <AskMe
         value={search}
         placeholder={'Ask me anything...'}
@@ -121,11 +127,11 @@ const Home = ({navigation}: any) => {
       {allNewsBlogs?.length > 0 ? (
         <View style={{flex: 1}}>
           <FlatList
-            data={injectAds(allNewsBlogs, ads)}
+            data={data}
             renderItem={renderItem}
             nestedScrollEnabled
             showsVerticalScrollIndicator={false}
-            keyExtractor={(index: any) => index.toString()}
+            keyExtractor={(item: any) => item?.id?.toString()}
           />
         </View>
       ) : (
@@ -139,5 +145,5 @@ const Home = ({navigation}: any) => {
     </MainWrapper>
   );
 };
- 
+
 export default Home;

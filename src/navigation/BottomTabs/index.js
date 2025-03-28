@@ -1,49 +1,51 @@
-import messaging, { getMessaging } from '@react-native-firebase/messaging';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, {useEffect} from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {DriverTabs} from './DriverTabs';
+import {ManagerTabs} from './ManagerTabs';
+import {useSelector} from 'react-redux';
+import {APP_ROLE, Routes} from '../../shared/exporter';
+import {EndUserTabs} from './EndUserTabs';
+import AuthStack from '../stacks/authStack';
 import {
   onDisplayNotification,
   onNotifyPress,
-  setupActionHandlers
+  setupActionHandlers,
 } from '../../hooks/NotificationHook';
-import { APP_ROLE } from '../../shared/exporter';
-import AuthStack from '../stacks/authStack';
-import { DriverTabs } from './DriverTabs';
-import { EndUserTabs } from './EndUserTabs';
-import { ManagerTabs } from './ManagerTabs';
-import { useUpdateCallMutation } from '../../redux/chat/chatApiSlice';
-
+import PushNotification from 'react-native-push-notification';
+import notifee, {EventType} from '@notifee/react-native';
+import {Linking} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useUpdateCallMutation} from '../../redux/chat/chatApiSlice';
+import messaging, {getMessaging} from '@react-native-firebase/messaging';
 
 const Tab = createBottomTabNavigator();
 const AppStack = () => {
-const navigation = useNavigation();
+  const navigation = useNavigation();
   const userRole = useSelector(state => state.appRole.userRole);
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const [updateCall, {error}] = useUpdateCallMutation();
-  
+
   useEffect(() => {
     NotificationListener(navigation);
-  }, [])
+  }, []);
 
-    const updateCallStatus = async (status, id) => {
-      try {
-        const obj = {
-          status: status ?? '',
-          id: id ?? '',
-        };
-        console.log('updateCall obj----------->>>>>>>>>>>>>>', obj);
-        const res = await updateCall(obj);
+  const updateCallStatus = async (status, id) => {
+    try {
+      const obj = {
+        status: status ?? '',
+        id: id ?? '',
+      };
+      console.log('updateCall obj----------->>>>>>>>>>>>>>', obj);
+      const res = await updateCall(obj);
 
-        // console.log('updateCall res------------------', res);
-      } catch (error) {
-        console.log('error in update call status------------------', error);
-      }
-    };
+      // console.log('updateCall res------------------', res);
+    } catch (error) {
+      console.log('error in update call status------------------', error);
+    }
+  };
 
   // Modified NotificationListener
-  const NotificationListener = (navigation) => {
+  const NotificationListener = navigation => {
     // Setup action handlers first
     setupActionHandlers(navigation, updateCallStatus);
 
@@ -52,6 +54,20 @@ const navigation = useNavigation();
       // console.log('App opened from background:', remoteMessage);
       onNotifyPress(remoteMessage, navigation);
     });
+
+    // useEffect(() => {
+    //   const unsubscribeNotificationListener: any = notificationListener();
+    //   return () => {
+    //     // Cleanup notification listeners
+    //     unsubscribeNotificationListener();
+
+    //     // Clear all delivered and local notifications
+    //     PushNotification.getDeliveredNotifications((all: any) => {
+    //       PushNotification.removeAllDeliveredNotifications();
+    //       PushNotification.cancelAllLocalNotifications();
+    //     });
+    //   };
+    // }, []);
 
     messaging().onMessage(async remoteMessage => {
       // console.log('Foreground message received:', remoteMessage);
@@ -74,6 +90,67 @@ const navigation = useNavigation();
       });
   };
 
+  const extractParams = (url: string) => {
+    const fixedUrl = url.replace(/\?(?=.*\?)/, '&');
+
+    const queryString = fixedUrl.split('?')[1];
+
+    if (!queryString) return {};
+    const params: Record<string, string> = {};
+    queryString.split('&').forEach(param => {
+      const [key, value] = param.split('=');
+      if (key && value) {
+        params[key] = decodeURIComponent(value);
+      }
+    });
+
+    return {routeType: params['route_type'], routeId: params['route_id']};
+  };
+
+  const handleDeepLink = (url: string | null) => {
+    if (url) {
+      console.log('\n\n\nDeep link received:', url);
+      const {routeType, routeId} = extractParams(url);
+      console.log('BOTTOTAB=====11======', routeId);
+      console.log('=BOTTOTAB====22======', routeType);
+      if (
+        routeType === 'hiking_waypoint' ||
+        routeType === 'waypoint_route' ||
+        'maps_location_pins'
+      ) {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: [],
+          routeId: routeId,
+          entranceName: '',
+        });
+      } else {
+        navigation.navigate(Routes.ViewSharedRoutes, {routeType, routeId});
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Handle deep link on app launch
+    const fetchInitialUrl = async () => {
+      try {
+        const initialUrl = await Linking.getInitialURL();
+        handleDeepLink(initialUrl);
+      } catch (error) {
+        console.warn('Error fetching initial URL', error);
+      }
+    };
+    fetchInitialUrl();
+
+    // Listen for deep links while the app is running
+    const subscription = Linking.addEventListener('url', event =>
+      handleDeepLink(event.url),
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return loginUser ? (
     userRole === APP_ROLE.DRIVER ? (
       <DriverTabs />
@@ -87,5 +164,4 @@ const navigation = useNavigation();
   );
 };
 
-export { AppStack };
-
+export {AppStack};

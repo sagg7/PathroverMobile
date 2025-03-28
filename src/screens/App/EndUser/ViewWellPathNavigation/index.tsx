@@ -11,9 +11,7 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
-  showAlert,
   StartPointModal,
-  UNEXPECTED_ERROR,
   WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
@@ -27,14 +25,12 @@ import {
   View,
 } from 'react-native';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
-import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useSelector} from 'react-redux';
-import {InteractionManager} from 'react-native';
-// import { activateKeepAwake, deactivateKeepAwake } from 'react-native-keep-awake';
 import {
   activateKeepAwake,
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
+import {useGetRouteBasedIdMutation} from '../../../../redux/endUser/endUserApiSlice';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -60,14 +56,29 @@ const ViewWellPathNavigation = ({route}: any) => {
   const screenWidth = Dimensions.get('window').width;
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const [count, setCount] = useState<any>(1);
+  const [getRouteBasedId, {isLoading, data}] = useGetRouteBasedIdMutation();
 
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
 
   useEffect(() => {
-    if (route) setDestination(route?.params?.entranceCoords);
+    if (route && route?.params?.entranceCoords?.length > 1) {
+      setDestination(route?.params?.entranceCoords);
+    } else {
+      if (route?.params?.routeId) getRouteBasedId(route?.params?.routeId);
+    }
   }, [route]);
+
+  useEffect(() => {
+    if (data) {
+      const routeData = data?.user_routes[0];
+      setDestination([
+        Number(routeData?.dropoff_location?.longitude),
+        Number(routeData?.dropoff_location?.latitude),
+      ]);
+    }
+  }, [data]);
+
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
@@ -269,45 +280,48 @@ const ViewWellPathNavigation = ({route}: any) => {
   const resetFlatList = () => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: true});
   };
+
   return (
     <MainWrapper style={styles.container}>
-      <View style={styles.stepsContainer}>
-        <FlatList
-          ref={flatListRef}
-          data={tourStops}
-          horizontal
-          style={{marginTop: isIOS() ? HP('5') : 0}}
-          pagingEnabled
-          snapToAlignment="center"
-          keyExtractor={(item, index) => index.toString()}
-          getItemLayout={(data, index) => ({
-            length: screenWidth * 0.8,
-            offset: screenWidth * 0.8 * index,
-            index,
-          })}
-          showsHorizontalScrollIndicator={false}
-          onViewableItemsChanged={handleViewableItemsChanged}
-          viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
-          renderItem={({item, index}) => (
-            <View style={styles.instructionCard}>
-              <View>
-                <Image
-                  resizeMode="contain"
-                  source={getManeuverIcon(tourStops[index]?.maneuver)}
-                  style={styles.directonIcon}
-                />
-                <Text style={styles.distanceText}>
-                  {/* {item?.distance?.toFixed(0)} m */}
-                  {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
+      {tourStops?.length > 0 && (
+        <View style={styles.stepsContainer}>
+          <FlatList
+            ref={flatListRef}
+            data={tourStops}
+            horizontal
+            style={{marginTop: isIOS() ? HP('5') : 0}}
+            pagingEnabled
+            snapToAlignment="center"
+            keyExtractor={(item, index) => index.toString()}
+            getItemLayout={(data, index) => ({
+              length: screenWidth * 0.8,
+              offset: screenWidth * 0.8 * index,
+              index,
+            })}
+            showsHorizontalScrollIndicator={false}
+            onViewableItemsChanged={handleViewableItemsChanged}
+            viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
+            renderItem={({item, index}) => (
+              <View style={styles.instructionCard}>
+                <View>
+                  <Image
+                    resizeMode="contain"
+                    source={getManeuverIcon(tourStops[index]?.maneuver)}
+                    style={styles.directonIcon}
+                  />
+                  <Text style={styles.distanceText}>
+                    {/* {item?.distance?.toFixed(0)} m */}
+                    {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
+                  </Text>
+                </View>
+                <Text style={styles.instructionText}>
+                  {item.maneuver.instruction}
                 </Text>
               </View>
-              <Text style={styles.instructionText}>
-                {item.maneuver.instruction}
-              </Text>
-            </View>
-          )}
-        />
-      </View>
+            )}
+          />
+        </View>
+      )}
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -366,15 +380,6 @@ const ViewWellPathNavigation = ({route}: any) => {
         )}
       </MapboxGL.MapView>
 
-      {/* {showRouteStartedSheet && (
-        <RouteToWellStartedSheet
-          routeName={route?.params?.entranceName}
-          routeInfo={results}
-          setModalVisible={() => {
-            setShowRouteStartedSheet(false), navigation.goBack();
-          }}
-        />
-      )} */}
       <View style={styles.navigationInfoView}>
         <View style={styles.titleView}>
           <TouchableOpacity
@@ -384,7 +389,9 @@ const ViewWellPathNavigation = ({route}: any) => {
             {svgIcon.CancelIcon}
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerText}>{route?.params?.entranceName}</Text>
+        <Text style={styles.headerText}>
+          {route?.params?.entranceName || data?.user_routes[0]?.name || 'N/A'}
+        </Text>
         <View
           style={{
             flexDirection: 'row',
@@ -408,7 +415,7 @@ const ViewWellPathNavigation = ({route}: any) => {
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.maplayerStyles} onPress={resetCompass}>
+      <TouchableOpacity style={styles.recenterIcon} onPress={resetCompass}>
         {svgIcon.MapWhiteBg}
       </TouchableOpacity>
       {modalKey === 1 && (
@@ -418,6 +425,11 @@ const ViewWellPathNavigation = ({route}: any) => {
           onPressSave={() => handleModalOkButton()}
         />
       )}
+      <TouchableOpacity
+        style={styles.maplayerStyles}
+        onPress={() => setMapLayerSheeet(true)}>
+        {svgIcon.MapLayer}
+      </TouchableOpacity>
 
       <MapLayerSheet
         setModalVisible={() => setMapLayerSheeet(false)}

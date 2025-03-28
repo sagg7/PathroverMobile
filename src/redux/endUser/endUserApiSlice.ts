@@ -127,6 +127,24 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    getRouteBasedId: builder.mutation({
+      query: id => {
+        return {
+          url: `user_routes/${id}`,
+          method: 'get',
+        };
+      },
+    }),
+    createShareLinkRoute: builder.mutation({
+      query: data => {
+        return {
+          url: `user_routes/create_route_link`,
+          method: 'POST',
+          body: data,
+        };
+      },
+    }),
     getNewsBlogs: builder.query({
       query: () => {
         return {
@@ -150,5 +168,7 @@ export const {
   useDeleteRouteMutation,
   useEditRouteMutation,
   useWellSearchMutation,
+  useGetRouteBasedIdMutation,
+  useCreateShareLinkRouteMutation,
   useGetNewsBlogsQuery,
 } = enduserApiSlice;

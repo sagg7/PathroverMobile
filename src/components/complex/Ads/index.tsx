@@ -23,7 +23,8 @@ function Ads({item}: AdsProps) {
         <ActivityIndicator size={'small'} color={PFColors.Blue.Dark} />
       ) : (
         <BannerAd
-          unitId={__DEV__ ? TestIds.BANNER : item}
+          unitId={TestIds.BANNER}
+          // unitId={__DEV__ ? TestIds.BANNER : item}
           size={BannerAdSize.LARGE_BANNER}
         />
       )}

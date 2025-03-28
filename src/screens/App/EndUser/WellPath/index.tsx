@@ -30,7 +30,10 @@ import SearchView from './SearchView';
 import HeaderView from './HeaderView';
 import {MapSettingSheet} from '../../../../components/complex/MapSettingSheet';
 import {PinLocationAddress} from '../../../../components/complex/PinLocationAddress';
-import {useGetAllWellsQuery} from '../../../../redux/endUser/endUserApiSlice';
+import {
+  useCreateShareLinkRouteMutation,
+  useGetAllWellsQuery,
+} from '../../../../redux/endUser/endUserApiSlice';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {
@@ -50,6 +53,8 @@ import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import marker from '../../../../assets/icons/wellsMarker.png';
 import usePlaceName from '../../../../hooks/getPlaceName';
+import Share from 'react-native-share';
+import SharedSheet from '../../../../components/complex/SharedSheet';
 
 const WellPath = () => {
   const navigation: any = useNavigation();
@@ -88,6 +93,9 @@ const WellPath = () => {
   const [entranceCoords, setEntranceCoords] = useState<any>(null);
   const [entranceName, setEntranceName] = useState<any>('');
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
+    useCreateShareLinkRouteMutation();
+
   const dispatch = useDispatch();
   const [selectedSearchedWell, setSelectedSearchedWell] = useState<any>(null);
   const [wellDistances, setWellDistances] = useState({});
@@ -102,6 +110,9 @@ const WellPath = () => {
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
   const [showPinLocationSheet, setShowPinLocationSheet] =
     useState<boolean>(false);
+  const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
+  const [showShareWellSheet, setShowShareWellSheet] = useState<boolean>(false);
+
   const getRadiusForZoomLevel = (zoomLevel: any) => {
     switch (zoomLevel) {
       case 12:
@@ -593,12 +604,104 @@ const WellPath = () => {
       name: null,
     });
     setShowPinLocationSheet(false);
+    setShowNavigationSheet(false);
     // setShowNavigationSheet(false);
+  };
+
+  const shareContent = async selectedRoute => {
+    const options = {
+      message: 'Shared location',
+      url: `https://staging.path-rover.com/?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
+    };
+
+    try {
+      const res = await Share.open(options);
+      console.log(res);
+      setShowShareWellSheet(false);
+    } catch (err) {
+      if (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  const saveShareRouteLink = async (type: string) => {
+    console.log('type', type);
+
+    let routeData: any = {};
+    if (type === 'way_point') {
+      routeData = {
+        user_route: {
+          name: placeName,
+          weight: '4',
+          route_type: 'waypoint_route',
+          notes: null,
+          is_road_route: null,
+          middle_location_points: [],
+          locations_attributes: [
+            {
+              latitude: pinLocationDetails?.latitude,
+              longitude: pinLocationDetails?.longitude,
+              name: 'test',
+            },
+          ],
+          pinned_points: [],
+        },
+      };
+    } else {
+      console.log('selectedWellName', selectedWellName);
+
+      routeData = {
+        user_route: {
+          name: selectedWellName?.well_name,
+          weight: '4',
+          route_type: 'maps_location_pins',
+          notes: null,
+          is_road_route: null,
+          middle_location_points: [],
+          locations_attributes: [
+            {
+              latitude: selectedWellName?.lat,
+              longitude: selectedWellName?.log,
+              name: 'well',
+            },
+          ],
+          pinned_points: [],
+        },
+      };
+    }
+    const resp = await createShareLinkRoute(routeData);
+    console.log('res', resp?.error?.data?.errors[0]);
+
+    if (resp?.data) {
+      shareContent(resp?.data?.user_route);
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const shareWellwithinApp = () => {
+    setShowShareWellSheet(false);
+    if (loginUser?.verified) {
+      setShowPinAddress(false);
+      selectedWell.map(Number);
+      const formatedArr = selectedWell.map(Number);
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: [],
+          endingPoint: formatedArr,
+          type: 'Well route',
+        },
+      });
+    } else {
+      showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+    }
   };
 
   return (
     <MainWrapper style={styles.container}>
       <HeaderView onPressToggle={() => onPressToggle()} switchOn={available} />
+
       <SearchView
         onPressSearch={() =>
           navigation.navigate(Routes.SearchWellPath, {
@@ -805,6 +908,11 @@ const WellPath = () => {
       />
       <PinLocationAddress
         onPressShare={() => {
+          setShowPinAddress(false);
+          setTimeout(() => {
+            setShowShareWellSheet(true);
+          }, 1000);
+          return;
           if (loginUser?.verified) {
             setShowPinAddress(false);
             selectedWell.map(Number);
@@ -936,6 +1044,7 @@ const WellPath = () => {
               setShowPinLocationSheet(true);
             }, 500);
           }}
+          onPressShare={() => setShowShareSheet(true)}
           onPressStart={() => {
             setShowNavigationSheet(false);
             navigation.navigate(Routes.ViewWellPathNavigation, {
@@ -946,6 +1055,18 @@ const WellPath = () => {
           }}
         />
       )}
+      <SharedSheet
+        modalVisible={showShareSheet}
+        onPressOther={() => saveShareRouteLink('way_point')}
+        // onPressShare={() => {}}
+        setModalVisible={() => setShowShareSheet(false)}
+      />
+      <SharedSheet
+        modalVisible={showShareWellSheet}
+        onPressOther={() => saveShareRouteLink('well')}
+        onPressShare={() => shareWellwithinApp()}
+        setModalVisible={() => setShowShareWellSheet(false)}
+      />
 
       <RBSheet
         ref={pinLocationSheet}
