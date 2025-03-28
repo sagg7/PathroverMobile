@@ -297,7 +297,8 @@ const ViewWellPathNavigation = ({route}: any) => {
                   style={styles.directonIcon}
                 />
                 <Text style={styles.distanceText}>
-                  {item?.distance?.toFixed(0)} m
+                  {/* {item?.distance?.toFixed(0)} m */}
+                  {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
                 </Text>
               </View>
               <Text style={styles.instructionText}>

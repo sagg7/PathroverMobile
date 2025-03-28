@@ -127,6 +127,15 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    getNewsBlogs: builder.query({
+      query: () => {
+        return {
+          url: `news_feed`,
+          method: 'GET',
+        };
+      },
+      transformResponse: (res: any) => res?.news_feed,
+    }),
   }),
 
   overrideExisting: true,
@@ -141,4 +150,5 @@ export const {
   useDeleteRouteMutation,
   useEditRouteMutation,
   useWellSearchMutation,
+  useGetNewsBlogsQuery,
 } = enduserApiSlice;

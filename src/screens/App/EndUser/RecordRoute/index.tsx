@@ -230,7 +230,11 @@ const RecordRoute = () => {
           followZoomLevel={16}
           centerCoordinate={liveLocation}
         />
-        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+        <MapboxGL.UserLocation
+          visible
+          onUpdate={handleLocationUpdate}
+          requestsAlwaysUse
+        />
 
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>

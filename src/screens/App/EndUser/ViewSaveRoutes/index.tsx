@@ -157,6 +157,8 @@ const ViewSaveRoutes = ({route}: any) => {
   }, [startPoint, endPoint]);
 
   const getRouteTotalDistance = async () => {
+    console.log('getTimeAndDistanceForWaypoint', routes?.length);
+
     const routeResults: any = await getTimeAndDistanceForWaypoint(routes);
     console.log('getTimeAndDistance', routeResults);
 
@@ -468,7 +470,8 @@ const ViewSaveRoutes = ({route}: any) => {
         )}
 
         {!selectedRoute?.is_road_route &&
-          selectedRoute?.route_type === 'custom_route' &&
+          (selectedRoute?.route_type === 'custom_route' ||
+            selectedRoute?.route_type === 'hiking_custom_route') &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}

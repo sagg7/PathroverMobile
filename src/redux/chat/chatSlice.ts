@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 
 const chatSlice = createSlice({
   name: 'chat',

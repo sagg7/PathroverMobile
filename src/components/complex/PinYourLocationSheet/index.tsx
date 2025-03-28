@@ -44,7 +44,7 @@ const PinYourLocationSheet = ({
         editable={false}
       />
       <AppInput
-        value={values?.latitude.toString() ?? ''}
+        value={values?.latitude?.toString() ?? ''}
         placeholder="Latitude"
         inputContainerStyle={styles.inputStyles}
         editable={false}
