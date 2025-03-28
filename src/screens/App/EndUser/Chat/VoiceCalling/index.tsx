@@ -144,17 +144,17 @@ const VoiceCalling = () => {
   }, []);
 
   useEffect(() => {
-    if (controls.isJoined) {
+    if (controls.isJoined && isFocused) {
       setTimeout(() => {
         console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
         if (controls.remoteUid === 0 && controls.call_data) {  // Check ref instead of state
           console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          // leave();
+          leave();
         }
         // }, 10000); 
-      }, 5000);
+      }, 65000);
       // }, 60000);
     }
 

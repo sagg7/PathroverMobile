@@ -252,7 +252,7 @@ const VideoCalling = () => {
   };
 
   useEffect(() => {
-      if (controls.joinChannelSuccess) {
+      if (controls.joinChannelSuccess && isFocused) {
         setTimeout(() => {
           console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
           if (controls.remoteUsers?.length === 0 && controls.call_data) {  // Check ref instead of state
