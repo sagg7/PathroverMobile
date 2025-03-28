@@ -1,10 +1,8 @@
-import {PermissionsAndroid, Platform} from 'react-native';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
-import PushNotification, {Importance} from 'react-native-push-notification';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import notifee, {AndroidImportance} from '@notifee/react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 
-// Request notification permissions (required for Android 13+)
+
 const requestNotificationPermission = async () => {
   try {
     if (Platform.OS === 'android') {
@@ -28,6 +26,8 @@ const requestNotificationPermission = async () => {
   }
 };
 
+requestNotificationPermission();
+
 // Verify notification permissions
 const verifyNotificationPermission = authStatus =>
   authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -38,13 +38,12 @@ export const getFCMToken = async () => {
   try {
     await messaging().setAutoInitEnabled(true);
     const registered = await messaging().registerDeviceForRemoteMessages();
-    console.log('=============registered=======================');
-    console.log(registered);
-    console.log('====================================');
     let token;
 
     if (Platform.OS === 'android') {
       token = await messaging().getToken();
+      console.log('token--------android------>>>>>>>>>>>>>>', token);
+      return token;
     } else {
       const authStatus = await messaging().hasPermission();
       if (verifyNotificationPermission(authStatus)) {
@@ -56,28 +55,60 @@ export const getFCMToken = async () => {
         }
       }
 
-      console.log('==============token======================');
-      console.log(token);
-      console.log('====================================');
+      console.log('token------------ios-->>>>>>>>>>>>>>', token);
       return token;
     }
   } catch (error) {
-    console.log('================error====================');
-    console.log(error);
-    console.log('====================================');
+    console.log('==============getFCMToken==error====================', error);
   }
 };
 
-// Display notification
-const onDisplayNotification = async message => {
+// 2. Notification Display Functions
+const setupNotificationChannels = async () => {
+  // iOS categories (for actions) - updated with more complete configuration
+  await notifee.setNotificationCategories([
+    {
+      id: 'call_actions',
+      actions: [
+        {
+          id: 'accept',
+          title: 'Accept',
+          foreground: true,
+          authenticationRequired: false,
+        },
+        {
+          id: 'reject',
+          title: 'Reject',
+          foreground: true,
+          destructive: true,
+          authenticationRequired: false,
+        },
+      ],
+    },
+  ]);
+};
+
+export const onDisplayNotification = async (message) => {
   try {
+    // console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
+
+
     const channelId = await notifee.createChannel({
       id: 'PathRover',
       name: 'PathRover',
       importance: AndroidImportance.HIGH,
+      sound: 'default',
+      // vibrationPattern: [0, 1000, 500, 1000],
+      vibration: true,
+      description: 'Channel for PathRover notifications',
     });
 
-    await notifee.displayNotification({
+    // Determine notification type from message data
+    const notificationType = 'call';
+    // const notificationType = message?.data?.type;
+
+    // Base notification configuration
+    const notificationConfig = {
       id: message?.messageId,
       title: message?.notification?.title,
       body: message?.notification?.body,
@@ -88,70 +119,239 @@ const onDisplayNotification = async message => {
         largeIcon: 'ic_launcher',
         pressAction: {
           id: 'default',
+          launchActivity: 'default',
         },
         importance: AndroidImportance.HIGH,
       },
-    });
+      ios: {
+        categoryId: 'call_actions',
+        sound: 'default',
+        foregroundPresentationOptions: {
+          badge: true,
+          sound: true,
+          banner: true,
+          list: true,
+        },
+      },
+    };
+
+    // Add actions based on notification type
+    switch (notificationType) {
+      case 'call':
+        await setupNotificationChannels();
+        notificationConfig.android.actions = [
+          {
+            title: 'Accept',
+            pressAction: {
+              id: 'accept',
+              launchActivity: 'default',
+            },
+          },
+          {
+            title: 'Reject',
+            pressAction: {
+              id: 'reject',
+              launchActivity: 'default',
+            },
+          },
+        ];
+        break;
+      default:
+        // No actions for default notifications
+        break;
+    }
+
+    await notifee.displayNotification(notificationConfig);
   } catch (error) {
     console.error('Error displaying notification:', error);
   }
 };
 
-// Notification listeners
-export const NotificationListener = listener => {
-  // Listener for when the app is in the background
-  messaging().onNotificationOpenedApp(async remoteMessage => {
-    console.log('App opened from background:', remoteMessage);
-    listener(remoteMessage, 1);
+// NotificationService.js
+// Display notification without auto-handling
+// export const onDisplayNotification = async (message) => {
+//   try {
+//     console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
+    
+//     await setupNotificationChannels();
+
+//     const channelId = await notifee.createChannel({
+//       id: 'PathRover',
+//       name: 'PathRover',
+//       importance: AndroidImportance.HIGH,
+//     });
+
+//     await notifee.displayNotification({
+//       id: message?.messageId,
+//       title: message?.notification?.title,
+//       body: message?.notification?.body,
+//       data: message?.data,
+//       android: {
+//         channelId,
+//         smallIcon: 'ic_launcher',
+//         largeIcon: 'ic_launcher',
+//         pressAction: {
+//           id: 'default',
+//           launchActivity: 'default',
+//         },
+//         importance: AndroidImportance.HIGH,
+//         actions: [
+//           {
+//             title: 'Accept',
+//             pressAction: {
+//               id: 'accept',
+//               launchActivity: 'default',
+//             },
+//           },
+//           {
+//             title: 'Reject',
+//             pressAction: {
+//               id: 'reject',
+//               launchActivity: 'default',
+//             },
+//           },
+//         ],
+//       },
+//       ios: {
+//         categoryId: 'call_actions',
+//         sound: 'default',
+//         foregroundPresentationOptions: {
+//           badge: true,
+//           sound: true,
+//           banner: true,
+//           list: true,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error displaying notification:', error);
+//   }
+// };
+
+// Handle notification actions separately
+export const setupActionHandlers = (navigation, updateCallStatus) => {
+  // Foreground actions
+  notifee.onForegroundEvent(({ type, detail }) => {
+    switch (type) {
+      case EventType.PRESS:
+        // Notification body pressed
+        handleNotificationPress(detail.notification, navigation);
+        break;
+      case EventType.ACTION_PRESS:
+        // Action button pressed
+        handleNotificationAction(detail.pressAction.id, detail.notification, navigation, updateCallStatus);
+        break;
+    }
   });
 
-  // Listener for when the app is in the foreground
-  messaging().onMessage(async remoteMessage => {
-    console.log('Foreground message received:', remoteMessage);
-    onDisplayNotification(remoteMessage);
+  // Background actions
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
+    if (type === EventType.ACTION_PRESS) {
+      handleNotificationAction(detail.pressAction.id, detail.notification, navigation, updateCallStatus);
+    }
   });
-
-  // Listener for when the app is in a quit state
-  messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('Background message received:', remoteMessage);
-    onDisplayNotification(remoteMessage);
-  });
-
-  // Listener for when the app is opened from a quit state
-  messaging()
-    .getInitialNotification()
-    .then(remoteMessage => {
-      if (remoteMessage) {
-        console.log('App opened from quit state:', remoteMessage);
-        listener(remoteMessage, 1);
-      }
-    })
-    .catch(err => {
-      console.error('Error getting initial notification:', err);
-    });
 };
 
-// Initialize notification permissions
-requestNotificationPermission();
-/**
- * Handle the click of a notification and navigate to the appropriate screen.
- */
-export const onNotifyPress = (notify, navigation) => {
-  const {data} = notify;
-  const {type} = data || {};
+const handleNotificationPress = (notification, navigation) => {
+  const { data } = notification;
+  // console.log('Notification pressed:', data);
 
-  switch (type) {
-    case 'call':
-      navigation.navigate('CallScreen', {
-        callerId: data.callerId,
-        channelName: data.channelName,
+  // Only handle if there's no specific action (regular tap)
+  // if (!data?.immediateAction) {
+  //   onNotifyPress(notification, navigation);
+  // }
+};
+
+const handleNotificationAction = (actionId, notification, navigation, updateCallStatus) => {
+  console.log('Action pressed:', actionId);
+  // console.log('Action notification:', notification);
+  const data = JSON.parse(notification?.data?.data) ?? {} 
+
+  // console.log('data------------------->>>>>>>>>>>>>>', data);
+  
+
+  switch (actionId) {
+    case 'accept':
+      data?.user_call_id && updateCallStatus('active', data?.user_call_id);
+      onNotifyPress(notification, navigation);
+      // console.log('in accept-------------------', data?.id);
+      break;
+    case 'reject':
+      data?.user_call_id && updateCallStatus('declined', data?.user_call_id);
+      // console.log('in reject-------------------', data?.id)
+      break;
+  }
+};
+
+// // Modified NotificationListener
+// export const NotificationListener = (navigation) => {
+//   // Setup action handlers first
+//   setupActionHandlers(navigation);
+
+//   // Firebase message handlers
+//   messaging().onNotificationOpenedApp(remoteMessage => {
+//     console.log('App opened from background:', remoteMessage);
+//     onNotifyPress(remoteMessage, navigation);
+//   });
+
+//   messaging().onMessage(async remoteMessage => {
+//     console.log('Foreground message received:', remoteMessage);
+//     // Only display, don't auto-handle
+//     onDisplayNotification(remoteMessage);
+//   });
+
+//   messaging().setBackgroundMessageHandler(async remoteMessage => {
+//     console.log('Background message received:', remoteMessage);
+//     onDisplayNotification(remoteMessage);
+//   });
+
+//   messaging()
+//     .getInitialNotification()
+//     .then(remoteMessage => {
+//       if (remoteMessage) {
+//         console.log('App opened from quit state:', remoteMessage);
+//         onNotifyPress(remoteMessage, navigation);
+//       }
+//     });
+// };
+
+// Keep your existing onNotifyPress
+export const onNotifyPress = (notify, navigation) => {
+  const { data } = notify;
+  const content = JSON.parse(data?.data) || {};
+  const { type, user_info, call_type, id, user_call_id } = content || {};
+  const { channelName } = user_info || {};
+
+  // console.log('Handling notification onNotifyPress:', user_call_id);
+  
+  // console.log('Handling notification data:', JSON.parse(data?.data));
+  // console.log('Handling notification call_type:', call_type);
+
+  switch (call_type) {
+    case 'audio_call':
+      navigation.navigate('VoiceCalling', {
+        user: user_info,
+        channel: channelName,
+        id: user_call_id ,
       });
+
+      console.log('navifatoihih--------audio_call---------------------------');
+      
+      break;
+    case 'video_call':
+      navigation.navigate('VideoCalling', {
+        user: user_info,
+        channel: channelName,
+        id: user_call_id,
+      });
+
+      console.log('navifatoihih--------audio_call---------------------------');
       break;
     case 'alerts':
-      navigation.navigate('AlertsScreen');
+      // navigation.navigate('AlertsScreen');
       break;
     case 'issue':
-      navigation.navigate('IssueScreen');
+      // navigation.navigate('IssueScreen');
       break;
     default:
       console.warn('Unhandled notification type:', type);
@@ -159,7 +359,186 @@ export const onNotifyPress = (notify, navigation) => {
   }
 };
 
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// // Request notification permissions (required for Android 13+)
+// const requestNotificationPermission = async () => {
+//   try {
+//     if (Platform.OS === 'android') {
+//       if (Platform.Version >= 33) {
+//         const result = await PermissionsAndroid.request(
+//           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+//         );
+//         return result === PermissionsAndroid.RESULTS.GRANTED;
+//       }
+//       return true; // No need for explicit permission request below API 33
+//     }
+
+//     const authStatus = await messaging().requestPermission();
+//     return (
+//       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+//       authStatus === messaging.AuthorizationStatus.PROVISIONAL
+//     );
+//   } catch (error) {
+//     console.error('Error requesting notification permissions', error);
+//     return false;
+//   }
+// };
+
+// // Verify notification permissions
+// const verifyNotificationPermission = authStatus =>
+//   authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+//   authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+// // Get FCM token
+// export const getFCMToken = async () => {
+//   try {
+//     await messaging().setAutoInitEnabled(true);
+//     const registered = await messaging().registerDeviceForRemoteMessages();
+//     let token;
+
+//     if (Platform.OS === 'android') {
+//       token = await messaging().getToken();
+//       console.log('token-------------->>>>>>>>>>>>>>', token);
+//       return token;
+//     } else {
+//       const authStatus = await messaging().hasPermission();
+//       if (verifyNotificationPermission(authStatus)) {
+//         token = await messaging().getToken();
+//       } else {
+//         const status = await messaging().requestPermission();
+//         if (verifyNotificationPermission(status)) {
+//           token = await getFCMToken(); // Retry to get the token
+//         }
+//       }
+
+//       console.log('token-------------->>>>>>>>>>>>>>', token);
+//       return token;
+//     }
+//   } catch (error) {
+//     console.log('================error====================');
+//     console.log(error);
+//     console.log('====================================');
+//   }
+// };
+
+// // Display notification
+// const onDisplayNotification = async message => {
+//   try {
+//     const channelId = await notifee.createChannel({
+//       id: 'PathRover',
+//       name: 'PathRover',
+//       importance: AndroidImportance.HIGH,
+//     });
+
+//     await notifee.displayNotification({
+//       id: message?.messageId,
+//       title: message?.notification?.title,
+//       body: message?.notification?.body,
+//       data: message?.data,
+//       android: {
+//         channelId,
+//         smallIcon: 'ic_launcher',
+//         largeIcon: 'ic_launcher',
+//         // pressAction: {
+//         //   id: 'default',
+//         // },
+//         importance: AndroidImportance.HIGH,
+//         actions: [
+//           {
+//             title: 'Accept',
+//             pressAction: {
+//               id: 'accept',
+//             },
+//           },
+//           {
+//             title: 'Reject',
+//             pressAction: {
+//               id: 'reject',
+//             },
+//           },
+//         ],
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error displaying notification:', error);
+//   }
+// };
+
+// // Notification listeners
+// export const NotificationListener = listener => {
+//   // Listener for when the app is in the background
+//   messaging().onNotificationOpenedApp(async remoteMessage => {
+//     console.log('App opened from background:', remoteMessage);
+//     listener(remoteMessage, 1);
+//   });
+
+//   // Listener for when the app is in the foreground
+//   messaging().onMessage(async remoteMessage => {
+//     console.log('Foreground message received:', remoteMessage);
+//     onDisplayNotification(remoteMessage);
+//   });
+
+//   // Listener for when the app is in a quit state
+//   messaging().setBackgroundMessageHandler(async remoteMessage => {
+//     console.log('Background message received:', remoteMessage);
+//     onDisplayNotification(remoteMessage);
+//   });
+
+//   // Listener for when the app is opened from a quit state
+//   messaging()
+//     .getInitialNotification()
+//     .then(remoteMessage => {
+//       if (remoteMessage) {
+//         console.log('App opened from quit state:', remoteMessage);
+//         listener(remoteMessage, 1);
+//       }
+//     })
+//     .catch(err => {
+//       console.error('Error getting initial notification:', err);
+//     });
+// };
+
+// // Initialize notification permissions
+// requestNotificationPermission();
+// /**
+//  * Handle the click of a notification and navigate to the appropriate screen.
+//  */
+// export const onNotifyPress = (notify, navigation) => {
+//   const {data} = notify;
+//   const {type} = data || {};
+
+//   console.log('====================================');
+//   console.log('notify', notify);
+//   console.log('data', data);
+//   console.log('type', type);
+//   console.log('====================================');
+
+//   switch (type) {
+//     case 'call':
+//       navigation.navigate('CallScreen', {
+//         callerId: data.callerId,
+//         channelName: data.channelName,
+//       });
+//       break;
+//     case 'alerts':
+//       navigation.navigate('AlertsScreen');
+//       break;
+//     case 'issue':
+//       navigation.navigate('IssueScreen');
+//       break;
+//     case 'incoming_call':
+//       console.log('incoming_call------------------------pressed');
+      
+//       // navigation.navigate('IssueScreen');
+//       break;
+//     default:
+//       console.warn('Unhandled notification type:', type);
+//       break;
+//   }
+// };
+
+// --------------------------------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // /**
 //  * Request notification permissions based on the platform.
 //  * Android requires POST_NOTIFICATIONS permission (API 33+), and iOS uses Firebase's requestPermission.
