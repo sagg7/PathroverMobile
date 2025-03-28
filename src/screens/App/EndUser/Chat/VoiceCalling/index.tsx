@@ -223,8 +223,9 @@ const VoiceCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    // console.log('item----------->>>>>>>>>>>>>>', item);
-    // leave();
+    if (item?.status === 'declined') {
+      leave();
+    }
   }
 
   const callInitiated = async (channelName: string) => {
