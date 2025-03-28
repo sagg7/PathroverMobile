@@ -54,6 +54,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    fcmTokenUpdate: builder.mutation({
+      query: data => ({
+        url: 'sessions/update_device_token',
+        method: 'POST',
+        body: data,
+      }),
+    }),
     logoutUser: builder.mutation({
       query: data => ({
         url: '/auth/logout',
@@ -82,4 +89,5 @@ export const {
   useResetPasswordMutation,
   useSwitchRoleMutation,
   useSociallLoginMutation,
+  useFcmTokenUpdateMutation,
 } = authApiSlice;
