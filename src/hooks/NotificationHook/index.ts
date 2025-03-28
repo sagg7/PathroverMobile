@@ -123,6 +123,8 @@ export const onDisplayNotification = async (message) => {
           launchActivity: 'default',
         },
         importance: AndroidImportance.HIGH,
+        ongoing: true,
+        loopSound: true,
       },
       ios: {
         categoryId: 'call_actions',
@@ -133,6 +135,8 @@ export const onDisplayNotification = async (message) => {
           banner: true,
           list: true,
         },
+        critical: true,
+        criticalVolume: 1.0,
       },
     };
 
