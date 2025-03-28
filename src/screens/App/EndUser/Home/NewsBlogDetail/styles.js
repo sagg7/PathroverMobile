@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
   imageStyle: {
     width: scrWidth,
     height: scrHeight / 2,
+    backgroundColor: PFColors.Gray.LightGray,
   },
   contentContainer: {
     flex: 1,

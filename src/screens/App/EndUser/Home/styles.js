@@ -42,6 +42,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 5,
+    backgroundColor: PFColors.Gray.LightMist,
   },
   imageStyle: {
     width: 124,
