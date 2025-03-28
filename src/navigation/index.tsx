@@ -1,4 +1,7 @@
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
@@ -74,11 +77,13 @@ import ViewSaveRoutesNavigation from '../screens/App/EndUser/ViewSaveRoutesNavig
 import SearchTrails from '../screens/App/EndUser/SearchTrails';
 import TrailDetails from '../screens/App/EndUser/TrailDetails';
 import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
+import ViewSharedRoutes from '../screens/App/EndUser/ViewSharedRoutes';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
+  const navigationRef = createNavigationContainerRef();
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         initialRouteName={Routes.Splash}
         screenOptions={{headerShown: false}}>
@@ -219,6 +224,10 @@ const AppNavigation = () => {
           component={SearchTrailResult}
         />
         <Stack.Screen name={Routes.TrailDetails} component={TrailDetails} />
+        <Stack.Screen
+          name={Routes.ViewSharedRoutes}
+          component={ViewSharedRoutes}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

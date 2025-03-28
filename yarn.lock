@@ -6355,6 +6355,7 @@ __metadata:
     react-native-render-html: ^6.3.4
     react-native-safe-area-context: ^5.1.0
     react-native-screens: ^3.34.0
+    react-native-share: ^12.0.9
     react-native-svg: ^15.6.0
     react-native-svg-transformer: ^1.5.0
     react-native-switch-toggle: ^2.2.1
@@ -13443,6 +13444,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 84d1e4697ab7afccf42111d13b7c7e68d382b136f4f4d9cd8fd077b0984ada3114e8c7459a69159983a538fe35db1cf4296075e72fc8cb45341e0feb5080d3dc
+  languageName: node
+  linkType: hard
+
+"react-native-share@npm:^12.0.9":
+  version: 12.0.9
+  resolution: "react-native-share@npm:12.0.9"
+  checksum: 837e7162d3e9b44bb225029d08abebc9b064c4dee54ebad5bbe017fba5c9f1be02451dd87d96f937d79bfe2b2e6424cb638ec469cdafb33b4a7d4ef069bfa60a
   languageName: node
   linkType: hard
 

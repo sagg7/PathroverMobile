@@ -334,6 +334,7 @@ const RouteToWell = ({route}: any) => {
             resetCompass();
           }}
           onPressPin={() => handlePinBtn()}
+          show={false}
         />
       )}
       {showRouteStartedSheet && (

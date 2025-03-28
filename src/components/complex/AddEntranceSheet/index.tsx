@@ -57,9 +57,9 @@ const AddEntranceSheet = ({
                 {selectedWellName?.name || selectedWellName?.well_name || ''}
               </Text>
             </View>
-            <TouchableOpacity onPress={onPressShare}>
+            {/* <TouchableOpacity onPress={onPressShare}>
               {svgIcon.ShareWellPath}
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           {selectedPin && (
             <View>

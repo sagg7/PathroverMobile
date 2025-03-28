@@ -70,6 +70,13 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+		<array>
+		<string>fb</string>
+		<string>instagram</string>
+		<string>twitter</string>
+		<string>tiktoksharesdk</string>
+		</array>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>PathRover requires photo library permission</string>
 	<key>NSCameraUsageDescription</key>

@@ -28,6 +28,7 @@ import {
   UNEXPECTED_ERROR,
   AppLoader,
   mapBoxToken,
+  CHAT_NON_VERIFIED_TEXT,
 } from '../../../../shared/exporter';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
@@ -42,6 +43,9 @@ import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice'
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import usePlaceName from '../../../../hooks/getPlaceName';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import SharedSheet from '../../../../components/complex/SharedSheet';
+import {useCreateShareLinkRouteMutation} from '../../../../redux/endUser/endUserApiSlice';
+import Share from 'react-native-share';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -96,6 +100,9 @@ const HikingScreen = ({route, navigation}: any) => {
 
   const [showTrailInfoSheet, setShowTrailInfoSheet] = useState<boolean>(false);
   const [routes, setRoute] = useState<any>([]);
+  const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
+  const [showTrailShareSheet, setShowTrailShareSheet] =
+    useState<boolean>(false);
 
   const {loginUser} = useSelector(state => state.auth);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -104,6 +111,8 @@ const HikingScreen = ({route, navigation}: any) => {
     direction: true,
     start: false,
   });
+  const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
+    useCreateShareLinkRouteMutation();
   // Get user location
   useEffect(() => {
     const fetchWeatherData = async () => {
@@ -390,8 +399,9 @@ const HikingScreen = ({route, navigation}: any) => {
     }
   };
 
-  const onPressShare = (routeData: any) => {
-    const trailPath = routeData?.geometry?.coordinates;
+  const onPressShare = () => {
+    setShowTrailShareSheet(false);
+    const routeData = trailInfo;
     const startingPoint = routeData?.geometry?.coordinates?.[0];
     const endingPoint = routeData?.geometry?.coordinates?.at(-1);
 
@@ -495,6 +505,79 @@ const HikingScreen = ({route, navigation}: any) => {
     // );
   };
 
+  const saveShareRouteLink = async (type: string) => {
+    let routeData = {};
+    if (type === 'well') {
+      routeData = {
+        user_route: {
+          name: placeName,
+          weight: '4',
+          route_type: 'waypoint_route',
+          notes: null,
+          is_road_route: null,
+          middle_location_points: [],
+          locations_attributes: [
+            {
+              latitude: pinLocationDetails?.latitude,
+              longitude: pinLocationDetails?.longitude,
+              name: 'test',
+            },
+          ],
+          pinned_points: [],
+        },
+      };
+    } else {
+      const trailPath = trailInfo?.geometry?.coordinates;
+      const trailInfoName = trailInfo?.properties?.tags;
+
+      const locationsAttributes =
+        trailPath?.length > 0
+          ? [
+              ...trailPath.map(([longitude, latitude], index) => ({
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
+                name: `Point ${index + 1}`,
+              })),
+            ]
+          : [];
+
+      routeData = {
+        user_route: {
+          name: trailInfoName?.name || 'UNKNOWN TRAIL/PATH',
+          notes: '',
+          route_type: 'hiking_trail_route',
+          is_chosen_trail: true,
+          color: PFColors.Blue.Dark,
+          weight: '4',
+          locations_attributes: locationsAttributes,
+        },
+      };
+    }
+
+    const resp = await createShareLinkRoute(routeData);
+    if (resp?.data) {
+      shareContent(resp?.data?.user_route);
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+  const shareContent = async selectedRoute => {
+    const options = {
+      // message: 'Shared location',
+      url: `https://staging.path-rover.com/download?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
+    };
+
+    try {
+      const res = await Share.open(options);
+      console.log(res);
+      setShowShareSheet(false);
+    } catch (err) {
+      if (err) {
+        console.log(err);
+      }
+    }
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <HeaderView
@@ -588,7 +671,6 @@ const HikingScreen = ({route, navigation}: any) => {
         }}>
         {svgIcon.SearchRoute}
       </TouchableOpacity>
-
       <View style={styles.actionBtnView}>
         <ActionBtn
           icon={appIcons.recordTrack}
@@ -622,7 +704,12 @@ const HikingScreen = ({route, navigation}: any) => {
         onPressSave={() => onPressSave()}
       />
       <TrailInfoSheet
-        onPressShare={onPressShare}
+        onPressShare={() => {
+          setShowTrailInfoSheet(false);
+          setTimeout(() => {
+            setShowTrailShareSheet(true);
+          }, 1500);
+        }}
         onPressPin={onPressPin}
         modalVisible={showTrailInfoSheet}
         trailInfo={trailInfo}
@@ -660,7 +747,6 @@ const HikingScreen = ({route, navigation}: any) => {
           }}
         />
       </GeneralModal>
-
       {/* Filter Modal */}
       <HikingFilter
         handleTrailTypeChange={(value: any) => {
@@ -678,11 +764,16 @@ const HikingScreen = ({route, navigation}: any) => {
           onPressSave={() => onPressWaypointSave()}
         />
       )}
-
       {showNavigationSheet && (
         <RouteToWellSheet
           routeLength={route?.length}
           onpressCancel={() => clearStates()}
+          onPressShare={() => {
+            setShowNavigationSheet(false);
+            setTimeout(() => {
+              setShowShareSheet(true);
+            }, 1000);
+          }}
           routeName={placeName}
           distanceInfo={results}
           actionBtn={actionBtn}
@@ -700,15 +791,25 @@ const HikingScreen = ({route, navigation}: any) => {
           }}
           onPressStart={() => {
             setShowNavigationSheet(false);
-            // navigation.navigate(Routes.ViewWellPathNavigation, {
-            //   entranceCoords: searchLocation,
-            //   entranceName: searchLocationName,
-            // });
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: pinLocationMarker,
+              entranceName: placeName,
+            });
           }}
-          // onPressPin={() => handlePinBtn()}
-          // show={false}
         />
       )}
+      <SharedSheet
+        modalVisible={showShareSheet}
+        onPressOther={() => saveShareRouteLink('well')}
+        // onPressShare={() => shareWellwithinApp()}
+        setModalVisible={() => setShowShareSheet(false)}
+      />
+      <SharedSheet
+        modalVisible={showTrailShareSheet}
+        onPressOther={() => saveShareRouteLink('trail_route')}
+        onPressShare={() => onPressShare()}
+        setModalVisible={() => setShowTrailShareSheet(false)}
+      />
 
       {isLoading && <AppLoader />}
     </MainWrapper>

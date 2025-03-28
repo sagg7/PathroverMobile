@@ -24,6 +24,8 @@ import {
 } from '../../../../shared/exporter';
 import styles from './styles';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import SharedSheet from '../../../../components/complex/SharedSheet';
+import Share from 'react-native-share';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -34,7 +36,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const [modalType, setModalType] = useState<'menu' | 'edit' | 'delete' | null>(
     null,
   );
-
+  const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
   const queryParams = {route_type: item?.type};
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
@@ -162,6 +164,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   };
 
   const handleShareOption = (routeData: any) => {
+    setShowShareSheet(false);
+
     if (routeData?.is_chosen_trail) {
       const trailPath = routeData?.middle_location_points;
       const startingPoint = trailPath?.[0];
@@ -218,6 +222,22 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     }
   };
 
+  const shareContent = async () => {
+    const options = {
+      // message: 'Shared location',
+      url: `https://staging.path-rover.com/download?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
+    };
+
+    try {
+      const res = await Share.open(options);
+      console.log(res);
+    } catch (err) {
+      if (err) {
+        console.log(err);
+      }
+    }
+  };
+
   return (
     <MainWrapper>
       <AppHeader title={item?.title} />
@@ -242,7 +262,13 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         onClose={() => handleModal(null, null)}>
         <TouchableOpacity
           style={styles.menuOption}
-          onPress={() => handleShareOption(selectedRoute)}>
+          // onPress={() => handleShareOption(selectedRoute)}
+          onPress={() => {
+            setModalType(null);
+            setTimeout(() => {
+              setShowShareSheet(true);
+            }, 1000);
+          }}>
           {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}
           {svgIcon.Share}
           <Text style={styles.menuOptionText}>Share</Text>
@@ -285,6 +311,13 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           />
         </View>
       </GeneralModal>
+      <SharedSheet
+        modalVisible={showShareSheet}
+        onPressOther={() => shareContent()}
+        onPressShare={() => handleShareOption(selectedRoute)}
+        setModalVisible={() => setShowShareSheet(false)}
+      />
+
       <RBSheet
         ref={refScrollable}
         customModalProps={{
