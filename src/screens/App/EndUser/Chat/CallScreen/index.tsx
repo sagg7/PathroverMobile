@@ -74,7 +74,7 @@ const CallScreen = ({
         </TouchableOpacity> */}
         <View style={styles.userConatiner}>
           <Text style={styles.callerNameTextStyle}>
-            {user?.first_name ?? 'User'} {user?.last_name ?? ''}
+            {user?.callerName || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'User'}
           </Text>
             <Text style={styles.callTime}>{timer}</Text>
         </View>

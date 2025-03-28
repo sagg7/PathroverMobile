@@ -1,5 +1,5 @@
 import {Text, View} from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './styles';
 import {
   AppButton,
@@ -29,6 +29,7 @@ import {useLoginMutation} from '../../../redux/auth/authApiSlice';
 import {useDispatch} from 'react-redux';
 import {setLoginUser} from '../../../redux/auth/authSlice';
 import {setUserRole} from '../../../redux/auth/appRoleSlice';
+import { getFCMToken } from '../../../hooks/NotificationHook';
 
 const LoginScreen = ({}) => {
   const keyboardVisible = useKeyboardListener();
@@ -36,7 +37,18 @@ const LoginScreen = ({}) => {
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
-  const {isEmail} = route?.params;
+  const { isEmail } = route?.params;
+  const [FCMToken, setFCMToken] = useState(null);  
+  
+  useEffect(() => {
+      (async () => {
+        const token = await getFCMToken();
+        if (token) {
+          setFCMToken(token);
+          // createNotifyChannel();
+        }
+      })();
+    }, [navigation]);
 
   const handleContinueBtn = async (val: any) => {
     const {email, phone, password} = val;
@@ -46,6 +58,7 @@ const LoginScreen = ({}) => {
         ...(phone && {phone_number: removeNonNumbers(phone)}),
         password: password,
       },
+      device_token: FCMToken,
     };
 
     const resp = await login(obj);
