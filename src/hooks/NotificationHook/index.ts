@@ -90,7 +90,7 @@ const setupNotificationChannels = async () => {
 
 export const onDisplayNotification = async (message) => {
   try {
-    // console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
+    console.log('message----onDisplayNotification--------------->>>>>>>>>>>>>>', message);
 
 
     const channelId = await notifee.createChannel({
@@ -104,7 +104,10 @@ export const onDisplayNotification = async (message) => {
     });
 
     // Determine notification type from message data
-    const notificationType = 'call';
+    const notificationType = JSON.parse(message?.data?.data)?.call_type;
+
+    console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
+    
     // const notificationType = message?.data?.type;
 
     // Base notification configuration
@@ -137,7 +140,26 @@ export const onDisplayNotification = async (message) => {
 
     // Add actions based on notification type
     switch (notificationType) {
-      case 'call':
+      case 'audio_call':
+        await setupNotificationChannels();
+        notificationConfig.android.actions = [
+          {
+            title: 'Accept',
+            pressAction: {
+              id: 'accept',
+              launchActivity: 'default',
+            },
+          },
+          {
+            title: 'Reject',
+            pressAction: {
+              id: 'reject',
+              launchActivity: 'default',
+            },
+          },
+        ];
+        break;
+      case 'video_call':
         await setupNotificationChannels();
         notificationConfig.android.actions = [
           {
@@ -161,11 +183,73 @@ export const onDisplayNotification = async (message) => {
         break;
     }
 
+    await clearAllCallNotifications()
     await notifee.displayNotification(notificationConfig);
+    
   } catch (error) {
     console.error('Error displaying notification:', error);
   }
 };
+
+export async function clearAllCallNotifications() {
+  try {
+    console.log('[clearAllCallNotifications] Starting...');
+
+    // Get all displayed notifications
+    const notifications = await notifee.getDisplayedNotifications();
+    console.log('[clearAllCallNotifications] Raw notifications:', JSON.stringify(notifications, null, 2));
+
+    if (!notifications.length) {
+      console.log('[clearAllCallNotifications] No notifications found');
+      return;
+    }
+
+    // Filter call notifications
+    const callNotifications = notifications.filter(notification => {
+      try {
+        // Skip if no notification data
+        if (!notification?.notification?.data) {
+          return false;
+        }
+
+        // Data is already an object - no need to parse
+        const notificationData = notification.notification.data;
+        console.log('[clearAllCallNotifications] Notification data:', notificationData);
+
+        // Check if this is a call notification (audio or video)
+        const isCallNotification =
+          notificationData?.call_type === 'audio_call' ||
+          notificationData?.call_type === 'video_call' ||
+          notification.notification.title === 'Incoming Call'; // Additional safety check
+
+        console.log(`[clearAllCallNotifications] Notification ${notification.notification.id} is call:`, isCallNotification);
+        return isCallNotification;
+      } catch (e) {
+        console.error('[clearAllCallNotifications] Error processing notification:', e);
+        return false;
+      }
+    });
+
+    console.log('[clearAllCallNotifications] Call notifications to remove:',
+      callNotifications.map(n => n.notification.id));
+
+    if (!callNotifications.length) {
+      console.log('[clearAllCallNotifications] No call notifications found to clear');
+      return;
+    }
+
+    // Cancel all call notifications at once
+    await Promise.all(
+      callNotifications.map(notification =>
+        notifee.cancelNotification(notification.notification.id)
+      ));
+
+    console.log(`[clearAllCallNotifications] Cleared ${callNotifications.length} call notifications`);
+  } catch (error) {
+    console.error('[clearAllCallNotifications] Error:', error);
+  }
+}
+
 
 // NotificationService.js
 // Display notification without auto-handling
@@ -346,6 +430,9 @@ export const onNotifyPress = (notify, navigation) => {
       });
 
       console.log('navifatoihih--------audio_call---------------------------');
+      break;
+    case 'missed_call':
+      clearCallNotifications()
       break;
     case 'alerts':
       // navigation.navigate('AlertsScreen');
