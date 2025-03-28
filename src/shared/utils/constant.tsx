@@ -11,13 +11,17 @@ export function showAlert(type: string, des: string, onPress?: () => void) {
 }
 
 export const isProduction = false;
-export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'ws://bedbug-trusting-starling.ngrok-free.app/cable?';
+export const REQ_LIST_SOCKET_URL = 'wss://staging.path-rover.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
 // export const REQ_LIST_SOCKET_URL =
 //   'wss://nice-mink-thankfully.ngrok-free.app/cable?';
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
-export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+// export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
+// export const BASE_URL = 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
 // export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
 
 export const DOMAIN_BASE_URL = 'https://staging.pathfinder-app.com/';
