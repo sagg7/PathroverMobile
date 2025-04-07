@@ -1,6 +1,6 @@
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {Image, Platform, Text, TouchableOpacity, View} from 'react-native';
+import {Image, Keyboard, Platform, Text, TouchableOpacity, View} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {useSelector} from 'react-redux';
 import {appIcons} from '../../../../../assets/icons';
@@ -134,6 +134,7 @@ const ChatDetail = () => {
 
   useEffect(() => {
     (async () => {
+      Keyboard.dismiss();
       if (isFocused) {
         await getChatMessage(params?.item?.id);
       }
@@ -198,7 +199,10 @@ const ChatDetail = () => {
   return (
     <MainWrapper>
       <Header
-        onPressBack={() => navigation.navigate('Chat')}
+        onPressBack={() => {
+          Keyboard.dismiss();
+          navigation.navigate('Chat')
+        }}
         title={params?.item || 'Group Chat'}
         onPressPhone={() => {
           console.log(params?.item?.user);
