@@ -102,7 +102,7 @@ export const onDisplayNotification = async (message) => {
     });
 
     // Determine notification type from message data
-    const notificationType = JSON.parse(message?.data?.data)?.call_type;
+    const notificationType = message?.notification?.title === 'Missed Call' ? 'Missed Call' :  JSON.parse(message?.data?.data)?.call_type;
 
     // console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
     
@@ -123,8 +123,9 @@ export const onDisplayNotification = async (message) => {
           launchActivity: 'default',
         },
         importance: AndroidImportance.HIGH,
-        ongoing: true,
-        loopSound: true,
+        ongoing: message?.notification?.title === 'Missed Call' ? false: true,
+        loopSound: message?.notification?.title === 'Missed Call' ? false : true,
+        // loopSound: message?.data?.type === 'ringing',
       },
       ios: {
         categoryId: 'call_actions',
@@ -141,6 +142,8 @@ export const onDisplayNotification = async (message) => {
     };
 
     // Add actions based on notification type
+    // console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
+    
     switch (notificationType) {
       case 'audio_call':
         await setupNotificationChannels();
