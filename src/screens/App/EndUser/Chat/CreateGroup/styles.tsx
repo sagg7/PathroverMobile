@@ -48,6 +48,9 @@ const styles = StyleSheet.create({
     borderColor: PFColors.Blue.Dark,
     textAlignVertical: 'center',
     paddingVertical: 6,
+    color: PFColors.Standard.Black,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    fontFamily: PFFonts.Foundation.Regular,
   },
   buttonStyle: isOpen => ({
     width: '92%',

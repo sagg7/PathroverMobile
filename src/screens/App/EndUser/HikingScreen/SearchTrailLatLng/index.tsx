@@ -47,9 +47,11 @@ const SearchTrailLatLng = () => {
   const {location} = useLocation();
   const navigation = useNavigation<any>();
   const mapCameraRef = useRef();
-  const {endingPoint, startingPoint, routeData} = useSelector(
+  const {endingPoint, startingPoint, routeData, routeType} = useSelector(
     (state: any) => state?.endUser?.trailRoute,
   );
+  console.log('TYPE HERE', routeData);
+
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [results, setResults] = useState<null>(null);
   const [routeToStartPoint, setRouteToStartPoint] = useState<any>([]);
@@ -384,7 +386,7 @@ const SearchTrailLatLng = () => {
         shareTrail: {
           startingPoint,
           endingPoint,
-          type: routeData?.route_type || 'trail',
+          type: routeType ? routeType : 'trail',
         },
       });
     } else {

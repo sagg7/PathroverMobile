@@ -74,27 +74,32 @@ const VoiceCalling = () => {
   useEffect(() => {
     const handleSubscribe = async () => {
       try {
+        // console.log('data---------outside-->>>>>>>>>>>>>>', controls.call_data);
         if (controls.call_data?.call_log?.id) {
-          // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
+          console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
           // console.log('params----------->>>>>>>>>>>>>>',params);
           subscribe(
             {
               channel: 'CallChannel',
-              user_call_id: params?.channel?  params?.id: controls.call_data?.call_log?.id,
+              user_call_id: params?.channel ? params?.id : controls.call_data?.call_log?.id,
               // channel_key: controls.call_data?.call_log?.id,
-              channel_key: `call_channel_${params?.channel ?  params?.id:controls.call_data?.call_log?.id}`,
+              channel_key: `call_channel_${params?.channel ? params?.id : controls.call_data?.call_log?.id}`,
             },
             {
               received: res => {
 
-                // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
+                console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
 
                 checkCallStatus(res);
               },
               connected: () => {
-                // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
+                console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                 // setIsConnected(true);
               },
+              rejected: () => {
+                console.log('rejected-------call---->>>>>>>>>>>>>>');
+                // setIsConnected(false);
+              }
             },
           );
         }
@@ -148,13 +153,17 @@ const VoiceCalling = () => {
           // console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          leave();
+          agoraEngineRef.current?.leaveChannel();
+
+          setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
+          navigation.goBack();
+          // leave();
         }
-        // }, 10000); 
-      }, 65000);
+      }, 120000);
+      //TODO: UNCOMMENT THIS CODE FOR PRODUCTION
+      // }, 65000);
       // }, 60000);
     }
-
   }, [controls.isJoined, controls.call_data]);
 
   useEffect(() => {
@@ -223,8 +232,9 @@ const VoiceCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    // console.log('item----------->>>>>>>>>>>>>>', item);
-    // leave();
+    if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended') {
+      leave();
+    }
   }
 
   const callInitiated = async (channelName: string) => {
@@ -245,10 +255,10 @@ const VoiceCalling = () => {
         setControls(prev => ({ ...prev, call_data: res?.data }));
       }
 
-      // console.log('call res----------->>>>>>>>>>>>>>', data);
+      console.log('call res----------->>>>>>>>>>>>>>', data);
     } catch (error) {
       setControls(prev => ({ ...prev, call_data: {} }));
-      // console.log('call error----------->>>>>>>>>>>>>>', error);
+      console.log('call error----------->>>>>>>>>>>>>>', error);
     }
   };
 
@@ -256,14 +266,18 @@ const VoiceCalling = () => {
     // console.log('controls.call_data', controls.call_data);
 
     try {
-      const obj = {
-        status: status ?? 'ended',
-        id: params?.channel?  params?.id: data?.call_log?.id ?? controls?.call_data?.call_log?.id,
-      };
+      const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
+      if (check) {
+        const obj = {
+          status: status ?? 'ended',
+          id: params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id,
+          receiver_id: params?.user?.id,
+        };
 
-      // console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
+        console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
 
-      await updateCall(obj);
+        await updateCall(obj);
+      }
     } catch (error) {
       //
     }
