@@ -33,7 +33,7 @@ const ChatGroup = () => {
   const {loginUser, accessToken} = useSelector((state: any) => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const {subscribe, unsubscribe} = useChannel(actionCable);
+  const { subscribe, unsubscribe } = useChannel(actionCable);  
 
   useEffect(() => {
     try {
@@ -44,10 +44,15 @@ const ChatGroup = () => {
         },
         {
           received: res => {
+            // console.log('ChatCountsChannel res', res);
+            
             dispatch(setChatCount(res));
             getGroupChats({});
           },
-          connected: () => {},
+          connected: () => {
+            // console.log('connected----------ChatCountsChannel-------------->>>');g
+            
+          },
         },
       );
     } catch (err) {
@@ -76,11 +81,13 @@ const ChatGroup = () => {
   useEffect(() => {
     if (data) {
       setChats(prevChats => {
-        if (prevChats.length === 0) return data;
-        const chatMap = new Map(prevChats.map(chat => [chat.id, chat]));
-        data.forEach((chat: any) => chatMap.set(chat.id, chat));
+        if (prevChats?.length === 0) return data ?? [];
+        const chatMap = new Map(prevChats?.map(chat => [chat?.id, chat]));
+        data?.forEach((chat: any) => chatMap?.set(chat?.id, chat));
         return Array.from(chatMap.values());
       });
+    } else {
+      setChats([]);
     }
   }, [data]);
 
@@ -107,6 +114,8 @@ const ChatGroup = () => {
   const onPressDelete = async (item: any) => {
     try {
       const res = await deleteGroup(item.id);
+      console.log(res, 'deleteGroup');
+      
       if (res?.data) {
         await getGroupChats({});
       }
