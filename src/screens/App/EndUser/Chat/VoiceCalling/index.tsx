@@ -76,7 +76,7 @@ const VoiceCalling = () => {
       try {
         // console.log('data---------outside-->>>>>>>>>>>>>>', controls.call_data);
         if (controls.call_data?.call_log?.id) {
-          console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
+          // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
           // console.log('params----------->>>>>>>>>>>>>>',params);
           subscribe(
             {
@@ -88,16 +88,16 @@ const VoiceCalling = () => {
             {
               received: res => {
 
-                console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
+                // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
 
                 checkCallStatus(res);
               },
               connected: () => {
-                console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
+                // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                 // setIsConnected(true);
               },
               rejected: () => {
-                console.log('rejected-------call---->>>>>>>>>>>>>>');
+                // console.log('rejected-------call---->>>>>>>>>>>>>>');
                 // setIsConnected(false);
               }
             },
@@ -159,9 +159,7 @@ const VoiceCalling = () => {
           navigation.goBack();
           // leave();
         }
-      }, 120000);
-      //TODO: UNCOMMENT THIS CODE FOR PRODUCTION
-      // }, 65000);
+      }, 65000);
       // }, 60000);
     }
   }, [controls.isJoined, controls.call_data]);
@@ -255,10 +253,10 @@ const VoiceCalling = () => {
         setControls(prev => ({ ...prev, call_data: res?.data }));
       }
 
-      console.log('call res----------->>>>>>>>>>>>>>', data);
+      // console.log('call res----------->>>>>>>>>>>>>>', data);
     } catch (error) {
       setControls(prev => ({ ...prev, call_data: {} }));
-      console.log('call error----------->>>>>>>>>>>>>>', error);
+      // console.log('call error----------->>>>>>>>>>>>>>', error);
     }
   };
 
@@ -270,11 +268,11 @@ const VoiceCalling = () => {
       if (check) {
         const obj = {
           status: status ?? 'ended',
-          id: params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id,
+          id: check,
           receiver_id: params?.user?.id,
         };
 
-        console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
+        // console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
 
         await updateCall(obj);
       }

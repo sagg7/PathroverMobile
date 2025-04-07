@@ -256,12 +256,18 @@ const VideoCalling = () => {
           // console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          controls.engine.leaveChannel();
+          controls?.engine?.leaveChannel();
+          setControls(prev => ({
+            ...prev,
+            joinChannelSuccess: false,
+            remoteUsers: [],
+          }));
+          navigation.goBack();
           // leave();
         }
         // }, 10000); 
-      }, 5000);
-      // }, 60000);
+        // }, 5000);
+      }, 60000);
     }
 
   }, [controls.joinChannelSuccess, controls.call_data]);
@@ -365,12 +371,16 @@ const VideoCalling = () => {
 
   const updateCallStatus = async (status) => {
     try {
-      const obj = {
-        status: status ?? 'ended',
-        id: params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id,
-      };
+      const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
+      if (check) {
+        const obj = {
+          status: status ?? 'ended',
+          id: check,
+          receiver_id: params?.user?.id,
+        };
 
-      await updateCall(obj);
+        await updateCall(obj);
+      }
     } catch (error) {
       //
     }
@@ -378,14 +388,13 @@ const VideoCalling = () => {
 
   const checkCallStatus = async (item) => {
     try {
-      console.log('checkCallStatus--------->>>>>>>>>>>>>>', item);
+      // console.log('checkCallStatus--------->>>>>>>>>>>>>>', item);
 
-      if (item?.status === 'declined') {
+      if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended') {
         controls.engine.leaveChannel();
       }
     } catch (error) {
-      console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);
-
+      // console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);
     }
   }
 
