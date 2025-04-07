@@ -29,6 +29,8 @@ import {
   AppLoader,
   mapBoxToken,
   CHAT_NON_VERIFIED_TEXT,
+  HP,
+  WP,
 } from '../../../../shared/exporter';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
@@ -42,10 +44,11 @@ import useLocation from '../../../../hooks/getLocation';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import usePlaceName from '../../../../hooks/getPlaceName';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {getTimeAndDistance, isIOS} from '../../../../shared/utils/helpers';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import {useCreateShareLinkRouteMutation} from '../../../../redux/endUser/endUserApiSlice';
 import Share from 'react-native-share';
+import RBSheet from 'react-native-raw-bottom-sheet';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -111,6 +114,8 @@ const HikingScreen = ({route, navigation}: any) => {
     direction: true,
     start: false,
   });
+  const pinLocationSheet = useRef<any>(null);
+
   const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
     useCreateShareLinkRouteMutation();
   // Get user location
@@ -402,6 +407,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const onPressShare = () => {
     setShowTrailShareSheet(false);
     const routeData = trailInfo;
+    console.log('==?routeData', routeData);
     const startingPoint = routeData?.geometry?.coordinates?.[0];
     const endingPoint = routeData?.geometry?.coordinates?.at(-1);
 
@@ -494,6 +500,7 @@ const HikingScreen = ({route, navigation}: any) => {
     });
     setShowPinLocationSheet(false);
     setShowNavigationSheet(false);
+    pinLocationSheet.current.close();
   };
 
   const fitToBounds = () => {
@@ -756,14 +763,37 @@ const HikingScreen = ({route, navigation}: any) => {
         showFilterSheet={showFilterSheet}
         setShowFilterSheet={setShowFilterSheet}
       />
-      {showPinLocationSheet && (
+      {/* {showPinLocationSheet && (
         <PinYourLocationSheet
           values={pinLocationDetails}
           onPressCancel={() => setShowPinLocationSheet(false)}
           setValues={setPinLocationDetails}
           onPressSave={() => onPressWaypointSave()}
         />
-      )}
+      )} */}
+
+      <RBSheet
+        ref={pinLocationSheet}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customStyles={{
+          container: {
+            height: isIOS() ? HP('43') : HP('50'),
+            borderTopLeftRadius: WP('3'),
+            borderTopRightRadius: WP('3'),
+          },
+        }}>
+        <PinYourLocationSheet
+          values={pinLocationDetails}
+          // onPressCancel={() => setShowPinLocationSheet(false)}
+          onPressCancel={() => pinLocationSheet?.current?.close()}
+          setValues={setPinLocationDetails}
+          onPressSave={() => onPressWaypointSave()}
+        />
+      </RBSheet>
+
       {showNavigationSheet && (
         <RouteToWellSheet
           routeLength={route?.length}
@@ -786,7 +816,7 @@ const HikingScreen = ({route, navigation}: any) => {
           onPressPin={() => {
             setShowNavigationSheet(false);
             setTimeout(() => {
-              setShowPinLocationSheet(true);
+              pinLocationSheet?.current?.open();
             }, 500);
           }}
           onPressStart={() => {
@@ -801,7 +831,16 @@ const HikingScreen = ({route, navigation}: any) => {
       <SharedSheet
         modalVisible={showShareSheet}
         onPressOther={() => saveShareRouteLink('well')}
-        // onPressShare={() => shareWellwithinApp()}
+        onPressShare={() => {
+          navigation.navigate(Routes.ChatUsers, {
+            shareTrail: {
+              startingPoint: [],
+              endingPoint: pinLocationMarker,
+              type: 'Pin Point',
+              // data: [],
+            },
+          });
+        }}
         setModalVisible={() => setShowShareSheet(false)}
       />
       <SharedSheet

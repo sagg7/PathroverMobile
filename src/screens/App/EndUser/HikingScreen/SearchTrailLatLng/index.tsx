@@ -93,10 +93,10 @@ const SearchTrailLatLng = () => {
       const response = await fetch(url);
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
+
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };
@@ -381,7 +381,11 @@ const SearchTrailLatLng = () => {
   const onPressShare = () => {
     if (loginUser?.verified) {
       navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {startingPoint, endingPoint, type: 'trail'},
+        shareTrail: {
+          startingPoint,
+          endingPoint,
+          type: routeData?.route_type || 'trail',
+        },
       });
     } else {
       showAlert('Alert', CHAT_NON_VERIFIED_TEXT);

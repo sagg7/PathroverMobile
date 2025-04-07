@@ -116,14 +116,18 @@ const AppStack = () => {
       if (
         routeType === 'hiking_waypoint' ||
         routeType === 'waypoint_route' ||
-        'maps_location_pins'
+        routeType === 'maps_location_pins'
       ) {
+        console.log('IT WORKED 55');
+
         navigation.navigate(Routes.ViewWellPathNavigation, {
           entranceCoords: [],
           routeId: routeId,
           entranceName: '',
         });
       } else {
+        console.log('IT WORKED 66');
+
         navigation.navigate(Routes.ViewSharedRoutes, {routeType, routeId});
       }
     }

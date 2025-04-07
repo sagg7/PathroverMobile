@@ -11,7 +11,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:staging.path-rover.com</string>
-		<string>applinks:path-rover.com</string>
 	</array>
 </dict>
 </plist>
