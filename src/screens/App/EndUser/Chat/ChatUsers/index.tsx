@@ -27,6 +27,7 @@ import {
 import {WP} from '../../../../../shared/exporter';
 import styles from './styles';
 import RenderEmptyUser from '../RenderEmptyUser';
+import {DOMAIN_BASE_URL} from '../../../../../shared/utils/constant';
 
 const ChatUsers = () => {
   const {params} = useRoute<any>();
@@ -143,11 +144,15 @@ const ChatUsers = () => {
       phone_number?.startsWith('+') || phone_number?.startsWith('0')
         ? phone_number
         : `+1${phone_number}`;
+
     let url = `sms:${normalizePhoneNumber(phoneNumber)}`;
     const separator = Platform.OS === 'ios' ? '&' : '?';
-    url += `${separator}body=${encodeURIComponent(
-      `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free`,
-    )}`;
+
+    const appLink = DOMAIN_BASE_URL + 'download';
+
+    const message = `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free. Download it here: ${appLink}`;
+
+    url += `${separator}body=${encodeURIComponent(message)}`;
     console.log(' inviteUser ~ url==>', url);
 
     Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));

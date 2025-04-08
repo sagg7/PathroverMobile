@@ -102,7 +102,6 @@ const VerifyNumber = () => {
       setTimer(59);
       setIsResendDisabled(true);
       const res = await addPhoneNumber(params);
-      console.log('res', res?.data);
 
       Alert.alert(
         'OTP',

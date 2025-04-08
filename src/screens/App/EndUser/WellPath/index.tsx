@@ -614,7 +614,6 @@ const WellPath = () => {
 
   const shareContent = async selectedRoute => {
     const options = {
-      // message: 'Shared location',
       url: `https://staging.path-rover.com/download?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
     };
 
@@ -718,7 +717,7 @@ const WellPath = () => {
 
   const onPressWithinappAddEntrance = () => {
     setShowShareWellSheet(false);
-
+    setShowPlaceEntrance(false);
     if (loginUser?.verified) {
       selectedWell.map(Number);
       const formatedArr = selectedWell.map(Number);
@@ -781,12 +780,6 @@ const WellPath = () => {
           requestsAlwaysUse
           visible={true}
         />
-
-        {/* {currentLocation && (
-          <MapboxGL.MarkerView coordinate={currentLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )} */}
 
         {selectedSearchedWell?.log && (
           <MapboxGL.MarkerView
@@ -948,21 +941,6 @@ const WellPath = () => {
           setTimeout(() => {
             setShowShareWellSheet(true);
           }, 1000);
-          return;
-          if (loginUser?.verified) {
-            setShowPinAddress(false);
-            selectedWell.map(Number);
-            const formatedArr = selectedWell.map(Number);
-            navigation.navigate(Routes.ChatUsers, {
-              shareTrail: {
-                startingPoint: [],
-                endingPoint: formatedArr,
-                type: 'Well route',
-              },
-            });
-          } else {
-            showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
-          }
         }}
         modalVisible={showPinAddress}
         selectedPin={selectedWell || ['', '']}
@@ -1014,18 +992,15 @@ const WellPath = () => {
           onpressCancel={() => {
             setRoute([]);
             setShowRouteActionSheet(false);
-            // cameraRef.current.flyTo(currentLocation, 1000);
           }}
           routeName={searchLocationName}
           distanceInfo={results}
           actionBtn={actionBtn}
           onPressDirection={() => {
-            // getRoute();
             setActionBtn({
               ...actionBtn,
               direction: true,
             });
-            // centerMap();
           }}
           onPressStart={() => {
             setShowRouteActionSheet(false);
@@ -1034,18 +1009,9 @@ const WellPath = () => {
               entranceName: searchLocationName,
             });
           }}
-          // onPressPin={() => handlePinBtn()}
           show={false}
         />
       )}
-      {/* {showPinLocationSheet && (
-        <PinYourLocationSheet
-          values={pinLocationDetails}
-          onPressCancel={() => setShowPinLocationSheet(false)}
-          setValues={setPinLocationDetails}
-          onPressSave={() => onPressWaypointSave()}
-        />
-      )} */}
 
       <RBSheet
         ref={pinMapLocation}
@@ -1102,7 +1068,6 @@ const WellPath = () => {
       <SharedSheet
         modalVisible={showShareSheet}
         onPressOther={() => saveShareRouteLink('way_point')}
-        // onPressShare={() => {}}
         onPressShare={() => {
           setShowShareSheet(false);
           navigation.navigate(Routes.ChatUsers, {
@@ -1110,7 +1075,6 @@ const WellPath = () => {
               startingPoint: [],
               endingPoint: pinLocationMarker,
               type: 'Pin Point',
-              // data: [],
             },
           });
         }}

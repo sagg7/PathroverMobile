@@ -8,7 +8,6 @@ import styles from './styles';
 
 const NewsBlogDetail = ({route}: any) => {
   const item = route.params?.item;
-  console.log('item', item);
 
   return (
     <MainWrapper>

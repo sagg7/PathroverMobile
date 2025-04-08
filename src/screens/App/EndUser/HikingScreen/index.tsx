@@ -407,7 +407,6 @@ const HikingScreen = ({route, navigation}: any) => {
   const onPressShare = () => {
     setShowTrailShareSheet(false);
     const routeData = trailInfo;
-    console.log('==?routeData', routeData);
     const startingPoint = routeData?.geometry?.coordinates?.[0];
     const endingPoint = routeData?.geometry?.coordinates?.at(-1);
 
@@ -800,6 +799,7 @@ const HikingScreen = ({route, navigation}: any) => {
           onpressCancel={() => clearStates()}
           onPressShare={() => {
             setShowNavigationSheet(false);
+
             setTimeout(() => {
               setShowShareSheet(true);
             }, 1000);
@@ -832,14 +832,17 @@ const HikingScreen = ({route, navigation}: any) => {
         modalVisible={showShareSheet}
         onPressOther={() => saveShareRouteLink('well')}
         onPressShare={() => {
-          navigation.navigate(Routes.ChatUsers, {
-            shareTrail: {
-              startingPoint: [],
-              endingPoint: pinLocationMarker,
-              type: 'Pin Point',
-              // data: [],
-            },
-          });
+          setShowNavigationSheet(false);
+          setTimeout(() => {
+            navigation.navigate(Routes.ChatUsers, {
+              shareTrail: {
+                startingPoint: [],
+                endingPoint: pinLocationMarker,
+                type: 'Pin Point',
+                // data: [],
+              },
+            });
+          }, 1000);
         }}
         setModalVisible={() => setShowShareSheet(false)}
       />
