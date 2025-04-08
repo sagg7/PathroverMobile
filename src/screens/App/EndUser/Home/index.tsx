@@ -11,7 +11,13 @@ import moment from 'moment';
 import MobileAds from 'react-native-google-mobile-ads';
 import {AskMe, MainWrapper} from '../../../../components';
 import {useFcmTokenUpdateMutation} from '../../../../redux/auth/authApiSlice';
-import {Routes, appIcons, AppLoader, Ads} from '../../../../shared/exporter';
+import {
+  Routes,
+  appIcons,
+  AppLoader,
+  Ads,
+  appImages,
+} from '../../../../shared/exporter';
 import styles from './styles';
 import {useGetNewsBlogsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {getFCMToken} from '../../../../hooks/NotificationHook';
@@ -87,7 +93,11 @@ const Home = ({navigation}: any) => {
         activeOpacity={0.7}
         onPress={() => navigation.navigate(Routes.NewsBlogDetail, {item})}
         style={styles.itemContainer}>
-        <Image source={{uri: item?.image_url}} style={styles.imageStyle} />
+        <Image
+          source={item?.image_url ? {uri: item?.image_url} : appIcons.appLogo}
+          style={styles.imageStyle}
+          resizeMode={item?.image_url ? 'cover' : 'contain'}
+        />
         <View style={styles.contentContainer}>
           <Text style={styles.titleTextStyle}>{item?.title}</Text>
           <Text numberOfLines={3} style={styles.descTextStyle}>

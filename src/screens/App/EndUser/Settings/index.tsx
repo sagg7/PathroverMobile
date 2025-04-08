@@ -15,10 +15,12 @@ import {
   APP_ROLE,
   EndUserProfileMenu,
   FAQ_LIST_LINK,
+  showAlert,
+  UNEXPECTED_ERROR,
   USER_PROFILE,
 } from '../../../../shared/utils/constant';
 import {useDispatch, useSelector} from 'react-redux';
-import {Routes} from '../../../../shared/exporter';
+import {AppLoader, Routes} from '../../../../shared/exporter';
 import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
 import {setUserRole} from '../../../../redux/auth/appRoleSlice';
 import ConsentSheet from '../../../../components/complex/ConsentSheet';
@@ -86,7 +88,7 @@ const Settings = ({navigation}: any) => {
     await GoogleSignin.signOut();
     setTimeout(() => {
       navigation.replace('AuthStack');
-    }, 1500);
+    }, 1000);
   };
 
   const handleNavigation = (itemId: any) => {
@@ -142,13 +144,17 @@ const Settings = ({navigation}: any) => {
     consentSheetRef?.current.close();
   };
   const handleSuccess = async () => {
+    consentSheetRef?.current.close();
+
     if (sheetToOpen === 'logout') {
-      consentSheetRef?.current.close();
       handleLogout();
     } else {
       let res = await deleteUserAccount(undefined);
-      consentSheetRef?.current.close();
-      handleLogout();
+      if (res?.data?.message === 'User account deleted successfully') {
+        handleLogout();
+      } else {
+        showAlert('Alert', UNEXPECTED_ERROR);
+      }
     }
   };
 
@@ -214,6 +220,7 @@ const Settings = ({navigation}: any) => {
         onPressCard={handleCard}
         setModalVisible={() => setshowSwitchRoleSheet(false)}
       />
+      {isLoadingDeleteAccounnt && <AppLoader />}
     </MainWrapper>
   );
 };

@@ -47,9 +47,11 @@ const SearchTrailLatLng = () => {
   const {location} = useLocation();
   const navigation = useNavigation<any>();
   const mapCameraRef = useRef();
-  const {endingPoint, startingPoint, routeData} = useSelector(
+  const {endingPoint, startingPoint, routeData, routeType} = useSelector(
     (state: any) => state?.endUser?.trailRoute,
   );
+  console.log('TYPE HERE', routeData);
+
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [results, setResults] = useState<null>(null);
   const [routeToStartPoint, setRouteToStartPoint] = useState<any>([]);
@@ -93,10 +95,10 @@ const SearchTrailLatLng = () => {
       const response = await fetch(url);
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
+
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };
@@ -381,7 +383,11 @@ const SearchTrailLatLng = () => {
   const onPressShare = () => {
     if (loginUser?.verified) {
       navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {startingPoint, endingPoint, type: 'trail'},
+        shareTrail: {
+          startingPoint,
+          endingPoint,
+          type: routeType ? routeType : 'trail',
+        },
       });
     } else {
       showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
