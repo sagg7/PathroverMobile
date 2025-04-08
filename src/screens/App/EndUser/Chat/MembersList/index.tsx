@@ -63,8 +63,12 @@ const MemberList = () => {
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
           // Save full contacts list
-          setAllContactsList(formattedContacts);
-          setMatchedUsers(formattedContacts);
+
+          const filteredContacts = formattedContacts.filter(
+            (contact: any) => contact?.is_exist)
+          
+          setAllContactsList(filteredContacts);
+          setMatchedUsers(filteredContacts);
         } else {
           console.warn('Contacts permission denied');
         }
@@ -95,6 +99,7 @@ const MemberList = () => {
             user?.givenName?.toLowerCase()?.includes(searchText) ||
             user?.familyName?.toLowerCase()?.includes(searchText),
         );
+        
         setMatchedUsers(filteredContacts);
       } else {
         setMatchedUsers(allContactsList);
