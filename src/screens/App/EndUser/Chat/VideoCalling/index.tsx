@@ -33,6 +33,7 @@ import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 import uuid from 'react-native-uuid';
 import { useActionCable } from '../../../../../hooks/socket/useActionCable';
 import { useChannel } from '../../../../../hooks/socket/useChannel';
+import { clearAllCallNotifications } from '../../../../../hooks/NotificationHook';
 
 const APP_ID = AGORA_KEY;
 
@@ -156,6 +157,7 @@ const VideoCalling = () => {
             },
             {
               received: res => {
+                // console.log('res--------subscribe--->>>>>>>>>>>>>>', res);
                 checkCallStatus(res);
               },
               connected: () => {
@@ -253,21 +255,20 @@ const VideoCalling = () => {
       setTimeout(() => {
         // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
         if (controls.remoteUsers?.length === 0 && controls.call_data) {  // Check ref instead of state
-          // console.error("No one joined in 3 mins, ending call...");
+          console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          controls?.engine?.leaveChannel();
-          setControls(prev => ({
-            ...prev,
-            joinChannelSuccess: false,
-            remoteUsers: [],
-          }));
-          navigation.goBack();
+          // controls?.engine?.leaveChannel();
+          // setControls(prev => ({
+          //   ...prev,
+          //   joinChannelSuccess: false,
+          //   remoteUsers: [],
+          // }));
+          // navigation.goBack();
           // leave();
         }
-        // }, 10000); 
-        // }, 5000);
-      }, 60000);
+        }, 85000);
+      // }, 60000);
     }
 
   }, [controls.joinChannelSuccess, controls.call_data]);
@@ -379,6 +380,9 @@ const VideoCalling = () => {
           receiver_id: params?.user?.id,
         };
 
+        // console.log('updateCallStatus--video calling------->>>>>>>>>>>>>>', obj);
+
+
         await updateCall(obj);
       }
     } catch (error) {
@@ -388,10 +392,14 @@ const VideoCalling = () => {
 
   const checkCallStatus = async (item) => {
     try {
-      // console.log('checkCallStatus--------->>>>>>>>>>>>>>', item);
-
-      if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended') {
+      if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
         controls.engine.leaveChannel();
+       
+        setControls(prev => ({ ...prev, engine: null, joinChannelSuccess: false,
+          remoteUsers: [],
+        }));
+        navigation.goBack();
+        clearAllCallNotifications()
       }
     } catch (error) {
       // console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);

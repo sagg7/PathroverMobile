@@ -22,6 +22,7 @@ import { formatTime } from '../../../../../helpers/getFormatTime';
 import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 import { useActionCable } from '../../../../../hooks/socket/useActionCable';
 import { useChannel } from '../../../../../hooks/socket/useChannel';
+import { clearAllCallNotifications } from '../../../../../hooks/NotificationHook';
 
 const appId = AGORA_KEY;
 
@@ -153,14 +154,13 @@ const VoiceCalling = () => {
           // console.error("No one joined in 3 mins, ending call...");
           // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          agoraEngineRef.current?.leaveChannel();
+          // agoraEngineRef.current?.leaveChannel();
 
-          setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
-          navigation.goBack();
-          // leave();
+          // setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
+          // navigation.goBack();
         }
-      }, 65000);
-      // }, 60000);
+      }, 85000);
+      // }, 6000);
     }
   }, [controls.isJoined, controls.call_data]);
 
@@ -230,8 +230,14 @@ const VoiceCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended') {
-      leave();
+    if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
+      // console.log('checkCallStatus item----------->>>>>>>>>>>>>>', item);
+      // leave();
+      agoraEngineRef.current?.leaveChannel();
+
+      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
+      navigation.goBack();
+      clearAllCallNotifications();
     }
   }
 
