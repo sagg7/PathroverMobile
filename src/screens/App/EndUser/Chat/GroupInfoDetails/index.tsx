@@ -150,7 +150,7 @@ const GroupInfoDetail = () => {
         </View>
 
         <TouchableOpacity onPress={() => {}}>
-          <Image source={appIcons.menuIcons} style={styles.iconStyle} />
+          {/* <Image source={appIcons.menuIcons} style={styles.iconStyle} /> */}
         </TouchableOpacity>
       </View>
       <View style={styles.topView}>
@@ -163,7 +163,7 @@ const GroupInfoDetail = () => {
           style={styles.groupImage}
         />
         <Text style={styles.headerText}>{params?.item?.name || ''}</Text>
-        <Text style={styles.subHeaderText}>Group| 8 Members</Text>
+        <Text style={styles.subHeaderText}>Group| {members?.users?.length ?? 0} Members</Text>
         <GroupButtons onPressAdd={onPressAdd} hide={true} isAdmin={isAdmin}  />
       </View>
       <FlatList
