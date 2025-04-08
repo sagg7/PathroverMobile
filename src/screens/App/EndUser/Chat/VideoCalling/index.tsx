@@ -53,6 +53,7 @@ const VideoCalling = () => {
     call_data: {},
     isMute: false,
     isNear: false,
+    status: null,
     elapsedTime: 0,
     remoteUsers: [],
     isSpeakerOn: false,
@@ -158,6 +159,7 @@ const VideoCalling = () => {
             {
               received: res => {
                 // console.log('res--------subscribe--->>>>>>>>>>>>>>', res);
+                setControls(prev => ({ ...prev, status: res?.status }));
                 checkCallStatus(res);
               },
               connected: () => {
@@ -251,27 +253,23 @@ const VideoCalling = () => {
   };
 
   useEffect(() => {
-    if (controls.joinChannelSuccess && isFocused) {
-      setTimeout(() => {
+    // console.log('onJoinChannel---setTimeout-------->>>>>>>>>>>>>>', 'controls.joinChannelSuccess', controls.joinChannelSuccess);
+    if (controls.status === 'ringing' && isFocused) {
+
+      const timeoutId = setTimeout(() => {
         // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
-        if (controls.remoteUsers?.length === 0 && controls.call_data) {  // Check ref instead of state
+        if (controls.remoteUsers?.length === 0 && controls.call_data) {
           console.error("No one joined in 3 mins, ending call...");
-          // alert("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
-          // controls?.engine?.leaveChannel();
-          // setControls(prev => ({
-          //   ...prev,
-          //   joinChannelSuccess: false,
-          //   remoteUsers: [],
-          // }));
-          // navigation.goBack();
-          // leave();
         }
-        }, 85000);
+        // }, 85000);
+      }, 60000);
       // }, 60000);
+
+      return () => clearTimeout(timeoutId);
     }
 
-  }, [controls.joinChannelSuccess, controls.call_data]);
+  }, [controls.status]);
 
   const joinChannel = async () => {
     const CHANNEL_NAME = params?.channel ? params?.channel : `video_call_${loginUser?.id}_${uuid.v4()}`;
@@ -363,7 +361,7 @@ const VideoCalling = () => {
       const res = await createCall(obj);
 
       if (res?.data) {
-        setControls(prev => ({ ...prev, call_data: res?.data }));
+        setControls(prev => ({ ...prev, call_data: res?.data, status: 'ringing' }));
       }
     } catch (error) {
       //
@@ -375,7 +373,7 @@ const VideoCalling = () => {
       const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
       if (check) {
         const obj = {
-          status: status ?? 'ended',
+          status: controls.status === 'ringing' ? status : 'ended',
           id: check,
           receiver_id: params?.user?.id,
         };
@@ -394,8 +392,9 @@ const VideoCalling = () => {
     try {
       if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
         controls.engine.leaveChannel();
-       
-        setControls(prev => ({ ...prev, engine: null, joinChannelSuccess: false,
+
+        setControls(prev => ({
+          ...prev, engine: null, joinChannelSuccess: false,
           remoteUsers: [],
         }));
         navigation.goBack();
