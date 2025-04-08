@@ -14,8 +14,6 @@ const navigationRef = createNavigationContainerRef();
 
 const navigate = (name: string, params?: object) => {
   if (navigationRef.isReady()) {
-    console.log('HERE NAVIGATION');
-
     navigationRef.navigate(name, params);
   }
 };
@@ -60,8 +58,6 @@ const App = () => {
     if (url) {
       console.log('\n\n\nDeep link received:', url);
       const {routeType, routeId} = extractParams(url);
-      console.log('=====11======', routeId);
-      console.log('=====22======', routeType);
       // if (routeType) {
       //   // navigate('ViewSharedRoute', {routeType, routeId});
       //   setTimeout(() => {
