@@ -1,19 +1,19 @@
-import {useIsFocused, useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
-import {FlatList, Text, View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppLoader} from '../../../../../components';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Text, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppLoader } from '../../../../../components';
 import ChatListItem from '../../../../../components/complex/ChatListItem';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
 import EmptyChatView from '../../../../../components/complex/EmptyChatView';
-import {useActionCable} from '../../../../../hooks/socket/useActionCable';
-import {useChannel} from '../../../../../hooks/socket/useChannel';
+import { useActionCable } from '../../../../../hooks/socket/useActionCable';
+import { useChannel } from '../../../../../hooks/socket/useChannel';
 import {
   useDeleteGroupMutation,
   useGetGroupChatsMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {setChatCount} from '../../../../../redux/chat/chatSlice';
-import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import { setChatCount } from '../../../../../redux/chat/chatSlice';
+import { REQ_LIST_SOCKET_URL } from '../../../../../shared/exporter';
 import styles from './styles';
 
 const ChatGroup = () => {
@@ -27,13 +27,13 @@ const ChatGroup = () => {
   const [searchedChats, setSearchedChats] = useState<any[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  const [getGroupChats, {isLoading, data}] = useGetGroupChatsMutation();
+  const [getGroupChats, { isLoading, data }] = useGetGroupChatsMutation();
   const [deleteGroup] = useDeleteGroupMutation();
 
-  const {loginUser, accessToken} = useSelector((state: any) => state.auth);
+  const { loginUser, accessToken } = useSelector((state: any) => state.auth);
   const token = accessToken?.replace('Bearer ', '');
-  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const { subscribe, unsubscribe } = useChannel(actionCable);  
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
 
   useEffect(() => {
     try {
@@ -44,15 +44,10 @@ const ChatGroup = () => {
         },
         {
           received: res => {
-            // console.log('ChatCountsChannel res', res);
-            
             dispatch(setChatCount(res));
             getGroupChats({});
           },
-          connected: () => {
-            // console.log('connected----------ChatCountsChannel-------------->>>');g
-            
-          },
+          connected: () => {},
         },
       );
     } catch (err) {
@@ -79,15 +74,21 @@ const ChatGroup = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    if (data) {
+    if (data === undefined) return;
+    if (data !== 'undefined' || data !== undefined) {
+      if (data?.length === 0) {
+        setChats(prevChats => {
+          console.log('prevChats', prevChats?.length !== 0 ? data : []);
+          
+          return prevChats?.length !== 0 ? data : []
+        });
+      }
       setChats(prevChats => {
-        if (prevChats?.length === 0) return data ?? [];
-        const chatMap = new Map(prevChats?.map(chat => [chat?.id, chat]));
+        // if (prevChats?.length === 0) return data ?? [];
+        const chatMap = new Map(data?.map(chat => [chat?.id, chat]));
         data?.forEach((chat: any) => chatMap?.set(chat?.id, chat));
         return Array.from(chatMap.values());
       });
-    } else {
-      setChats([]);
     }
   }, [data]);
 
@@ -115,7 +116,7 @@ const ChatGroup = () => {
     try {
       const res = await deleteGroup(item.id);
       console.log(res, 'deleteGroup');
-      
+
       if (res?.data) {
         await getGroupChats({});
       }
@@ -124,12 +125,12 @@ const ChatGroup = () => {
     }
   };
 
-  const renderItem = ({item, index}: any) => {
+  const renderItem = ({ item, index }: any) => {
     return (
       <ChatListItem
         item={item}
         onPress={() => {
-          navigation.navigate('GroupChatDetail', {item, isGroup: true});
+          navigation.navigate('GroupChatDetail', { item, isGroup: true });
         }}
         onPressDelete={() => onPressDelete(item)}
       />
