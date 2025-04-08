@@ -143,7 +143,7 @@ const MemberList = () => {
           {exists && <View style={styles.iconView}>{svgIcon.AddedIcon}</View>}
         </View>
         <View style={styles.textView}>
-          <Text style={styles.nameText}>{item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>{item?.displayName|| item?.givenName || 'User'}</Text>
         </View>
       </TouchableOpacity>
     );

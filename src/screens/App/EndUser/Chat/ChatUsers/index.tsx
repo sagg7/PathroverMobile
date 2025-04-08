@@ -36,10 +36,8 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
-  console.log(' ChatUsers ~ allContactsList==>', allContactsList[1]);
 
   // API
-  // const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
   const [getAllUsers, {isLoading, data}] = useGetChatContactsMutation();
   const [createChat] = useCreateChatMutation();
 
@@ -71,6 +69,9 @@ const ChatUsers = () => {
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
           setAllContactsList(formattedContacts);
+
+          console.log('formattedContacts', JSON.stringify(formattedContacts, null, 2));
+          
           setMatchedUsers(formattedContacts);
         } else {
           console.warn('Contacts permission denied');
@@ -164,7 +165,7 @@ const ChatUsers = () => {
             }
             style={styles.imageStyle}
           />
-          <Text style={styles.nameText}>{item?.displayName || 'User'}</Text>
+          <Text style={styles.nameText}>{item?.displayName|| item?.givenName || 'User'}</Text>
         </View>
         {item?.is_exist ? (
           <TouchableOpacity
