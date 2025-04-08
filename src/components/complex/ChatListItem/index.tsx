@@ -100,7 +100,7 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
                     )
                     ? `Shared ${extractType(item)}`
                     : item?.last_message?.content || ''
-                  : ''}
+                  : item?.last_message ??''}
               </Text>
             )}
           </View>
