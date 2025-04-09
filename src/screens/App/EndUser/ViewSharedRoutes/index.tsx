@@ -87,9 +87,7 @@ const ViewSharedRoutes = ({route}: any) => {
 
   useEffect(() => {
     if (data) {
-      console.log('API DATA', data?.user_routes[0]);
-
-      const selectedRoute = data?.user_routes[0];
+      const selectedRoute = data?.user_routes[0] || [];
 
       const endCoordinates = [
         parseFloat(selectedRoute?.dropoff_location?.longitude),
@@ -102,19 +100,18 @@ const ViewSharedRoutes = ({route}: any) => {
       setStartPoint(startCoordinates);
       setEndPoint(endCoordinates);
       const formattedPoints =
-        selectedRoute?.middle_location_points &&
-        selectedRoute?.middle_location_points
-          .filter((point: any) => point?.latitude && point?.longitude)
-          .map((point: any) => [
-            parseFloat(point?.longitude),
-            parseFloat(point?.latitude),
-          ]);
+        (selectedRoute?.middle_location_points &&
+          selectedRoute?.middle_location_points
+            .filter((point: any) => point?.latitude && point?.longitude)
+            .map((point: any) => [
+              parseFloat(point?.longitude),
+              parseFloat(point?.latitude),
+            ])) ||
+        [];
 
       setDestination(endCoordinates);
-      formattedPoints.unshift(startCoordinates);
-      formattedPoints.push(endCoordinates);
-      console.log('\n\n\nselectedRoute?.route_type', selectedRoute);
-
+      formattedPoints?.unshift(startCoordinates);
+      formattedPoints?.push(endCoordinates);
       if (selectedRoute?.route_type === 'maps_location_pins') {
         getRoadRoute(startCoordinates, endCoordinates);
       } else {
@@ -282,7 +279,7 @@ const ViewSharedRoutes = ({route}: any) => {
   };
   const calculateTotalDistance = (routePoints: any): number => {
     let totalDistanceKm = 0;
-    for (let i = 0; i < routePoints.length - 1; i++) {
+    for (let i = 0; i < routePoints?.length - 1; i++) {
       totalDistanceKm += haversineDistance(routePoints[i], routePoints[i + 1]);
     }
     const totalDistanceMiles = totalDistanceKm * 0.621371;

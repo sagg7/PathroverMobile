@@ -11,8 +11,6 @@ import {
   onNotifyPress,
   setupActionHandlers,
 } from '../../hooks/NotificationHook';
-import PushNotification from 'react-native-push-notification';
-import notifee, {EventType} from '@notifee/react-native';
 import {Linking} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useUpdateCallMutation} from '../../redux/chat/chatApiSlice';
@@ -109,22 +107,23 @@ const AppStack = () => {
 
   const handleDeepLink = (url: string | null) => {
     if (url) {
-      console.log('\n\n\nDeep link received:', url);
       const {routeType, routeId} = extractParams(url);
-      console.log('BOTTOTAB=====11======', routeId);
-      console.log('=BOTTOTAB====22======', routeType);
-      if (
-        routeType === 'hiking_waypoint' ||
-        routeType === 'waypoint_route' ||
-        'maps_location_pins'
-      ) {
-        navigation.navigate(Routes.ViewWellPathNavigation, {
-          entranceCoords: [],
-          routeId: routeId,
-          entranceName: '',
-        });
+      if (routeType) {
+        if (
+          routeType === 'hiking_waypoint' ||
+          routeType === 'waypoint_route' ||
+          routeType === 'maps_location_pins'
+        ) {
+          navigation.navigate(Routes.ViewWellPathNavigation, {
+            entranceCoords: [],
+            routeId: routeId,
+            entranceName: '',
+          });
+        } else {
+          navigation.navigate(Routes.ViewSharedRoutes, {routeType, routeId});
+        }
       } else {
-        navigation.navigate(Routes.ViewSharedRoutes, {routeType, routeId});
+        navigation.navigate('AppStack');
       }
     }
   };

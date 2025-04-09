@@ -123,7 +123,7 @@ const CreateGroup = () => {
           onChangeText={text => setName(text)}
           style={styles.textInputStyle}
         />
-        {svgIcon.MaskMan}
+        {/* {svgIcon.MaskMan} */}
       </View>
       <Text style={styles.memberText}>Members {usersList?.length || ''}</Text>
       <UsersListView

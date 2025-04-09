@@ -2,17 +2,6 @@ import {apiSlice} from '../api/apiSlice';
 
 export const enduserApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
-    // getAllWells: builder.query({
-    //   query: ({...params}) => {
-    //     const queryParams = new URLSearchParams({...params}).toString();
-    //     console.log('\n\nQUERY PARAM HIT\n', queryParams);
-    //     return {
-    //       url: `user_routes/well_location?${queryParams}`,
-    //       method: 'GET',
-    //     };
-    //   },
-    // }),
-
     getAllWells: builder.query({
       async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
         let allWells: any = [];

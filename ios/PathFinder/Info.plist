@@ -45,6 +45,12 @@
 			</array>
 		</dict>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:www.staging.path-rover.com</string>
+		<string>applinks:*.staging.path-rover.com</string>
+	</array>
+
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
@@ -71,12 +77,12 @@
 		<true/>
 	</dict>
 	<key>LSApplicationQueriesSchemes</key>
-		<array>
+	<array>
 		<string>fb</string>
 		<string>instagram</string>
 		<string>twitter</string>
 		<string>tiktoksharesdk</string>
-		</array>
+	</array>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>PathRover requires photo library permission</string>
 	<key>NSCameraUsageDescription</key>

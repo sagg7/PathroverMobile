@@ -22,6 +22,7 @@ import { formatTime } from '../../../../../helpers/getFormatTime';
 import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 import { useActionCable } from '../../../../../hooks/socket/useActionCable';
 import { useChannel } from '../../../../../hooks/socket/useChannel';
+import { clearAllCallNotifications } from '../../../../../hooks/NotificationHook';
 
 const appId = AGORA_KEY;
 
@@ -50,6 +51,7 @@ const VoiceCalling = () => {
     elapsedTime: 0,
     isNear: false,
     call_data: {},
+    status: null,
   });
 
   // APIs
@@ -74,27 +76,33 @@ const VoiceCalling = () => {
   useEffect(() => {
     const handleSubscribe = async () => {
       try {
+        // console.log('data---------outside-->>>>>>>>>>>>>>', controls.call_data);
         if (controls.call_data?.call_log?.id) {
           // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
           // console.log('params----------->>>>>>>>>>>>>>',params);
           subscribe(
             {
               channel: 'CallChannel',
-              user_call_id: params?.channel?  params?.id: controls.call_data?.call_log?.id,
+              user_call_id: params?.channel ? params?.id : controls.call_data?.call_log?.id,
               // channel_key: controls.call_data?.call_log?.id,
-              channel_key: `call_channel_${params?.channel ?  params?.id:controls.call_data?.call_log?.id}`,
+              channel_key: `call_channel_${params?.channel ? params?.id : controls.call_data?.call_log?.id}`,
             },
             {
               received: res => {
 
                 // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
 
+                setControls(prev => ({ ...prev, status: res?.status }));
                 checkCallStatus(res);
               },
               connected: () => {
                 // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                 // setIsConnected(true);
               },
+              rejected: () => {
+                // console.log('rejected-------call---->>>>>>>>>>>>>>');
+                // setIsConnected(false);
+              }
             },
           );
         }
@@ -141,21 +149,18 @@ const VoiceCalling = () => {
   }, []);
 
   useEffect(() => {
-    if (controls.isJoined && isFocused) {
-      setTimeout(() => {
-        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
-        if (controls.remoteUid === 0 && controls.call_data) {  // Check ref instead of state
-          // console.error("No one joined in 3 mins, ending call...");
-          // alert("No one joined in 3 mins, ending call...");
+    if (controls.status === 'ringing' && isFocused) {
+      const timeoutId = setTimeout(() => {
+        // console.log('onJoinChannelSuccess---1-minute-timeout-------->>>>>>>>>>>>>>', controls.status);
+        if (controls.remoteUid === 0 && controls.call_data) {
           updateCallStatus('not_attended');
-          leave();
         }
-        // }, 10000); 
-      }, 65000);
-      // }, 60000);
+      }, 60000); // 60,000ms = 1 minute
+
+      return () => clearTimeout(timeoutId); // Cleanup on unmount
     }
 
-  }, [controls.isJoined, controls.call_data]);
+  }, [controls.status]);
 
   useEffect(() => {
     sensorSubscriptionRef.current = proximity.subscribe((values) => {
@@ -223,8 +228,15 @@ const VoiceCalling = () => {
   };
 
   const checkCallStatus = async (item) => {
-    // console.log('item----------->>>>>>>>>>>>>>', item);
-    // leave();
+    if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
+      // console.log('checkCallStatus item----------->>>>>>>>>>>>>>', item);
+      // leave();
+      agoraEngineRef.current?.leaveChannel();
+
+      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
+      navigation.goBack();
+      clearAllCallNotifications();
+    }
   }
 
   const callInitiated = async (channelName: string) => {
@@ -242,7 +254,7 @@ const VoiceCalling = () => {
 
       const res = await createCall(obj);
       if (res?.data) {
-        setControls(prev => ({ ...prev, call_data: res?.data }));
+        setControls(prev => ({ ...prev, call_data: res?.data, status: 'ringing' }));
       }
 
       // console.log('call res----------->>>>>>>>>>>>>>', data);
@@ -256,14 +268,18 @@ const VoiceCalling = () => {
     // console.log('controls.call_data', controls.call_data);
 
     try {
-      const obj = {
-        status: status ?? 'ended',
-        id: params?.channel?  params?.id: data?.call_log?.id ?? controls?.call_data?.call_log?.id,
-      };
+      const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
+      if (check) {
+        const obj = {
+          status: controls.status === 'ringing' ? status : 'ended',
+          id: check,
+          receiver_id: params?.user?.id,
+        };
 
-      // console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
+        // console.log('updateCallStatus obj---voice calling-------->>>>>>>>>>>>>>', obj);
 
-      await updateCall(obj);
+        await updateCall(obj);
+      }
     } catch (error) {
       //
     }
@@ -307,7 +323,7 @@ const VoiceCalling = () => {
       agoraEngineRef.current?.leaveChannel();
 
       setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
-      updateCallStatus();
+      updateCallStatus('ended');
       navigation.goBack();
     } catch (e) {
       // console.log(e);

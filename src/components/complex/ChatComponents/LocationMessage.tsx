@@ -9,6 +9,7 @@ import {
   resetTrailRoute,
   setEndingPoint,
   setRouteData,
+  setRouteType,
   setStartingPoint,
 } from '../../../redux/endUser/endUserSlice';
 import {useNavigation} from '@react-navigation/native';
@@ -23,6 +24,8 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
+    console.log('TYPE', type);
+
     if (type === 'Chosen Trail') {
       navigation.navigate(Routes.TrailDetails, {trailInfo: data});
     } else {
@@ -47,6 +50,9 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
           ]),
         );
       }
+
+      dispatch(setRouteType(type));
+
       if (data) {
         dispatch(setRouteData(data));
       }

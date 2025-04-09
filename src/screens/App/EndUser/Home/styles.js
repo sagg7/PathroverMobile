@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     width: 124,
     height: 110,
     borderRadius: 5,
-    backgroundColor: PFColors.Gray.LightGray,
+    backgroundColor: PFColors.Gray.AshGray,
   },
   contentContainer: {
     flex: 1,

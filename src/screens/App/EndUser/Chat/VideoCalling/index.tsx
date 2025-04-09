@@ -1,5 +1,5 @@
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
   Dimensions,
@@ -18,28 +18,29 @@ import {
   RtcTextureView,
   VideoViewSetupMode,
 } from 'react-native-agora';
-import {useSelector} from 'react-redux';
-import {appIcons} from '../../../../../assets/icons';
+import { useSelector } from 'react-redux';
+import { appIcons } from '../../../../../assets/icons';
 import {
   useCreateCallMutation,
   useLazyGetAgoraTokenQuery,
   useUpdateCallMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {PFColors} from '../../../../../shared/exporter';
+import { PFColors } from '../../../../../shared/exporter';
 import styles from './styles';
-import {AGORA_KEY, REQ_LIST_SOCKET_URL} from '../../../../../shared/utils/constant';
-import {formatTime} from '../../../../../helpers/getFormatTime';
+import { AGORA_KEY, REQ_LIST_SOCKET_URL } from '../../../../../shared/utils/constant';
+import { formatTime } from '../../../../../helpers/getFormatTime';
 import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
 import uuid from 'react-native-uuid';
 import { useActionCable } from '../../../../../hooks/socket/useActionCable';
 import { useChannel } from '../../../../../hooks/socket/useChannel';
+import { clearAllCallNotifications } from '../../../../../hooks/NotificationHook';
 
 const APP_ID = AGORA_KEY;
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const VideoCalling = () => {
-  const {params} = useRoute();
+  const { params } = useRoute();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
 
@@ -52,6 +53,7 @@ const VideoCalling = () => {
     call_data: {},
     isMute: false,
     isNear: false,
+    status: null,
     elapsedTime: 0,
     remoteUsers: [],
     isSpeakerOn: false,
@@ -61,23 +63,23 @@ const VideoCalling = () => {
     setupMode: VideoViewSetupMode.VideoViewSetupReplace,
   });
 
-  const [fetchAgoraToken, {isLoading}] = useLazyGetAgoraTokenQuery(undefined);
-  const [createCall, {data}] = useCreateCallMutation();
+  const [fetchAgoraToken, { isLoading }] = useLazyGetAgoraTokenQuery(undefined);
+  const [createCall, { data }] = useCreateCallMutation();
   const [updateCall] = useUpdateCallMutation();
 
   const { loginUser, accessToken } = useSelector(state => state.auth);
-    const token = accessToken?.replace('Bearer ', '');
-    const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
-    const { subscribe, unsubscribe } = useChannel(actionCable);
-  
+  const token = accessToken?.replace('Bearer ', '');
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
+
   useEffect(() => {
     const initRtcEngine = async () => {
       const agoraEngine = createAgoraRtcEngine();
-      agoraEngine.initialize({appId: APP_ID});
+      agoraEngine.initialize({ appId: APP_ID });
       agoraEngine.registerEventHandler(eventHandler);
       agoraEngine.enableVideo();
 
-      setControls(prev => ({...prev, renderByTextureView: true}));
+      setControls(prev => ({ ...prev, renderByTextureView: true }));
       agoraEngine.enableLocalVideo(true);
       agoraEngine.muteLocalVideoStream(false);
 
@@ -89,7 +91,7 @@ const VideoCalling = () => {
       }
 
       agoraEngine.startPreview();
-      setControls(prev => ({...prev, engine: agoraEngine}));
+      setControls(prev => ({ ...prev, engine: agoraEngine }));
       // joinChannel();
     };
 
@@ -105,7 +107,7 @@ const VideoCalling = () => {
   useEffect(() => {
     if (isFocused) {
       // setElapsedTime(0);
-      setControls(prev => ({...prev, elapsedTime: 0}));
+      setControls(prev => ({ ...prev, elapsedTime: 0 }));
     }
     if (isFocused && controls.engine) {
       joinChannel();
@@ -116,21 +118,21 @@ const VideoCalling = () => {
   }, [isFocused, controls.engine]);
 
   useEffect(() => {
-      const backAction = () => {
-        return true; // Block the back button
-      };
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-      return () => backHandler.remove();
+    const backAction = () => {
+      return true; // Block the back button
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     sensorSubscriptionRef.current = proximity.subscribe((values) => {
-          if (values.distance > 4) {
-            setControls(prev => ({...prev, isNear: false}))
-            
-          } else {
-            setControls(prev => ({...prev, isNear: true}))
-          }          
+      if (values.distance > 4) {
+        setControls(prev => ({ ...prev, isNear: false }))
+
+      } else {
+        setControls(prev => ({ ...prev, isNear: true }))
+      }
     });
 
     return () => {
@@ -139,58 +141,57 @@ const VideoCalling = () => {
         sensorSubscriptionRef.current = null;
       }
     };
-   }, []);
-  
+  }, []);
+
   useEffect(() => {
-      const handleSubscribe = async () => {
-        try {
-          if (controls.call_data?.call_log?.id) {
-            // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
-            // console.log('params----------->>>>>>>>>>>>>>',params);
-            subscribe(
-              {
-                channel: 'CallChannel',
-                user_call_id: params?.channel?  params?.id: controls.call_data?.call_log?.id,
-                // channel_key: controls.call_data?.call_log?.id,
-                channel_key: `call_channel_${params?.channel ?  params?.id:controls.call_data?.call_log?.id}`,
+    const handleSubscribe = async () => {
+      try {
+        if (controls.call_data?.call_log?.id) {
+          // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
+          // console.log('params----------->>>>>>>>>>>>>>',params);
+          subscribe(
+            {
+              channel: 'CallChannel',
+              user_call_id: params?.channel ? params?.id : controls.call_data?.call_log?.id,
+              // channel_key: controls.call_data?.call_log?.id,
+              channel_key: `call_channel_${params?.channel ? params?.id : controls.call_data?.call_log?.id}`,
+            },
+            {
+              received: res => {
+                // console.log('res--------subscribe--->>>>>>>>>>>>>>', res);
+                setControls(prev => ({ ...prev, status: res?.status }));
+                checkCallStatus(res);
               },
-              {
-                received: res => {
-  
-                  // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
-  
-                  checkCallStatus(res);
-                },
-                connected: () => {
-                  // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
-                  // setIsConnected(true);
-                },
+              connected: () => {
+                // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
+                // setIsConnected(true);
               },
-            );
-          }
-        } catch (err) {
-          // console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
+            },
+          );
         }
-      };
-  
-      handleSubscribe();
-  
-      return () => {
-        // try {
-        //   if (subscription) {
-        unsubscribe(); // Make sure unsubscribe is available in scope
-        // unsubscribe(subscription); // Make sure unsubscribe is available in scope
-        // }
-        // } catch (err) {
-        //   console.log('err--------unsubscribe--->>>>>>>>>>>>>>', err);
-        // }
-      };
-    }, [controls.call_data]); // Added checkCallStatus to dependencies
-  
+      } catch (err) {
+        // console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
+      }
+    };
+
+    handleSubscribe();
+
+    return () => {
+      // try {
+      //   if (subscription) {
+      unsubscribe(); // Make sure unsubscribe is available in scope
+      // unsubscribe(subscription); // Make sure unsubscribe is available in scope
+      // }
+      // } catch (err) {
+      //   console.log('err--------unsubscribe--->>>>>>>>>>>>>>', err);
+      // }
+    };
+  }, [controls.call_data]); // Added checkCallStatus to dependencies
+
 
   const eventHandler: IRtcEngineEventHandler = {
     onJoinChannelSuccess: () => {
-      setControls(prev => ({...prev, joinChannelSuccess: true}));
+      setControls(prev => ({ ...prev, joinChannelSuccess: true }));
     },
     onUserJoined: (connection, remoteUid) => {
       setControls(prev => ({
@@ -211,7 +212,7 @@ const VideoCalling = () => {
       }
     },
     onUserMuteVideo: (connection, remoteUser, muted) => {
-      setControls(prev => ({...prev, remoteUserCamera: muted}));
+      setControls(prev => ({ ...prev, remoteUserCamera: muted }));
     },
     onConnectionStateChanged: (connection, state) => {
       if (state === 1 || state === 5) {
@@ -232,7 +233,7 @@ const VideoCalling = () => {
     startTimeRef.current = Date.now(); // Record the start time
     timerIntervalRef.current = setInterval(() => {
       const now = Date.now();
-      setControls(prev => ({...prev, elapsedTime: now - startTimeRef.current}));
+      setControls(prev => ({ ...prev, elapsedTime: now - startTimeRef.current }));
     }, 1000); // Update every second
   };
 
@@ -252,21 +253,23 @@ const VideoCalling = () => {
   };
 
   useEffect(() => {
-      if (controls.joinChannelSuccess && isFocused) {
-        setTimeout(() => {
-          // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
-          if (controls.remoteUsers?.length === 0 && controls.call_data) {  // Check ref instead of state
-            // console.error("No one joined in 3 mins, ending call...");
-            // alert("No one joined in 3 mins, ending call...");
-            updateCallStatus('not_attended');
-            // leave();
-          }
-          // }, 10000); 
-        }, 5000);
-        // }, 60000);
-      }
-  
-    }, [controls.joinChannelSuccess, controls.call_data]);
+    // console.log('onJoinChannel---setTimeout-------->>>>>>>>>>>>>>', 'controls.joinChannelSuccess', controls.joinChannelSuccess);
+    if (controls.status === 'ringing' && isFocused) {
+
+      const timeoutId = setTimeout(() => {
+        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
+        if (controls.remoteUsers?.length === 0 && controls.call_data) {
+          console.error("No one joined in 3 mins, ending call...");
+          updateCallStatus('not_attended');
+        }
+        // }, 85000);
+      }, 60000);
+      // }, 60000);
+
+      return () => clearTimeout(timeoutId);
+    }
+
+  }, [controls.status]);
 
   const joinChannel = async () => {
     const CHANNEL_NAME = params?.channel ? params?.channel : `video_call_${loginUser?.id}_${uuid.v4()}`;
@@ -302,7 +305,7 @@ const VideoCalling = () => {
       return;
     }
     const hasPreview = !controls.renderByTextureView;
-    setControls(prev => ({...prev, renderByTextureView: hasPreview}));
+    setControls(prev => ({ ...prev, renderByTextureView: hasPreview }));
     controls.engine.enableLocalVideo(hasPreview);
     controls.engine.muteLocalVideoStream(!hasPreview);
   };
@@ -312,13 +315,13 @@ const VideoCalling = () => {
       return;
     }
     const hasMuted = !controls.isMute;
-    setControls(prev => ({...prev, isMute: hasMuted}));
+    setControls(prev => ({ ...prev, isMute: hasMuted }));
     controls.engine?.muteLocalAudioStream(hasMuted);
   };
 
   const onPressSpeaker = () => {
     const newSpeakerState = !controls.isSpeakerOn;
-    setControls(prev => ({...prev, isSpeakerOn: newSpeakerState}));
+    setControls(prev => ({ ...prev, isSpeakerOn: newSpeakerState }));
     controls.engine?.setEnableSpeakerphone(newSpeakerState);
   };
 
@@ -333,7 +336,7 @@ const VideoCalling = () => {
       if (controls.engine) {
         controls.engine.leaveChannel();
       }
-      setControls(prev => ({...prev, engine: null}));
+      setControls(prev => ({ ...prev, engine: null }));
       updateCallStatus();
 
       setTimeout(() => {
@@ -358,7 +361,7 @@ const VideoCalling = () => {
       const res = await createCall(obj);
 
       if (res?.data) {
-        setControls(prev => ({ ...prev, call_data: res?.data }));
+        setControls(prev => ({ ...prev, call_data: res?.data, status: 'ringing' }));
       }
     } catch (error) {
       //
@@ -367,24 +370,39 @@ const VideoCalling = () => {
 
   const updateCallStatus = async (status) => {
     try {
-      // const obj = {
-      //   status: 'ended',
-      //   id: data?.call_log?.id,
-      // };
-      const obj = {
-        status: status ?? 'ended',
-        id: params?.channel?  params?.id: data?.call_log?.id ?? controls?.call_data?.call_log?.id,
-      };
+      const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
+      if (check) {
+        const obj = {
+          status: controls.status === 'ringing' ? status : 'ended',
+          id: check,
+          receiver_id: params?.user?.id,
+        };
 
-      await updateCall(obj);
+        // console.log('updateCallStatus--video calling------->>>>>>>>>>>>>>', obj);
+
+
+        await updateCall(obj);
+      }
     } catch (error) {
       //
     }
   };
 
   const checkCallStatus = async (item) => {
-    // console.log('item----------->>>>>>>>>>>>>>', item);
-    // leave();
+    try {
+      if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
+        controls.engine.leaveChannel();
+
+        setControls(prev => ({
+          ...prev, engine: null, joinChannelSuccess: false,
+          remoteUsers: [],
+        }));
+        navigation.goBack();
+        clearAllCallNotifications()
+      }
+    } catch (error) {
+      // console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);
+    }
   }
 
   const iconsView = () => {
@@ -439,7 +457,7 @@ const VideoCalling = () => {
     );
   };
 
-  const renderVideo = (user: {uid: number}) => {
+  const renderVideo = (user: { uid: number }) => {
     const cameraHeight =
       controls.remoteUsers?.length > 0 ? (height - 130) / 2 : height;
     const showUserCamera =
@@ -452,12 +470,12 @@ const VideoCalling = () => {
           width: width - 10,
           height: cameraHeight,
         }}
-        canvas={{uid: user?.uid, setupMode: controls.setupMode}}
+        canvas={{ uid: user?.uid, setupMode: controls.setupMode }}
       />
     ) : Platform.OS === 'android' ? (
       <RtcTextureView
-        style={{width: width, height: cameraHeight}}
-        canvas={{uid: user?.uid, setupMode: controls.setupMode}}
+        style={{ width: width, height: cameraHeight }}
+        canvas={{ uid: user?.uid, setupMode: controls.setupMode }}
       />
     ) : (
       <View
@@ -473,26 +491,26 @@ const VideoCalling = () => {
   return (
     <View style={styles.cameraView}>
       {controls.joinChannelSuccess && (
-        <View style={{height: height - 115}}>
+        <View style={{ height: height - 115 }}>
           {/* Remote video streams */}
           <View style={styles.containerView}>
             {controls.remoteUsers?.map(uid => renderVideo({ uid }))}
             <View style={styles.userNameTextView}>
-            <Text style={styles.userName}>
-              {params?.user?.callerName || 
-              `${params?.user?.first_name || ''} ${params?.user?.last_name || ''}`.trim() || 
-              'User'}
-            </Text>
-          </View>
+              <Text style={styles.userName}>
+                {params?.user?.callerName ||
+                  `${params?.user?.first_name || ''} ${params?.user?.last_name || ''}`.trim() ||
+                  'User'}
+              </Text>
+            </View>
           </View>
 
           {/* Local video stream */}
           <View style={styles.containerView}>{renderVideo({ uid: 0 })}</View>
           <View style={styles.timerTextView}>
-          <Text style={styles.counterText}>
-            {formatTime(controls.elapsedTime)}
+            <Text style={styles.counterText}>
+              {formatTime(controls.elapsedTime)}
             </Text>
-            </View>
+          </View>
         </View>
       )}
       <View style={styles.iconContainer}>{iconsView()}</View>

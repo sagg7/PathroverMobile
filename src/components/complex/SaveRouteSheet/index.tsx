@@ -41,7 +41,6 @@ const SaveRouteSheet = ({
       onPressSave();
     }, 500);
   };
-  console.log('routeName', routeName);
 
   return (
     <KeyboardAvoidingView

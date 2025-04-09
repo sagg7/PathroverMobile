@@ -68,10 +68,12 @@ const ViewWellPathNavigation = ({route}: any) => {
       if (route?.params?.routeId) getRouteBasedId(route?.params?.routeId);
     }
   }, [route]);
-
+  // maps_location_pins;
   useEffect(() => {
     if (data) {
       const routeData = data?.user_routes[0];
+      console.log('routeData===>', routeData?.route_type);
+
       setDestination([
         Number(routeData?.dropoff_location?.longitude),
         Number(routeData?.dropoff_location?.latitude),
@@ -80,10 +82,10 @@ const ViewWellPathNavigation = ({route}: any) => {
   }, [data]);
 
   useEffect(() => {
-    if (location) {
+    if (location?.latitude) {
       setCurrentLocation([location?.longitude, location?.latitude]);
     }
-  }, [location]);
+  }, [location?.latitude]);
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
@@ -283,45 +285,46 @@ const ViewWellPathNavigation = ({route}: any) => {
 
   return (
     <MainWrapper style={styles.container}>
-      {tourStops?.length > 0 && (
-        <View style={styles.stepsContainer}>
-          <FlatList
-            ref={flatListRef}
-            data={tourStops}
-            horizontal
-            style={{marginTop: isIOS() ? HP('5') : 0}}
-            pagingEnabled
-            snapToAlignment="center"
-            keyExtractor={(item, index) => index.toString()}
-            getItemLayout={(data, index) => ({
-              length: screenWidth * 0.8,
-              offset: screenWidth * 0.8 * index,
-              index,
-            })}
-            showsHorizontalScrollIndicator={false}
-            onViewableItemsChanged={handleViewableItemsChanged}
-            viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
-            renderItem={({item, index}) => (
-              <View style={styles.instructionCard}>
-                <View>
-                  <Image
-                    resizeMode="contain"
-                    source={getManeuverIcon(tourStops[index]?.maneuver)}
-                    style={styles.directonIcon}
-                  />
-                  <Text style={styles.distanceText}>
-                    {/* {item?.distance?.toFixed(0)} m */}
-                    {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
+      {tourStops?.length > 0 &&
+        data?.user_routes[0]?.route_type != 'maps_location_pins' && (
+          <View style={styles.stepsContainer}>
+            <FlatList
+              ref={flatListRef}
+              data={tourStops}
+              horizontal
+              style={{marginTop: isIOS() ? HP('5') : 0}}
+              pagingEnabled
+              snapToAlignment="center"
+              keyExtractor={(item, index) => index.toString()}
+              getItemLayout={(data, index) => ({
+                length: screenWidth * 0.8,
+                offset: screenWidth * 0.8 * index,
+                index,
+              })}
+              showsHorizontalScrollIndicator={false}
+              onViewableItemsChanged={handleViewableItemsChanged}
+              viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
+              renderItem={({item, index}) => (
+                <View style={styles.instructionCard}>
+                  <View>
+                    <Image
+                      resizeMode="contain"
+                      source={getManeuverIcon(tourStops[index]?.maneuver)}
+                      style={styles.directonIcon}
+                    />
+                    <Text style={styles.distanceText}>
+                      {/* {item?.distance?.toFixed(0)} m */}
+                      {(item?.distance * 0.000621371)?.toFixed(2) + ' mi'}
+                    </Text>
+                  </View>
+                  <Text style={styles.instructionText}>
+                    {item.maneuver.instruction}
                   </Text>
                 </View>
-                <Text style={styles.instructionText}>
-                  {item.maneuver.instruction}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-      )}
+              )}
+            />
+          </View>
+        )}
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -333,7 +336,6 @@ const ViewWellPathNavigation = ({route}: any) => {
         <MapboxGL.Camera
           ref={cameraRef}
           centerCoordinate={activeItem ?? currentLocation}
-          // followUserLocation={true}
           zoomLevel={18}
           followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
           animationMode="flyTo"

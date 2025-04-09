@@ -10,8 +10,9 @@ import {
   useGetGroupInfoMutation,
 } from '../../../../../redux/chat/chatApiSlice';
 import {showAlert} from '../../../../../shared/exporter';
+import { useSelector } from 'react-redux';
 
-const GroupButtons = ({onPressAdd, hide = false}) => {
+const GroupButtons = ({ onPressAdd, hide = false, isAdmin= false}) => {
   return (
     <View style={styles.buttonView}>
       {!hide && (
@@ -27,10 +28,10 @@ const GroupButtons = ({onPressAdd, hide = false}) => {
         </>
       )}
 
-      <TouchableOpacity style={styles.buttonStyle} onPress={onPressAdd}>
+      {isAdmin && <TouchableOpacity style={styles.buttonStyle} onPress={onPressAdd}>
         {svgIcon.PlusIcon}
         <Text style={styles.buttonText}>Add</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>}
     </View>
   );
 };
@@ -40,9 +41,12 @@ const GroupInfoDetail = () => {
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [exitGroup, {isError, error}] = useExitGroupMutation();
-  const [getGroupInfo, {isLoading, data}] = useGetGroupInfoMutation();
+  const [getGroupInfo, { isLoading, data }] = useGetGroupInfoMutation();  
+
+    const { loginUser } = useSelector(state => state.auth);
 
   const [members, setMembers] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +70,13 @@ const GroupInfoDetail = () => {
   useEffect(() => {
     if (data) {
       setMembers(data);
+
+      const filtered = data?.users?.filter(i => i?.is_admin);
+      if (filtered?.length > 0) {
+        const isAdmin = filtered?.some(i => i?.id === loginUser?.id);
+        setIsAdmin(isAdmin);
+      }
+
     }
   }, [data]);
 
@@ -139,7 +150,7 @@ const GroupInfoDetail = () => {
         </View>
 
         <TouchableOpacity onPress={() => {}}>
-          <Image source={appIcons.menuIcons} style={styles.iconStyle} />
+          {/* <Image source={appIcons.menuIcons} style={styles.iconStyle} /> */}
         </TouchableOpacity>
       </View>
       <View style={styles.topView}>
@@ -152,8 +163,8 @@ const GroupInfoDetail = () => {
           style={styles.groupImage}
         />
         <Text style={styles.headerText}>{params?.item?.name || ''}</Text>
-        <Text style={styles.subHeaderText}>Group| 8 Members</Text>
-        <GroupButtons onPressAdd={onPressAdd} hide={true} />
+        <Text style={styles.subHeaderText}>Group| {members?.users?.length ?? 0} Members</Text>
+        <GroupButtons onPressAdd={onPressAdd} hide={true} isAdmin={isAdmin}  />
       </View>
       <FlatList
         data={members?.users}
