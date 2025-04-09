@@ -16,6 +16,7 @@ interface CallScreenProps {
   onPressLeave: () => void;
   isMute: boolean;
   isNear: boolean;
+  leaveDisabled: boolean;
   isSpeakerOn: boolean;
   timer: string;
   onPressSpeaker: () => void;
@@ -32,6 +33,7 @@ const CallScreen = ({
   onPressMute,
   user,
   isNear,
+  leaveDisabled
 }: CallScreenProps) => {
   const iconsView = () => {
     return (
@@ -54,7 +56,7 @@ const CallScreen = ({
           </View>
           <Text style={styles.iiconTextStyle}>Mute</Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressLeave}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressLeave} disabled={leaveDisabled}>
           <View style={styles.iconBackGroundRed}>
             <Image source={appIcons.endCall} style={styles.callIconStyle} />
           </View>

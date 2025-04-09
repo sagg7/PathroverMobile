@@ -1,25 +1,25 @@
-import {View, Text, TouchableOpacity, Image, FlatList} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {AppLoader, MainWrapper} from '../../../../../components';
-import {svgIcon} from '../../../../../assets/svg';
+import { View, Text, TouchableOpacity, Image, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AppLoader, MainWrapper } from '../../../../../components';
+import { svgIcon } from '../../../../../assets/svg';
 import ChatSearch from '../../../../../components/complex/ChatSearch';
 import styles from './styles';
-import {appIcons} from '../../../../../assets/icons';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
+import { appIcons } from '../../../../../assets/icons';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import UsersListView from '../../../../../components/complex/UsersListView';
 import {
   useAddMembersMutation,
   useGetAllUsersMutation,
   useGetChatContactsMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {showAlert} from '../../../../../shared/exporter';
-import {Platform} from 'react-native';
-import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import { showAlert } from '../../../../../shared/exporter';
+import { Platform } from 'react-native';
+import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import Contacts from 'react-native-contacts';
 import RenderEmptyUser from '../RenderEmptyUser';
 
 const MemberList = () => {
-  const {params} = useRoute<any>();
+  const { params } = useRoute<any>();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [addMembers] = useAddMembersMutation<any>();
@@ -32,7 +32,7 @@ const MemberList = () => {
     selectedMembers: [],
   });
 
-  const [getAllUsers, {isLoading, data: allData}] =
+  const [getAllUsers, { isLoading, data: allData }] =
     useGetChatContactsMutation();
 
   const requestContactsPermission = async () => {
@@ -60,13 +60,13 @@ const MemberList = () => {
         const permissionGranted = await requestContactsPermission();
         if (permissionGranted) {
           const allContacts = await Contacts.getAll();
-          const allUsers = await getAllUsers({users: allContacts}).unwrap();
+          const allUsers = await getAllUsers({ users: allContacts }).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
           // Save full contacts list
 
           const filteredContacts = formattedContacts.filter(
             (contact: any) => contact?.is_exist)
-          
+
           setAllContactsList(filteredContacts);
           setMatchedUsers(filteredContacts);
         } else {
@@ -99,7 +99,7 @@ const MemberList = () => {
             user?.givenName?.toLowerCase()?.includes(searchText) ||
             user?.familyName?.toLowerCase()?.includes(searchText),
         );
-        
+
         setMatchedUsers(filteredContacts);
       } else {
         setMatchedUsers(allContactsList);
@@ -127,7 +127,7 @@ const MemberList = () => {
     }
   };
 
-  const renderItem = ({item}: any) => {
+  const renderItem = ({ item }: any) => {
     const exists = data.selectedMembers.some(
       (member: any) => member.id === item.id,
     );
@@ -140,7 +140,7 @@ const MemberList = () => {
           <Image
             source={
               item?.profile_image
-                ? {uri: item?.profile_image}
+                ? { uri: item?.profile_image }
                 : appIcons.userPlaceholder
             }
             style={styles.imageStyle}
@@ -148,7 +148,15 @@ const MemberList = () => {
           {exists && <View style={styles.iconView}>{svgIcon.AddedIcon}</View>}
         </View>
         <View style={styles.textView}>
-          <Text style={styles.nameText}>{item?.displayName|| item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>{
+            item?.displayName ||
+            (
+              (item?.givenName && item?.familyName)
+                ? `${item.givenName} ${item.familyName}`
+                : item?.givenName || item?.familyName     
+            ) ||
+            'User' 
+          }</Text>
         </View>
       </TouchableOpacity>
     );
@@ -167,7 +175,7 @@ const MemberList = () => {
           navigation.pop();
         }
       } else {
-        navigation.navigate('CreateGroup', {users: data.selectedMembers});
+        navigation.navigate('CreateGroup', { users: data.selectedMembers });
       }
     } else {
       showAlert(
@@ -202,7 +210,7 @@ const MemberList = () => {
           <TouchableOpacity
             onPress={() => {
               setData(prev => {
-                return {...prev, showSearch: !prev.showSearch};
+                return { ...prev, showSearch: !prev.showSearch };
               });
             }}>
             {svgIcon.Search}
@@ -212,7 +220,7 @@ const MemberList = () => {
           <ChatSearch
             placeholder="Search for members"
             value={data.search}
-            onChangeText={text => setData(prev => ({...prev, search: text}))}
+            onChangeText={text => setData(prev => ({ ...prev, search: text }))}
           />
         )}
       </View>

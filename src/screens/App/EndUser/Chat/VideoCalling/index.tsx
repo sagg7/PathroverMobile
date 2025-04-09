@@ -63,8 +63,8 @@ const VideoCalling = () => {
     setupMode: VideoViewSetupMode.VideoViewSetupReplace,
   });
 
-  const [fetchAgoraToken, { isLoading }] = useLazyGetAgoraTokenQuery(undefined);
-  const [createCall, { data }] = useCreateCallMutation();
+  const [fetchAgoraToken] = useLazyGetAgoraTokenQuery(undefined);
+  const [createCall, { data, isLoading }] = useCreateCallMutation();
   const [updateCall] = useUpdateCallMutation();
 
   const { loginUser, accessToken } = useSelector(state => state.auth);
@@ -340,7 +340,8 @@ const VideoCalling = () => {
       updateCallStatus();
 
       setTimeout(() => {
-        navigation.goBack();
+        navigation.pop();
+        // navigation.goBack();
       }, 500);
     } catch (error) {
       //
@@ -397,7 +398,8 @@ const VideoCalling = () => {
           ...prev, engine: null, joinChannelSuccess: false,
           remoteUsers: [],
         }));
-        navigation.goBack();
+        navigation.pop();
+        // navigation.goBack();
         clearAllCallNotifications()
       }
     } catch (error) {
@@ -447,7 +449,15 @@ const VideoCalling = () => {
           </View>
           <Text style={styles.iconTextStyle}>Camera</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressLeave}>
+        <TouchableOpacity style={styles.iconDetails} disabled={params?.channel ? false : isLoading} onPress={() => {
+          if (!params?.channel) {
+            !isLoading && onPressLeave()
+          } else {
+            onPressLeave()
+          }
+
+        }
+        }>
           <View style={styles.iconBackGroundRed}>
             <Image source={appIcons.endCall} style={styles.callIconStyle} />
           </View>
