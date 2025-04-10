@@ -55,9 +55,10 @@ const VoiceCalling = () => {
   });
 
   // APIs
-  const [fetchAgoraToken, { isLoading }] = useLazyGetAgoraTokenQuery(undefined);
-  const [createCall, { data }] = useCreateCallMutation();
-  const [updateCall] = useUpdateCallMutation();
+  const [fetchAgoraToken] = useLazyGetAgoraTokenQuery(undefined);
+  const [createCall, { data, isLoading }] = useCreateCallMutation();
+  const [updateCall, { error }] = useUpdateCallMutation();
+
 
   // Function to start the timer
   const startTimer = () => {
@@ -234,7 +235,8 @@ const VoiceCalling = () => {
       agoraEngineRef.current?.leaveChannel();
 
       setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
-      navigation.goBack();
+      navigation.pop();
+      // navigation.goBack();
       clearAllCallNotifications();
     }
   }
@@ -250,7 +252,7 @@ const VoiceCalling = () => {
         },
       };
 
-      // console.log('call obj----------->>>>>>>>>>>>>>', obj);
+      console.log('call obj----------->>>>>>>>>>>>>>', obj);
 
       const res = await createCall(obj);
       if (res?.data) {
@@ -269,6 +271,8 @@ const VoiceCalling = () => {
 
     try {
       const check = params?.channel ? params?.id : data?.call_log?.id ?? controls?.call_data?.call_log?.id;
+      // console.log('checkCallStatus check----------->>>>>>>>>>>>>>', check);
+
       if (check) {
         const obj = {
           status: controls.status === 'ringing' ? status : 'ended',
@@ -320,13 +324,14 @@ const VoiceCalling = () => {
 
   const leave = () => {
     try {
-      agoraEngineRef.current?.leaveChannel();
-
-      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
       updateCallStatus('ended');
-      navigation.goBack();
+      agoraEngineRef.current?.leaveChannel();
+      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
+
+      navigation.pop();
+      // navigation.goBack();
     } catch (e) {
-      // console.log(e);
+      console.error(e);
     }
   };
 
@@ -367,7 +372,13 @@ const VoiceCalling = () => {
 
   return (
     <CallScreen
-      onPressLeave={() => leave()}
+      onPressLeave={() => {
+        if (!params?.channel) {
+          !isLoading && leave()
+        } else {
+          leave()
+        }
+      }}
       isMute={controls.isMuted}
       isSpeakerOn={controls.isSpeakerOn}
       timer={formatTime(controls.elapsedTime)}
@@ -375,6 +386,7 @@ const VoiceCalling = () => {
       onPressSpeaker={() => toggleSpeaker()}
       user={params?.user}
       isNear={controls.isNear}
+      leaveDisabled={params?.channel ? false : isLoading}
     />
   );
 };

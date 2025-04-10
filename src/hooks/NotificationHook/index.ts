@@ -285,7 +285,7 @@ const handleNotificationPress = (notification, navigation, updateCallStatus) => 
   
   const data = JSON.parse(notification?.data?.data) ?? {} 
 
-  console.log('Notification pressed:', data);
+  // console.log('Notification pressed:', data);
 
   // Only handle if there's no specific action (regular tap)
   // if (!data?.immediateAction) {
@@ -293,7 +293,7 @@ const handleNotificationPress = (notification, navigation, updateCallStatus) => 
   // }
   switch (data?.type) {
     case 'incoming_call':
-      data?.user_call_id && updateCallStatus('not_attended', data?.user_call_id);
+      data?.user_call_id && updateCallStatus('not_attended', data?.user_call_id, data?.user_info?.callerId);
       clearAllCallNotifications()
       break;
     default:
@@ -311,12 +311,12 @@ const handleNotificationAction = (actionId, notification, navigation, updateCall
 
   switch (actionId) {
     case 'accept':
-      data?.user_call_id && updateCallStatus('active', data?.user_call_id);
+      data?.user_call_id && updateCallStatus('active', data?.user_call_id, data?.user_info?.callerId);
       onNotifyPress(notification, navigation);
       // console.log('in accept-------------------', data?.id);
       break;
     case 'reject':
-      data?.user_call_id && updateCallStatus('declined', data?.user_call_id);
+      data?.user_call_id && updateCallStatus('declined', data?.user_call_id, data?.user_info?.callerId);
       // console.log('in reject-------------------', data?.id)
       break;
     default:
