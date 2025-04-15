@@ -76,8 +76,6 @@ const HikingScreen = ({route, navigation}: any) => {
   const [userLocation, setUserLocation] = useState<any>(null);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedType, setSelectedType] = useState('hiking');
-  const [simpleSearch, setSimpleSearch] = useState<string>('');
-  const [suggestions, setSuggestions] = useState([]);
   const [trailInfo, setTrailInfo] = useState<boolean>(null);
   const [isMyDataVisible, setIsMyDataVisible] = useState(false);
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
@@ -96,9 +94,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const [showNavigationSheet, setShowNavigationSheet] =
     useState<boolean>(false);
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
-  const [searchLocationName, setSearchLocationNames] = useState<any>(null);
-  const {placeName, fetchPlaceName, setPlaceName, error, loading} =
-    usePlaceName();
+  const {placeName, fetchPlaceName} = usePlaceName();
   const {location} = useLocation();
 
   const [showTrailInfoSheet, setShowTrailInfoSheet] = useState<boolean>(false);
@@ -114,6 +110,8 @@ const HikingScreen = ({route, navigation}: any) => {
     direction: true,
     start: false,
   });
+  const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
+
   const pinLocationSheet = useRef<any>(null);
 
   const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
@@ -245,18 +243,6 @@ const HikingScreen = ({route, navigation}: any) => {
     `;
   };
 
-  // const getOverpassQuery1 = (latitude, longitude, type) => {
-  //   return `
-  //   [out:json];
-  //   (
-  //     way["highway"~"path|track|footway|steps|bridleway|cycleway"](around:5000, ${latitude}, ${longitude});
-  //   );
-  //   out geom;
-  //   `;
-  // };
-
-  // Function to Get Overpass Query
-
   const getTrailColor = (index: any) => {
     const colors = ['#13488A'];
     // const colors = ['#ff7f00', '#1f77b4', '#2ca02c', '#d62728', '#9467bd'];
@@ -307,7 +293,7 @@ const HikingScreen = ({route, navigation}: any) => {
       setShowTrailInfoSheet(true);
     }, 300);
   };
-  const fetchRoute = async (start, end) => {
+  const _fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
@@ -321,12 +307,64 @@ const HikingScreen = ({route, navigation}: any) => {
       return [];
     }
   };
-  const handlePlaceSelect = (place: any) => {
-    const [longitude, latitude] = place.center || place;
-    setSimpleSearch(place?.place_name);
-    setSuggestions([]);
-    setUserLocation([longitude, latitude]);
-    fetchNearbyTrails(latitude, longitude);
+  const toRad = (value: any) => (value * Math.PI) / 180;
+
+  const getDistanceInKm = (coord1: any, coord2: any) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
+  const fetchRoute = async (start: any, end: any) => {
+    const accessToken = mapBoxToken;
+    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data?.routes[0]?.geometry?.coordinates;
+
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
+
+      const firstRoutePoint = route[0];
+      const lastRoutePoint = route[route.length - 1];
+
+      const startDistance = getDistanceInKm(start, firstRoutePoint);
+      const endDistance = getDistanceInKm(end, lastRoutePoint);
+
+      const isStartOffRoad = startDistance > 0.01; // 10 meters
+      const isEndOffRoad = endDistance > 0.01;
+
+      let offRoad = [];
+
+      if (isStartOffRoad) {
+        const formatedArr = start?.map((item: any) => Number(item));
+
+        offRoad?.push([formatedArr, firstRoutePoint]);
+      }
+      if (isEndOffRoad) {
+        const formatedArr = end?.map((item: any) => Number(item));
+
+        offRoad?.push([lastRoutePoint, formatedArr]);
+      }
+      return {
+        mainRoute: route,
+        offRoad: offRoad,
+      };
+    } catch (error) {
+      return {mainRoute: [], offRoad: []};
+    }
   };
 
   const onPressMap = async (event: any) => {
@@ -342,8 +380,9 @@ const HikingScreen = ({route, navigation}: any) => {
         });
 
         fetchPlaceName(coords[1], coords[0]);
-        const fetchedRoute = await fetchRoute(userLocation, coords);
-        setRoute(fetchedRoute);
+        const {mainRoute, offRoad} = await fetchRoute(userLocation, coords);
+        setRoute(mainRoute);
+        setOffRoadSegment(offRoad);
         const locResults: any = await getTimeAndDistance(userLocation, coords);
 
         setResults(locResults);
@@ -500,6 +539,7 @@ const HikingScreen = ({route, navigation}: any) => {
     setShowPinLocationSheet(false);
     setShowNavigationSheet(false);
     pinLocationSheet.current.close();
+    setOffRoadSegment([]);
   };
 
   const fitToBounds = () => {
@@ -647,12 +687,34 @@ const HikingScreen = ({route, navigation}: any) => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 5,
                 lineColor: PFColors.Blue.Dark,
               }}
             />
           </MapboxGL.ShapeSource>
         )}
+        {offRoadSegment?.length > 0 &&
+          offRoadSegment.map((segment, index) => (
+            <MapboxGL.ShapeSource
+              key={`off-road-source-${index}`}
+              id={`off-road-source-${index}`}
+              shape={{
+                type: 'Feature',
+                geometry: {
+                  type: 'LineString',
+                  coordinates: segment,
+                },
+              }}>
+              <MapboxGL.LineLayer
+                id={`off-road-line-${index}`}
+                style={{
+                  lineWidth: 3,
+                  lineColor: 'red',
+                  lineDasharray: [0.8, 3],
+                }}
+              />
+            </MapboxGL.ShapeSource>
+          ))}
       </MapboxGL.MapView>
       <TouchableOpacity
         style={styles.centerMapStyles}
@@ -838,8 +900,8 @@ const HikingScreen = ({route, navigation}: any) => {
               shareTrail: {
                 startingPoint: [],
                 endingPoint: pinLocationMarker,
-                type: 'Pin Point',
-                // data: [],
+                type: 'Way point',
+                name: placeName,
               },
             });
           }, 1000);

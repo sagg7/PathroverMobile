@@ -410,7 +410,7 @@ const RecordHikingRoute = () => {
           minDisplacement={isIOS() ? 3 : 10}
           // minDisplacement={5}
           requestsAlwaysUse
-          // showsUserHeadingIndicator
+          showsUserHeadingIndicator
           androidRenderMode="gps"
         />
 
@@ -432,7 +432,7 @@ const RecordHikingRoute = () => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 5,
                 lineColor: PFColors.Blue.Dark,
                 lineJoin: 'round',
                 lineCap: 'round',

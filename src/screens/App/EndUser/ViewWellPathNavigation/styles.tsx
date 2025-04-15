@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
   },
   maplayerStyles: {
     position: 'absolute',
-    top: HP('75'),
-    right: 20,
+    top: isIOS() ? HP('75') : HP('73'),
+    right: 17,
   },
   undoRedoContainer: {
     flexDirection: 'row',
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   recenterIcon: {
     position: 'absolute',
-    top: HP('75'),
+    top: isIOS() ? HP('75') : HP('73'),
     left: 15,
   },
 });

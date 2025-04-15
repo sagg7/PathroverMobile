@@ -358,7 +358,7 @@ const SearchTrailResult = ({route, navigation}: any) => {
               <MapboxGL.LineLayer
                 id="routeLayer-unique"
                 style={{
-                  lineWidth: 3,
+                  lineWidth: 5,
                   lineColor: PFColors.Blue.Dark,
                 }}
               />

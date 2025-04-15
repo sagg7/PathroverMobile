@@ -262,22 +262,32 @@ const SearchWellPath = ({route, navigation}: any) => {
           />
         </>
       )}
-      <View style={{...styles.rowView, padding: WP('5')}}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => setSearchType('wells')}
-          style={styles.rowView}>
-          {searchType == 'wells' ? svgIcon.RadioActive : svgIcon.RadioInactive}
-          <Text style={styles.searchLabel}>{'Search by wells'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => setSearchType('places')}
-          style={styles.rowView}>
-          {searchType == 'places' ? svgIcon.RadioActive : svgIcon.RadioInactive}
-          <Text style={styles.searchLabel}>{'Search by places'}</Text>
-        </TouchableOpacity>
-      </View>
+      {suggestions?.length < 1 && (
+        <View
+          style={{
+            ...styles.rowView,
+            padding: WP('5'),
+          }}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setSearchType('wells')}
+            style={styles.rowView}>
+            {searchType == 'wells'
+              ? svgIcon.RadioActive
+              : svgIcon.RadioInactive}
+            <Text style={styles.searchLabel}>{'Search by wells'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setSearchType('places')}
+            style={styles.rowView}>
+            {searchType == 'places'
+              ? svgIcon.RadioActive
+              : svgIcon.RadioInactive}
+            <Text style={styles.searchLabel}>{'Search by places'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {suggestions?.length < 1 && (
         <>
           <Text style={styles.recentTitle}>{'Recently Searches'}</Text>

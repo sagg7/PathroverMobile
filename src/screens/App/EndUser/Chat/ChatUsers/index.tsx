@@ -31,6 +31,7 @@ import {DOMAIN_BASE_URL} from '../../../../../shared/utils/constant';
 
 const ChatUsers = () => {
   const {params} = useRoute<any>();
+
   const shareTrail = params?.shareTrail;
   const isFocused = useIsFocused();
   const navigation = useNavigation<any>();
@@ -68,11 +69,9 @@ const ChatUsers = () => {
         if (permissionGranted) {
           const allContacts = await Contacts.getAll();
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
+
           const formattedContacts = formatContacts(allUsers?.data);
           setAllContactsList(formattedContacts);
-
-          console.log('formattedContacts', JSON.stringify(formattedContacts, null, 2));
-          
           setMatchedUsers(formattedContacts);
         } else {
           console.warn('Contacts permission denied');
@@ -153,7 +152,6 @@ const ChatUsers = () => {
     const message = `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free. Download it here: ${appLink}`;
 
     url += `${separator}body=${encodeURIComponent(message)}`;
-    console.log(' inviteUser ~ url==>', url);
 
     Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));
   };
@@ -170,7 +168,13 @@ const ChatUsers = () => {
             }
             style={styles.imageStyle}
           />
-          <Text style={styles.nameText}>{item?.displayName|| item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>
+            {item?.displayName ||
+              (item?.givenName && item?.familyName
+                ? `${item.givenName} ${item.familyName}`
+                : item?.givenName || item?.familyName) ||
+              'User'}
+          </Text>
         </View>
         {item?.is_exist ? (
           <TouchableOpacity

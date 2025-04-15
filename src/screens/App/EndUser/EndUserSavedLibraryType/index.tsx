@@ -56,7 +56,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const handleNavigation = (selectedItem: any) => {
     if (
       selectedItem?.route_type === 'waypoint_route' ||
-      selectedItem?.route_type === 'hiking_waypoint'
+      selectedItem?.route_type === 'hiking_waypoint' ||
+      selectedItem?.route_type === 'maps_location_pins'
     ) {
       navigation.navigate(Routes.ViewWellPathNavigation, {
         entranceCoords: [
@@ -194,19 +195,21 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         });
       }, 300);
     } else {
-      console.log(' handleShareOption ~ routeData==>', routeData);
       // const hasCustom = routeData?.route_type.includes('custom');
       const startingPoint = extractCoordinates(routeData?.pickup_location);
       const endingPoint = extractCoordinates(routeData?.dropoff_location);
       const {pickup_location, dropoff_location, ...data} = routeData;
       handleModal(null, null);
+      // return;
       if (routeData?.route_type) {
         navigation.navigate(Routes.ChatUsers, {
           shareTrail: {
             startingPoint: startingPoint,
             endingPoint: endingPoint,
+            ...routeData,
             type:
-              routeData.route_type == 'custom_route'
+              routeData.route_type == 'custom_route' ||
+              routeData.route_type == 'hiking_custom_route'
                 ? 'custom route'
                 : routeData.route_type == 'recording_route'
                 ? 'Recording'
@@ -214,8 +217,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
                 ? 'Well pin'
                 : routeData.route_type == 'hiking_trail_route'
                 ? 'trail'
+                : routeData.route_type == 'waypoint_route'
+                ? 'Way point'
                 : 'route',
-            data,
           },
         });
       }

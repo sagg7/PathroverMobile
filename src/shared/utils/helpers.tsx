@@ -143,7 +143,7 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
    */
   const formatDuration = minutes => {
     if (minutes < 1) {
-      return 'A few seconds away';
+      return 'Almost there';
     }
 
     if (minutes >= 60) {
@@ -408,7 +408,7 @@ export const getTimeAndDistanceForWaypoint = async (
 
   const MAX_WAYPOINTS = 25; // Mapbox limit
   const formatDuration = minutes => {
-    if (minutes < 1) return 'A few seconds away';
+    if (minutes < 1) return 'Few seconds away';
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = Math.round(minutes % 60);

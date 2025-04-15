@@ -65,8 +65,9 @@ const MemberList = () => {
           // Save full contacts list
 
           const filteredContacts = formattedContacts.filter(
-            (contact: any) => contact?.is_exist)
-          
+            (contact: any) => contact?.is_exist,
+          );
+
           setAllContactsList(filteredContacts);
           setMatchedUsers(filteredContacts);
         } else {
@@ -99,7 +100,7 @@ const MemberList = () => {
             user?.givenName?.toLowerCase()?.includes(searchText) ||
             user?.familyName?.toLowerCase()?.includes(searchText),
         );
-        
+
         setMatchedUsers(filteredContacts);
       } else {
         setMatchedUsers(allContactsList);
@@ -148,7 +149,13 @@ const MemberList = () => {
           {exists && <View style={styles.iconView}>{svgIcon.AddedIcon}</View>}
         </View>
         <View style={styles.textView}>
-          <Text style={styles.nameText}>{item?.displayName|| item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>
+            {item?.displayName ||
+              (item?.givenName && item?.familyName
+                ? `${item.givenName} ${item.familyName}`
+                : item?.givenName || item?.familyName) ||
+              'User'}
+          </Text>
         </View>
       </TouchableOpacity>
     );

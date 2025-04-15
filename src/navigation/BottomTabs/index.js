@@ -27,18 +27,19 @@ const AppStack = () => {
     NotificationListener(navigation);
   }, []);
 
-  const updateCallStatus = async (status, id) => {
+  const updateCallStatus = async (status, id, receiver_id) => {
     try {
       const obj = {
         status: status ?? '',
         id: id ?? '',
+        receiver_id: receiver_id ?? '',
       };
-      console.log('updateCall obj----------->>>>>>>>>>>>>>', obj);
+      // console.log('updateCall obj--bottom tab notification--------->>>>>>>>>>>>>>', obj);
       const res = await updateCall(obj);
 
       // console.log('updateCall res------------------', res);
     } catch (error) {
-      console.log('error in update call status------------------', error);
+      // console.log('error in update call status------------------', error);
     }
   };
 
@@ -52,20 +53,6 @@ const AppStack = () => {
       // console.log('App opened from background:', remoteMessage);
       onNotifyPress(remoteMessage, navigation);
     });
-
-    // useEffect(() => {
-    //   const unsubscribeNotificationListener: any = notificationListener();
-    //   return () => {
-    //     // Cleanup notification listeners
-    //     unsubscribeNotificationListener();
-
-    //     // Clear all delivered and local notifications
-    //     PushNotification.getDeliveredNotifications((all: any) => {
-    //       PushNotification.removeAllDeliveredNotifications();
-    //       PushNotification.cancelAllLocalNotifications();
-    //     });
-    //   };
-    // }, []);
 
     messaging().onMessage(async remoteMessage => {
       // console.log('Foreground message received:', remoteMessage);
