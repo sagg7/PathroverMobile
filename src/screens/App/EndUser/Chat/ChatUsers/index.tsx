@@ -31,7 +31,6 @@ import {DOMAIN_BASE_URL} from '../../../../../shared/utils/constant';
 
 const ChatUsers = () => {
   const {params} = useRoute<any>();
-
   const shareTrail = params?.shareTrail;
   const isFocused = useIsFocused();
   const navigation = useNavigation<any>();

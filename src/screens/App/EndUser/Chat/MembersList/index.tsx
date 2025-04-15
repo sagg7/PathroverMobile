@@ -21,7 +21,7 @@ import RenderEmptyUser from '../RenderEmptyUser';
 const MemberList = () => {
   const {params} = useRoute<any>();
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [addMembers] = useAddMembersMutation<any>();
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
