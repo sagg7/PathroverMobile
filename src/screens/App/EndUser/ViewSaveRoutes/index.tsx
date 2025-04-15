@@ -81,7 +81,8 @@ const ViewSaveRoutes = ({route}: any) => {
 
   useEffect(() => {
     if (route) {
-      const selectedRoute = route?.params?.item;
+      const selectedRoute =
+        route?.params?.item || route?.params || route?.params?.data;
 
       const endCoordinates = [
         parseFloat(selectedRoute?.dropoff_location?.longitude),
@@ -103,8 +104,8 @@ const ViewSaveRoutes = ({route}: any) => {
           ]);
 
       setDestination(endCoordinates);
-      formattedPoints.unshift(startCoordinates);
-      formattedPoints.push(endCoordinates);
+      formattedPoints?.unshift(startCoordinates);
+      formattedPoints?.push(endCoordinates);
       if (selectedRoute?.route_type === 'maps_location_pins') {
         getRoadRoute(startCoordinates, endCoordinates);
       } else {
@@ -112,7 +113,7 @@ const ViewSaveRoutes = ({route}: any) => {
       }
       setRouteLineColor(selectedRoute?.color);
       setRouteLineHeight(Number(selectedRoute?.weight));
-      setSelectedRoute(route?.params?.item);
+      setSelectedRoute(route?.params?.item || route?.params);
     }
   }, [route]);
 
@@ -127,6 +128,7 @@ const ViewSaveRoutes = ({route}: any) => {
 
   const getTimeDistanceDetails = async () => {
     const locResults: any = await getTimeAndDistance(liveLocation, startPoint);
+
     setTimeDistance(locResults);
 
     let distanceValue = 0;
@@ -162,16 +164,6 @@ const ViewSaveRoutes = ({route}: any) => {
     getLocationOneTime();
   }, []);
 
-  const getRoute = async () => {
-    if (currentLocation) {
-      try {
-        const path = await fetchRoute(currentLocation, startPoint);
-        setRouteToStartPoint(path);
-      } catch (error) {
-        console.error('Error fetching route:', error);
-      }
-    }
-  };
   useEffect(() => {
     getTimeDistanceDetails();
   }, [currentLocation]);
@@ -270,7 +262,7 @@ const ViewSaveRoutes = ({route}: any) => {
   };
   const calculateTotalDistance = (routePoints: any): number => {
     let totalDistanceKm = 0;
-    for (let i = 0; i < routePoints.length - 1; i++) {
+    for (let i = 0; i < routePoints?.length - 1; i++) {
       totalDistanceKm += haversineDistance(routePoints[i], routePoints[i + 1]);
     }
     const totalDistanceMiles = totalDistanceKm * 0.621371;
@@ -394,7 +386,7 @@ const ViewSaveRoutes = ({route}: any) => {
 
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title={route?.params?.item?.name} />
+      <AppHeader title={route?.params?.item?.name || route?.params?.name} />
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -449,6 +441,7 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+        {/*  */}
 
         {routeToStartPoint?.length > 0 && (
           <MapboxGL.ShapeSource shape={routeGeoJSONToStart} id="245">
@@ -456,7 +449,7 @@ const ViewSaveRoutes = ({route}: any) => {
               key={routeToStartPoint?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 4,
+                lineWidth: routeLineHeight || 5,
                 lineColor: routeLineColor,
               }}
             />

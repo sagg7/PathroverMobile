@@ -254,7 +254,7 @@ const RecordRoute = () => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 5,
                 lineColor: PFColors.Blue.Dark,
                 lineJoin: 'round',
                 lineCap: 'round',

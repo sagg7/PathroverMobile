@@ -56,7 +56,6 @@ const App = () => {
 
   const handleDeepLink = (url: string | null) => {
     if (url) {
-      console.log('\n\n\nDeep link received:', url);
       const {routeType, routeId} = extractParams(url);
       // if (routeType) {
       //   // navigate('ViewSharedRoute', {routeType, routeId});

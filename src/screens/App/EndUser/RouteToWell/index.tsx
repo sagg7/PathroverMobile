@@ -36,7 +36,7 @@ const RouteToWell = ({route}: any) => {
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [count, setCount] = useState<any>(1);
+  const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
@@ -52,7 +52,12 @@ const RouteToWell = ({route}: any) => {
   const cameraRef = useRef<any>(null);
 
   useEffect(() => {
-    if (route) setDestination(route?.params?.entranceCoords);
+    if (route) {
+      const formattedCoords = route?.params?.entranceCoords.map(coord =>
+        parseFloat(coord),
+      );
+      setDestination(formattedCoords);
+    }
   }, [route]);
   useEffect(() => {
     if (location) {
@@ -70,6 +75,25 @@ const RouteToWell = ({route}: any) => {
     }
   }, [mapLayerStyle]);
 
+  const toRad = value => (value * Math.PI) / 180;
+
+  const getDistanceInKm = (coord1, coord2) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
@@ -77,11 +101,24 @@ const RouteToWell = ({route}: any) => {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      const route = data.routes[0]?.geometry?.coordinates;
-      return route;
+      const route = data?.routes[0]?.geometry?.coordinates;
+      setTourStops(data.routes[0]?.legs[0]?.steps);
+
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
+
+      const lastRoutePoint = route[route?.length - 1];
+      const distance = getDistanceInKm(lastRoutePoint, end);
+
+      const isOffRoad = distance > 0.01; // 10 meters
+
+      // Return the main route and the off-road segment if needed
+      return {
+        mainRoute: route,
+        offRoad: isOffRoad ? [lastRoutePoint, end] : [],
+      };
     } catch (error) {
-      // showAlert('Error', 'No route exists between the entered locations.');
-      return [];
+      console.error('Error fetching route:', error);
+      return {mainRoute: [], offRoad: []};
     }
   };
 
@@ -99,8 +136,15 @@ const RouteToWell = ({route}: any) => {
 
   const getRoute = async () => {
     if (destination && currentLocation) {
-      const fetchedRoute = await fetchRoute(currentLocation, destination);
-      setRoute(fetchedRoute);
+      // const fetchedRoute = await fetchRoute(currentLocation, destination);
+      const {mainRoute, offRoad} = await fetchRoute(
+        currentLocation,
+        destination,
+      );
+
+      setRoute(mainRoute);
+
+      setOffRoadSegment(offRoad);
     }
   };
   useEffect(() => {
@@ -290,7 +334,6 @@ const RouteToWell = ({route}: any) => {
             {svgIcon.CurrentLocation}
           </MapboxGL.MarkerView>
         )}
-
         {/* Route Line */}
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
@@ -299,6 +342,26 @@ const RouteToWell = ({route}: any) => {
               style={{
                 lineWidth: 3,
                 lineColor: PFColors.Blue.Dark,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
+        {offRoadSegment?.length === 2 && (
+          <MapboxGL.ShapeSource
+            shape={{
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: offRoadSegment,
+              },
+            }}
+            id="off-road-source">
+            <MapboxGL.LineLayer
+              id="off-road-line"
+              style={{
+                lineWidth: 3,
+                lineColor: 'red',
+                lineDasharray: [0.8, 3], // Small dots with short gaps
               }}
             />
           </MapboxGL.ShapeSource>

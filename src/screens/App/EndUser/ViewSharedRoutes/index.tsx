@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import MapboxGL from '@rnmapbox/maps';
 import {svgIcon} from '../../../../assets/svg';
@@ -26,6 +26,7 @@ import {
 } from '../../../../shared/utils/helpers';
 import styles from './styles';
 import {useGetRouteBasedIdMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const ViewSharedRoutes = ({route}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -51,6 +52,7 @@ const ViewSharedRoutes = ({route}: any) => {
   const [isStartBtnPressed, setIsStartBtnPressed] = useState<boolean>(false);
   const [showReachModal, setShowReachModal] = useState(false);
   const [modalKey, setModalKey] = useState(1);
+  const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,
@@ -58,7 +60,7 @@ const ViewSharedRoutes = ({route}: any) => {
   });
   const [showRouteActionSheet, setShowRouteActionSheet] =
     useState<boolean>(true);
-
+  const dispatch = useDispatch();
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
@@ -125,10 +127,9 @@ const ViewSharedRoutes = ({route}: any) => {
 
   const getRoadRoute = async (start, end) => {
     try {
-      const path = await fetchRoute(start, end);
-      console.log('\n\n\nPATH', path);
-
-      setRoute(path);
+      const {mainRoute, offRoad} = await fetchRoute(start, end);
+      setRoute(mainRoute);
+      setOffRoadSegment(offRoad);
     } catch (error: any) {
       showAlert('Error fetching road route', error);
     }
@@ -171,16 +172,6 @@ const ViewSharedRoutes = ({route}: any) => {
     getLocationOneTime();
   }, []);
 
-  const getRoute = async () => {
-    if (currentLocation) {
-      try {
-        const path = await fetchRoute(currentLocation, startPoint);
-        setRouteToStartPoint(path);
-      } catch (error) {
-        console.error('Error fetching route:', error);
-      }
-    }
-  };
   useEffect(() => {
     getTimeDistanceDetails();
   }, [currentLocation]);
@@ -207,7 +198,26 @@ const ViewSharedRoutes = ({route}: any) => {
     }
   };
 
-  const fetchRoute = async (start, end) => {
+  const toRad = (value: any) => (value * Math.PI) / 180;
+
+  const getDistanceInKm = (coord1: any, coord2: any) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
+  const _fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
@@ -220,6 +230,31 @@ const ViewSharedRoutes = ({route}: any) => {
       console.error('Error fetching route:', error);
       // showAlert('Error', 'No route exists between the entered locations.');
       return [];
+    }
+  };
+
+  const fetchRoute = async (start: any, end: any) => {
+    const accessToken = mapBoxToken;
+    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data?.routes[0]?.geometry?.coordinates;
+
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
+
+      const lastRoutePoint = route[route?.length - 1];
+      const distance = getDistanceInKm(lastRoutePoint, end);
+
+      const isOffRoad = distance > 0.01; // 10 meters
+
+      return {
+        mainRoute: route,
+        offRoad: isOffRoad ? [lastRoutePoint, end] : [],
+      };
+    } catch (error) {
+      return {mainRoute: [], offRoad: []};
     }
   };
 
@@ -237,6 +272,7 @@ const ViewSharedRoutes = ({route}: any) => {
       (item: any) => item.isSelected,
     )?.type;
     setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
 
     setTimeout(() => {
       setMapLayerSheeet(false);
@@ -350,7 +386,7 @@ const ViewSharedRoutes = ({route}: any) => {
     setIsStartBtnPressed(true);
     // return;
     // getRoute();
-    const path = await fetchRoute(currentLocation, startPoint);
+    const {mainRoute, offRoad} = await fetchRoute(currentLocation, startPoint);
 
     cameraRef.current.setCamera({
       centerCoordinate: currentLocation,
@@ -360,7 +396,8 @@ const ViewSharedRoutes = ({route}: any) => {
       pitch: 60,
     });
 
-    setRouteToStartPoint(path);
+    setRouteToStartPoint(mainRoute);
+    setOffRoadSegment(offRoad);
     setShowRouteActionSheet(false);
     const routeResults: any = await getTimeAndDistance(
       currentLocation,
@@ -400,7 +437,6 @@ const ViewSharedRoutes = ({route}: any) => {
       paddingBottom: 180,
     };
   };
-  console.log('outes?.length', routes);
 
   return (
     <MainWrapper style={styles.container}>
@@ -453,7 +489,7 @@ const ViewSharedRoutes = ({route}: any) => {
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 4,
+                lineWidth: routeLineHeight || 6,
                 lineColor: routeLineColor,
               }}
             />

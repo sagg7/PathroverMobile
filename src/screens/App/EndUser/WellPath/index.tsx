@@ -74,7 +74,7 @@ const WellPath = () => {
   const [searchLocationName, setSearchLocationNames] = useState<any>(null);
   const [searchedWells, setSearchedWells] = useState<any>(null);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-
+  const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
   const [selectedWell, setSelectedWell] = useState<any>(null);
   const [selectedWellName, setSelectedWellName] = useState<any>(null);
   const [showRouteActionSheet, setShowRouteActionSheet] =
@@ -273,6 +273,25 @@ const WellPath = () => {
   //   setAllWells(filteredWells);
   // }, [nearbyWells, nearbyPins, allWellLocations]);
 
+  const toRad = value => (value * Math.PI) / 180;
+
+  const getDistanceInKm = (coord1, coord2) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
@@ -280,19 +299,49 @@ const WellPath = () => {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      const route = data.routes[0]?.geometry?.coordinates;
-      return route;
+      const route = data?.routes[0]?.geometry?.coordinates;
+
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
+
+      const firstRoutePoint = route[0];
+      const lastRoutePoint = route[route.length - 1];
+
+      const startDistance = getDistanceInKm(start, firstRoutePoint);
+      const endDistance = getDistanceInKm(end, lastRoutePoint);
+
+      const isStartOffRoad = startDistance > 0.01; // 10 meters
+      const isEndOffRoad = endDistance > 0.01;
+
+      let offRoad = [];
+
+      if (isStartOffRoad) {
+        const formatedArr = start?.map((item: any) => Number(item));
+
+        offRoad?.push([formatedArr, firstRoutePoint]);
+      }
+      if (isEndOffRoad) {
+        const formatedArr = end?.map((item: any) => Number(item));
+
+        offRoad?.push([lastRoutePoint, formatedArr]);
+      }
+
+      return {
+        mainRoute: route,
+        offRoad: offRoad,
+      };
     } catch (error) {
-      console.error('Error fetching route:', error);
-      // showAlert('Error', 'No route exists between the entered locations.');
-      return [];
+      return {mainRoute: [], offRoad: []};
     }
   };
 
   const getRoute = async () => {
     if (searchLocation && currentLocation) {
-      const fetchedRoute = await fetchRoute(currentLocation, searchLocation);
-      setRoute(fetchedRoute);
+      const {mainRoute, offRoad} = await fetchRoute(
+        currentLocation,
+        searchLocation,
+      );
+      setRoute(mainRoute);
+      setOffRoadSegment(offRoad);
     }
   };
   useEffect(() => {
@@ -330,6 +379,13 @@ const WellPath = () => {
             page: 1,
           });
           setShowRouteActionSheet(true);
+          fetchPlaceName(searchLocation[1], searchLocation[0]);
+
+          setPinLocationDetails({
+            latitude: searchLocation[1],
+            longitude: searchLocation[0],
+            name: pinLocationDetails?.name || placeName || '',
+          });
 
           refetch();
         } else {
@@ -361,9 +417,13 @@ const WellPath = () => {
 
           fetchPlaceName(coords[1], coords[0]);
 
-          // Fetch route asynchronously
-          const fetchedRoute = await fetchRoute(currentLocation, coords);
-          setWayPointRoute(fetchedRoute);
+          const {mainRoute, offRoad} = await fetchRoute(
+            currentLocation,
+            coords,
+          );
+
+          setWayPointRoute(mainRoute);
+          setOffRoadSegment(offRoad);
 
           // Fetch time and distance asynchronously
           const locResults: any = await getTimeAndDistance(
@@ -609,6 +669,8 @@ const WellPath = () => {
     setShowPinLocationSheet(false);
     setShowNavigationSheet(false);
     pinMapLocation.current?.close();
+    setOffRoadSegment([]);
+
     // setShowNavigationSheet(false);
   };
 
@@ -619,11 +681,9 @@ const WellPath = () => {
 
     try {
       const res = await Share.open(options);
-      console.log(res);
       setShowShareWellSheet(false);
     } catch (err) {
       if (err) {
-        console.log(err);
       }
     }
   };
@@ -726,6 +786,7 @@ const WellPath = () => {
           startingPoint: entranceCoords,
           endingPoint: formatedArr,
           type: 'Well entrance route',
+          route_type: 'maps_location_pins',
         },
       });
     } else {
@@ -770,7 +831,7 @@ const WellPath = () => {
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={16}
+          zoomLevel={14}
           centerCoordinate={currentLocation}
         />
         <MapboxGL.UserLocation
@@ -816,6 +877,7 @@ const WellPath = () => {
         )}
 
         <MapboxGL.ShapeSource
+          key={`wellsCluster-${allWells?.length}`}
           onPress={onPressMarker}
           id="wellsCluster"
           shape={wellsToGeoJSON(allWells)}
@@ -823,7 +885,6 @@ const WellPath = () => {
           clusterRadius={50} // Adjust cluster grouping size
           clusterMaxZoom={14} // Adjust zoom level for cluster expansion
         >
-          {/* Cluster Layer (Shows Number of Markers in Cluster) */}
           <MapboxGL.SymbolLayer
             id="clusterLayer"
             filter={['has', 'point_count']} // Only apply to clusters
@@ -861,19 +922,42 @@ const WellPath = () => {
             }}
           />
         </MapboxGL.ShapeSource>
-
         {/* Route Line */}
         {route?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 5,
                 lineColor: PFColors.Blue.Dark,
               }}
             />
           </MapboxGL.ShapeSource>
         )}
+
+        {offRoadSegment?.length > 0 &&
+          offRoadSegment.map((segment, index) => (
+            <MapboxGL.ShapeSource
+              key={`off-road-source-${index}`}
+              id={`off-road-source-${index}`}
+              shape={{
+                type: 'Feature',
+                geometry: {
+                  type: 'LineString',
+                  coordinates: segment,
+                },
+              }}>
+              <MapboxGL.LineLayer
+                id={`off-road-line-${index}`}
+                style={{
+                  lineWidth: 3,
+                  lineColor: 'red',
+                  lineDasharray: [0.8, 3],
+                }}
+              />
+            </MapboxGL.ShapeSource>
+          ))}
+
         {waypointRoute?.length > 1 && (
           <MapboxGL.ShapeSource
             shape={waypointRouteGeoJSON}
@@ -956,12 +1040,13 @@ const WellPath = () => {
         }}
         onPressRouteToWell={() => {
           setShowPinAddress(false);
-          navigation.navigate(Routes.RouteToWell, {
+          navigation.navigate(Routes.ViewWellPathNavigation, {
             entranceCoords: selectedWell,
             entranceName: selectedWellName?.well_name,
           });
         }}
       />
+
       {showAddEntranceSheet && (
         <AddEntranceSheet
           onPressShare={() => setShowPlaceEntrance(true)}
@@ -971,7 +1056,7 @@ const WellPath = () => {
           entranceName={entranceName}
           isEntranceMarker={entranceCoords}
           onPressPlaceToEntrance={() => {
-            navigation.navigate(Routes.RouteToWell, {
+            navigation.navigate(Routes.ViewWellPathNavigation, {
               entranceCoords: entranceCoords,
               entranceName: entranceName,
             });
@@ -1008,8 +1093,16 @@ const WellPath = () => {
               entranceCoords: searchLocation,
               entranceName: searchLocationName,
             });
+            setOffRoadSegment([]);
           }}
-          show={false}
+          show={true}
+          onPressShare={() => setShowShareSheet(true)}
+          onPressPin={() => {
+            setShowRouteActionSheet(false);
+            setTimeout(() => {
+              pinMapLocation?.current?.open();
+            }, 500);
+          }}
         />
       )}
 
@@ -1074,7 +1167,9 @@ const WellPath = () => {
             shareTrail: {
               startingPoint: [],
               endingPoint: pinLocationMarker,
-              type: 'Pin Point',
+              type: 'Way point',
+              route_type: 'waypoint_route',
+              name: placeName,
             },
           });
         }}

@@ -55,7 +55,7 @@ import Undo from '../svg/Undo.svg';
 import RedoActive from '../svg/RedoActive.svg';
 import UndoActive from '../svg/UndoActive.svg';
 import Navigator from '../svg/navigator.svg';
-import MapWhiteBg from '../svg/Map.svg';
+import MapWhiteBg from '../svg/recenterIcon.svg';
 import MapLayer from '../svg/maplayers.svg';
 import StartPoint from './greenMarker.svg';
 import DefaultMarker from './default.svg';
@@ -163,6 +163,7 @@ import RecentIcon from './recent.svg';
 import CheckboxFill from './checkbox_fill.svg';
 import CheckboxBlank from './checkbox_blank.svg';
 import SearchIcon from './search_icon.svg';
+import RecenterIcon from './recenterIcon.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -202,7 +203,7 @@ export const svgIcon = {
   GalleryBlue: <GalleryBlue />,
   RouteBlue: <RouteBlue />,
   RouteBlack: <RouteBlack />,
-  DownChaveron: <DownChaveron fill={"#13488A"}/>,
+  DownChaveron: <DownChaveron fill={'#13488A'} />,
   UpChaveron: <UpChaveron />,
   ClockRed: <Clock />,
   RatingStar: <RatingStar />,
@@ -329,4 +330,5 @@ export const svgIcon = {
   CheckboxFill: <CheckboxFill />,
   CheckboxBlank: <CheckboxBlank />,
   SearchIcon: <SearchIcon />,
+  RecenterIcon: <RecenterIcon />,
 };

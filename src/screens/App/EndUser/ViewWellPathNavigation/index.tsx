@@ -25,12 +25,13 @@ import {
   View,
 } from 'react-native';
 import {getTimeAndDistance} from '../../../../shared/utils/helpers';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   activateKeepAwake,
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
 import {useGetRouteBasedIdMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -43,10 +44,7 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [routes, setRoute] = useState<any>([]);
   const [results, setResults] = useState<any>(null);
   const [destination, setDestination] = useState<any>(null);
-  const [tourStarted, setTourStarted] = useState<boolean>(true);
-  const [routeSteps, setRouteSteps] = useState<any>([]);
-  const [showRouteStartedSheet, setShowRouteStartedSheet] =
-    useState<boolean>(true);
+
   const [heading, setHeading] = useState(0);
   const [tourStops, setTourStops] = useState<any>([]);
   const [activeItem, setActiveItem] = useState(null);
@@ -57,10 +55,13 @@ const ViewWellPathNavigation = ({route}: any) => {
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const [getRouteBasedId, {isLoading, data}] = useGetRouteBasedIdMutation();
+  const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
-
+  const dispatch = useDispatch();
+  const userRef = useRef<any>();
+  const flatListRef = useRef<any>(null);
   useEffect(() => {
     if (route && route?.params?.entranceCoords?.length > 1) {
       setDestination(route?.params?.entranceCoords);
@@ -68,11 +69,9 @@ const ViewWellPathNavigation = ({route}: any) => {
       if (route?.params?.routeId) getRouteBasedId(route?.params?.routeId);
     }
   }, [route]);
-  // maps_location_pins;
   useEffect(() => {
     if (data) {
       const routeData = data?.user_routes[0];
-      console.log('routeData===>', routeData?.route_type);
 
       setDestination([
         Number(routeData?.dropoff_location?.longitude),
@@ -100,7 +99,26 @@ const ViewWellPathNavigation = ({route}: any) => {
     };
   }, []);
 
-  const fetchRoute = async (start, end) => {
+  const toRad = value => (value * Math.PI) / 180;
+
+  const getDistanceInKm = (coord1, coord2) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in kilometers
+  };
+
+  const _fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
@@ -116,6 +134,53 @@ const ViewWellPathNavigation = ({route}: any) => {
       // }
       // setCount(2);
       return [];
+    }
+  };
+
+  const fetchRoute = async (start, end) => {
+    const accessToken = mapBoxToken;
+    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data?.routes[0]?.geometry?.coordinates;
+      setTourStops(data.routes[0]?.legs[0]?.steps);
+
+      if (!route || route?.length === 0) {
+        setRoute([]), setOffRoadSegment([]);
+        return;
+      }
+
+      const firstRoutePoint = route[0];
+      const lastRoutePoint = route[route.length - 1];
+
+      const startDistance = getDistanceInKm(start, firstRoutePoint);
+      const endDistance = getDistanceInKm(end, lastRoutePoint);
+
+      const isStartOffRoad = startDistance > 0.01; // 10 meters
+      const isEndOffRoad = endDistance > 0.01;
+
+      let offRoad = [];
+
+      if (isStartOffRoad) {
+        const formatedArr = start?.map((item: any) => Number(item));
+
+        offRoad?.push([formatedArr, firstRoutePoint]);
+      }
+      if (isEndOffRoad) {
+        const formatedArr = end?.map((item: any) => Number(item));
+
+        offRoad?.push([lastRoutePoint, formatedArr]);
+      }
+
+      setRoute(route);
+      setOffRoadSegment(offRoad);
+    } catch (error) {
+      console.error('Error fetching route:', error);
+      setRoute([]);
+      setOffRoadSegment([]);
+      return {mainRoute: [], offRoad: []};
     }
   };
 
@@ -173,7 +238,7 @@ const ViewWellPathNavigation = ({route}: any) => {
   const handleModalOkButton = () => {
     setShowReachModal(false);
     setTimeout(() => {
-      navigation.navigate('Hiking');
+      navigation.goBack();
     }, 100);
   };
 
@@ -182,6 +247,7 @@ const ViewWellPathNavigation = ({route}: any) => {
       (item: any) => item.isSelected,
     )?.type;
     setSelectedMapType(selected);
+    dispatch(setMapLayerStyle(selected));
 
     setTimeout(() => {
       setMapLayerSheeet(false);
@@ -216,7 +282,6 @@ const ViewWellPathNavigation = ({route}: any) => {
 
     return maneuverIcons[type] || maneuverIcons.turn.straight;
   };
-  const activeItemRef = useRef(null);
   const handleViewableItemsChanged = useCallback(({viewableItems}: any) => {
     if (viewableItems?.[0]?.index > 0 && viewableItems.length > 0) {
       const newActiveItem = viewableItems[0].item;
@@ -264,7 +329,7 @@ const ViewWellPathNavigation = ({route}: any) => {
 
         if (distanceToNextStep <= 0.0124) {
           // Threshold distance to consider step reached
-          setTourStops(prevStops => prevStops.slice(1));
+          setTourStops((prevStops: any) => prevStops.slice(1));
         }
       }
 
@@ -275,9 +340,6 @@ const ViewWellPathNavigation = ({route}: any) => {
       setResults(routeResults);
     }
   };
-
-  const userRef = useRef();
-  const flatListRef = useRef(null);
 
   const resetFlatList = () => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: true});
@@ -380,14 +442,53 @@ const ViewWellPathNavigation = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+        {/* {offRoadSegment?.length > 0 && (
+          <MapboxGL.ShapeSource
+            shape={{
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: offRoadSegment,
+              },
+            }}
+            id="off-road-source">
+            <MapboxGL.LineLayer
+              id="off-road-line"
+              style={{
+                lineWidth: 3,
+                lineColor: 'red',
+                lineDasharray: [0.8, 3], // Small dots with short gaps
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )} */}
+        {offRoadSegment?.length > 0 &&
+          offRoadSegment.map((segment, index) => (
+            <MapboxGL.ShapeSource
+              key={`off-road-source-${index}`}
+              id={`off-road-source-${index}`}
+              shape={{
+                type: 'Feature',
+                geometry: {
+                  type: 'LineString',
+                  coordinates: segment,
+                },
+              }}>
+              <MapboxGL.LineLayer
+                id={`off-road-line-${index}`}
+                style={{
+                  lineWidth: 3,
+                  lineColor: 'red',
+                  lineDasharray: [0.8, 3],
+                }}
+              />
+            </MapboxGL.ShapeSource>
+          ))}
       </MapboxGL.MapView>
 
       <View style={styles.navigationInfoView}>
         <View style={styles.titleView}>
-          <TouchableOpacity
-            onPress={() => {
-              setShowRouteStartedSheet(false), navigation.goBack();
-            }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             {svgIcon.CancelIcon}
           </TouchableOpacity>
         </View>
@@ -418,7 +519,7 @@ const ViewWellPathNavigation = ({route}: any) => {
         </View>
       </View>
       <TouchableOpacity style={styles.recenterIcon} onPress={resetCompass}>
-        {svgIcon.MapWhiteBg}
+        {svgIcon.RecenterIcon}
       </TouchableOpacity>
       {modalKey === 1 && (
         <StartPointModal

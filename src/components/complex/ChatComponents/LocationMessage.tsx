@@ -1,7 +1,6 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {PFColors, PFFonts, PFFontSize, Routes} from '../../../shared/exporter';
-import {svgIcon} from '../../../assets/svg';
 import Svg from '../../../assets/svg/blueMarker.svg';
 import moment from 'moment';
 import {useDispatch} from 'react-redux';
@@ -17,15 +16,13 @@ import useLocation from '../../../hooks/getLocation';
 
 const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const {location} = useLocation();
 
   const {startingPoint, endingPoint, type, data} =
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
-    console.log('TYPE', type);
-
     if (type === 'Chosen Trail') {
       navigation.navigate(Routes.TrailDetails, {trailInfo: data});
     } else {
@@ -56,7 +53,31 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
       if (data) {
         dispatch(setRouteData(data));
       }
-      navigation.navigate(Routes.SearchTrailLatLng);
+      const formatedData = JSON.parse(content)?.messageContainsLocation;
+      if (
+        formatedData?.route_type === 'waypoint_route' ||
+        formatedData?.route_type === 'hiking_waypoint' ||
+        formatedData?.route_type === 'maps_location_pins' ||
+        formatedData?.type === 'entrance route' ||
+        formatedData?.type === 'Well route' ||
+        formatedData?.type === 'Well entrance route' ||
+        formatedData?.type === 'Pin Point' ||
+        formatedData?.type === 'Way point'
+      ) {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: formatedData?.endingPoint,
+          entranceName: formatedData?.name,
+        });
+      } else if (
+        formatedData?.route_type === 'hiking_trail_route' ||
+        type === 'trail'
+      ) {
+        navigation.navigate(Routes.SearchTrailLatLng);
+      } else {
+        navigation.navigate(Routes.ViewSaveRoutes, {
+          item: formatedData,
+        });
+      }
     }
   };
 

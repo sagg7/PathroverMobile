@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -9,9 +9,9 @@ import {
   View,
 } from 'react-native';
 import Contacts from 'react-native-contacts';
-import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
-import { appIcons } from '../../../../../assets/icons';
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
+import {appIcons} from '../../../../../assets/icons';
 import ChatIcon from '../../../../../assets/svg/chatIcon.svg';
 import {
   AppButton,
@@ -24,13 +24,13 @@ import {
   useCreateChatMutation,
   useGetChatContactsMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import { WP } from '../../../../../shared/exporter';
+import {WP} from '../../../../../shared/exporter';
 import styles from './styles';
 import RenderEmptyUser from '../RenderEmptyUser';
-import { DOMAIN_BASE_URL } from '../../../../../shared/utils/constant';
+import {DOMAIN_BASE_URL} from '../../../../../shared/utils/constant';
 
 const ChatUsers = () => {
-  const { params } = useRoute<any>();
+  const {params} = useRoute<any>();
   const shareTrail = params?.shareTrail;
   const isFocused = useIsFocused();
   const navigation = useNavigation<any>();
@@ -39,7 +39,7 @@ const ChatUsers = () => {
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
 
   // API
-  const [getAllUsers, { isLoading, data }] = useGetChatContactsMutation();
+  const [getAllUsers, {isLoading, data}] = useGetChatContactsMutation();
   const [createChat] = useCreateChatMutation();
 
   const requestContactsPermission = async () => {
@@ -67,7 +67,7 @@ const ChatUsers = () => {
         const permissionGranted = await requestContactsPermission();
         if (permissionGranted) {
           const allContacts = await Contacts.getAll();
-          const allUsers = await getAllUsers({ users: allContacts }).unwrap();
+          const allUsers = await getAllUsers({users: allContacts}).unwrap();
 
           const formattedContacts = formatContacts(allUsers?.data);
           setAllContactsList(formattedContacts);
@@ -120,7 +120,7 @@ const ChatUsers = () => {
       const obj = {
         chat: {
           chat_type: 0,
-          chat_members_attributes: [{ user_id: item?.id }],
+          chat_members_attributes: [{user_id: item?.id}],
         },
       };
       const res = await createChat(obj);
@@ -128,7 +128,7 @@ const ChatUsers = () => {
         navigation.navigate('ChatDetail', {
           item: res?.data,
           isGroup: false,
-          ...(shareTrail && { shareTrail }),
+          ...(shareTrail && {shareTrail}),
         });
       }
     } catch (error) {
@@ -151,32 +151,29 @@ const ChatUsers = () => {
     const message = `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free. Download it here: ${appLink}`;
 
     url += `${separator}body=${encodeURIComponent(message)}`;
-    console.log(' inviteUser ~ url==>', url);
 
     Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));
   };
 
-  const renderItem = ({ item, index }: any) => {
+  const renderItem = ({item, index}: any) => {
     return (
       <View style={styles.container}>
         <View style={styles.rowContainer}>
           <Image
             source={
               item?.profile_image
-                ? { uri: item?.profile_image }
+                ? {uri: item?.profile_image}
                 : appIcons.userPlaceholder
             }
             style={styles.imageStyle}
           />
-          <Text style={styles.nameText}>{
-            item?.displayName ||
-            (
-              (item?.givenName && item?.familyName)
+          <Text style={styles.nameText}>
+            {item?.displayName ||
+              (item?.givenName && item?.familyName
                 ? `${item.givenName} ${item.familyName}`
-                : item?.givenName || item?.familyName  
-            ) ||
-            'User'
-          }</Text>
+                : item?.givenName || item?.familyName) ||
+              'User'}
+          </Text>
         </View>
         {item?.is_exist ? (
           <TouchableOpacity
@@ -188,8 +185,8 @@ const ChatUsers = () => {
           <AppButton
             title={'Invite'}
             handleClick={() => inviteUser(item)}
-            buttonStyle={{ width: '23%', height: WP('7') }}
-            textStyle={{ fontSize: 12 }}
+            buttonStyle={{width: '23%', height: WP('7')}}
+            textStyle={{fontSize: 12}}
           />
         )}
       </View>

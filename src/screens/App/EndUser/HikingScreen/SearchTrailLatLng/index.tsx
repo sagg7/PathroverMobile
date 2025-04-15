@@ -46,11 +46,10 @@ import styles from './styles';
 const SearchTrailLatLng = () => {
   const {location} = useLocation();
   const navigation = useNavigation<any>();
-  const mapCameraRef = useRef();
+  const mapCameraRef: any = useRef();
   const {endingPoint, startingPoint, routeData, routeType} = useSelector(
     (state: any) => state?.endUser?.trailRoute,
   );
-  console.log('TYPE HERE', routeData);
 
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [results, setResults] = useState<null>(null);
@@ -279,10 +278,17 @@ const SearchTrailLatLng = () => {
 
   const recenterMap = () => {
     if (currentLocation) {
-      mapCameraRef?.current?.setCamera({
+      // mapCameraRef?.current?.setCamera({
+      //   centerCoordinate: currentLocation,
+      //   zoomLevel: 18,
+      //   animationDuration: 1000, // Smooth transition effect
+      // });
+      mapCameraRef?.current.setCamera({
         centerCoordinate: currentLocation,
-        zoomLevel: 15,
-        animationDuration: 1000, // Smooth transition effect
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
       });
     }
   };
@@ -400,20 +406,29 @@ const SearchTrailLatLng = () => {
       {!showRouteStartedSheet && <SearchTrailSelector />}
       <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
         <MapboxGL.Camera
-          zoomLevel={15}
           ref={mapCameraRef}
           centerCoordinate={
             startingPoint?.length > 0 ? startingPoint : currentLocation
           }
+          zoomLevel={18}
+          followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
+          // animationMode="flyTo"
+          animationDuration={2000}
+          pitch={60}
+          heading={0}
         />
-        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+        <MapboxGL.UserLocation
+          visible
+          onUpdate={handleLocationUpdate}
+          showsUserHeadingIndicator
+        />
         {routes?.length > 1 && !isStartBtnPressed && (
           <MapboxGL.ShapeSource shape={routeJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: 4,
+                lineWidth: 6,
                 lineColor: 'red',
               }}
             />
@@ -531,12 +546,15 @@ const SearchTrailLatLng = () => {
             handleClick={() => Linking.openURL(`tel:911`)}
             buttonStyle={{
               position: 'absolute',
-              width: WP('37'),
+              width: WP('38'),
               right: WP('3'),
               backgroundColor: PFColors.Red.RadiantRed,
               height: 40,
               alignItems: 'center',
               bottom: WP('45'),
+            }}
+            textStyle={{
+              paddingBottom: 3,
             }}
           />
           <AppButton
@@ -545,12 +563,15 @@ const SearchTrailLatLng = () => {
             handleClick={recenterMap}
             buttonStyle={{
               position: 'absolute',
-              width: WP('35'),
+              width: WP('37'),
               left: WP('3'),
               backgroundColor: '#A0AFC3',
               height: 40,
               alignItems: 'center',
               bottom: WP('45'),
+            }}
+            textStyle={{
+              paddingBottom: 3,
             }}
           />
           <AppButton
