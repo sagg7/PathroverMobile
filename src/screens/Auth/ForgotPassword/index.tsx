@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import {Alert, View} from 'react-native';
 import React from 'react';
 import styles from './styles';
 import {
@@ -8,9 +8,9 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {Formik} from 'formik';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {
   forgotPassValidation,
   forgotPasswordInitialObject,
@@ -23,30 +23,49 @@ import {
   LOGIN_TYPE_TEXT,
   removeNonNumbers,
 } from '../../../shared/exporter';
-import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
+import {useForgotPasswordMutation} from '../../../redux/auth/authApiSlice';
 
-const ForgotPassword = ({ }) => {
+const ForgotPassword = ({}) => {
   const keyboardVisible = useKeyboardListener();
-  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const [forgotPassword, {isLoading}] = useForgotPasswordMutation();
   const route = useRoute();
-  const { isEmail } = route?.params;
+  const {isEmail} = route?.params;
   const navigation = useNavigation();
 
   const handleContinueBtn = async (val: any) => {
-    const { email, phone } = val;
+    const {email, phone} = val;
     const obj = {
       user: {
-        ...(email && { email: email }),
-        ...(phone && { phone_number: removeNonNumbers(phone) }),
+        ...(email && {email: email?.toLowerCase()}),
+        ...(phone && {phone_number: removeNonNumbers(phone)}),
       },
     };
 
     const resp = await forgotPassword(obj);
     if (resp?.data) {
-      navigation.navigate(Routes.VerifyOtp, {
-        selectedValue: isEmail ? email : phone,
-        isEmail: isEmail,
-      });
+      // TODDO CHANGE AFTER OTP
+      // navigation.navigate(Routes.VerifyOtp, {
+      //   selectedValue: isEmail ? email : phone,
+      //   isEmail: isEmail,
+      // });
+
+      Alert.alert(
+        'OTP',
+        `Remember your otp ${
+          resp?.data?.data?.otp ? resp?.data?.data?.otp : ''
+        }`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.navigate(Routes.VerifyOtp, {
+                selectedValue: isEmail ? email : phone,
+                isEmail: isEmail,
+              });
+            },
+          },
+        ],
+      );
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
@@ -84,9 +103,8 @@ const ForgotPassword = ({ }) => {
                 touched,
                 setFieldValue,
               }) => {
-
                 return (
-                  <View style={{ alignSelf: 'center' }}>
+                  <View style={{alignSelf: 'center'}}>
                     {isEmail ? (
                       <AppInput
                         placeholder="Email"
@@ -94,7 +112,6 @@ const ForgotPassword = ({ }) => {
                         onChangeText={handleChange('email')}
                         touched={touched.email}
                         errorMessage={errors.email}
-
                       />
                     ) : (
                       <AppInput
@@ -106,7 +123,7 @@ const ForgotPassword = ({ }) => {
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
-                        keyboardType={"numeric"}
+                        keyboardType={'numeric'}
                       />
                     )}
 

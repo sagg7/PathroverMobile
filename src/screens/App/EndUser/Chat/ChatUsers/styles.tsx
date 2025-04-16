@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
     height: 48,
     width: 48,
     borderRadius: 48,
+    backgroundColor: PFColors.Gray.LightMist,
   },
   nameText: {
     color: PFColors.Standard.Black,

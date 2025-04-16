@@ -2,6 +2,7 @@ export const PFColors = {
   Standard: {
     White: '#ffffff',
     Black: '#000000',
+    LightBlack: '#282B2B',
     ModalBackdropcolor: 'rgba(0,0,0, 0.5)',
     BackdropLightColor: 'rgba(255, 255, 255, 0.3)',
     SoftWhite: '#f1f1f1',
@@ -31,6 +32,7 @@ export const PFColors = {
     SoftSkyBlue: '#b9c9dc',
     SelectedBlue: '#13488A1A',
     lightBlue: '#EAEFF5',
+    SoftBlue: '#A0AFC3',
   },
   Gray: {
     SoftGray: '#efefef',

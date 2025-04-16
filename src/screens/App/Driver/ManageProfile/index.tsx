@@ -30,7 +30,11 @@ const ManageProfile = ({navigation}: any) => {
   const [profileImage, setProfileImage] = useState<any>(null);
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const [editProfile, {data, isLoading}] = useEdtProfileMutation();
-  const username = `${loginUser?.first_name} ${loginUser?.last_name}`;
+  const [userName, setUserName] = useState(
+    `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+      loginUser?.last_name ? loginUser?.last_name : ''
+    } `,
+  );
   const dispatch = useDispatch();
   const uploadFromGallery = async () => {
     const result = await launchImageLibrary(IMAGE_OPTIONS);
@@ -90,7 +94,7 @@ const ManageProfile = ({navigation}: any) => {
             </View>
           </ImageBackground>
         </TouchableOpacity>
-        <Text style={styles.username}>{username}</Text>
+        <Text style={styles.username}>{userName}</Text>
       </View>
 
       <FlatList

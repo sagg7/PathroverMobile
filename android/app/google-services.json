@@ -1,37 +1,37 @@
 {
   "project_info": {
-    "project_number": "259356526485",
-    "project_id": "pathrover-de86a",
-    "storage_bucket": "pathrover-de86a.firebasestorage.app"
+    "project_number": "123757988773",
+    "project_id": "pathfinder-ca7c7",
+    "storage_bucket": "pathfinder-ca7c7.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:259356526485:android:b9e70b7f2a39d1962dd89c",
+        "mobilesdk_app_id": "1:123757988773:android:766475bb3c134f5fe8364c",
         "android_client_info": {
           "package_name": "com.pathrover"
         }
       },
       "oauth_client": [
         {
-          "client_id": "259356526485-g0llcedebdppjctams5kt994ghmd9tlu.apps.googleusercontent.com",
+          "client_id": "123757988773-m693cnqd674b9nvd3kat3bdp6eh1226j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDZkDB7MJDcQgDpnDNKeDF314OkEaZGcvk"
+          "current_key": "AIzaSyAT-hRTnkM4JmqeWYJzcHq5WmEBS0ixbeU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "259356526485-g0llcedebdppjctams5kt994ghmd9tlu.apps.googleusercontent.com",
+              "client_id": "123757988773-m693cnqd674b9nvd3kat3bdp6eh1226j.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "259356526485-7j0t7i4eakbqd9mb4nj5mjpj01j1r4kr.apps.googleusercontent.com",
+              "client_id": "123757988773-c0sece94e2pm7eqj1g48b3b15b2avm46.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.pathrover.org"

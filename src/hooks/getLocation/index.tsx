@@ -14,7 +14,7 @@ const useLocation = () => {
     }
     watchID = Geolocation.getCurrentPosition(
       position => {
-        const {longitude, latitude} = position.coords;
+        const {longitude, latitude, accuracy} = position.coords;
 
         setLocation({longitude, latitude});
       },
@@ -23,7 +23,7 @@ const useLocation = () => {
         console.error('Error:', error);
       },
       {
-        enableHighAccuracy: false,
+        enableHighAccuracy: true,
       },
     );
   }, []);

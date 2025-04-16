@@ -111,7 +111,7 @@ const RouteToWellSheet = ({
             <Text>
               {svgIcon.BlueClock}
               <View style={{width: 5}} />
-              <Text style={styles.routeInfoText}>
+              <Text style={styles.timeText}>
                 {distanceInfo?.distance
                   ? distanceInfo?.duration
                   : 'calculating'}
@@ -223,6 +223,11 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   routeInfoText: {
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    color: PFColors.Standard.Black,
+  },
+  timeText: {
     fontFamily: PFFonts.Foundation.Regular,
     fontSize: PFFontSize.FONT_SIZE_16,
     color: PFColors.Standard.Black,

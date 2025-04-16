@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
@@ -12,6 +12,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {
   Default_Map_Style,
+  isIOS,
   MapTypes,
   PFColors,
   showAlert,
@@ -40,6 +41,10 @@ import {
   useAddRouteReportMutation,
   useGetRouteReportQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 
 const RecordHikingRoute = () => {
   const navigation: any = useNavigation();
@@ -83,6 +88,15 @@ const RecordHikingRoute = () => {
   const dispatch = useDispatch();
   const BOTTOM_SHEET_HEIGHT = -8;
   const PIXEL_TO_COORDINATE_FACTOR = 0.0002;
+  const routeRef = useRef<any>([]); // Stores route without triggering re-renders
+  const distanceRef = useRef(0);
+  useEffect(() => {
+    activateKeepAwake();
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, []);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -98,7 +112,8 @@ const RecordHikingRoute = () => {
     try {
       Geolocation.getCurrentPosition(
         position => {
-          const {latitude, longitude} = position.coords;
+          const {latitude, longitude, accuracy} = position.coords;
+
           setCurrentLocation([longitude, latitude]);
           setLiveLocation([longitude, latitude]);
         },
@@ -172,13 +187,6 @@ const RecordHikingRoute = () => {
       '0',
     )}:${String(seconds).padStart(2, '0')}`;
   };
-  const routeGeoJSON = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: route,
-    },
-  };
 
   const handleSaveBtn = async () => {
     if (route?.length < 2) {
@@ -204,6 +212,7 @@ const RecordHikingRoute = () => {
         color: PFColors.Blue.Dark,
         weight: '4',
         locations_attributes: locationsAttributes,
+        isChosenTrail: false,
       },
     };
 
@@ -216,46 +225,82 @@ const RecordHikingRoute = () => {
       showAlert('Error', UNEXPECTED_ERROR);
     }
   };
+  // const handleLocationUpdate = location => {
+  //   if (location?.coords) {
+  //     const {latitude, longitude, speed, altitude} = location.coords;
+
+  //     if (isRecordingStarted) {
+  //       setLiveLocation([longitude, latitude]);
+  //       const speedMph = speed ? (speed * 2.23694).toFixed(1) : '0.00';
+  //       const elevationFeet = altitude
+  //         ? (altitude * 3.28084).toFixed(0)
+  //         : '0.00';
+
+  //       setRoute(prev => {
+  //         if (prev.length > 0) {
+  //           const lastPoint = prev[prev.length - 1];
+  //           const newPoint = {latitude, longitude};
+  //           const distanceBetween = haversine(
+  //             {lat: lastPoint[1], lon: lastPoint[0]},
+  //             newPoint,
+  //           );
+
+  //           setTotalDistance(
+  //             prevDistance => prevDistance + distanceBetween * 0.000621371,
+  //           );
+  //         }
+
+  //         return [...prev, [longitude, latitude]];
+  //       });
+
+  //       setSpeed(speedMph);
+  //       setElevation(elevationFeet);
+  //     }
+  //   }
+  // };
+
+  const routeGeoJSON = useMemo(
+    () => ({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: routeRef.current,
+      },
+    }),
+    [route],
+  );
+
   const handleLocationUpdate = location => {
-    if (location?.coords) {
-      const {latitude, longitude, heading, speed, altitude} = location.coords;
+    if (!location?.coords || !isRecordingStarted) return;
 
-      if (isRecordingStarted) {
-        setLiveLocation([longitude, latitude]);
-        const speedMph = speed ? (speed * 2.23694).toFixed(1) : '0.00';
-        const elevationFeet = altitude
-          ? (altitude * 3.28084).toFixed(0)
-          : '0.00';
-        console.log('ELEVATION', elevationFeet);
+    const {latitude, longitude, speed, altitude} = location.coords;
+    const speedMph = speed ? (speed * 2.23694).toFixed(1) : '0.00';
+    const elevationFeet = altitude ? (altitude * 3.28084).toFixed(0) : '0.00';
 
-        setRoute(prev => {
-          if (prev.length > 0) {
-            const lastPoint = prev[prev.length - 1];
-            const newPoint = {latitude, longitude};
-            const distanceBetween = haversine(
-              {lat: lastPoint[1], lon: lastPoint[0]},
-              newPoint,
-            );
+    setLiveLocation([longitude, latitude]);
+    setSpeed(speedMph);
+    setElevation(elevationFeet);
 
-            setTotalDistance(
-              prevDistance => prevDistance + distanceBetween * 0.000621371,
-            );
-          }
+    if (routeRef.current.length > 0) {
+      const lastPoint = routeRef.current[routeRef.current.length - 1];
+      const distanceBetween = haversine(
+        {lat: lastPoint[1], lon: lastPoint[0]},
+        {lat: latitude, lon: longitude},
+      );
 
-          return [...prev, [longitude, latitude]];
-        });
-
-        setSpeed(speedMph);
-        setElevation(elevationFeet);
+      if (distanceBetween > 3) {
+        // Only update if moved > 3 meters
+        distanceRef.current += distanceBetween * 0.000621371;
+        setTotalDistance(distanceRef.current);
+        routeRef.current.push([longitude, latitude]);
+        setRoute([...routeRef.current]); // Batch update state
+        if (cameraRef.current) {
+          cameraRef.current.moveTo([longitude, latitude], 1000); // Smooth transition
+        }
       }
-      if (cameraRef.current) {
-        cameraRef?.current.setCamera({
-          centerCoordinate: [longitude, latitude],
-          zoomLevel: 16,
-          animationDuration: 1000, // Smooth animation
-          bearing: heading,
-        });
-      }
+    } else {
+      routeRef.current.push([longitude, latitude]);
+      setRoute([...routeRef.current]);
     }
   };
 
@@ -354,16 +399,18 @@ const RecordHikingRoute = () => {
           ref={cameraRef}
           zoomLevel={16}
           // followUserLocation={true}
-          followZoomLevel={16}
+          // followZoomLevel={16}
           // centerCoordinate={liveLocation}
           centerCoordinate={adjustLocationForBottomSheet(liveLocation)}
         />
         <MapboxGL.UserLocation
+          key={route?.length}
           visible
           onUpdate={handleLocationUpdate}
-          minDisplacement={10}
+          minDisplacement={isIOS() ? 3 : 10}
+          // minDisplacement={5}
           requestsAlwaysUse
-          // showsUserHeadingIndicator
+          showsUserHeadingIndicator
           androidRenderMode="gps"
         />
 
@@ -385,7 +432,7 @@ const RecordHikingRoute = () => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 3,
+                lineWidth: 5,
                 lineColor: PFColors.Blue.Dark,
                 lineJoin: 'round',
                 lineCap: 'round',

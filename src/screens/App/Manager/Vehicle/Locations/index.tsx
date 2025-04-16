@@ -95,7 +95,6 @@ const Locations = ({navigation, route}: any) => {
       setDestinationAddress,
     });
   };
-  console.log('place name on location', pickUpAddress);
 
   useEffect(() => {
     if (location) {

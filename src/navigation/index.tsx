@@ -1,4 +1,7 @@
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import WithdrawAmount from '../screens/App/Driver/DriverWallet/Withdraw';
@@ -70,11 +73,18 @@ import RecordHikingRoute from '../screens/App/EndUser/RecordHikingRoute';
 import CreateHikeRoute from '../screens/App/EndUser/CreateHikeRoute';
 import DownloadedMapList from '../screens/App/EndUser/DownloadedMapList';
 import ViewOfflineMap from '../screens/App/EndUser/ViewOflineMap';
+import ViewSaveRoutesNavigation from '../screens/App/EndUser/ViewSaveRoutesNavigation';
+import SearchTrails from '../screens/App/EndUser/SearchTrails';
+import TrailDetails from '../screens/App/EndUser/TrailDetails';
+import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
+import ViewSharedRoutes from '../screens/App/EndUser/ViewSharedRoutes';
+import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
+  const navigationRef = createNavigationContainerRef();
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         initialRouteName={Routes.Splash}
         screenOptions={{headerShown: false}}>
@@ -205,6 +215,21 @@ const AppNavigation = () => {
           component={DownloadedMapList}
         />
         <Stack.Screen name={Routes.ViewOfflineMap} component={ViewOfflineMap} />
+        <Stack.Screen
+          name={Routes.ViewSaveRoutesNavigation}
+          component={ViewSaveRoutesNavigation}
+        />
+        <Stack.Screen name={Routes.SearchTrails} component={SearchTrails} />
+        <Stack.Screen
+          name={Routes.SearchTrailResult}
+          component={SearchTrailResult}
+        />
+        <Stack.Screen name={Routes.TrailDetails} component={TrailDetails} />
+        <Stack.Screen
+          name={Routes.ViewSharedRoutes}
+          component={ViewSharedRoutes}
+        />
+        <Stack.Screen name={Routes.NewsBlogDetail} component={NewsBlogDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

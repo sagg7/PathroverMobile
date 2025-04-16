@@ -36,6 +36,7 @@ import {
   WP,
 } from '../../../../../shared/exporter';
 import {
+  CHAT_NON_VERIFIED_TEXT,
   REPORTS_LIST,
   UNEXPECTED_ERROR,
 } from '../../../../../shared/utils/constant';
@@ -46,10 +47,11 @@ import usePremiumAlert from '../../../../../hooks/usePremiumAlert';
 const SearchTrailLatLng = () => {
   const {location} = useLocation();
   const navigation = useNavigation<any>();
-  const mapCameraRef = useRef();
-  const {endingPoint, startingPoint} = useSelector(
+  const mapCameraRef: any = useRef();
+  const {endingPoint, startingPoint, routeData, routeType} = useSelector(
     (state: any) => state?.endUser?.trailRoute,
   );
+
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [results, setResults] = useState<null>(null);
   const [routeToStartPoint, setRouteToStartPoint] = useState<any>([]);
@@ -78,6 +80,7 @@ const SearchTrailLatLng = () => {
   const [addRouteReport] = useAddRouteReportMutation();
   const {data: allReports, refetch} = useGetRouteReportQuery({});
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
+  const loginUser = useSelector(state => state?.auth?.loginUser);
 
   useEffect(() => {
     if (location) {
@@ -93,10 +96,10 @@ const SearchTrailLatLng = () => {
       const response = await fetch(url);
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
+
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };
@@ -112,9 +115,9 @@ const SearchTrailLatLng = () => {
     }
   };
 
-  const getRoadRoute = async () => {
+  const getRoadRoute = async (start, end) => {
     try {
-      const path = await fetchRoute(startingPoint, endingPoint);
+      const path = await fetchRoute(start, end);
       setRoute(path);
     } catch (error: any) {
       showAlert('Error fetching road route', error);
@@ -123,7 +126,7 @@ const SearchTrailLatLng = () => {
 
   useEffect(() => {
     if (startingPoint?.length > 0 && endingPoint?.length > 0) {
-      getRoadRoute();
+      getRoadRoute(startingPoint, endingPoint);
       setShowRouteActionSheet(true);
     }
   }, [startingPoint, endingPoint]);
@@ -146,26 +149,56 @@ const SearchTrailLatLng = () => {
     setRouteToStartPoint([]);
     setShowReachModal(false);
     setModalKey(2);
+    const formattedPoints = (routeData?.middle_location_points || [])
+      .filter((point: any) => point.latitude && point.longitude)
+      .map((point: any) => [
+        parseFloat(point.longitude),
+        parseFloat(point.latitude),
+      ]);
+    formattedPoints.unshift(startingPoint);
+    formattedPoints.push(endingPoint);
 
-    const endCoordinates = endingPoint;
-    const startCoordinates = startingPoint;
-
-    // const formattedPoints = selectedRoute?.middle_location_points
-    //   .filter((point: any) => point.latitude && point.longitude)
-    //   .map((point: any) => [
-    //     parseFloat(point.longitude),
-    //     parseFloat(point.latitude),
-    //   ]);
-    // formattedPoints.unshift(startCoordinates);
-    // formattedPoints.push(endCoordinates);
-    // if (selectedRoute?.route_type === 'maps_location_pins') {
-    getRoadRoute(startCoordinates, endCoordinates);
+    if (routeData?.route_type === 'custom_route' && !routeData?.is_road_route) {
+      setRoute(formattedPoints);
+    } else {
+      getRoadRoute(startingPoint, endingPoint);
+    }
+    // getRoadRoute(startingPoint, endingPoint);
     setIsStartBtnPressed(false);
-    // } else {
-    //   setRoute(formattedPoints);
-    // }
-    // setRoute(formattedPoints);
   };
+
+  useEffect(() => {
+    const isEmpty = Object.keys(routeData).length === 0;
+    if (!isEmpty) {
+      // const selectedRoute = route?.params?.item;
+      let formattedPoints = [];
+      formattedPoints = routeData?.middle_location_points
+        ? routeData?.middle_location_points
+            .filter((point: any) => point?.latitude && point?.longitude)
+            .map((point: any) => [
+              parseFloat(point?.longitude),
+              parseFloat(point?.latitude),
+            ])
+        : [];
+
+      // setDestination(endCoordinates);
+      formattedPoints.unshift(startingPoint);
+      formattedPoints.push(endingPoint);
+      if (
+        routeData?.route_type === 'custom_route' &&
+        !routeData?.is_road_route
+      ) {
+        setRoute(formattedPoints);
+      } else {
+        getRoadRoute(startingPoint, endingPoint);
+      }
+      // setRouteLineColor(routeData?.color);
+      // setRouteLineHeight(Number(routeData?.weight));
+      // setSelectedRoute();
+    } else if (startingPoint?.length > 0 && endingPoint?.length > 0) {
+      getRoadRoute(startingPoint, endingPoint);
+    }
+  }, [routeData]);
 
   const getTimeDistanceDetails = async () => {
     const locResults: any = await getTimeAndDistance(
@@ -179,34 +212,16 @@ const SearchTrailLatLng = () => {
     if (typeof locResults?.distance === 'string') {
       const match = locResults?.distance.match(/([\d.]+)\s*miles/);
       if (match) {
-        distanceValue = parseFloat(match[1]); // Distance is already in miles
+        distanceValue = parseFloat(match[1]);
       }
     } else if (typeof locResults?.distance === 'number') {
-      distanceValue = locResults.distance; // Already in miles
+      distanceValue = locResults.distance;
     }
 
     if (distanceValue < 0.186) {
-      // 300 meters ≈ 0.186 miles
-      // setRouteStartedFromCurrent(true);
       setShowReachModal(true);
     }
   };
-
-  // const getTimeDistanceDetails = async () => {
-  //   const locResults: any = await getTimeAndDistance(
-  //     liveLocation,
-  //     startingPoint,
-  //   );
-  //   setTimeDistance(locResults);
-  //   const match = locResults?.distance?.match(/([\d.]+)\s*(km|m)/);
-  //   const distanceValue = match
-  //     ? parseFloat(match[1]) * (match[2] === 'km' ? 1000 : 1)
-  //     : Number(locResults?.distance) || 0;
-
-  //   if (distanceValue < 300) {
-  //     setShowReachModal(true);
-  //   }
-  // };
 
   useEffect(() => {
     getTimeDistanceDetails();
@@ -219,6 +234,7 @@ const SearchTrailLatLng = () => {
   const onPressStartBtn = async () => {
     getRoute();
     setIsStartBtnPressed(true);
+    recenterMap();
     setShowRouteActionSheet(false);
     const routeResults: any = await getTimeAndDistance(
       currentLocation,
@@ -230,17 +246,6 @@ const SearchTrailLatLng = () => {
     }, 1000);
     setRoute([]);
   };
-
-  // const routeGeoJSON = useMemo(
-  //   () => ({
-  //     type: 'Feature',
-  //     geometry: {
-  //       type: 'LineString',
-  //       coordinates: isStartBtnPressed ? routeToStartPoint : routes,
-  //     },
-  //   }),
-  //   [isStartBtnPressed, routeToStartPoint, routes],
-  // );
 
   const routeGeoJSON = {
     type: 'Feature',
@@ -271,10 +276,17 @@ const SearchTrailLatLng = () => {
 
   const recenterMap = () => {
     if (currentLocation) {
-      mapCameraRef?.current?.setCamera({
+      // mapCameraRef?.current?.setCamera({
+      //   centerCoordinate: currentLocation,
+      //   zoomLevel: 18,
+      //   animationDuration: 1000, // Smooth transition effect
+      // });
+      mapCameraRef?.current.setCamera({
         centerCoordinate: currentLocation,
-        zoomLevel: 15,
-        animationDuration: 1000, // Smooth transition effect
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
       });
     }
   };
@@ -373,11 +385,21 @@ const SearchTrailLatLng = () => {
   };
 
   const onPressShare = () => {
-    subscription
-      ? navigation.navigate(Routes.ChatUsers, {
-          shareTrail: {startingPoint, endingPoint},
-        })
-      : showPremiumAlert({});
+    if (subscription) {
+      if (loginUser?.verified) {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint,
+            endingPoint,
+            type: routeType ? routeType : 'trail',
+          },
+        });
+      } else {
+        showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+      }
+    } else {
+      showPremiumAlert({});
+    }
   };
 
   return (
@@ -386,25 +408,55 @@ const SearchTrailLatLng = () => {
       {!showRouteStartedSheet && <SearchTrailSelector />}
       <MapboxGL.MapView style={styles.map} scaleBarEnabled={false}>
         <MapboxGL.Camera
-          zoomLevel={15}
           ref={mapCameraRef}
           centerCoordinate={
             startingPoint?.length > 0 ? startingPoint : currentLocation
           }
+          zoomLevel={18}
+          followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
+          // animationMode="flyTo"
+          animationDuration={2000}
+          pitch={60}
+          heading={0}
         />
-        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+        <MapboxGL.UserLocation
+          visible
+          onUpdate={handleLocationUpdate}
+          showsUserHeadingIndicator
+        />
         {routes?.length > 1 && !isStartBtnPressed && (
           <MapboxGL.ShapeSource shape={routeJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: 4,
+                lineWidth: 6,
                 lineColor: 'red',
               }}
             />
           </MapboxGL.ShapeSource>
         )}
+        {routeData?.pinned_points?.map(point => (
+          <MapboxGL.MarkerView
+            key={point.id}
+            coordinate={[
+              parseFloat(point.longitude),
+              parseFloat(point.latitude),
+            ]} // Convert to numbers
+          >
+            {svgIcon.RedPin}
+          </MapboxGL.MarkerView>
+        ))}
+        {routeData?.route_type === 'custom_route' &&
+          !routeData?.is_road_route &&
+          routes?.map((coordinate, index) => (
+            <MapboxGL.PointAnnotation
+              key={`pin-${index}`}
+              id={`pin-${index}`}
+              coordinate={coordinate}>
+              <View style={[styles.routeStopStyles]} />
+            </MapboxGL.PointAnnotation>
+          ))}
         {routeToStartPoint?.length > 1 && isStartBtnPressed && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
@@ -454,10 +506,7 @@ const SearchTrailLatLng = () => {
           }
           routeInfo={results}
           setModalVisible={() => {
-            setShowRouteStartedSheet(false);
-            setIsStartBtnPressed(false);
-            getRoadRoute();
-            setShowRouteActionSheet(true);
+            navigation.goBack();
           }}
         />
       )}
@@ -499,12 +548,15 @@ const SearchTrailLatLng = () => {
             handleClick={() => Linking.openURL(`tel:911`)}
             buttonStyle={{
               position: 'absolute',
-              width: WP('37'),
+              width: WP('38'),
               right: WP('3'),
               backgroundColor: PFColors.Red.RadiantRed,
               height: 40,
               alignItems: 'center',
               bottom: WP('45'),
+            }}
+            textStyle={{
+              paddingBottom: 3,
             }}
           />
           <AppButton
@@ -513,12 +565,15 @@ const SearchTrailLatLng = () => {
             handleClick={recenterMap}
             buttonStyle={{
               position: 'absolute',
-              width: WP('35'),
+              width: WP('37'),
               left: WP('3'),
               backgroundColor: '#A0AFC3',
               height: 40,
               alignItems: 'center',
               bottom: WP('45'),
+            }}
+            textStyle={{
+              paddingBottom: 3,
             }}
           />
           <AppButton

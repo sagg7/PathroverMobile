@@ -27,6 +27,7 @@ import {
 import {WP} from '../../../../../shared/exporter';
 import styles from './styles';
 import RenderEmptyUser from '../RenderEmptyUser';
+import {DOMAIN_BASE_URL} from '../../../../../shared/utils/constant';
 
 const ChatUsers = () => {
   const {params} = useRoute<any>();
@@ -36,10 +37,8 @@ const ChatUsers = () => {
   const [search, setSearch] = useState('');
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
-  console.log(" ChatUsers ~ allContactsList==>", allContactsList[1])
 
   // API
-  // const [getAllUsers, {isLoading, data}] = useGetAllUsersMutation();
   const [getAllUsers, {isLoading, data}] = useGetChatContactsMutation();
   const [createChat] = useCreateChatMutation();
 
@@ -69,9 +68,8 @@ const ChatUsers = () => {
         if (permissionGranted) {
           const allContacts = await Contacts.getAll();
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
-          const formattedContacts = formatContacts(allUsers?.data);
 
-          // Save full contacts list
+          const formattedContacts = formatContacts(allUsers?.data);
           setAllContactsList(formattedContacts);
           setMatchedUsers(formattedContacts);
         } else {
@@ -82,12 +80,12 @@ const ChatUsers = () => {
   }, [isFocused]);
 
   const normalizePhoneNumber = (phone: any) => {
-    return phone.replace(/[\s\-()]/g, '')
+    return phone.replace(/[\s\-()]/g, '');
   };
 
   const formatContacts = (contacts: any = []) => {
     const sortedContacts = [...contacts].sort((a: any, b: any) => {
-      const nameA = a?.givenName || ''; 
+      const nameA = a?.givenName || '';
       const nameB = b?.givenName || '';
 
       if (a.is_exist === b.is_exist) {
@@ -144,12 +142,15 @@ const ChatUsers = () => {
       phone_number?.startsWith('+') || phone_number?.startsWith('0')
         ? phone_number
         : `+1${phone_number}`;
+
     let url = `sms:${normalizePhoneNumber(phoneNumber)}`;
     const separator = Platform.OS === 'ios' ? '&' : '?';
-    url += `${separator}body=${encodeURIComponent(
-      `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free`,
-    )}`;
-    console.log(" inviteUser ~ url==>", url)
+
+    const appLink = DOMAIN_BASE_URL + 'download';
+
+    const message = `Let's chat on Pathrover! It's a fast, simple, and secure app we can use to message and call each other for free. Download it here: ${appLink}`;
+
+    url += `${separator}body=${encodeURIComponent(message)}`;
 
     Linking.openURL(url).catch(err => console.log('Error opening SMS:', err));
   };
@@ -166,7 +167,13 @@ const ChatUsers = () => {
             }
             style={styles.imageStyle}
           />
-          <Text style={styles.nameText}>{item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>
+            {item?.displayName ||
+              (item?.givenName && item?.familyName
+                ? `${item.givenName} ${item.familyName}`
+                : item?.givenName || item?.familyName) ||
+              'User'}
+          </Text>
         </View>
         {item?.is_exist ? (
           <TouchableOpacity

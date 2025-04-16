@@ -142,6 +142,10 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
    * @returns {string} - Formatted duration.
    */
   const formatDuration = minutes => {
+    if (minutes < 1) {
+      return 'Almost there';
+    }
+
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = Math.round(minutes % 60);
@@ -151,6 +155,7 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
           : ''
       }`;
     }
+
     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
   };
 
@@ -192,5 +197,289 @@ export const getTimeAndDistance = async (start, end, profile = 'driving') => {
   } catch (error) {
     console.error('Error fetching time and distance:', error);
     throw error;
+  }
+};
+
+// export const getTimeAndDistanceForWaypoint = async (
+//   coordinates,
+
+//   profile = 'driving',
+// ) => {
+//   if (!Array.isArray(coordinates) || coordinates.length < 2) {
+//     throw new Error(
+//       'Provide at least two coordinates as [longitude, latitude] pairs.',
+//     );
+//   }
+
+//   const coordsString = coordinates
+//     ?.map(coord => `${coord[0]},${coord[1]}`)
+//     .join(';');
+
+//   const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordsString}?annotations=distance,duration&overview=simplified&access_token=${mapBoxToken}`;
+//   const formatDuration = minutes => {
+//     if (minutes < 1) return 'A few seconds away';
+//     if (minutes >= 60) {
+//       const hours = Math.floor(minutes / 60);
+//       const remainingMinutes = Math.round(minutes % 60);
+//       return `${hours} hr${hours > 1 ? 's' : ''} ${
+//         remainingMinutes > 0
+//           ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+//           : ''
+//       }`;
+//     }
+//     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+//   };
+
+//   const convertToMiles = meters => (meters * 0.000621371).toFixed(2);
+
+//   const formatDistance = meters => `${convertToMiles(meters)} miles`;
+
+//   try {
+//     const response = await fetch(url);
+//     const data = await response.json();
+
+//     if (data.routes && data.routes.length > 0) {
+//       const route = data.routes[0];
+
+//       return {
+//         duration: formatDuration(route.duration / 60), // Convert seconds to minutes
+//         distance: formatDistance(route.distance), // Convert meters to miles
+//       };
+//     } else {
+//       return {
+//         duration: 'Unable to calculate duration', // Convert seconds to minutes
+//         distance: 'Unable to calculate distance', // Convert meters to miles
+//       };
+//       // throw new Error('No routes found');
+//     }
+//   } catch (error) {
+//     console.error('Error fetching route:', error);
+//     throw error;
+//   }
+// };
+
+// export const getTimeAndDistanceForWaypoint = async (
+//   coordinates,
+//   profile = 'driving',
+// ) => {
+//   if (!Array.isArray(coordinates) || coordinates.length < 2) {
+//     throw new Error(
+//       'Provide at least two coordinates as [longitude, latitude] pairs.',
+//     );
+//   }
+
+//   const MAX_WAYPOINTS = 25; // Mapbox limit
+//   const formatDuration = minutes => {
+//     if (minutes < 1) return 'A few seconds away';
+//     if (minutes >= 60) {
+//       const hours = Math.floor(minutes / 60);
+//       const remainingMinutes = Math.round(minutes % 60);
+//       return `${hours} hr${hours > 1 ? 's' : ''} ${
+//         remainingMinutes > 0
+//           ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+//           : ''
+//       }`;
+//     }
+//     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+//   };
+
+//   const convertToMiles = meters => (meters * 0.000621371).toFixed(2);
+//   const formatDistance = meters => `${convertToMiles(meters)} miles`;
+
+//   const fetchRouteSegment = async segment => {
+//     const coordsString = segment
+//       .map(coord => `${coord[0]},${coord[1]}`)
+//       .join(';');
+//     const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordsString}?annotations=distance,duration&overview=simplified&access_token=${mapBoxToken}`;
+
+//     try {
+//       const response = await fetch(url);
+//       const data = await response.json();
+//       if (data.routes && data.routes.length > 0) {
+//         return data.routes[0];
+//       }
+//     } catch (error) {
+//       console.error('Error fetching route segment:', error);
+//     }
+//     return null;
+//   };
+
+//   let totalDistance = 0;
+//   let totalDuration = 0;
+
+//   for (let i = 0; i < coordinates.length - 1; i += MAX_WAYPOINTS - 1) {
+//     const segment = coordinates.slice(i, i + MAX_WAYPOINTS);
+//     const result = await fetchRouteSegment(segment);
+//     if (result) {
+//       totalDistance += result.distance;
+//       totalDuration += result.duration;
+//     }
+//   }
+
+//   return {
+//     duration: totalDuration > 0 ? formatDuration(totalDuration / 60) : 'N/A',
+//     distance: totalDistance > 0 ? formatDistance(totalDistance) : 'N/A',
+//   };
+// };
+
+// export const getTimeAndDistanceForWaypoint = async (
+//   coordinates,
+//   profile = 'driving',
+// ) => {
+//   if (!Array.isArray(coordinates) || coordinates.length < 2) {
+//     throw new Error(
+//       'Provide at least two coordinates as [longitude, latitude] pairs.',
+//     );
+//   }
+
+//   const MAX_WAYPOINTS = 25; // Mapbox limit
+//   const formatDuration = minutes => {
+//     if (minutes < 1) return 'A few seconds away';
+//     if (minutes >= 60) {
+//       const hours = Math.floor(minutes / 60);
+//       const remainingMinutes = Math.round(minutes % 60);
+//       return `${hours} hr${hours > 1 ? 's' : ''} ${
+//         remainingMinutes > 0
+//           ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+//           : ''
+//       }`;
+//     }
+//     return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+//   };
+
+//   const convertToMiles = meters => (meters * 0.000621371).toFixed(2);
+//   const formatDistance = meters => `${convertToMiles(meters)} miles`;
+
+//   const fetchRouteSegment = async segment => {
+//     const coordsString = segment
+//       .map(coord => `${coord[0]},${coord[1]}`)
+//       .join(';');
+//     const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordsString}?annotations=distance,duration&overview=full&geometries=geojson&access_token=${mapBoxToken}`;
+
+//     try {
+//       const response = await fetch(url);
+//       const data = await response.json();
+//       if (data.routes && data.routes.length > 0) {
+//         return data.routes[0];
+//       } else {
+//         console.error('No route found for segment:', segment);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching route segment:', error);
+//     }
+//     return null;
+//   };
+
+//   let totalDistance = 0;
+//   let totalDuration = 0;
+//   let routeCoordinates = [];
+
+//   for (let i = 0; i < coordinates.length - 1; i += MAX_WAYPOINTS - 1) {
+//     let segment = coordinates.slice(i, i + MAX_WAYPOINTS);
+
+//     // Ensure continuity: Keep last point of previous segment as first in next
+//     if (routeCoordinates.length > 0) {
+//       segment.unshift(routeCoordinates[routeCoordinates.length - 1]);
+//     }
+
+//     const result = await fetchRouteSegment(segment);
+//     if (result) {
+//       totalDistance += result.distance;
+//       totalDuration += result.duration;
+//       routeCoordinates = routeCoordinates.concat(result.geometry.coordinates);
+//     }
+//   }
+
+//   return {
+//     duration: totalDuration > 0 ? formatDuration(totalDuration / 60) : 'N/A',
+//     distance: totalDistance > 0 ? formatDistance(totalDistance) : 'N/A',
+//     routePath: routeCoordinates, // Useful if you need to display on a map
+//   };
+// };
+export const getTimeAndDistanceForWaypoint = async (
+  coordinates,
+  profile = 'driving-traffic',
+) => {
+  if (!Array.isArray(coordinates) || coordinates.length < 2) {
+    throw new Error(
+      'Provide at least two coordinates as [longitude, latitude] pairs.',
+    );
+  }
+
+  const MAX_WAYPOINTS = 25; // Mapbox limit
+  const formatDuration = minutes => {
+    if (minutes < 1) return 'Few seconds away';
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = Math.round(minutes % 60);
+      return `${hours} hr${hours > 1 ? 's' : ''} ${
+        remainingMinutes > 0
+          ? `${remainingMinutes} min${remainingMinutes > 1 ? 's' : ''}`
+          : ''
+      }`;
+    }
+    return `${Math.round(minutes)} min${minutes > 1 ? 's' : ''}`;
+  };
+
+  const convertToMiles = meters => (meters * 0.000621371).toFixed(2);
+  const formatDistance = meters => `${convertToMiles(meters)} miles`;
+
+  const fetchRouteSegment = async segment => {
+    const coordsString = segment
+      .map(coord => `${coord[0]},${coord[1]}`)
+      .join(';');
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordsString}?annotations=distance,duration&overview=full&geometries=geojson&access_token=${mapBoxToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        return data.routes[0];
+      } else {
+        console.error('No route found for segment:', segment);
+      }
+    } catch (error) {
+      console.error('Error fetching route segment:', error);
+    }
+    return null;
+  };
+
+  let totalDistance = 0;
+  let totalDuration = 0;
+  let routeCoordinates: any = [];
+
+  for (let i = 0; i < coordinates.length - 1; i += MAX_WAYPOINTS - 1) {
+    let segment = coordinates.slice(i, i + MAX_WAYPOINTS);
+
+    // Ensure continuity: Keep last point of previous segment as first in next
+    if (routeCoordinates.length > 0) {
+      segment.unshift(routeCoordinates[routeCoordinates.length - 1]);
+    }
+
+    const result = await fetchRouteSegment(segment);
+    if (result) {
+      totalDistance += result.distance;
+      totalDuration += result.duration;
+      routeCoordinates = routeCoordinates.concat(result.geometry.coordinates);
+    }
+  }
+
+  return {
+    duration: totalDuration > 0 ? formatDuration(totalDuration / 60) : 'N/A',
+    distance: totalDistance > 0 ? formatDistance(totalDistance) : 'N/A',
+    routePath: routeCoordinates, // Useful if you need to display on a map
+  };
+};
+
+export const extractType = (content: any): string | undefined => {
+  try {
+    const messageContent = content?.last_message?.content;
+    if (!messageContent) return '';
+
+    const parsedContent = JSON.parse(messageContent);
+    return parsedContent?.messageContainsLocation?.type;
+  } catch (error) {
+    console.error('JSON parsing error:', error);
+    return '';
   }
 };

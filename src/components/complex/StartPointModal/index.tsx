@@ -7,14 +7,15 @@ import {AppButton} from '../AppButton';
 interface StartPointModalProps {
   modalVisible: boolean;
   setModalVisible?: () => void;
-  onPressCancel: () => void;
   onPressSave?: any;
+  title?: string;
 }
 
 const StartPointModal = ({
   modalVisible,
   setModalVisible,
   onPressSave,
+  title,
 }: StartPointModalProps) => {
   return (
     <Modal
@@ -27,8 +28,9 @@ const StartPointModal = ({
           <Text style={styles.headerText}>Route Alert</Text>
         </View>
         <Text style={styles.actionText}>
-          You are now at start point, Please follow the route to reach your
-          destination.
+          {title
+            ? title
+            : ' You are now at start point, Please follow the route to reach your destination.'}
         </Text>
 
         <View style={styles.btnContainer}>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
     color: PFColors.Standard.Black,
     paddingHorizontal: WP('6'),
     paddingVertical: 5,
-    width:'100%'
+    width: '100%',
   },
   cancelBtn: {
     backgroundColor: PFColors.Standard.White,

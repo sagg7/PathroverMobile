@@ -14,6 +14,12 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  routeStopStyles: {
+    height: 16,
+    width: 16,
+    borderRadius: 20 / 2,
+    backgroundColor: PFColors.Red.RadiantRed,
+  },
   inputStyles: {
     zIndex: 1,
   },

@@ -11,7 +11,8 @@ import Reanimated, {
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
 import {getFormattedTime, isToday} from '../../../hooks/getFormattedDate';
-import { MESSAGE_CONTAINS_LOCATION } from '../../../shared/utils/constant';
+import {MESSAGE_CONTAINS_LOCATION} from '../../../shared/utils/constant';
+import {extractType} from '../../../shared/utils/helpers';
 
 interface ChatListItemProps {
   item: object;
@@ -94,7 +95,12 @@ const ChatListItem = ({onPress, onPressDelete, item}: ChatListItemProps) => {
             {item?.last_message && (
               <Text style={styles.detailText} numberOfLines={1}>
                 {typeof item?.last_message === 'object'
-                  ? (item?.last_message?.content || '').includes(MESSAGE_CONTAINS_LOCATION) ? 'Shared Location' : item?.last_message?.content || '' :""}
+                  ? (item?.last_message?.content || '').includes(
+                      MESSAGE_CONTAINS_LOCATION,
+                    )
+                    ? `Shared ${extractType(item)}`
+                    : item?.last_message?.content || ''
+                  : item?.last_message ??''}
               </Text>
             )}
           </View>

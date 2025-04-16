@@ -16,6 +16,7 @@ interface CallScreenProps {
   onPressLeave: () => void;
   isMute: boolean;
   isNear: boolean;
+  leaveDisabled: boolean;
   isSpeakerOn: boolean;
   timer: string;
   onPressSpeaker: () => void;
@@ -32,11 +33,12 @@ const CallScreen = ({
   onPressMute,
   user,
   isNear,
+  leaveDisabled
 }: CallScreenProps) => {
   const iconsView = () => {
     return (
-      <View style={styles.callButtonView} pointerEvents={isNear ? 'none' : 'auto'}>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressSpeaker}>
+      <View style={styles.callButtonView} pointerEvents={isNear ? 'box-none' : 'auto'}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressSpeaker}>
           <View style={styles.iconBackGround(isSpeakerOn)}>
             <Image
               source={isSpeakerOn ? appIcons.speakerOn : appIcons.speakerOff}
@@ -45,7 +47,7 @@ const CallScreen = ({
           </View>
           <Text style={styles.iiconTextStyle}>Speaker</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressMute}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressMute}>
           <View style={styles.iconBackGround(!isMute)}>
             <Image
               source={isMute ? appIcons.muted : appIcons.mute}
@@ -54,7 +56,7 @@ const CallScreen = ({
           </View>
           <Text style={styles.iiconTextStyle}>Mute</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconDetails} onPress={onPressLeave}>
+        <TouchableOpacity activeOpacity={.7} style={styles.iconDetails} onPress={onPressLeave} disabled={leaveDisabled}>
           <View style={styles.iconBackGroundRed}>
             <Image source={appIcons.endCall} style={styles.callIconStyle} />
           </View>
@@ -74,7 +76,7 @@ const CallScreen = ({
         </TouchableOpacity> */}
         <View style={styles.userConatiner}>
           <Text style={styles.callerNameTextStyle}>
-            {user?.first_name ?? 'User'} {user?.last_name ?? ''}
+            {user?.callerName || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'User'}
           </Text>
             <Text style={styles.callTime}>{timer}</Text>
         </View>

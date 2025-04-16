@@ -1,6 +1,6 @@
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {Image, Platform, Text, TouchableOpacity, View} from 'react-native';
+import {Image, Keyboard, Platform, Text, TouchableOpacity, View} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import {useSelector} from 'react-redux';
 import {appIcons} from '../../../../../assets/icons';
@@ -63,10 +63,14 @@ const Header = ({
       </View>
 
       <View style={styles.iconView}>
-        <TouchableOpacity onPress={onPressPhone} hitSlop={{top: 10, bottom: 10}}>
+        <TouchableOpacity
+          onPress={onPressPhone}
+          hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.BlackPhone}
         </TouchableOpacity>
-        <TouchableOpacity onPress={onPressVideo} hitSlop={{top: 10, bottom: 10}}>
+        <TouchableOpacity
+          onPress={onPressVideo}
+          hitSlop={{top: 10, bottom: 10}}>
           {svgIcon.VideoIcon}
         </TouchableOpacity>
       </View>
@@ -87,8 +91,8 @@ const ChatDetail = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage] = useCreateChatMessageMutation();
-  const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
-  
+  const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
+
   useEffect(() => {
     try {
       subscribe(
@@ -130,6 +134,7 @@ const ChatDetail = () => {
 
   useEffect(() => {
     (async () => {
+      Keyboard.dismiss();
       if (isFocused) {
         await getChatMessage(params?.item?.id);
       }
@@ -138,14 +143,13 @@ const ChatDetail = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    if (isConnected && shareTrail) {
-      console.log('RESP', {[MESSAGE_CONTAINS_LOCATION]: shareTrail});
-
+    // console.log('WORKING', isConnected + shareTrail);
+    if (shareTrail) {
       onSend([
         {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
       ]);
     }
-  }, [shareTrail, isConnected]);
+  }, [shareTrail]);
 
   const onSend = async (message: string) => {
     try {
@@ -179,9 +183,8 @@ const ChatDetail = () => {
       if (res) {
         await getChatMessage(item?.id);
       }
-      
     } catch (error) {
-      //      
+      //
     }
   };
 
@@ -196,17 +199,24 @@ const ChatDetail = () => {
   return (
     <MainWrapper>
       <Header
-        onPressBack={() => navigation.navigate('Chat')}
+        onPressBack={() => {
+          Keyboard.dismiss();
+          navigation.navigate('Chat')
+        }}
         title={params?.item || 'Group Chat'}
         onPressPhone={() => {
           console.log(params?.item?.user);
+          // navigation.navigate('VoiceCalling');
           navigation.navigate('VoiceCalling', {
             user: params?.item?.user,
-            channel: Platform.OS === 'android' ? 'call_501222' : '',
+            // channel: Platform.OS === 'android' ? 'call_501222' : '',
           });
         }}
         onPressVideo={() => {
-          navigation.navigate('VideoCalling', {user: params?.item?.user, channel: Platform.OS === 'android' ? 'testChannel' : '',});
+          navigation.navigate('VideoCalling', {
+            user: params?.item?.user,
+            // channel: Platform.OS === 'android' ? 'testChannel' : '',
+          });
         }}
       />
       <View style={styles.container}>

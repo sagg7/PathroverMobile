@@ -44,7 +44,9 @@ const CreateRouteEndUser = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<any>([
+    74.276313, 31.454005,
+  ]);
   const [route, setRoute] = useState<any>([]);
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const {createRouteData} = useSelector(
@@ -74,10 +76,16 @@ const CreateRouteEndUser = () => {
     start: '',
     end: '',
   });
+  console.log(' CreateRouteEndUser ~ searchValues==>', searchValues);
   const [searchValuesByAddress, setSearchValuesByAddress] = useState<any>({
     start: '',
     end: '',
   });
+  console.log(
+    ' CreateRouteEndUser ~ searchValuesByAddress==>',
+    searchValuesByAddress,
+  );
+
   const refScrollable = useRef<any>();
 
   const {location} = useLocation();
@@ -361,6 +369,7 @@ const CreateRouteEndUser = () => {
           color: routeLineColor,
           weight: routeLineHeight,
           pinned_points: pinnedPoints,
+          is_road_route: searchValuesByAddress?.start?.length > 1,
         },
       };
 

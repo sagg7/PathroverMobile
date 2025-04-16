@@ -36,7 +36,21 @@
 				<string>fb442637768783622</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.123757988773-c0sece94e2pm7eqj1g48b3b15b2avm46</string>
+			</array>
+		</dict>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:www.staging.path-rover.com</string>
+		<string>applinks:*.staging.path-rover.com</string>
+	</array>
+
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
@@ -53,6 +67,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -60,32 +76,35 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to upload images.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need access to your photo library to save images.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone to record audio for videos.</string>
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>We need access to your documents to upload files.</string>
-	<key>NSDownloadsFolderUsageDescription</key>
-	<string>We need access to your downloads folder to save files.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fb</string>
+		<string>instagram</string>
+		<string>twitter</string>
+		<string>tiktoksharesdk</string>
+	</array>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>PathRover requires photo library permission</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PathRover requires camera permission</string>
+	<key>NSContactsUsageDescription</key>
+	<string>We need to access your contacts to start chat with other users</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>We need access to your documents to upload files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>We need access to your downloads folder to save files.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location to show your current position on the map</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need your location to show your current position on the map</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show nearby places</string>
-	<key>NSContactsUsageDescription</key>
-	<string>We need to access your contacts to start chat with other users</string>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to record audio for videos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to save images.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to upload images.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>PlusJakartaSans-Bold.ttf</string>
@@ -108,9 +127,11 @@
 		<string>fetch</string>
 		<string>location</string>
 		<string>remote-notification</string>
-		 <string>audio</string>
-  		<string>voip</string>
+		<string>audio</string>
+		<string>voip</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

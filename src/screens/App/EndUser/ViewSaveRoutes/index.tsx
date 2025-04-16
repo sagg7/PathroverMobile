@@ -20,7 +20,10 @@ import {
   PFColors,
   showAlert,
 } from '../../../../shared/exporter';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {
+  getTimeAndDistance,
+  getTimeAndDistanceForWaypoint,
+} from '../../../../shared/utils/helpers';
 import styles from './styles';
 import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
@@ -63,6 +66,8 @@ const ViewSaveRoutes = ({route}: any) => {
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
   const cameraRef = useRef<any>(null);
+  const userRef = useRef<any>(null);
+
   const [results, setResults] = useState<null>(null);
 
   useEffect(() => {
@@ -78,7 +83,8 @@ const ViewSaveRoutes = ({route}: any) => {
 
   useEffect(() => {
     if (route) {
-      const selectedRoute = route?.params?.item;
+      const selectedRoute =
+        route?.params?.item || route?.params || route?.params?.data;
 
       const endCoordinates = [
         parseFloat(selectedRoute?.dropoff_location?.longitude),
@@ -100,8 +106,8 @@ const ViewSaveRoutes = ({route}: any) => {
           ]);
 
       setDestination(endCoordinates);
-      formattedPoints.unshift(startCoordinates);
-      formattedPoints.push(endCoordinates);
+      formattedPoints?.unshift(startCoordinates);
+      formattedPoints?.push(endCoordinates);
       if (selectedRoute?.route_type === 'maps_location_pins') {
         getRoadRoute(startCoordinates, endCoordinates);
       } else {
@@ -109,7 +115,7 @@ const ViewSaveRoutes = ({route}: any) => {
       }
       setRouteLineColor(selectedRoute?.color);
       setRouteLineHeight(Number(selectedRoute?.weight));
-      setSelectedRoute(route?.params?.item);
+      setSelectedRoute(route?.params?.item || route?.params);
     }
   }, [route]);
 
@@ -124,6 +130,7 @@ const ViewSaveRoutes = ({route}: any) => {
 
   const getTimeDistanceDetails = async () => {
     const locResults: any = await getTimeAndDistance(liveLocation, startPoint);
+
     setTimeDistance(locResults);
 
     let distanceValue = 0;
@@ -151,23 +158,14 @@ const ViewSaveRoutes = ({route}: any) => {
   }, [startPoint, endPoint]);
 
   const getRouteTotalDistance = async () => {
-    const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
+    const routeResults: any = await getTimeAndDistanceForWaypoint(routes);
+
     setResults(routeResults);
   };
   useEffect(() => {
     getLocationOneTime();
   }, []);
 
-  const getRoute = async () => {
-    if (currentLocation) {
-      try {
-        const path = await fetchRoute(currentLocation, startPoint);
-        setRouteToStartPoint(path);
-      } catch (error) {
-        console.error('Error fetching route:', error);
-      }
-    }
-  };
   useEffect(() => {
     getTimeDistanceDetails();
   }, [currentLocation]);
@@ -205,7 +203,7 @@ const ViewSaveRoutes = ({route}: any) => {
       return route;
     } catch (error) {
       console.error('Error fetching route:', error);
-      showAlert('Error', 'No route exists between the entered locations.');
+      // showAlert('Error', 'No route exists between the entered locations.');
       return [];
     }
   };
@@ -266,7 +264,7 @@ const ViewSaveRoutes = ({route}: any) => {
   };
   const calculateTotalDistance = (routePoints: any): number => {
     let totalDistanceKm = 0;
-    for (let i = 0; i < routePoints.length - 1; i++) {
+    for (let i = 0; i < routePoints?.length - 1; i++) {
       totalDistanceKm += haversineDistance(routePoints[i], routePoints[i + 1]);
     }
     const totalDistanceMiles = totalDistanceKm * 0.621371;
@@ -291,14 +289,17 @@ const ViewSaveRoutes = ({route}: any) => {
     if (location?.coords) {
       const {latitude, longitude} = location.coords;
       setLiveLocation([longitude, latitude]);
-      const routeResults: any = await getTimeAndDistance(
-        [longitude, latitude],
-        endPoint,
-      );
-      setResults(routeResults);
+
+      if (isStartBtnPressed) {
+        const routeResults: any = await getTimeAndDistance(
+          [longitude, latitude],
+          endPoint,
+        );
+        setResults(routeResults);
+      }
     }
   };
-  const handleStartModalSaveBtn = () => {
+  const handleStartModalSaveBtn = async () => {
     setRouteToStartPoint([]);
     setShowReachModal(false);
     setModalKey(2);
@@ -329,17 +330,36 @@ const ViewSaveRoutes = ({route}: any) => {
     // setRoute(formattedPoints);
   };
   const onPressStartBtn = async () => {
-    getRoute();
-    setShowRouteActionSheet(false);
-    setIsStartBtnPressed(true);
-    const routeResults: any = await getTimeAndDistance(startPoint, endPoint);
-    console.log('===888routeResults', routeResults);
+    setRoute([]);
 
+    setIsStartBtnPressed(true);
+    // return;
+    // getRoute();
+    const path = await fetchRoute(currentLocation, startPoint);
+
+    cameraRef.current.setCamera({
+      centerCoordinate: currentLocation,
+      zoomLevel: 18,
+      heading: 220,
+      animationDuration: 1000,
+      pitch: 60,
+    });
+
+    setRouteToStartPoint(path);
+    setShowRouteActionSheet(false);
+    const routeResults: any = await getTimeAndDistance(
+      currentLocation,
+      startPoint,
+    );
+    // cameraRef.current.setCamera({
+    //   centerCoordinate: currentLocation,
+    //   zoomLevel: 16,
+    //   animationDuration: 1000,
+    // });
     setResults(routeResults);
     setTimeout(() => {
       setShowRouteStartedSheet(true);
     }, 1000);
-    setRoute([]);
   };
 
   const calculateBounds = coordinates => {
@@ -356,21 +376,19 @@ const ViewSaveRoutes = ({route}: any) => {
       minLat = Math.min(minLat, lat);
       maxLat = Math.max(maxLat, lat);
     }
-
     return {
-      ne: [maxLng, maxLat], // North-East (Top-Right)
-      sw: [minLng, minLat], // South-West (Bottom-Left)
+      ne: [maxLng, maxLat],
+      sw: [minLng, minLat],
       paddingLeft: 30,
       paddingRight: 30,
       paddingTop: 30,
       paddingBottom: 180,
     };
   };
-  const hasCustom = selectedRoute?.route_type.includes('custom');
 
   return (
     <MainWrapper style={styles.container}>
-      <AppHeader title={route?.params?.item?.name} />
+      <AppHeader title={route?.params?.item?.name || route?.params?.name} />
 
       <MapboxGL.MapView
         key={selectedMapType}
@@ -380,8 +398,14 @@ const ViewSaveRoutes = ({route}: any) => {
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={10}
-          centerCoordinate={currentLocation}
-          bounds={routes?.length > 0 ? calculateBounds(routes) : undefined}
+          // centerCoordinate={isStartBtnPressed ? currentLocation : undefined}
+          bounds={
+            routes?.length > 0
+              ? calculateBounds(routes)
+              : isStartBtnPressed
+              ? []
+              : calculateBounds(routeToStartPoint)
+          }
         />
         <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
         {startPoint && (
@@ -389,7 +413,7 @@ const ViewSaveRoutes = ({route}: any) => {
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
         )}
-        {!hasCustom &&
+        {selectedRoute?.is_road_route &&
           selectedRoute?.pinned_points?.map(point => (
             <MapboxGL.MarkerView
               key={point.id}
@@ -410,7 +434,7 @@ const ViewSaveRoutes = ({route}: any) => {
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
-              key={route?.length}
+              key={routes?.length}
               id="routeLayer-unique"
               style={{
                 lineWidth: routeLineHeight || 4,
@@ -419,19 +443,24 @@ const ViewSaveRoutes = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )}
+        {/*  */}
+
         {routeToStartPoint?.length > 0 && (
           <MapboxGL.ShapeSource shape={routeGeoJSONToStart} id="245">
             <MapboxGL.LineLayer
               key={routeToStartPoint?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 4,
+                lineWidth: routeLineHeight || 5,
                 lineColor: routeLineColor,
               }}
             />
           </MapboxGL.ShapeSource>
         )}
-        {hasCustom &&
+
+        {!selectedRoute?.is_road_route &&
+          (selectedRoute?.route_type === 'custom_route' ||
+            selectedRoute?.route_type === 'hiking_custom_route') &&
           routes?.map((coordinate, index) => (
             <MapboxGL.PointAnnotation
               key={`pin-${index}`}
@@ -467,6 +496,7 @@ const ViewSaveRoutes = ({route}: any) => {
               ? 'Enroute to starting point'
               : 'Enroute to destination point'
           }
+          // routeInfo={timeDistance}
           routeInfo={results}
         />
       )}
@@ -498,7 +528,6 @@ const ViewSaveRoutes = ({route}: any) => {
           }}
           onPressStart={() => onPressStartBtn()}
           show={false}
-          // onPressPin={() => handlePinBtn()}
         />
       )}
 

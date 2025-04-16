@@ -50,6 +50,8 @@ export {
   routeLineArr,
   EndUserSetting,
   WEATHER_API_KEY,
+  CHAT_NON_VERIFIED_TEXT,
+  FAQ_LIST_LINK,
 } from '../utils/constant.tsx';
 export {useKeyboardListener} from '../../hooks/keyboard.tsx';
 export {
@@ -70,6 +72,10 @@ export {
   latLngValidation,
   latLngInitial,
 } from '../utils/validations.tsx';
-export {fetchSuggestions, formatDate} from '../utils/helpers.tsx';
+export {
+  fetchSuggestions,
+  formatDate,
+  getTimeAndDistanceForWaypoint,
+} from '../utils/helpers.tsx';
 export * from '../../hooks/getPlaceName';
 export * from '../../components';

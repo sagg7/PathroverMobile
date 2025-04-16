@@ -39,20 +39,21 @@ const VerifyOtpScreen = ({}) => {
     try {
       const obj = {
         user: {
-          ...(isEmail && {email: selectedValue}),
+          ...(isEmail && {email: selectedValue?.toLowerCase()}),
           ...(!isEmail && {phone_number: removeNonNumbers(selectedValue)}),
           otp: value,
         },
       };
 
-      const resp = await verifyOtp(obj);
-      if (resp?.data) {
+      const resp: any = await verifyOtp(obj);
+
+      if (resp?.data?.message === 'OTP is correct.') {
         navigation.replace(Routes.ResetPassword, {
           value: selectedValue,
           isEmail: isEmail,
         });
       } else {
-        showAlert('Error', resp?.error?.data?.error || UNEXPECTED_ERROR);
+        showAlert('Error', resp?.error?.data?.success || UNEXPECTED_ERROR);
       }
     } catch (e) {
       showAlert('Error', UNEXPECTED_ERROR);
@@ -63,7 +64,9 @@ const VerifyOtpScreen = ({}) => {
     <MainWrapper>
       <AppHeader title="Path Rover" />
       <Text style={styles.desc}>
-        Please check your email. We send you the{'\n'}verification code.
+        {`Please check your ${
+          isEmail ? 'email' : 'number'
+        }. We send you the verification code.`}
       </Text>
 
       <View style={styles.otpView}>

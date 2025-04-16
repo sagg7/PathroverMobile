@@ -21,7 +21,7 @@ import RenderEmptyUser from '../RenderEmptyUser';
 const MemberList = () => {
   const {params} = useRoute<any>();
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [addMembers] = useAddMembersMutation<any>();
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const [allContactsList, setAllContactsList] = useState<any[]>([]);
@@ -63,8 +63,13 @@ const MemberList = () => {
           const allUsers = await getAllUsers({users: allContacts}).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
           // Save full contacts list
-          setAllContactsList(formattedContacts);
-          setMatchedUsers(formattedContacts);
+
+          const filteredContacts = formattedContacts.filter(
+            (contact: any) => contact?.is_exist,
+          );
+
+          setAllContactsList(filteredContacts);
+          setMatchedUsers(filteredContacts);
         } else {
           console.warn('Contacts permission denied');
         }
@@ -95,6 +100,7 @@ const MemberList = () => {
             user?.givenName?.toLowerCase()?.includes(searchText) ||
             user?.familyName?.toLowerCase()?.includes(searchText),
         );
+
         setMatchedUsers(filteredContacts);
       } else {
         setMatchedUsers(allContactsList);
@@ -143,7 +149,13 @@ const MemberList = () => {
           {exists && <View style={styles.iconView}>{svgIcon.AddedIcon}</View>}
         </View>
         <View style={styles.textView}>
-          <Text style={styles.nameText}>{item?.givenName || 'User'}</Text>
+          <Text style={styles.nameText}>
+            {item?.displayName ||
+              (item?.givenName && item?.familyName
+                ? `${item.givenName} ${item.familyName}`
+                : item?.givenName || item?.familyName) ||
+              'User'}
+          </Text>
         </View>
       </TouchableOpacity>
     );

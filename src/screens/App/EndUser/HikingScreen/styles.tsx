@@ -16,6 +16,10 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  gestureView: {
+    flex: 1,
+    backgroundColor: 'red',
+  },
   inputStyles: {
     position: 'absolute',
     zIndex: 1111,
@@ -115,7 +119,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: isIOS() ? WP('10') : WP('5'),
     right: 7,
-    zIndex: 1,
   },
   hikeIconStyle: {
     position: 'absolute',
@@ -125,8 +128,13 @@ const styles = StyleSheet.create({
   searcRoute: {
     position: 'absolute',
     bottom: isIOS() ? WP('25') : WP('20'),
-
     right: 10,
+  },
+  iconStyle: {
+    marginRight: WP('2'),
+  },
+  filterContainer: {
+    // padding:20
   },
 });
 export default styles;

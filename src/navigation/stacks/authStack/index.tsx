@@ -23,12 +23,11 @@ const AuthStack = () => {
   const isWalkthrough = useSelector(state => state?.auth?.isWalkthrough);
 
   return (
-    <Stack.Navigator
-      screenOptions={{headerShown: false}}
-      >
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       {!isWalkthrough && (
         <Stack.Screen name={Routes.Walkthrough} component={Walkthrough} />
       )}
+      <Stack.Screen name={Routes.ContinueAs} component={ContinueAs} />
       <Stack.Screen name={Routes.GetStarted} component={GetStarted} />
       <Stack.Screen name={Routes.LoginScreen} component={LoginScreen} />
       <Stack.Screen name={Routes.VerifyOtp} component={VerifyOtpScreen} />
@@ -40,7 +39,6 @@ const AuthStack = () => {
         name={Routes.AccountCreationSuccess}
         component={AccountCreationSuccess}
       />
-      <Stack.Screen name={Routes.ContinueAs} component={ContinueAs} />
     </Stack.Navigator>
   );
 };

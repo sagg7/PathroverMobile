@@ -21,6 +21,7 @@ const baseQueryWithReAuth = async (args, api, extraOptions) => {
 
   if (result?.meta?.response?.headers) {
     const newToken = result.meta.response.headers.get('authorization');
+
     if (newToken) {
       dispatch(setAccessToken(newToken));
     }

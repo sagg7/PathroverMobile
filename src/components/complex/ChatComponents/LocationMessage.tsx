@@ -1,12 +1,14 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {PFColors, PFFonts, PFFontSize, Routes} from '../../../shared/exporter';
-import {svgIcon} from '../../../assets/svg';
 import Svg from '../../../assets/svg/blueMarker.svg';
 import moment from 'moment';
 import {useDispatch} from 'react-redux';
 import {
+  resetTrailRoute,
   setEndingPoint,
+  setRouteData,
+  setRouteType,
   setStartingPoint,
 } from '../../../redux/endUser/endUserSlice';
 import {useNavigation} from '@react-navigation/native';
@@ -14,40 +16,73 @@ import useLocation from '../../../hooks/getLocation';
 
 const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const {location} = useLocation();
 
-  const {startingPoint, endingPoint} =
+  const {startingPoint, endingPoint, type, data} =
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
-    if (startingPoint?.length > 0) {
-      dispatch(
-        setStartingPoint([
-          parseFloat(startingPoint[0]),
-          parseFloat(startingPoint[1]),
-        ]),
-      );
+    if (type === 'Chosen Trail') {
+      navigation.navigate(Routes.TrailDetails, {trailInfo: data});
     } else {
-      if (location?.longitude && location?.latitude) {
-        dispatch(setStartingPoint([location.longitude, location.latitude]));
+      dispatch(resetTrailRoute());
+      if (startingPoint?.length > 0) {
+        dispatch(
+          setStartingPoint([
+            parseFloat(startingPoint[0]),
+            parseFloat(startingPoint[1]),
+          ]),
+        );
+      } else {
+        if (location?.longitude && location?.latitude) {
+          dispatch(setStartingPoint([location.longitude, location.latitude]));
+        }
+      }
+      if (endingPoint?.length > 0) {
+        dispatch(
+          setEndingPoint([
+            parseFloat(endingPoint[0]),
+            parseFloat(endingPoint[1]),
+          ]),
+        );
+      }
+
+      dispatch(setRouteType(type));
+
+      if (data) {
+        dispatch(setRouteData(data));
+      }
+      const formatedData = JSON.parse(content)?.messageContainsLocation;
+      if (
+        formatedData?.route_type === 'waypoint_route' ||
+        formatedData?.route_type === 'hiking_waypoint' ||
+        formatedData?.route_type === 'maps_location_pins' ||
+        formatedData?.type === 'entrance route' ||
+        formatedData?.type === 'Well route' ||
+        formatedData?.type === 'Well entrance route' ||
+        formatedData?.type === 'Pin Point' ||
+        formatedData?.type === 'Way point'
+      ) {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: formatedData?.endingPoint,
+          entranceName: formatedData?.name,
+        });
+      } else if (
+        formatedData?.route_type === 'hiking_trail_route' ||
+        type === 'trail'
+      ) {
+        navigation.navigate(Routes.SearchTrailLatLng);
+      } else {
+        navigation.navigate(Routes.ViewSaveRoutes, {
+          item: formatedData,
+        });
       }
     }
-
-    if (endingPoint?.length > 0) {
-      dispatch(
-        setEndingPoint([
-          parseFloat(endingPoint[0]),
-          parseFloat(endingPoint[1]),
-        ]),
-      );
-    }
-
-    navigation.navigate(Routes.SearchTrailLatLng);
   };
 
   return (
-    <View style={{...styles.main, marginLeft: 10}}>
+    <View style={{...styles.main, marginLeft: -10}}>
       <TouchableOpacity
         style={[
           styles.bubbleContainer,
@@ -79,8 +114,9 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             style={{
               ...styles.locText,
               color: isLeft ? PFColors.Orange.Dark : PFColors.Blue.Dark,
+              textAlign: isLeft ? 'right' : 'left',
             }}>
-            {'Shared location'}
+            {`Shared ${type ? type : 'location'}`}
           </Text>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -133,10 +169,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   locText: {
-    width: '80%',
-    textAlign: 'center',
+    width: '75%',
     fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.Medium,
+    textTransform: 'capitalize',
   },
   time: {
     fontSize: PFFontSize.FONT_SIZE_8,

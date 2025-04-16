@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 40,
+    backgroundColor: PFColors.Gray.LightMist,
   },
   textView: {
     flexDirection: 'row',

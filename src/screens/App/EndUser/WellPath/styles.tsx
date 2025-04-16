@@ -107,5 +107,34 @@ const styles = StyleSheet.create({
     height: scale(44),
     width: scale(44),
   },
+  searchWellContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: PFColors.Gray.WhisperGray,
+    padding: 6,
+    marginBottom: WP('3'),
+    borderRadius: 16,
+  },
+  searchWellImage: {
+    height: scale(50),
+    width: scale(50),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: PFColors.Standard.White,
+    borderRadius: 12,
+    resizeMode: 'contain',
+  },
+  searchWellName: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_14,
+    // width: '60%',
+    textTransform: 'capitalize',
+  },
+  searchWellDistance: {
+    color: PFColors.Gray.DarkGray,
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_12,
+  },
 });
 export default styles;

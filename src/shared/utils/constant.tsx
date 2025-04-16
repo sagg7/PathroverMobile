@@ -11,16 +11,20 @@ export function showAlert(type: string, des: string, onPress?: () => void) {
 }
 
 export const isProduction = false;
-export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'ws://bedbug-trusting-starling.ngrok-free.app/cable?';
+export const REQ_LIST_SOCKET_URL = 'wss://staging.path-rover.com/cable?';
+// export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
 // export const REQ_LIST_SOCKET_URL =
 //   'wss://nice-mink-thankfully.ngrok-free.app/cable?';
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
-export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+// export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
+export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
+// export const BASE_URL = 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
 // export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
-
-export const DOMAIN_BASE_URL = 'https://staging.pathfinder-app.com/';
+export const FAQ_LIST_LINK = 'https://staging.path-rover.com/faq_list';
+export const DOMAIN_BASE_URL = 'https://staging.path-rover.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 export const WEATHER_API_KEY = 'deaad5f174ef065c55f06d98b520e02c';
@@ -32,7 +36,8 @@ export const OPEN_AI_URL = 'https://api.openai.com/v1/';
 export const OPEN_AI_KEY =
   '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';
 export const AGORA_KEY = '7f325faacba441eabb5bfca254aef699';
-
+export const CHAT_NON_VERIFIED_TEXT =
+  "You need to create a chat account before proceeding. Please create one and try again.'";
 type IntroSlidesTypes = {
   key: number;
   title: string;
@@ -61,20 +66,20 @@ export const OFFER_STATUS = {
 export const APP_INTRO_SLIDES: IntroSlidesTypes[] = [
   {
     key: 1,
-    title: 'Welcome to PathFinder!',
+    title: 'Welcome to PathRover!',
     info: 'The premier navigation and mapping application tailored specifically for the oil and gas industry. Our app is designed to simplify navigation in remote and challenging environments, ensuring that you have the tools you need to reach your destination efficiently and safely.',
     image: appImages.appIntroTwo,
   },
   {
     key: 2,
     title: 'Create and Share Routes',
-    info: 'Easily create routes and share them with your team for streamlined navigation. Whether you’re planning the best path to a new drill site or coordinating logistics for equipment delivery, PathFinder has you covered.',
+    info: 'Easily create routes and share them with your team for streamlined navigation. Whether you’re planning the best path to a new drill site or coordinating logistics for equipment delivery, PathRover has you covered.',
     image: appImages.appIntroOne,
   },
   {
     key: 3,
     title: 'Integrated Chat: Seamless Communication',
-    info: 'Stay connected with your team no matter where you are with PathFinder’s Integrated Chat, create group chats for different projects or teams, allowing for organized and efficient communication.',
+    info: 'Stay connected with your team no matter where you are with PathRover’s Integrated Chat, create group chats for different projects or teams, allowing for organized and efficient communication.',
     image: appImages.appIntroThree,
   },
 ];
@@ -519,7 +524,6 @@ export const DriverProfileMenu = [
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -558,7 +562,6 @@ export const ManagerProfileMenu = [
     title: 'Notifications',
     icon: appIcons.bellIcon,
   },
-
   {
     id: 7,
     title: 'Privacy Policy',
@@ -579,13 +582,11 @@ export const ManagerProfileMenu = [
     title: 'FAQ',
     icon: appIcons.faq,
   },
-
   {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -604,7 +605,6 @@ export const EndUserProfileMenu = [
     title: 'Switch Account',
     icon: appIcons.logout,
   },
-
   {
     id: 1,
     title: 'Manage Profile',
@@ -640,13 +640,11 @@ export const EndUserProfileMenu = [
     title: 'Privacy Policy',
     icon: appIcons.privacy,
   },
-
   {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
   },
-
   {
     id: 9,
     title: 'Delete',
@@ -745,6 +743,55 @@ export const RIDE_STATUS = {
   ORDER_DELIVERED: 'order_delivered',
 };
 
+export const ANDROID_ADS = [
+  'ca-app-pub-8139629720293753/3060338255',
+  'ca-app-pub-8139629720293753/8121093246',
+  'ca-app-pub-8139629720293753/5494929901',
+  // 'ca-app-pub-8139629720293753/2868766563',
+  // 'ca-app-pub-8139629720293753/2163781875',
+  // 'ca-app-pub-8139629720293753/7929521557',
+  // 'ca-app-pub-8139629720293753/9850700209',
+  // 'ca-app-pub-8139629720293753/8537618532',
+  // 'ca-app-pub-8139629720293753/7635600407',
+  // 'ca-app-pub-8139629720293753/5911455198',
+  // 'ca-app-pub-8139629720293753/8099205650',
+  // 'ca-app-pub-8139629720293753/8099205650',
+  // 'ca-app-pub-8139629720293753/5473042310',
+  // 'ca-app-pub-8139629720293753/7737949860',
+  // 'ca-app-pub-8139629720293753/5111786528',
+  // 'ca-app-pub-8139629720293753/2485623181',
+  // 'ca-app-pub-8139629720293753/1172541514',
+  // 'ca-app-pub-8139629720293753/4595074911',
+  // 'ca-app-pub-8139629720293753/1968911576',
+  // 'ca-app-pub-8139629720293753/1523895301',
+  // 'ca-app-pub-8139629720293753/7897731965',
+  // 'ca-app-pub-8139629720293753/9655829902',
+];
+
+export const IOS_ADS = [
+  'ca-app-pub-8139629720293753/9019241945',
+  'ca-app-pub-8139629720293753/7879713807',
+  'ca-app-pub-8139629720293753/9255803838',
+  // 'ca-app-pub-8139629720293753/6649821792',
+  // 'ca-app-pub-8139629720293753/7942722166',
+  // 'ca-app-pub-8139629720293753/5253550468',
+  // 'ca-app-pub-8139629720293753/2589564961',
+  // 'ca-app-pub-8139629720293753/7650319959',
+  // 'ca-app-pub-8139629720293753/9621043021',
+  // 'ca-app-pub-8139629720293753/5024156612',
+  // 'ca-app-pub-8139629720293753/3776817262',
+  // 'ca-app-pub-8139629720293753/2463735594',
+  // 'ca-app-pub-8139629720293753/4888425246',
+  // 'ca-app-pub-8139629720293753/5145168432',
+  // 'ca-app-pub-8139629720293753/3832086766',
+  // 'ca-app-pub-8139629720293753/9001223784',
+  // 'ca-app-pub-8139629720293753/4291822588',
+  // 'ca-app-pub-8139629720293753/4291822588',
+  // 'ca-app-pub-8139629720293753/8636098564',
+  // 'ca-app-pub-8139629720293753/7688142118',
+  // 'ca-app-pub-8139629720293753/7323016894',
+];
+
 export const top_ads_android = [
   'ca-app-pub-8139629720293753/3060338255',
   'ca-app-pub-8139629720293753/8121093246',
@@ -835,6 +882,12 @@ export const EndUserSetting = [
     title: 'Well Location Pins',
     icon: svgIcon.BluePin,
     type: 'maps_location_pins',
+  },
+  {
+    id: 1,
+    title: 'WayPoint',
+    icon: svgIcon.RouteBlue,
+    type: 'waypoint_route',
   },
 ];
 
@@ -958,5 +1011,468 @@ export const REPORTS_LIST = [
     name: 'Stalled vehicle',
     icon: appIcons.warning,
     key: 'stalled_vehicle',
+  },
+];
+
+export const HIKING_FILTERS_CHECKLIST = [
+  {
+    id: 1,
+    label: 'Wet weather friendly',
+  },
+  {
+    id: 2,
+    label: 'Family friendly',
+  },
+  {
+    id: 1,
+    label: 'Alpine trail',
+  },
+  {
+    id: 1,
+    label: 'Hide closed',
+  },
+];
+
+export const DIRECTIONS = [
+  {
+    id: 0,
+    value: 'Downhill Only',
+    label: 'Downhill Only',
+  },
+  {
+    id: 1,
+    value: 'Downhill Primary',
+    label: 'Downhill Primary',
+  },
+  {
+    id: 2,
+    value: 'Both Directions',
+    label: 'Both Directions',
+  },
+  {
+    id: 3,
+    value: 'Uphill Primary',
+    label: 'Uphill Primary',
+  },
+  {
+    id: 4,
+    value: 'Uphill Only',
+    label: 'Uphill Only',
+  },
+  {
+    id: 5,
+    value: 'One Direction',
+    label: 'One Direction',
+  },
+];
+
+export const DIFFICULTIES = [
+  {
+    id: 0,
+    value: 'Access Road/Trail',
+    label: 'Access Road/Trail',
+  },
+  {
+    id: 1,
+    value: 'Secondary Access Road/Trail',
+    label: 'Secondary Access Road/Trail',
+  },
+  {
+    id: 2,
+    value: 'White',
+    label: 'White',
+  },
+  {
+    id: 3,
+    value: 'Green',
+    label: 'Green',
+  },
+  {
+    id: 4,
+    value: 'Blue',
+    label: 'Blue',
+  },
+  {
+    id: 5,
+    value: 'Advanced',
+    label: 'Advanced',
+  },
+  {
+    id: 6,
+    value: 'Black',
+    label: 'Black',
+  },
+  {
+    id: 7,
+    value: 'Double Black Diamond',
+    label: 'Double Black Diamond',
+  },
+  {
+    id: 8,
+    value: 'Proline',
+    label: 'Proline',
+  },
+  {
+    id: 8,
+    value: 'Lift',
+    label: 'Lift',
+  },
+];
+
+export const TTFs = [
+  {
+    id: 0,
+    value: 'A-Frame',
+    label: 'A-Frame',
+  },
+  {
+    id: 1,
+    value: 'Berm',
+    label: 'Berm',
+  },
+  {
+    id: 2,
+    value: 'Bridge',
+    label: 'Bridge',
+  },
+  {
+    id: 3,
+    value: 'Drop',
+    label: 'Drop',
+  },
+  {
+    id: 4,
+    value: 'Jump',
+    label: 'Jump',
+  },
+  {
+    id: 5,
+    value: 'Gap Jump',
+    label: 'Gap Jump',
+  },
+  {
+    id: 6,
+    value: 'Ladder Bridge',
+    label: 'Ladder Bridge',
+  },
+  {
+    id: 7,
+    value: 'Log Ride',
+    label: 'Log Ride',
+  },
+  {
+    id: 8,
+    value: 'Pump Track',
+    label: 'Pump Track',
+  },
+  {
+    id: 9,
+    value: 'Rock Face',
+    label: 'Rock Face',
+  },
+  {
+    id: 10,
+    value: 'Rock Garden',
+    label: 'Rock Garden',
+  },
+  {
+    id: 11,
+    value: 'Roller Coaster',
+    label: 'Roller Coaster',
+  },
+  {
+    id: 12,
+    value: 'Skinny',
+    label: 'Skinny',
+  },
+  {
+    id: 13,
+    value: 'Teeter Totter',
+    label: 'Teeter Totter',
+  },
+  {
+    id: 14,
+    value: 'Wallride',
+    label: 'Wallride',
+  },
+  {
+    id: 15,
+    value: 'Other',
+    label: 'Other',
+  },
+];
+
+export const BIKE_TYPE = [
+  {
+    id: 0,
+    value: 'Downhill',
+    label: 'Downhill',
+  },
+  {
+    id: 1,
+    value: 'All-Mountain',
+    label: 'All-Mountain',
+  },
+  {
+    id: 2,
+    value: 'Cross-Country',
+    label: 'Cross-Country',
+  },
+  {
+    id: 3,
+    value: 'Dirtjump/Slopstyle',
+    label: 'Dirtjump/Slopstyle',
+  },
+  {
+    id: 4,
+    value: 'Road',
+    label: 'Road',
+  },
+  {
+    id: 5,
+    value: 'Fat Bike',
+    label: 'Fat Bike',
+  },
+  {
+    id: 6,
+    value: 'Adaptive MTB',
+    label: 'Adaptive MTB',
+  },
+  {
+    id: 7,
+    value: 'Cyclo-Cross',
+    label: 'Cyclo-Cross',
+  },
+  {
+    id: 8,
+    value: 'Gravel/Adventure',
+    label: 'Gravel/Adventure',
+  },
+  {
+    id: 9,
+    value: 'Unicycle',
+    label: 'Unicycle',
+  },
+  {
+    id: 10,
+    value: 'BMX',
+    label: 'BMX',
+  },
+  {
+    id: 11,
+    value: 'Trials',
+    label: 'Trials',
+  },
+];
+
+export const TRAIL_TYPE = [
+  {
+    id: 0,
+    label: 'Hiking Trails',
+    value: 'hiking',
+  }, // General hiking/walking trails
+  // {id: 1, label: 'Footway', value: 'footway'}, // Sidewalks, pedestrian paths
+  // {id: 2, label: 'Steps', value: 'steps'}, // Stairways and pedestrian-only step paths
+  {id: 3, label: 'Ski Trails', value: 'skiing'}, // Ski routes (piste:type)
+  {id: 4, label: 'Mountain Biking Trails', value: 'mtb'}, // MTB-specific routes
+  {id: 5, label: 'Cycling Paths', value: 'cycleway'}, // Bicycle lanes, tracks
+  {id: 6, label: 'Bridleways (Horse Riding)', value: 'bridleway'}, // Horse-riding trails
+  {id: 7, label: 'Off-Road Trails', value: 'track'}, // Dirt roads, forestry tracks
+];
+export const TRAIL_TYPE1 = [
+  {
+    id: 0,
+    value: 'Singletrack',
+    label: 'Singletrack',
+  },
+  {
+    id: 1,
+    value: 'Machine Groomed',
+    label: 'Machine Groomed',
+  },
+  {
+    id: 2,
+    value: 'Doubletrack',
+    label: 'Doubletrack',
+  },
+  {
+    id: 3,
+    value: 'Mixed',
+    label: 'Mixed',
+  },
+  {
+    id: 4,
+    value: 'Dirt/Gravel Road',
+    label: 'Dirt/Gravel Road',
+  },
+  {
+    id: 5,
+    value: 'Asphalt/Tarmac Road',
+    label: 'Asphalt/Tarmac Road',
+  },
+  {
+    id: 6,
+    value: 'Paved Path',
+    label: 'Paved Path',
+  },
+  {
+    id: 7,
+    value: 'Gravel Path',
+    label: 'Gravel Path',
+  },
+  {
+    id: 8,
+    value: 'Rail Trail',
+    label: 'Rail Trail',
+  },
+  {
+    id: 9,
+    value: 'Wilderness Trail',
+    label: 'Wilderness Trail',
+  },
+  {
+    id: 10,
+    value: 'Hike-a-Bike',
+    label: 'Hike-a-Bike',
+  },
+  {
+    id: 11,
+    value: 'Primitive',
+    label: 'Primitive',
+  },
+  {
+    id: 12,
+    value: 'Grass',
+    label: 'Grass',
+  },
+  {
+    id: 13,
+    value: 'Boardwalk',
+    label: 'Boardwalk',
+  },
+  {
+    id: 14,
+    value: 'Sandy',
+    label: 'Sandy',
+  },
+  {
+    id: 15,
+    value: 'Ski Run (Piste)',
+    label: 'Ski Run (Piste)',
+  },
+  {
+    id: 16,
+    value: 'Ski Run (Off-Piste)',
+    label: 'Ski Run (Off-Piste)',
+  },
+  {
+    id: 17,
+    value: 'Other',
+    label: 'Other',
+  },
+];
+
+export const NEW_TRAILS = [
+  {
+    id: 0,
+    value: '1 Month',
+    label: '1 Month',
+  },
+  {
+    id: 1,
+    value: '6 months',
+    label: '6 months',
+  },
+  {
+    id: 2,
+    value: '12 months',
+    label: '12 months',
+  },
+];
+
+export const LOCAL_POPULARITY = [
+  {
+    id: 0,
+    value: '10',
+    label: '10',
+  },
+  {
+    id: 1,
+    value: '20',
+    label: '20',
+  },
+  {
+    id: 2,
+    value: '30',
+    label: '30',
+  },
+  {
+    id: 3,
+    value: '40',
+    label: '40',
+  },
+  {
+    id: 4,
+    value: '50',
+    label: '50',
+  },
+  {
+    id: 5,
+    value: '60',
+    label: '60',
+  },
+  {
+    id: 6,
+    value: '70',
+    label: '70',
+  },
+  {
+    id: 7,
+    value: '80',
+    label: '80',
+  },
+  {
+    id: 8,
+    value: '90',
+    label: '90',
+  },
+];
+
+export const TRAILS_COMPLETION = [
+  {
+    id: 0,
+    value: 'Completed',
+    label: 'Completed',
+  },
+  {
+    id: 1,
+    value: 'Not Completed',
+    label: 'Not Completed',
+  },
+];
+
+export const TRAILS_ON_WHISHLIST = [
+  {
+    id: 0,
+    value: 'Yes',
+    label: 'Yes',
+  },
+  {
+    id: 1,
+    value: 'No',
+    label: 'No',
+  },
+];
+
+export const UNSANCTIONED = [
+  {
+    id: 0,
+    value: 'No',
+    label: 'No',
+  },
+  {
+    id: 1,
+    value: 'Yes',
+    label: 'Yes',
   },
 ];

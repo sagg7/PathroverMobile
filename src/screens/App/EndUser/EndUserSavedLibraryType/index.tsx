@@ -1,76 +1,84 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FlatList, Text, TouchableOpacity, View} from 'react-native';
-import {useDispatch} from 'react-redux';
 import {useIsFocused} from '@react-navigation/native';
 import {svgIcon} from '../../../../assets/svg';
+import DeleteSvg from '../../../../assets/svg/chatDelete.svg';
+import EditSvg from '../../../../assets/svg/Edit.svg';
 import {
   AppButton,
   AppHeader,
-  AppInput,
   AppLoader,
   MainWrapper,
 } from '../../../../components';
+import GeneralModal from '../../../../components/complex/GeneralModal';
 import {
   useDeleteRouteMutation,
   useEditRouteMutation,
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
 import {
-  setEndingPoint,
-  setStartingPoint,
-} from '../../../../redux/endUser/endUserSlice';
-import {PFColors, Routes, WP} from '../../../../shared/exporter';
+  PFColors,
+  Routes,
+  SaveRouteSheet,
+  WP,
+} from '../../../../shared/exporter';
 import styles from './styles';
-import GeneralModal from '../../../../components/complex/GeneralModal';
-import EditSvg from '../../../../assets/svg/Edit.svg';
-import DeleteSvg from '../../../../assets/svg/chatDelete.svg';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import SharedSheet from '../../../../components/complex/SharedSheet';
+import Share from 'react-native-share';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
-  const isHiking = !!route?.params?.isHiking;
-  const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const [routeName, setRouteName] = useState('');
   const [error, setError] = useState('');
-  const [selectedRoute, setSelectedRoute] = useState<number | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<any | null>(null);
   const [modalType, setModalType] = useState<'menu' | 'edit' | 'delete' | null>(
     null,
   );
-
+  const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
   const queryParams = {route_type: item?.type};
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
+  const refScrollable = useRef<any>();
+
+  useEffect(() => {
+    if (modalType === 'edit') {
+      refScrollable.current.open();
+    }
+  }, [modalType]);
 
   useEffect(() => {
     if (isFocused) refetch();
   }, [isFocused]);
 
   const handleNavigation = (selectedItem: any) => {
-    if (isHiking) {
-      dispatch(
-        setStartingPoint([
-          +selectedItem?.pickup_location?.longitude,
-          +selectedItem?.pickup_location?.latitude,
-        ]),
-      );
-      dispatch(
-        setEndingPoint([
-          +selectedItem?.dropoff_location?.longitude,
-          +selectedItem?.dropoff_location?.latitude,
-        ]),
-      );
-      navigation.navigate(Routes.SearchTrailLatLng);
+    if (
+      selectedItem?.route_type === 'waypoint_route' ||
+      selectedItem?.route_type === 'hiking_waypoint' ||
+      selectedItem?.route_type === 'maps_location_pins'
+    ) {
+      navigation.navigate(Routes.ViewWellPathNavigation, {
+        entranceCoords: [
+          Number(selectedItem?.dropoff_location?.longitude),
+          Number(selectedItem?.dropoff_location?.latitude),
+        ],
+        entranceName: selectedItem?.name,
+      });
     } else {
-      navigation.navigate(Routes.ViewSaveRoutes, {item: selectedItem});
+      navigation.navigate(Routes.ViewSaveRoutes, {
+        item: selectedItem,
+      });
     }
   };
 
   const handleModal = (
-    routeId: number | null,
+    routeId: any | null,
     type: 'menu' | 'edit' | 'delete' | null,
   ) => {
     setSelectedRoute(routeId);
+    setRouteName(routeId?.name);
     setModalType(null);
 
     if (type) {
@@ -96,33 +104,35 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         refetch();
         setRouteName('');
         handleModal(null, null);
+        refScrollable.current.close();
       })
       .catch(err => {
         console.log('err', err);
       });
   };
 
-  const handleDelete = () => {
-    deleteRoute(selectedRoute?.id)
-      .unwrap()
-      .then(() => {
-        refetch();
-        handleModal(null, null);
-      })
-      .catch(err => {
-        console.log('err', err);
-      });
+  const handleDelete = async () => {
+    try {
+      if (!selectedRoute?.id) {
+        console.log('No route selected to delete.');
+        return;
+      }
+
+      const res = await deleteRoute(selectedRoute.id).unwrap();
+      refetch();
+      handleModal(null, null);
+    } catch (err) {
+      console.error('Error:', err);
+    }
   };
 
   const renderView = ({item}: any) => (
     <TouchableOpacity
       style={styles.listConatainer}
-      onPress={() => handleNavigation(item)}
-      // onPress={() => console.log('item', item)}
-    >
+      onPress={() => handleNavigation(item)}>
       <View style={styles.innerContainer}>
         <View style={styles.iconContainer}>{svgIcon.MapWindow}</View>
-        <Text style={styles.listOptionText}>{item?.name}</Text>
+        <Text style={styles.listOptionText}>{item?.name || 'N/A'}</Text>
       </View>
       <TouchableOpacity hitSlop={20} onPress={() => handleModal(item, 'menu')}>
         {svgIcon.MenuDot}
@@ -132,7 +142,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
 
   const handleUpdateName = (text: string) => {
     setRouteName(text);
-    if (!!text.trim()) {
+    if (!!text?.trim()) {
       setError('');
     } else {
       setError('Route name cannot be empty');
@@ -143,19 +153,92 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
 
     return [Number(location.longitude), Number(location.latitude)];
   };
-  const handdleShareOption = (routeData: any) => {
-    // const hasCustom = routeData?.route_type.includes('custom');
-    const startingPoint = extractCoordinates(routeData?.pickup_location);
-    const endingPoint = extractCoordinates(routeData?.dropoff_location);
 
-    if (routeData?.route_type) {
-      // console.log('DATA===>', routeData);
-      navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {
-          startingPoint: startingPoint,
-          endingPoint: endingPoint,
+  const transformData = (data: any) => {
+    return {
+      ...data, // Keep all other key-value pairs unchanged
+      middle_location_points: data.middle_location_points.map((point: any) => [
+        parseFloat(point.longitude), // Convert to float if needed
+        parseFloat(point.latitude),
+      ]),
+    };
+  };
+
+  const handleShareOption = (routeData: any) => {
+    setShowShareSheet(false);
+
+    if (routeData?.is_chosen_trail) {
+      const trailPath = routeData?.middle_location_points;
+      const startingPoint = trailPath?.[0];
+      const endingPoint = trailPath?.at(-1);
+
+      const outputPath = transformData(routeData);
+
+      const trailInfo = {
+        geometry: {coordinates: outputPath?.middle_location_points},
+        properties: {
+          color: '#13488A',
+          tags: {name: ''},
         },
-      });
+        type: 'Feature',
+      };
+
+      handleModal(null, null);
+      setTimeout(() => {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint: startingPoint,
+            endingPoint: endingPoint,
+            type: 'Chosen Trail',
+            data: trailInfo,
+          },
+        });
+      }, 300);
+    } else {
+      // const hasCustom = routeData?.route_type.includes('custom');
+      const startingPoint = extractCoordinates(routeData?.pickup_location);
+      const endingPoint = extractCoordinates(routeData?.dropoff_location);
+      const {pickup_location, dropoff_location, ...data} = routeData;
+      handleModal(null, null);
+      // return;
+      if (routeData?.route_type) {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint: startingPoint,
+            endingPoint: endingPoint,
+            ...routeData,
+            type:
+              routeData.route_type == 'custom_route' ||
+              routeData.route_type == 'hiking_custom_route'
+                ? 'custom route'
+                : routeData.route_type == 'recording_route'
+                ? 'Recording'
+                : routeData.route_type == 'maps_location_pins'
+                ? 'Well pin'
+                : routeData.route_type == 'hiking_trail_route'
+                ? 'trail'
+                : routeData.route_type == 'waypoint_route'
+                ? 'Way point'
+                : 'route',
+          },
+        });
+      }
+    }
+  };
+
+  const shareContent = async () => {
+    const options = {
+      // message: 'Shared location',
+      url: `https://staging.path-rover.com/download?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
+    };
+
+    try {
+      const res = await Share.open(options);
+      console.log(res);
+    } catch (err) {
+      if (err) {
+        console.log(err);
+      }
     }
   };
 
@@ -183,7 +266,13 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         onClose={() => handleModal(null, null)}>
         <TouchableOpacity
           style={styles.menuOption}
-          onPress={() => handdleShareOption(selectedRoute)}>
+          // onPress={() => handleShareOption(selectedRoute)}
+          onPress={() => {
+            setModalType(null);
+            setTimeout(() => {
+              setShowShareSheet(true);
+            }, 1000);
+          }}>
           {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}
           {svgIcon.Share}
           <Text style={styles.menuOptionText}>Share</Text>
@@ -202,23 +291,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         </TouchableOpacity>
       </GeneralModal>
       <GeneralModal
-        title="Edit"
-        visible={modalType === 'edit'}
-        onClose={() => handleModal(null, null)}>
-        <AppInput
-          touched={true}
-          errorMessage={`${error}`}
-          placeholder="Enter name"
-          onChangeText={handleUpdateName}
-        />
-        <AppButton
-          title="Save"
-          buttonStyle={{marginTop: WP('2')}}
-          handleClick={handleSave}
-          isLoading={isEditing}
-        />
-      </GeneralModal>
-      <GeneralModal
         title=""
         hideCross
         visible={modalType === 'delete'}
@@ -229,19 +301,50 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         <View style={styles.innerContainer}>
           <AppButton
             title="Cancel"
+            disabled={isDeleting}
             buttonStyle={styles.cancelBtn}
             handleClick={() => handleModal(null, null)}
             textStyle={{color: PFColors.Standard.Black}}
           />
           <AppButton
             title="Delete"
+            disabled={isDeleting}
             buttonStyle={styles.deleteBtn}
             handleClick={handleDelete}
             isLoading={isDeleting}
           />
         </View>
       </GeneralModal>
-      {isLoading && <AppLoader />}
+      <SharedSheet
+        modalVisible={showShareSheet}
+        onPressOther={() => shareContent()}
+        onPressShare={() => handleShareOption(selectedRoute)}
+        setModalVisible={() => setShowShareSheet(false)}
+      />
+
+      <RBSheet
+        ref={refScrollable}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customStyles={{
+          container: {
+            borderTopLeftRadius: WP('3'),
+            borderTopRightRadius: WP('3'),
+          },
+        }}>
+        <SaveRouteSheet
+          onPressCancel={() => refScrollable.current.close()}
+          title="Edit"
+          routeName={routeName || ''}
+          onChangeText={handleUpdateName}
+          onPressSave={() => handleSave()}
+          btnTitle="Save Map"
+        />
+        {/* )} */}
+      </RBSheet>
+      {(isLoading || isEditing) && <AppLoader />}
     </MainWrapper>
   );
 };

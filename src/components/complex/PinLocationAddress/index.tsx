@@ -32,6 +32,7 @@ const PinLocationAddress = ({
       <Text style={styles.detailValue}>{value}</Text>
     </View>
   );
+
   return (
     <Modal
       useNativeDriver
@@ -39,13 +40,19 @@ const PinLocationAddress = ({
       onBackdropPress={setModalVisible}
       style={styles.modalContainer}>
       <View style={styles.titleView}>
-        <Text style={styles.headerText}>{selectedWell?.well_name}</Text>
+        <View>
+          <Text style={styles.headerText}>{selectedWell?.well_name}</Text>
+          <Text style={styles.headerText}>
+            {selectedWell?.company_operator}
+          </Text>
+        </View>
+
         <TouchableOpacity onPress={setModalVisible}>
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
       <View style={styles.actionIcon}>
-        <TouchableOpacity onPress={onPressShare} style={{right: 10}}>
+        <TouchableOpacity onPress={onPressShare} style={{right: 0}}>
           {svgIcon.ShareWellPath}
         </TouchableOpacity>
         {/* <TouchableOpacity onPress={onPressPin}>
@@ -54,12 +61,6 @@ const PinLocationAddress = ({
       </View>
 
       <View style={styles.blueBox}>
-        {/* TODO SET COMPANY NAME  */}
-        {/* <View style={styles.detailSection}>
-          <DetailView title="Operator" value={selectedWell?.api || 'N/A'} />
-        </View>
-        <View style={styles.horizontalLine} /> */}
-
         <View style={styles.detailSection}>
           <DetailView title="API" value={selectedWell?.api || 'N/A'} />
         </View>
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_16,
     color: PFColors.Standard.Black,
     width: WP('80'),
-    paddingVertical: 10,
+    paddingVertical: 5,
     textTransform: 'capitalize',
   },
   btnContainer: {
