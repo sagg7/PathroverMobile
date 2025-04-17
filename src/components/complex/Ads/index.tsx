@@ -59,7 +59,7 @@ function Ads({ item }: AdsProps) {
               <Text style={styles.titleTextStyle}>{nativeAd.headline}</Text>
             </NativeAsset>
             <NativeAsset assetType={NativeAssetType.BODY}>
-              <Text style={styles.titleTextStyle}>{nativeAd.body}</Text>
+              <Text style={styles.descTextStyle}>{nativeAd.body}</Text>
             </NativeAsset>
           </View>
         </NativeAdView>
