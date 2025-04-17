@@ -23,10 +23,10 @@ const NewsBlogDetail = ({route}: any) => {
           <Text style={styles.timeTextStyle}>
             {moment(item?.created_at).format('MM-DD-YYYY')}
           </Text>
-          {item?.content && (
+          {item?.content?.body && (
             <RenderHTML
               contentWidth={scrWidth}
-              source={{html: item?.content}}
+              source={{html: item?.content?.body}}
               baseStyle={styles.htmlBaseStyle}
             />
           )}
