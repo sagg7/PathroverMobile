@@ -9,7 +9,7 @@ const authSlice = createSlice({
 		refreshToken: {},
 		isTokenValid: false,
 		isWalkthrough: false,
-		sessionExpired: true,
+		sessionExpired: false,
 	},
 	reducers: {
 		setRefreshToken: (state, action) => {
@@ -21,7 +21,7 @@ const authSlice = createSlice({
 		},
 		setLoginUser: (state, action) => {
 			state.loginUser = action?.payload;
-			state.sessionExpired = true;
+			state.sessionExpired = false;
 		},
 		setIsTokenValid: (state, action) => {
 			state.isTokenValid = action?.payload;
@@ -38,7 +38,7 @@ const authSlice = createSlice({
 			state.sessionExpired = action.payload;
 		},
 		resetSessionExpired: (state) => {
-			state.sessionExpired = true;
+			state.sessionExpired = false;
 		},
 	},
 });
