@@ -7,6 +7,7 @@ import {showAlert} from '../../shared/exporter';
 export const useGoogleSignIn = (setGoogleToken: any) => {
   const signInWithGoogle = async () => {
     try {
+      await GoogleSignin.signOut();
       await GoogleSignin.hasPlayServices();
       const result: any = await GoogleSignin.signIn();
       console.log(result?.data);
@@ -18,7 +19,7 @@ export const useGoogleSignIn = (setGoogleToken: any) => {
         showAlert('Google Sign-In failed', 'No ID token returned');
       }
     } catch (error: any) {
-      console.log('Error =>', error?.message);
+      console.log('Error =>', error?.message, error, error?.code);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         showAlert('Google Sign-In Cancelled', 'User cancelled the login flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
