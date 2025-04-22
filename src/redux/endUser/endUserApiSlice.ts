@@ -7,7 +7,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
         let allWells: any = [];
         let currentPage = 1;
         let totalPages = 1;
-        let perPage = 2000;
+        // let perPage = 100;
         let radius = 70;
 
         try {
@@ -16,7 +16,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
             latitude: arg.latitude,
             longitude: arg.longitude,
             radius: radius,
-            per_page: perPage,
+            per_page: arg.per_page,
             page: currentPage,
           }).toString();
 
@@ -34,6 +34,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
           // console.log(
           //   `Fetched page ${currentPage}/${data.total_pages}, Wells: ${data.wells.length}`,
           // );
+
           allWells = [...allWells, ...data.wells];
           totalPages = data.total_pages;
           // }

@@ -66,6 +66,8 @@ const styles = StyleSheet.create({
     marginVertical: WP('10'),
     width: WP('90'),
     alignSelf: 'center',
+    position: 'absolute',
+    bottom: 30,
   },
 
   addressCard: {

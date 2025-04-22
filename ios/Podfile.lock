@@ -153,17 +153,32 @@ PODS:
   - MapboxCommon (23.10.1)
   - MapboxCoreMaps (10.18.0):
     - MapboxCommon (~> 23.10)
+  - MapboxCoreNavigation (2.19.0):
+    - MapboxDirections (~> 2.14)
+    - MapboxNavigationNative (< 207.0.0, >= 206.0.1)
+  - MapboxDirections (2.14.0):
+    - Polyline (~> 5.0)
+    - Turf (~> 2.8.0)
   - MapboxMaps (10.18.2):
     - MapboxCommon (= 23.10.1)
     - MapboxCoreMaps (= 10.18.0)
     - MapboxMobileEvents (= 1.0.10)
     - Turf (= 2.8.0)
   - MapboxMobileEvents (1.0.10)
+  - MapboxNavigation (2.19.0):
+    - MapboxCoreNavigation (= 2.19.0)
+    - MapboxMaps (~> 10.18)
+    - MapboxSpeech (~> 2.0)
+    - Solar-dev (~> 3.0)
+  - MapboxNavigationNative (206.1.1):
+    - MapboxCommon (~> 23.10)
+  - MapboxSpeech (2.1.1)
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - Polyline (5.1.0)
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.01.01.00):
     - boost
@@ -1751,6 +1766,7 @@ PODS:
   - RNSVG (15.11.2):
     - React-Core
   - SocketRocket (0.7.0)
+  - Solar-dev (3.0.1)
   - Stripe (24.2.0):
     - StripeApplePay (= 24.2.0)
     - StripeCore (= 24.2.0)
@@ -1800,6 +1816,8 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - GoogleUtilities
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - MapboxMaps (= 10.18.2)
+  - MapboxNavigation (~> 2.19.0.majorMinor)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -1914,11 +1932,18 @@ SPEC REPOS:
     - GTMSessionFetcher
     - MapboxCommon
     - MapboxCoreMaps
+    - MapboxCoreNavigation
+    - MapboxDirections
     - MapboxMaps
     - MapboxMobileEvents
+    - MapboxNavigation
+    - MapboxNavigationNative
+    - MapboxSpeech
     - nanopb
+    - Polyline
     - PromisesObjC
     - SocketRocket
+    - Solar-dev
     - Stripe
     - StripeApplePay
     - StripeCore
@@ -2145,9 +2170,15 @@ SPEC CHECKSUMS:
   hermes-engine: 8c1577f3fdb849cbe7729c2e7b5abc4b845e88f8
   MapboxCommon: 0ff437e44988da6856e280d00ffb266564ed0487
   MapboxCoreMaps: f1bd9405f5b9d3e343f2fe4138775299699a22fb
+  MapboxCoreNavigation: 3be9990fae3ed732a101001746d0e3b4234ec023
+  MapboxDirections: 3d468327d3e2ac52ae1be2176004976580cf6fd9
   MapboxMaps: e76b14f52c54c40b76ddecd04f40448e6f35a864
   MapboxMobileEvents: de50b3a4de180dd129c326e09cd12c8adaaa46d6
+  MapboxNavigation: da9cf3d773ed5b0fa0fb388fccdaa117ee681f31
+  MapboxNavigationNative: d898e5882007b6caea5af158b0dffb7c75e7641d
+  MapboxSpeech: cd25ef99c3a3d2e0da72620ff558276ea5991a77
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  Polyline: 2a1f29f87f8d9b7de868940f4f76deb8c678a5b1
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: 3afceddffa65aee666dafd6f0116f1d975db1584
@@ -2232,6 +2263,7 @@ SPEC CHECKSUMS:
   RNShare: ddc90a41a808268fd75061da52e0239ad416df28
   RNSVG: e451741721b9fd3db71b06aafe9335d09a189692
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
+  Solar-dev: 4612dc9878b9fed2667d23b327f1d4e54e16e8d0
   Stripe: be805dc0e80a7299de7b10ecbe01ce81412654c8
   stripe-react-native: 01b57a63afbe42b57f24cebdde78eff3d602148b
   StripeApplePay: 5233ecff535bb0772785d2d18d02b39ec24ecb71
@@ -2245,6 +2277,6 @@ SPEC CHECKSUMS:
   Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
   Yoga: 950bbfd7e6f04790fdb51149ed51df41f329fcc8
 
-PODFILE CHECKSUM: e40249ddcb67a8ad8d8f121c155d1db173e5f82d
+PODFILE CHECKSUM: e8dc9da36035ccb4431ae52ee037831775720da2
 
 COCOAPODS: 1.15.2
