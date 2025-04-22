@@ -38,9 +38,7 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.275364, 31.454158,
-  ]);
+  const [currentLocation, setCurrentLocation] = useState<any>([]);
   const [routes, setRoute] = useState<any>([]);
   const [results, setResults] = useState<any>(null);
   const [destination, setDestination] = useState<any>(null);
@@ -50,7 +48,6 @@ const ViewWellPathNavigation = ({route}: any) => {
   const [activeItem, setActiveItem] = useState(null);
   const [modalKey, setModalKey] = useState(1);
   const [showReachModal, setShowReachModal] = useState(false);
-  const [distanceToNext, setDistanceToNext] = useState(25);
   const screenWidth = Dimensions.get('window').width;
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
@@ -118,25 +115,6 @@ const ViewWellPathNavigation = ({route}: any) => {
     return R * c; // Distance in kilometers
   };
 
-  const _fetchRoute = async (start, end) => {
-    const accessToken = mapBoxToken;
-    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      const route = data.routes[0]?.geometry?.coordinates;
-      setRoute(route);
-      setTourStops(data.routes[0]?.legs[0]?.steps);
-    } catch (error) {
-      // if (count === 1) {
-      //   showAlert('Error', 'No route exists between the entered locations.');
-      // }
-      // setCount(2);
-      return [];
-    }
-  };
-
   const fetchRoute = async (start, end) => {
     const accessToken = mapBoxToken;
     let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
@@ -185,37 +163,26 @@ const ViewWellPathNavigation = ({route}: any) => {
   };
 
   useEffect(() => {
-    const getResults = async () => {
-      const locResults: any = await getTimeAndDistance(
-        currentLocation,
-        destination,
-      );
+    if (currentLocation) {
+      const getResults = async () => {
+        const locResults: any = await getTimeAndDistance(
+          currentLocation,
+          destination,
+        );
 
-      setResults(locResults);
-      // DISTANCE CALCULATED IN MILES
-      if (
-        locResults?.distance <= '0.0621371' ||
-        locResults?.distance <= 0.0621371
-      ) {
-        setShowReachModal(true);
-      }
-    };
+        setResults(locResults);
+        // DISTANCE CALCULATED IN MILES
+        if (
+          locResults?.distance <= '0.0621371' ||
+          locResults?.distance <= 0.0621371
+        ) {
+          setShowReachModal(true);
+        }
+      };
 
-    getResults();
+      getResults();
+    }
   }, [currentLocation]);
-  // useEffect(() => {
-  //   if (currentLocation && cameraRef.current) {
-  //     cameraRef.current.setCamera({
-  //       centerCoordinate: currentLocation,
-  //       zoomLevel: 18,
-  //       animationMode: 'flyTo',
-  //       animationDuration: 2000,
-  //       pitch: 60,
-  //     });
-
-  //     setTimeout(() => setEnableFollow(true), 1500); // Delay to allow zoom first
-  //   }
-  // }, [currentLocation]);
 
   const getRoute = async () => {
     if (destination && currentLocation) {
@@ -292,7 +259,7 @@ const ViewWellPathNavigation = ({route}: any) => {
   }, []);
 
   const resetCompass = () => {
-    if (cameraRef.current) {
+    if (cameraRef.current && currentLocation?.length > 0) {
       setActiveItem(null);
       cameraRef.current.setCamera({
         centerCoordinate: currentLocation,
@@ -325,7 +292,6 @@ const ViewWellPathNavigation = ({route}: any) => {
           stepLng,
           stepLat,
         );
-        setDistanceToNext(distanceToNextStep);
 
         if (distanceToNextStep <= 0.0124) {
           // Threshold distance to consider step reached
@@ -343,6 +309,16 @@ const ViewWellPathNavigation = ({route}: any) => {
 
   const resetFlatList = () => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+  };
+  const isValidCoordinate = (coord: any): coord is [number, number] => {
+    return (
+      Array.isArray(coord) &&
+      coord.length === 2 &&
+      typeof coord[0] === 'number' &&
+      typeof coord[1] === 'number' &&
+      !isNaN(coord[0]) &&
+      !isNaN(coord[1])
+    );
   };
 
   return (
@@ -387,62 +363,70 @@ const ViewWellPathNavigation = ({route}: any) => {
             />
           </View>
         )}
+      {isValidCoordinate(currentLocation) && (
+        <MapboxGL.MapView
+          key={selectedMapType}
+          styleURL={selectedMapType}
+          style={styles.map}
+          compassEnabled
+          compassPosition={{top: isIOS() ? HP('62') : HP('66'), right: 20}}
+          scaleBarEnabled={false}>
+          <MapboxGL.Camera
+            key={`${currentLocation[0]}-${currentLocation[1]}`}
+            ref={cameraRef}
+            // centerCoordinate={
+            //   activeItem?.length === 2
+            //     ? activeItem
+            //     : currentLocation?.length === 2
+            //     ? currentLocation
+            //     : undefined
+            // }
+            centerCoordinate={activeItem ?? currentLocation}
+            zoomLevel={18}
+            followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
+            animationMode="flyTo"
+            animationDuration={2000}
+            pitch={60}
+          />
+          <MapboxGL.UserLocation
+            ref={userRef}
+            showsUserHeadingIndicator={true}
+            onUpdate={handleLocationUpdate}
+            minDisplacement={5}
+            requestsAlwaysUse
+            visible={true}
+          />
+          {activeItem && (
+            <MapboxGL.MarkerView coordinate={activeItem}>
+              <Image
+                source={appIcons.liveLocation}
+                style={{
+                  height: 40,
+                  width: 40,
+                  transform: [{rotate: `${heading}deg`}],
+                }}
+              />
+            </MapboxGL.MarkerView>
+          )}
+          {destination && (
+            <MapboxGL.MarkerView coordinate={destination}>
+              {svgIcon.CurrentLocation}
+            </MapboxGL.MarkerView>
+          )}
 
-      <MapboxGL.MapView
-        key={selectedMapType}
-        styleURL={selectedMapType}
-        style={styles.map}
-        compassEnabled
-        compassPosition={{top: isIOS() ? HP('62') : HP('66'), right: 20}}
-        scaleBarEnabled={false}>
-        <MapboxGL.Camera
-          ref={cameraRef}
-          centerCoordinate={activeItem ?? currentLocation}
-          zoomLevel={18}
-          followUserMode={MapboxGL.UserTrackingMode.FollowWithCourse}
-          animationMode="flyTo"
-          animationDuration={2000}
-          pitch={60}
-        />
-        <MapboxGL.UserLocation
-          ref={userRef}
-          showsUserHeadingIndicator={true}
-          onUpdate={handleLocationUpdate}
-          minDisplacement={5}
-          requestsAlwaysUse
-          visible={true}
-        />
-        {activeItem && (
-          <MapboxGL.MarkerView coordinate={activeItem}>
-            <Image
-              source={appIcons.liveLocation}
-              style={{
-                height: 40,
-                width: 40,
-                transform: [{rotate: `${heading}deg`}],
-              }}
-            />
-          </MapboxGL.MarkerView>
-        )}
-        {destination && (
-          <MapboxGL.MarkerView coordinate={destination}>
-            {svgIcon.CurrentLocation}
-          </MapboxGL.MarkerView>
-        )}
-
-        {/* Route Line */}
-        {routes?.length > 1 && (
-          <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
-            <MapboxGL.LineLayer
-              id="routeLayer-unique"
-              style={{
-                lineWidth: 6,
-                lineColor: PFColors.Blue.Dark,
-              }}
-            />
-          </MapboxGL.ShapeSource>
-        )}
-        {/* {offRoadSegment?.length > 0 && (
+          {/* Route Line */}
+          {routes?.length > 1 && (
+            <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
+              <MapboxGL.LineLayer
+                id="routeLayer-unique"
+                style={{
+                  lineWidth: 6,
+                  lineColor: PFColors.Blue.Dark,
+                }}
+              />
+            </MapboxGL.ShapeSource>
+          )}
+          {/* {offRoadSegment?.length > 0 && (
           <MapboxGL.ShapeSource
             shape={{
               type: 'Feature',
@@ -462,29 +446,30 @@ const ViewWellPathNavigation = ({route}: any) => {
             />
           </MapboxGL.ShapeSource>
         )} */}
-        {offRoadSegment?.length > 0 &&
-          offRoadSegment.map((segment, index) => (
-            <MapboxGL.ShapeSource
-              key={`off-road-source-${index}`}
-              id={`off-road-source-${index}`}
-              shape={{
-                type: 'Feature',
-                geometry: {
-                  type: 'LineString',
-                  coordinates: segment,
-                },
-              }}>
-              <MapboxGL.LineLayer
-                id={`off-road-line-${index}`}
-                style={{
-                  lineWidth: 3,
-                  lineColor: 'red',
-                  lineDasharray: [0.8, 3],
-                }}
-              />
-            </MapboxGL.ShapeSource>
-          ))}
-      </MapboxGL.MapView>
+          {offRoadSegment?.length > 0 &&
+            offRoadSegment.map((segment, index) => (
+              <MapboxGL.ShapeSource
+                key={`off-road-source-${index}`}
+                id={`off-road-source-${index}`}
+                shape={{
+                  type: 'Feature',
+                  geometry: {
+                    type: 'LineString',
+                    coordinates: segment,
+                  },
+                }}>
+                <MapboxGL.LineLayer
+                  id={`off-road-line-${index}`}
+                  style={{
+                    lineWidth: 3,
+                    lineColor: 'red',
+                    lineDasharray: [0.8, 3],
+                  }}
+                />
+              </MapboxGL.ShapeSource>
+            ))}
+        </MapboxGL.MapView>
+      )}
 
       <View style={styles.navigationInfoView}>
         <View style={styles.titleView}>

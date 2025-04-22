@@ -79,7 +79,7 @@ import TrailDetails from '../screens/App/EndUser/TrailDetails';
 import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
 import ViewSharedRoutes from '../screens/App/EndUser/ViewSharedRoutes';
 import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
-
+import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
   const navigationRef = createNavigationContainerRef();
@@ -230,6 +230,7 @@ const AppNavigation = () => {
           component={ViewSharedRoutes}
         />
         <Stack.Screen name={Routes.NewsBlogDetail} component={NewsBlogDetail} />
+        <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
       </Stack.Navigator>
     </NavigationContainer>
   );

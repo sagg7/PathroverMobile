@@ -7,7 +7,6 @@ import {
   MainWrapper,
   MapLayerSheet,
   PinYourLocationSheet,
-  SaveRecordHikingRouteSheet,
   WellPathMenuSheet,
 } from '../../../../components';
 import {useNavigation} from '@react-navigation/native';
@@ -164,7 +163,7 @@ const WellPath = () => {
     latitude: null,
     longitude: null,
     radius: getRadiusForZoomLevel(zoom),
-    per_page: 1000,
+    per_page: 100,
     page: 1,
   });
 
@@ -377,6 +376,7 @@ const WellPath = () => {
             latitude: searchLocation[1],
             longitude: searchLocation[0],
             page: 1,
+            per_page: 2000,
           });
           setShowRouteActionSheet(true);
           fetchPlaceName(searchLocation[1], searchLocation[0]);
@@ -557,6 +557,7 @@ const WellPath = () => {
           latitude: center[1],
           longitude: center[0],
           page: 1,
+          per_page: 2000,
           radius: getRadiusForZoomLevel(zoom),
         });
       }
@@ -831,7 +832,7 @@ const WellPath = () => {
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={14}
+          zoomLevel={10}
           centerCoordinate={currentLocation}
         />
         <MapboxGL.UserLocation
@@ -1149,11 +1150,20 @@ const WellPath = () => {
           }}
           onPressShare={() => setShowShareSheet(true)}
           onPressStart={() => {
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: currentLocation,
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            } else {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            }
+
             setShowNavigationSheet(false);
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: pinLocationMarker,
-              entranceName: placeName,
-            });
             clearStates();
           }}
         />
