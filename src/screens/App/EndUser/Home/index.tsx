@@ -84,9 +84,9 @@ const Home = ({navigation}: any) => {
     return newData;
   };
   const renderItem = ({item, index}: any) => {
-    if (item?.isAd) {
-      return <Ads item={ads[index / 21]} />; // Pass ad sequentially
-    }
+    // if (item?.isAd) {
+    //   return <Ads item={ads[index / 21]} />; // Pass ad sequentially
+    // }
 
     return (
       <TouchableOpacity
