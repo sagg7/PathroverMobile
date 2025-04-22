@@ -1,37 +1,41 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { Formik } from 'formik';
+import parsePhoneNumberFromString from 'libphonenumber-js';
+import React, { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSelector } from 'react-redux';
 import {
   AppButton,
   AppHeader,
-  AppInput,
-  MainWrapper,
+  MainWrapper
 } from '../../../../../components';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Formik} from 'formik';
-import {AddNumberValidation} from '../../../../../shared/utils/validations';
-import styles from './styles';
-import {
-  formatPhoneNumber,
-  removeNonNumbers,
-  showAlert,
-  useKeyboardListener,
-} from '../../../../../shared/exporter';
-import {Alert, Platform, Text, View} from 'react-native';
+import { CountryCodeInput } from '../../../../../components/complex/CountryCodeInput';
 import NumberVerifyModal from '../../../../../components/complex/NumberVerifyModal';
-import {useAddPhoneNumberMutation} from '../../../../../redux/chat/chatApiSlice';
-import {useSelector} from 'react-redux';
+import { useAddPhoneNumberMutation } from '../../../../../redux/chat/chatApiSlice';
+import {
+  showAlert,
+  useKeyboardListener
+} from '../../../../../shared/exporter';
+import { AddNumberValidation } from '../../../../../shared/utils/validations';
+import styles from './styles';
 
 const AddNumber = () => {
+  const formikRef = useRef(null);
   const navigation = useNavigation();
   const keyboardVisible = useKeyboardListener();
-  const {loginUser} = useSelector(state => state.auth);
+  const { loginUser } = useSelector(state => state.auth);
 
-  const [addPhoneNumber, {error, isError, isLoading}] =
+  const [addPhoneNumber, { error, isError, isLoading }] =
     useAddPhoneNumberMutation();
 
   const [isVisible, setIsVisible] = useState(false);
+  const [initialValues, setInitialValues] = useState({
+    phone: '',
+    callingCode:  '1',
+    countryCode: 'US',
+  });
 
-  //TODO: REVERT FOR COMMENTED
   useEffect(() => {
     if (error) {
       setIsVisible(false);
@@ -42,6 +46,25 @@ const AddNumber = () => {
     }
   }, [isError]);
 
+  useEffect(() => {
+    if (loginUser?.phone_number) {
+      const parsedNumber = parsePhoneNumberFromString('+' + loginUser?.phone_number);
+      if (parsedNumber) {
+        setInitialValues({
+          phone: parsedNumber.nationalNumber,
+          callingCode: parsedNumber.country ? parsedNumber.countryCallingCode : '1',
+          countryCode: parsedNumber.country?.toString()?? 'US',
+        });
+      } else {
+        setInitialValues({
+          phone: loginUser?.phone_number,
+          callingCode: loginUser?.country_code,
+          countryCode: 'US',
+        });
+      }
+    }
+  }, [loginUser]);
+
   const handleContinueBtn = () => {
     setIsVisible(true);
   };
@@ -49,25 +72,14 @@ const AddNumber = () => {
   const onPressContinue = async (values: object) => {
     try {
       const data = {
-        phone_number: removeNonNumbers(values?.phone),
+        phone_number: values?.callingCode?.includes('+') ? `${values?.callingCode}${values?.phone}` : `+${values?.callingCode}${values?.phone}`,
+        // phone_number: removeNonNumbers(values?.phone),
       };
       const res = await addPhoneNumber(data);
-      // TODO: REVERT FOR COMMENTED/REMOVE OTP FROM ALERT
+
       if (res?.data) {
-        // if (res?.data) {
         setIsVisible(false);
-        Alert.alert(
-          'OTP',
-          `Remember your otp ${res?.data?.otp ? res?.data?.otp : ''}`,
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('VerifyNumber', data);
-              },
-            },
-          ],
-        );
+        navigation.navigate('VerifyNumber', data);
       } else {
         showAlert('Error', res?.error?.data?.error);
       }
@@ -89,26 +101,41 @@ const AddNumber = () => {
         enableAutomaticScroll
         keyboardShouldPersistTaps={'handled'}>
         <Formik
+          innerRef={formikRef}
           enableReinitialize
-          initialValues={{
-            phone: formatPhoneNumber(loginUser?.phone_number) || '',
-          }}
+          initialValues={initialValues}
+          validateOnChange={true}
+          validateOnBlur={true}
           validationSchema={AddNumberValidation}
           onSubmit={handleContinueBtn}>
-          {({handleSubmit, values, errors, touched, setFieldValue}) => (
+          {({ handleSubmit, values, errors, touched, setFieldValue, setFieldError, handleBlur }) => (
             <View style={styles.container}>
               <Text style={styles.titleStyle}>Verify Your Phone number</Text>
               <Text style={styles.subTitleStyle}>Enter your phone number</Text>
-              <AppInput
+
+              <CountryCodeInput
                 placeholder="Phone No"
                 value={values.phone}
+                phoneCountryCode={values.countryCode}
                 onChangeText={text => {
-                  const formatted = formatPhoneNumber(text);
-                  setFieldValue('phone', formatted);
+                  // const formatted = formatPhoneNumber(text);
+                  setFieldValue('phone', text);
+                  // Trigger validation
+                  if (values.callingCode && values.countryCode) {
+                    formikRef.current?.validateField('phone');
+                  }
                 }}
                 touched={touched.phone}
                 errorMessage={errors.phone}
                 keyboardType="numeric"
+                onSelectCode={country => {
+                  setFieldValue('callingCode', country?.callingCode[0]);
+                  setFieldValue('countryCode', country?.cca2);
+
+                  if (values.callingCode && values.countryCode) {
+                    formikRef.current?.validateField('phone');
+                  }
+                }}
               />
               <View style={styles.divider(keyboardVisible)}>
                 <AppButton
@@ -122,7 +149,7 @@ const AddNumber = () => {
                 <NumberVerifyModal
                   isVisible={isVisible}
                   setIsVisible={() => setIsVisible(false)}
-                  number={values.phone}
+                  number={values?.callingCode?.includes('+') ? `${values?.callingCode}${values?.phone}` : `+${values?.callingCode}${values?.phone}`}
                   onPressEdit={() => setIsVisible(false)}
                   onPressContinue={() => onPressContinue(values)}
                   isLoading={isLoading}
