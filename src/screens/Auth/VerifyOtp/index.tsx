@@ -1,20 +1,19 @@
-import {Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {AppHeader, AppLoader, MainWrapper} from '../../../components';
-import styles from './styles';
-import {
-  Routes,
-  UNEXPECTED_ERROR,
-  removeNonNumbers,
-  showAlert,
-} from '../../../shared/exporter';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
-import {useVerifyOtpMutation} from '../../../redux/auth/authApiSlice';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { AppHeader, AppLoader, MainWrapper } from '../../../components';
+import { useVerifyOtpMutation } from '../../../redux/auth/authApiSlice';
+import {
+  Routes,
+  UNEXPECTED_ERROR,
+  showAlert
+} from '../../../shared/exporter';
+import styles from './styles';
 
 const VerifyOtpScreen = ({}) => {
   const [value, setValue] = useState('');
@@ -27,7 +26,7 @@ const VerifyOtpScreen = ({}) => {
   });
   const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
   const route = useRoute();
-  const {isEmail, selectedValue} = route?.params;
+  const {isEmail, selectedValue} = route?.params;  
 
   useEffect(() => {
     if (value.length > 3) {
@@ -40,7 +39,7 @@ const VerifyOtpScreen = ({}) => {
       const obj = {
         user: {
           ...(isEmail && {email: selectedValue?.toLowerCase()}),
-          ...(!isEmail && {phone_number: removeNonNumbers(selectedValue)}),
+          ...(!isEmail && {phone_number: selectedValue}),
           otp: value,
         },
       };

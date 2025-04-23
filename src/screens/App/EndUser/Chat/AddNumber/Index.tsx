@@ -73,7 +73,6 @@ const AddNumber = () => {
     try {
       const data = {
         phone_number: values?.callingCode?.includes('+') ? `${values?.callingCode}${values?.phone}` : `+${values?.callingCode}${values?.phone}`,
-        // phone_number: removeNonNumbers(values?.phone),
       };
       const res = await addPhoneNumber(data);
 

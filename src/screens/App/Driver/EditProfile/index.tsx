@@ -1,6 +1,10 @@
-import { Text, View } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styles from './styles';
+import { Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   AppButton,
   AppHeader,
@@ -8,26 +12,20 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
+import { CountryCodeInput } from '../../../../components/complex/CountryCodeInput';
+import { setLoginUser } from '../../../../redux/auth/authSlice';
+import { useEdtProfileMutation } from '../../../../redux/driver/driverApiSlice';
+import {
+  UNEXPECTED_ERROR,
+  isIOS,
+  showAlert,
+  useKeyboardListener
+} from '../../../../shared/exporter';
 import {
   EditInitialObject,
   EditProfileValidation,
 } from '../../../../shared/utils/validations';
-import {
-  UNEXPECTED_ERROR,
-  formatPhoneNumber,
-  isIOS,
-  removeNonNumbers,
-  showAlert,
-  useKeyboardListener,
-} from '../../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { useEdtProfileMutation } from '../../../../redux/driver/driverApiSlice';
-import { CountryCodeInput } from '../../../../components/complex/CountryCodeInput';
-import parsePhoneNumberFromString from 'libphonenumber-js';
+import styles from './styles';
 
 const EditProfile = () => {
   const keyboardVisible = useKeyboardListener();

@@ -1,6 +1,9 @@
-import { Text, View } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
-import styles from './styles';
+import { Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useDispatch } from 'react-redux';
 import {
   AppButton,
   AppHeader,
@@ -8,29 +11,24 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
-import {
-  loginInitialObj,
-  loginValidation,
-} from '../../../shared/utils/validations';
+import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
+import { getFCMToken } from '../../../hooks/NotificationHook';
+import { setUserRole } from '../../../redux/auth/appRoleSlice';
+import { useLoginMutation } from '../../../redux/auth/authApiSlice';
+import { setLoginUser } from '../../../redux/auth/authSlice';
 import {
   APP_ROLE,
   Routes,
   UNEXPECTED_ERROR,
-  formatPhoneNumber,
   isIOS,
-  removeNonNumbers,
   showAlert,
-  useKeyboardListener,
+  useKeyboardListener
 } from '../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useLoginMutation } from '../../../redux/auth/authApiSlice';
-import { useDispatch } from 'react-redux';
-import { setLoginUser } from '../../../redux/auth/authSlice';
-import { setUserRole } from '../../../redux/auth/appRoleSlice';
-import { getFCMToken } from '../../../hooks/NotificationHook';
-import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
+import {
+  loginInitialObj,
+  loginValidation,
+} from '../../../shared/utils/validations';
+import styles from './styles';
 
 const LoginScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener();

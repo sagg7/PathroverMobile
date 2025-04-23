@@ -1,6 +1,8 @@
-import { Alert, View } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
 import React from 'react';
-import styles from './styles';
+import { View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   AppButton,
   AppHeader,
@@ -8,23 +10,19 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
+import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
 import {
   forgotPassValidation,
   forgotPasswordInitialObject,
-  useKeyboardListener,
   isIOS,
-  formatPhoneNumber,
+  LOGIN_TYPE_TEXT,
+  Routes,
   showAlert,
   UNEXPECTED_ERROR,
-  Routes,
-  LOGIN_TYPE_TEXT,
-  removeNonNumbers,
+  useKeyboardListener
 } from '../../../shared/exporter';
-import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
-import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
+import styles from './styles';
 
 const ForgotPassword = ({ }) => {
   const keyboardVisible = useKeyboardListener();
