@@ -1,6 +1,8 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
+import React, { useRef } from 'react';
 import { View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
-import styles from './styles';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   AppButton,
   AppHeader,
@@ -8,20 +10,17 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Formik } from 'formik';
+import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
 import {
   Routes,
   UNEXPECTED_ERROR,
   isIOS,
-  removeNonNumbers,
   resetPasswordVal,
   showAlert,
   signupPasswordObj,
-  useKeyboardListener,
+  useKeyboardListener
 } from '../../../shared/exporter';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
+import styles from './styles';
 
 const SetPassword = ({ }) => {
   const route = useRoute();
