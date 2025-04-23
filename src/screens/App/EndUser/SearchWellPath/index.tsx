@@ -288,7 +288,7 @@ const SearchWellPath = ({route, navigation}: any) => {
           </TouchableOpacity>
         </View>
       )}
-      {suggestions?.length < 1 && (
+      {suggestions?.length < 1 && searchType != 'wells' && (
         <>
           <Text style={styles.recentTitle}>{'Recently Searches'}</Text>
           <FlatList

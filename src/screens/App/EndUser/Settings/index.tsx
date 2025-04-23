@@ -6,7 +6,7 @@ import {
   FlatList,
   Linking,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
@@ -44,6 +44,13 @@ const Settings = ({navigation}: any) => {
       loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+        loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+  }, [loginUser?.first_name, loginUser?.last_name]);
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {

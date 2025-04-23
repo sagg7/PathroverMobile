@@ -93,8 +93,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const {subscription} = useSelector(state => state?.auth?.loginUser);
   const {showPremiumAlert} = usePremiumAlert();
-  const [showPinLocationSheet, setShowPinLocationSheet] =
-    useState<boolean>(false);
+
   const [showNavigationSheet, setShowNavigationSheet] =
     useState<boolean>(false);
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
@@ -116,6 +115,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
   const pinLocationSheet = useRef<any>(null);
+  console.log('subscription', subscription);
 
   const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
     useCreateShareLinkRouteMutation();
@@ -296,20 +296,7 @@ const HikingScreen = ({route, navigation}: any) => {
       setShowTrailInfoSheet(true);
     }, 300);
   };
-  const _fetchRoute = async (start, end) => {
-    const accessToken = mapBoxToken;
-    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      const route = data.routes[0]?.geometry?.coordinates;
-      return route;
-    } catch (error) {
-      console.error('Error fetching route:', error);
-      return [];
-    }
-  };
   const toRad = (value: any) => (value * Math.PI) / 180;
 
   const getDistanceInKm = (coord1: any, coord2: any) => {
@@ -539,7 +526,7 @@ const HikingScreen = ({route, navigation}: any) => {
       longitude: null,
       name: null,
     });
-    setShowPinLocationSheet(false);
+
     setShowNavigationSheet(false);
     pinLocationSheet.current.close();
     setOffRoadSegment([]);
@@ -843,14 +830,6 @@ const HikingScreen = ({route, navigation}: any) => {
         showFilterSheet={showFilterSheet}
         setShowFilterSheet={setShowFilterSheet}
       />
-      {/* {showPinLocationSheet && (
-        <PinYourLocationSheet
-          values={pinLocationDetails}
-          onPressCancel={() => setShowPinLocationSheet(false)}
-          setValues={setPinLocationDetails}
-          onPressSave={() => onPressWaypointSave()}
-        />
-      )} */}
 
       <RBSheet
         ref={pinLocationSheet}
@@ -867,7 +846,6 @@ const HikingScreen = ({route, navigation}: any) => {
         }}>
         <PinYourLocationSheet
           values={pinLocationDetails}
-          // onPressCancel={() => setShowPinLocationSheet(false)}
           onPressCancel={() => pinLocationSheet?.current?.close()}
           setValues={setPinLocationDetails}
           onPressSave={() => onPressWaypointSave()}

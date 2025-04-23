@@ -5,7 +5,7 @@ import {
   FlatList,
   ImageBackground,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -29,12 +29,22 @@ import {setLoginUser} from '../../../../redux/auth/authSlice';
 const ManageProfile = ({navigation}: any) => {
   const [profileImage, setProfileImage] = useState<any>(null);
   const loginUser = useSelector(state => state?.auth?.loginUser);
+
   const [editProfile, {data, isLoading}] = useEdtProfileMutation();
   const [userName, setUserName] = useState(
     `${loginUser?.first_name ? loginUser?.first_name : ''} ${
       loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+        loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+  }, [loginUser?.first_name, loginUser?.last_name]);
+
   const dispatch = useDispatch();
   const uploadFromGallery = async () => {
     const result = await launchImageLibrary(IMAGE_OPTIONS);

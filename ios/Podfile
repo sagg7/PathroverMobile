@@ -47,6 +47,8 @@ target 'PathFinder' do
  
   pod 'GoogleUtilities', :modular_headers => true
   pod 'FirebaseCore', :modular_headers => true
+  pod 'MapboxMaps', '10.18.2'
+  pod 'MapboxNavigation', '~> 2.19.0.majorMinor'
 
 
   use_react_native!(

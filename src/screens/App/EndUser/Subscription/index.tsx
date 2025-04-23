@@ -11,6 +11,8 @@ import {
   View,
 } from 'react-native';
 import {
+  acknowledgePurchaseAndroid,
+  finishTransaction,
   flushFailedPurchasesCachedAsPendingAndroid,
   initConnection,
   purchaseErrorListener,
@@ -21,14 +23,17 @@ import {useNavigation} from '@react-navigation/native';
 import {AppButton, AppLoader, MainWrapper} from '../../../../components';
 import {
   HP,
+  isIOS,
   PFColors,
   PFFonts,
   PFFontSize,
+  SubscriptionPackageName,
   WP,
 } from '../../../../shared/exporter';
 import {svgIcon} from '../../../../assets/svg';
 import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
 
 const SUBSCRIPTIONS_SLIDES = (isTrailAvailed: boolean) =>
   [
@@ -79,6 +84,10 @@ const Subscription = () => {
   const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
   const {loginUser} = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
+  const [currentPurchase, setCurrentPurchase] = useState<any>(null);
+
+  const dispatch = useDispatch();
+  console.log('subscriptions', subscriptions);
 
   useEffect(() => {
     const initializeIAP = async () => {
@@ -120,13 +129,17 @@ const Subscription = () => {
     isProcessing.current = true;
     setIsLoading(true);
 
+    // return;
     try {
       const offerToken =
         subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
-      await requestSubscription({
+      const purchase = await requestSubscription({
         sku,
         ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
       });
+      console.log('PURCHASE', purchase);
+      setCurrentPurchase(purchase);
+
       const startDate = new Date();
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 30);
@@ -144,6 +157,14 @@ const Subscription = () => {
         .then(res => {
           Alert.alert('Success', 'Subscription purchased successfully!');
           navigation.goBack();
+          dispatch(
+            setLoginUser({
+              ...loginUser,
+              subscription: true,
+              is_aval_trial: true,
+            }),
+          );
+          finishTheTransaction();
         })
         .catch(e => {
           console.log(e);
@@ -169,8 +190,21 @@ const Subscription = () => {
       setSelectedIndex(nextIndex);
       scrollRef.current?.scrollTo({x: nextIndex * WP('100'), animated: true});
     } else {
-      handleBuySubscription('com.pathrover.monthly');
+      handleBuySubscription(SubscriptionPackageName);
     }
+  };
+  const finishTheTransaction = async () => {
+    if (!isIOS()) {
+      await acknowledgePurchaseAndroid({
+        token: currentPurchase[0].purchaseToken,
+        developerPayload: currentPurchase[0].developerPayloadAndroid,
+      });
+    }
+    // finishPurchase(!isIOS() ? currentPurchase[0] : currentPurchase, false);
+    await finishTransaction({
+      purchase: !isIOS() ? currentPurchase[0] : currentPurchase,
+      isConsumable: false,
+    });
   };
 
   return (

@@ -21,7 +21,14 @@ import {
 import styles from './styles';
 import {useGetNewsBlogsQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {getFCMToken} from '../../../../hooks/NotificationHook';
-import {IOS_ADS, ANDROID_ADS} from '../../../../shared/utils/constant';
+import {
+  IOS_ADS,
+  ANDROID_ADS,
+  SubscriptionPackageName,
+} from '../../../../shared/utils/constant';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {getAvailablePurchases} from 'react-native-iap';
 MobileAds()
   .setRequestConfiguration({
     // An array of test device IDs to allow.
@@ -42,7 +49,10 @@ const Home = ({navigation}: any) => {
   const [fcmToken, setFCMToken] = useState(false);
   const [fcmTokenUpdate] = useFcmTokenUpdateMutation();
   const [data, setData] = useState<any>([]);
+  const loginUser = useSelector(state => state?.auth?.loginUser);
+
   const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
+  const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       const token = await getFCMToken();
@@ -64,6 +74,42 @@ const Home = ({navigation}: any) => {
     const checkPlatform = Platform.OS === 'ios';
     setAds(checkPlatform ? IOS_ADS : ANDROID_ADS);
   }, []);
+
+  useEffect(() => {
+    checkActiveSubscription();
+  }, []);
+
+  const checkActiveSubscription = async () => {
+    try {
+      const purchases = await getAvailablePurchases();
+
+      const subscription = purchases.find(
+        purchase => purchase.productId === SubscriptionPackageName,
+      );
+      console.log('Test', subscription);
+
+      if (!subscription) {
+        dispatch(
+          setLoginUser({
+            ...loginUser,
+            subscription: false,
+            is_aval_trial: false,
+          }),
+        );
+      } else {
+        dispatch(
+          setLoginUser({
+            ...loginUser,
+            subscription: true,
+            is_aval_trial: true,
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
   }, [allNewsBlogs, ads]);

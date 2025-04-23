@@ -26,6 +26,8 @@ import styles from './styles';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import Share from 'react-native-share';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
+import {useSelector} from 'react-redux';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -41,6 +43,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
+
   const refScrollable = useRef<any>();
 
   useEffect(() => {
@@ -241,6 +246,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       }
     }
   };
+  // showPremiumAlert({});
+  console.log('subscription', subscription);
 
   return (
     <MainWrapper>
@@ -266,11 +273,11 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         onClose={() => handleModal(null, null)}>
         <TouchableOpacity
           style={styles.menuOption}
-          // onPress={() => handleShareOption(selectedRoute)}
           onPress={() => {
             setModalType(null);
             setTimeout(() => {
-              setShowShareSheet(true);
+              // setShowShareSheet(true);
+              subscription ? setShowShareSheet(true) : showPremiumAlert({});
             }, 1000);
           }}>
           {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}

@@ -1476,3 +1476,4 @@ export const UNSANCTIONED = [
     label: 'Yes',
   },
 ];
+export const SubscriptionPackageName = 'com.pathrover.monthly';

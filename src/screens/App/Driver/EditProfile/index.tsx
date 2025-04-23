@@ -63,10 +63,10 @@ const EditProfile = () => {
       };
 
       const resp = await editProfile(obj);
-      dispatch(setLoginUser(resp?.data?.profile));
 
       if (resp?.data) {
         showAlert('Alert', `Profile has been updated.`);
+        dispatch(setLoginUser(resp?.data?.profile));
         navigation.goBack();
       } else {
         showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
