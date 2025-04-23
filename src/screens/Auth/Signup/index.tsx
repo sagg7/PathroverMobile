@@ -13,6 +13,7 @@ import {
   useKeyboardListener,
 } from '../../../shared/exporter';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
 
 const SignupScreen = ({}) => {
   const keyboardVisible = useKeyboardListener();
@@ -89,16 +90,28 @@ const SignupScreen = ({}) => {
                         errorMessage={errors.email}
                       />
                     ) : (
-                      <AppInput
+                      <CountryCodeInput
                         placeholder="Phone No"
                         value={values.phone}
+                        phoneCountryCode={values.countryCode}
                         onChangeText={text => {
-                          const formatted = formatPhoneNumber(text);
-                          setFieldValue('phone', formatted);
+                          setFieldValue('phone', text);
+                          // Trigger validation
+                          if (values.callingCode && values.countryCode) {
+                            formik.current?.validateField('phone');
+                          }
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
-                        keyboardType={'numeric'}
+                        keyboardType="numeric"
+                        onSelectCode={country => {
+                          setFieldValue('callingCode', country?.callingCode[0]);
+                          setFieldValue('countryCode', country?.cca2);
+
+                          if (values.callingCode && values.countryCode) {
+                            formik.current?.validateField('phone');
+                          }
+                        }}
                       />
                     )}
                     <View style={styles.divider}>

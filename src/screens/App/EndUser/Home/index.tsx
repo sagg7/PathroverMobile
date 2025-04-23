@@ -84,9 +84,9 @@ const Home = ({navigation}: any) => {
     return newData;
   };
   const renderItem = ({item, index}: any) => {
-    if (item?.isAd) {
-      return <Ads item={ads[index / 21]} />; // Pass ad sequentially
-    }
+    // if (item?.isAd) {
+    //   return <Ads item={ads[index / 21]} />; // Pass ad sequentially
+    // }
 
     return (
       <TouchableOpacity
@@ -101,7 +101,7 @@ const Home = ({navigation}: any) => {
         <View style={styles.contentContainer}>
           <Text style={styles.titleTextStyle}>{item?.title}</Text>
           <Text numberOfLines={3} style={styles.descTextStyle}>
-            {item?.content_in_text}
+            {item?.content_in_text?.trim()}
           </Text>
           <Text style={styles.timeTextStyle}>
             {moment(item?.created_at).format('MM-DD-YYYY')}

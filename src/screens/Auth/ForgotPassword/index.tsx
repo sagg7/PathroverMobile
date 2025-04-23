@@ -1,4 +1,4 @@
-import {Alert, View} from 'react-native';
+import { Alert, View } from 'react-native';
 import React from 'react';
 import styles from './styles';
 import {
@@ -8,9 +8,9 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Formik} from 'formik';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Formik } from 'formik';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   forgotPassValidation,
   forgotPasswordInitialObject,
@@ -23,49 +23,34 @@ import {
   LOGIN_TYPE_TEXT,
   removeNonNumbers,
 } from '../../../shared/exporter';
-import {useForgotPasswordMutation} from '../../../redux/auth/authApiSlice';
+import { useForgotPasswordMutation } from '../../../redux/auth/authApiSlice';
+import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
 
-const ForgotPassword = ({}) => {
+const ForgotPassword = ({ }) => {
   const keyboardVisible = useKeyboardListener();
-  const [forgotPassword, {isLoading}] = useForgotPasswordMutation();
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
   const route = useRoute();
-  const {isEmail} = route?.params;
+  const { isEmail } = route?.params;
   const navigation = useNavigation();
+  const formikRef = React.useRef(null);
 
   const handleContinueBtn = async (val: any) => {
-    const {email, phone} = val;
+    const { email, phone } = val;
     const obj = {
       user: {
-        ...(email && {email: email?.toLowerCase()}),
-        ...(phone && {phone_number: removeNonNumbers(phone)}),
+        ...(email && { email: email?.toLowerCase() }),
+        ...(phone && { phone_number: val?.callingCode?.includes('+') ? `${val?.callingCode}${phone}` : `+${val?.callingCode}${phone}` }),
       },
     };
 
     const resp = await forgotPassword(obj);
     if (resp?.data) {
-      // TODDO CHANGE AFTER OTP
-      // navigation.navigate(Routes.VerifyOtp, {
-      //   selectedValue: isEmail ? email : phone,
-      //   isEmail: isEmail,
-      // });
 
-      Alert.alert(
-        'OTP',
-        `Remember your otp ${
-          resp?.data?.data?.otp ? resp?.data?.data?.otp : ''
-        }`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate(Routes.VerifyOtp, {
-                selectedValue: isEmail ? email : phone,
-                isEmail: isEmail,
-              });
-            },
-          },
-        ],
-      );
+      navigation.navigate(Routes.VerifyOtp, {
+        selectedValue: isEmail ? email : obj?.user?.phone_number,
+        isEmail: isEmail,
+      });
+
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
@@ -91,6 +76,7 @@ const ForgotPassword = ({}) => {
         <View>
           <View style={styles.formikContainer}>
             <Formik
+              innerRef={formikRef}
               initialValues={forgotPasswordInitialObject}
               validationSchema={forgotPassValidation(isEmail)}
               validateOnMount={true}
@@ -104,7 +90,7 @@ const ForgotPassword = ({}) => {
                 setFieldValue,
               }) => {
                 return (
-                  <View style={{alignSelf: 'center'}}>
+                  <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
                       <AppInput
                         placeholder="Email"
@@ -114,16 +100,28 @@ const ForgotPassword = ({}) => {
                         errorMessage={errors.email}
                       />
                     ) : (
-                      <AppInput
+                      <CountryCodeInput
                         placeholder="Phone No"
                         value={values.phone}
+                        phoneCountryCode={values.countryCode}
                         onChangeText={text => {
-                          const formatted = formatPhoneNumber(text);
-                          setFieldValue('phone', formatted);
+                          setFieldValue('phone', text);
+                          // Trigger validation
+                          if (values.callingCode && values.countryCode) {
+                            formikRef.current?.validateField('phone');
+                          }
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
-                        keyboardType={'numeric'}
+                        keyboardType="numeric"
+                        onSelectCode={country => {
+                          setFieldValue('callingCode', country?.callingCode[0]);
+                          setFieldValue('countryCode', country?.cca2);
+
+                          if (values.callingCode && values.countryCode) {
+                            formikRef.current?.validateField('phone');
+                          }
+                        }}
                       />
                     )}
 

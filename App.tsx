@@ -122,6 +122,8 @@ const App = () => {
       iosClientId:
         '123757988773-c0sece94e2pm7eqj1g48b3b15b2avm46.apps.googleusercontent.com',
       offlineAccess: true,
+      forceCodeForRefreshToken: true,
+      profileImageSize: 120
     });
   }, []);
 

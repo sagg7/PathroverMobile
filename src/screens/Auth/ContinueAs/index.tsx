@@ -72,7 +72,9 @@ const ContinueAs = ({}) => {
       setShowSheet(false);
       navigation.replace('AppStack');
     } else {
-      showAlert('Error', resp?.error?.data?.errors || UNEXPECTED_ERROR);
+      console.error('Error:', resp?.error?.data?.errors[0]); 
+      
+      showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
 

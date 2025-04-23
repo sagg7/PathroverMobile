@@ -1,9 +1,12 @@
+import parsePhoneNumberFromString from 'libphonenumber-js';
 import * as yup from 'yup';
 
 export const loginInitialObj = {
   email: '',
   password: '',
   phone: '',
+  callingCode: '1',
+  countryCode: 'US',
 };
 export const signupInitialObject = {
   email: '',
@@ -11,6 +14,8 @@ export const signupInitialObject = {
   phone: '',
   firstName: '',
   lastName: '',
+  callingCode: '1',
+  countryCode: 'US',
 };
 export const signupPasswordObj = {
   password: '',
@@ -24,10 +29,14 @@ export const EditInitialObject = {
   lastName: '',
   password: '',
   confirmPassword: '',
+  callingCode: '1',
+  countryCode: 'US',
 };
 export const forgotPasswordInitialObject = {
   email: '',
   phone: '',
+  callingCode: '1',
+  countryCode: 'US',
 };
 export const supportInitialObj = {
   email: '',
@@ -81,11 +90,17 @@ export const createValidationSchema = (isEmail: boolean) => {
       .required('Email Required')
       .email('Please provide a valid email address');
   } else {
-    baseSchema.phone = yup
+    baseSchema.phone =yup
       .string()
-      .required('Phone No Required')
-      .max(14, 'Phone number must be exactly 10 digits.')
-      .min(14, 'Phone number must be exactly 10 digits.');
+      .required('Phone number is required')
+      .test('valid-phone', 'Invalid phone number', function (value) {
+        const { callingCode, countryCode } = this.parent;
+
+        // Early return if missing required fields
+        if (!value || !callingCode || !countryCode) return false;
+
+        return validatePhoneNumber(value, callingCode, countryCode);
+      });
   }
   return yup.object().shape(baseSchema);
 };
@@ -109,9 +124,15 @@ export const EditProfileValidation = (id: number) => {
   } else if (id === 3) {
     baseSchema.phone = yup
       .string()
-      .required('Phone No Required')
-      .max(14, 'Phone number must be exactly 10 digits.')
-      .min(14, 'Phone number must be exactly 10 digits.');
+      .required('Phone number is required')
+      .test('valid-phone', 'Invalid phone number', function (value) {
+        const { callingCode, countryCode } = this.parent;
+
+        // Early return if missing required fields
+        if (!value || !callingCode || !countryCode) return false;
+
+        return validatePhoneNumber(value, callingCode, countryCode);
+      });
   } else if (id === 2) {
     baseSchema.password = yup
       .string()
@@ -127,12 +148,52 @@ export const EditProfileValidation = (id: number) => {
   return yup.object().shape(baseSchema);
 };
 
+// export const AddNumberValidation = yup.object().shape({
+//   phone: yup
+//     .string()
+//     .required('Phone No Required')
+//     .test('valid-phone', 'Invalid phone number', function (value) {
+//       const { callingCode, countryCode } = this.parent;
+//       return validatePhoneNumber(value, callingCode, countryCode);
+//     }),
+//   // .max(13, 'Phone number must be exactly 10 digits.')
+//   // .min(13, 'Phone number must be exactly 10 digits.'),
+//   callingCode: yup.string().required('Country Code Required'),
+//   countryCode: yup.string(),
+// });
+
+export const validatePhoneNumber = (
+  phoneNumber: string,
+  callingCode: string,
+  countryCode: string
+): boolean => {
+  if (!phoneNumber || !callingCode || !countryCode) return false;
+
+  try {
+    const fullNumber = `+${callingCode}${phoneNumber.replace(/\D/g, '')}`;
+    console.log('fullNumber', fullNumber);
+
+    const parsedNumber = parsePhoneNumberFromString(fullNumber, countryCode as any);
+    return parsedNumber?.isValid() ?? false;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const AddNumberValidation = yup.object().shape({
   phone: yup
     .string()
-    .required('Phone No Required')
-    .max(14, 'Phone number must be exactly 10 digits.')
-    .min(14, 'Phone number must be exactly 10 digits.'),
+    .required('Phone number is required')
+    .test('valid-phone', 'Invalid phone number', function (value) {
+      const { callingCode, countryCode } = this.parent;
+
+      // Early return if missing required fields
+      if (!value || !callingCode || !countryCode) return false;
+
+      return validatePhoneNumber(value, callingCode, countryCode);
+    }),
+  callingCode: yup.string().required('Country code is required'),
+  countryCode: yup.string().required('Country is required'),
 });
 
 export const loginValidation = (isEmail: boolean) => {
@@ -149,11 +210,17 @@ export const loginValidation = (isEmail: boolean) => {
       .required('Email Required')
       .email('Please provide a valid email address');
   } else {
-    loginScheme.phone = yup
+    loginScheme.phone =yup
       .string()
-      .required('Phone No Required')
-      .max(14, 'Phone number must be exactly 10 digits.')
-      .min(14, 'Phone number must be exactly 10 digits.');
+      .required('Phone number is required')
+      .test('valid-phone', 'Invalid phone number', function (value) {
+        const { callingCode, countryCode } = this.parent;
+
+        // Early return if missing required fields
+        if (!value || !callingCode || !countryCode) return false;
+
+        return validatePhoneNumber(value, callingCode, countryCode);
+      });
   }
   return yup.object().shape(loginScheme);
 };
@@ -167,9 +234,15 @@ export const forgotPassValidation = (isEmail: boolean) => {
   } else {
     loginScheme.phone = yup
       .string()
-      .required('Phone No Required')
-      .max(14, 'Phone number must be exactly 10 digits.')
-      .min(14, 'Phone number must be exactly 10 digits.');
+      .required('Phone number is required')
+      .test('valid-phone', 'Invalid phone number', function (value) {
+        const { callingCode, countryCode } = this.parent;
+
+        // Early return if missing required fields
+        if (!value || !callingCode || !countryCode) return false;
+
+        return validatePhoneNumber(value, callingCode, countryCode);
+      });
   }
   return yup.object().shape(loginScheme);
 };

@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
-import {PFColors} from '../../../shared/exporter';
-import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { NativeAd, NativeAdChoicesPlacement, NativeAdEventType, NativeAdView, NativeAsset, NativeAssetType, NativeMediaAspectRatio, NativeMediaView, TestIds } from 'react-native-google-mobile-ads';
+import { PFColors, PFFonts, PFFontSize } from '../../../shared/exporter';
 
 interface AdsProps {
   item: string;
 }
 
-function Ads({item}: AdsProps) {
+function Ads({ item }: AdsProps) {
   const [loading, setLoading] = useState(false);
+  const [nativeAd, setNativeAd] = useState<NativeAd>();
 
   useEffect(() => {
     setLoading(true);
@@ -17,32 +18,90 @@ function Ads({item}: AdsProps) {
     }, 1500);
   }, []);
 
+  useEffect(() => {
+    NativeAd.createForAdRequest(TestIds.NATIVE, {
+      aspectRatio: NativeMediaAspectRatio.LANDSCAPE,
+      adChoicesPlacement: NativeAdChoicesPlacement.TOP_LEFT,
+    })
+      .then(setNativeAd)
+      .catch(console.error);
+  }, []);
+  
+
+  useEffect(() => {
+    if (!nativeAd) return;
+    const listener = nativeAd.addAdEventListener(NativeAdEventType.CLICKED, () => {
+      // console.log('Native ad clicked');
+    });
+    return () => {
+      listener.remove();
+      nativeAd.destroy();
+    };
+  }, [nativeAd]);
+
+  if (!nativeAd) {
+    return null;
+  }
+
+
   return (
-    <View style={styles.main}>
+    <>
       {loading ? (
         <ActivityIndicator size={'small'} color={PFColors.Blue.Dark} />
       ) : (
-        <BannerAd
-          unitId={TestIds.BANNER}
-          // unitId={__DEV__ ? TestIds.BANNER : item}
-          size={BannerAdSize.LARGE_BANNER}
-        />
+        <NativeAdView nativeAd={nativeAd} style={styles.main}>
+          <NativeMediaView style={styles.imageStyle} />
+          <View style={styles.textContainer}>
+            {nativeAd.advertiser && <NativeAsset assetType={NativeAssetType.ADVERTISER}>
+              <Text style={styles.titleTextStyle}>{nativeAd.advertiser}</Text>
+            </NativeAsset>}
+            <NativeAsset assetType={NativeAssetType.HEADLINE}>
+              <Text style={styles.titleTextStyle}>{nativeAd.headline}</Text>
+            </NativeAsset>
+            <NativeAsset assetType={NativeAssetType.BODY}>
+              <Text style={styles.descTextStyle}>{nativeAd.body}</Text>
+            </NativeAsset>
+          </View>
+        </NativeAdView>
       )}
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   main: {
-    width: '91.5%',
-    borderRadius: 5,
-    marginHorizontal: 16,
-    height: 110,
+    flex: 1,
     marginBottom: 20,
+    marginHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 5,
     backgroundColor: PFColors.Gray.LightMist,
   },
+  titleTextStyle: {
+    lineHeight: 18,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    color: PFColors.Standard.LightBlack,
+    fontFamily: PFFonts.Foundation.SemiBold,
+  },
+  imageStyle: {
+    aspectRatio: 1,
+    width: 124,
+    height: 110,
+    borderRadius: 5,
+    backgroundColor: PFColors.Gray.AshGray,
+    marginRight: 10,
+  },
+  descTextStyle: {
+    lineHeight: 18,
+    color: PFColors.Gray.DarkGray,
+    fontSize: PFFontSize.FONT_SIZE_10,
+    fontFamily: PFFonts.Foundation.Regular,
+  },
+  textContainer: {
+    flexDirection: 'column',
+    width: '60%',
+  }
 });
 
-export {Ads};
+export { Ads };

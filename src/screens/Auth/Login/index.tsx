@@ -1,4 +1,4 @@
-import {Text, View} from 'react-native';
+import { Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import styles from './styles';
 import {
@@ -8,8 +8,8 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Formik} from 'formik';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Formik } from 'formik';
 import {
   loginInitialObj,
   loginValidation,
@@ -24,44 +24,46 @@ import {
   showAlert,
   useKeyboardListener,
 } from '../../../shared/exporter';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {useLoginMutation} from '../../../redux/auth/authApiSlice';
-import {useDispatch} from 'react-redux';
-import {setLoginUser} from '../../../redux/auth/authSlice';
-import {setUserRole} from '../../../redux/auth/appRoleSlice';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useLoginMutation } from '../../../redux/auth/authApiSlice';
+import { useDispatch } from 'react-redux';
+import { setLoginUser } from '../../../redux/auth/authSlice';
+import { setUserRole } from '../../../redux/auth/appRoleSlice';
 import { getFCMToken } from '../../../hooks/NotificationHook';
+import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
 
-const LoginScreen = ({}) => {
+const LoginScreen = ({ }) => {
   const keyboardVisible = useKeyboardListener();
-  const [login, {data, isLoading}] = useLoginMutation();
+  const [login, { data, isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
+  const formikRef = React.useRef(null);
   const { isEmail } = route?.params;
-  const [FCMToken, setFCMToken] = useState(null);  
-  
+  const [FCMToken, setFCMToken] = useState(null);
+
   useEffect(() => {
-      (async () => {
-        const token = await getFCMToken();
-        if (token) {
-          setFCMToken(token);
-          // createNotifyChannel();
-        }
-      })();
-    }, [navigation]);
+    (async () => {
+      const token = await getFCMToken();
+      if (token) {
+        setFCMToken(token);
+        // createNotifyChannel();
+      }
+    })();
+  }, [navigation]);
 
   const handleContinueBtn = async (val: any) => {
-    const {email, phone, password} = val;
+    const { email, phone, password } = val;
     const obj = {
       user: {
-        ...(email && {email: email?.toLowerCase()}),
-        ...(phone && {phone_number: removeNonNumbers(phone)}),
+        ...(email && { email: email?.toLowerCase() }),
+        ...(phone && { phone_number: val?.callingCode?.includes('+') ? `${val?.callingCode}${phone}` : `+${val?.callingCode}${phone}` }),
         password: password,
       },
       device_token: FCMToken,
-    };
+    };    
 
-    const resp = await login(obj);
+    const resp = await login(obj);    
     dispatch(setLoginUser(resp?.data?.user));
     dispatch(setUserRole(APP_ROLE.END_USER));
 
@@ -91,6 +93,7 @@ const LoginScreen = ({}) => {
         <View>
           <View style={styles.formikContainer}>
             <Formik
+              innerRef={formikRef}
               initialValues={loginInitialObj}
               validationSchema={loginValidation(isEmail)}
               onSubmit={values => {
@@ -105,7 +108,7 @@ const LoginScreen = ({}) => {
                 setFieldValue,
               }) => {
                 return (
-                  <View style={{alignSelf: 'center'}}>
+                  <View style={{ alignSelf: 'center' }}>
                     {isEmail ? (
                       <AppInput
                         placeholder="Email"
@@ -115,16 +118,28 @@ const LoginScreen = ({}) => {
                         errorMessage={errors.email}
                       />
                     ) : (
-                      <AppInput
+                      <CountryCodeInput
                         placeholder="Phone No"
-                        keyboardType={'numeric'}
                         value={values.phone}
+                        phoneCountryCode={values.countryCode}
                         onChangeText={text => {
-                          const formatted = formatPhoneNumber(text);
-                          setFieldValue('phone', formatted);
+                          setFieldValue('phone', text);
+                          // Trigger validation
+                          if (values.callingCode && values.countryCode) {
+                            formikRef.current?.validateField('phone');
+                          }
                         }}
                         touched={touched.phone}
                         errorMessage={errors.phone}
+                        keyboardType="numeric"
+                        onSelectCode={country => {
+                          setFieldValue('callingCode', country?.callingCode[0]);
+                          setFieldValue('countryCode', country?.cca2);
+
+                          if (values.callingCode && values.countryCode) {
+                            formikRef.current?.validateField('phone');
+                          }
+                        }}
                       />
                     )}
                     <AppInput
