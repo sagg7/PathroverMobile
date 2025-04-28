@@ -85,6 +85,7 @@
     "react-native-tab-view": "^4.0.5",
     "react-native-uuid": "^2.0.3",
     "react-native-video": "^6.10.1",
+    "react-native-webview": "^13.13.5",
     "react-redux": "^9.1.2",
     "redux-persist": "^6.0.0",
     "rn-proximity-sensor": "^0.2.5",

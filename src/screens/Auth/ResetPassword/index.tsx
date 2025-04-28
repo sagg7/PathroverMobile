@@ -1,8 +1,8 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { Formik } from 'formik';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {Formik} from 'formik';
 import React from 'react';
-import { View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {View} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
   AppButton,
   AppHeader,
@@ -10,7 +10,7 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { useResetPasswordMutation } from '../../../redux/auth/authApiSlice';
+import {useResetPasswordMutation} from '../../../redux/auth/authApiSlice';
 import {
   Routes,
   UNEXPECTED_ERROR,
@@ -18,16 +18,16 @@ import {
   resetPasswordVal,
   showAlert,
   signupPasswordObj,
-  useKeyboardListener
+  useKeyboardListener,
 } from '../../../shared/exporter';
 import styles from './styles';
 
 const ResetPassword = ({}) => {
   const keyboardVisible = useKeyboardListener();
   const [resetPassword, {isLoading}] = useResetPasswordMutation();
-  const route = useRoute();
+  const route: any = useRoute();
   const {value, isEmail} = route?.params;
-  const navigation = useNavigation();  
+  const navigation = useNavigation();
 
   const handleContinueBtn = async (val: any) => {
     const obj = {
@@ -41,7 +41,7 @@ const ResetPassword = ({}) => {
     const resp = await resetPassword(obj);
 
     if (resp?.data) {
-      navigation.replace(Routes.AccountCreationSuccess);
+      navigation.replace(Routes.AccountCreationSuccess, {isSignup: false});
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
