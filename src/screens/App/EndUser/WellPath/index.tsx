@@ -60,9 +60,10 @@ const WellPath = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.276313, 31.454005,
-  ]);
+  // const [currentLocation, setCurrentLocation] = useState<any>([
+  //   74.276313, 31.454005,
+  // ]);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
   const [available, setAvailable] = useState(false);
   const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
@@ -114,6 +115,7 @@ const WellPath = () => {
   const [showPlaceEntrance, setShowPlaceEntrance] = useState<boolean>(false);
   const [loaderCount, setLoaderCount] = useState(0);
   const [loaderState, setLoaderState] = useState(true);
+  const [IsmapLoading, setIsmapLoading] = useState(true);
 
   const getRadiusForZoomLevel = (zoomLevel: any) => {
     switch (zoomLevel) {
@@ -171,13 +173,6 @@ const WellPath = () => {
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
-  // useEffect(() => {
-  //   setQueryParams(prev => ({
-  //     ...prev,
-  //     radius: getRadiusForZoomLevel(zoom),
-  //   }));
-  // }, [zoom]);
-
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
     longitude: '',
@@ -188,7 +183,9 @@ const WellPath = () => {
     data: allWellLocations,
     isLoading,
     refetch,
-  } = useGetAllWellsQuery(queryParams);
+  } = useGetAllWellsQuery(queryParams, {
+    skip: queryParams.longitude === null || IsmapLoading,
+  });
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
@@ -198,12 +195,6 @@ const WellPath = () => {
 
   const [allWells, setAllWells] = useState<any>([]);
   // const [allPins, setAllPins] = useState<any>([]);
-
-  // useEffect(() => {
-  //   if (allWellLocations && queryParams.page === 1) {
-  //     setQueryParams(prev => ({...prev, page: 2})); // Set page 2 after page 1 loads
-  //   }
-  // }, [allWellLocations]);
 
   useEffect(() => {
     if (location) {
@@ -216,11 +207,11 @@ const WellPath = () => {
     }
   }, [location]);
 
-  useEffect(() => {
-    if (queryParams.latitude) {
-      refetch();
-    }
-  }, [queryParams, refetch]);
+  // useEffect(() => {
+  //   if (queryParams.latitude && !IsmapLoading) {
+  //     refetch();
+  //   }
+  // }, [queryParams, refetch, IsmapLoading]);
 
   useEffect(() => {
     if (allWellLocations?.length > 0) {
@@ -551,11 +542,12 @@ const WellPath = () => {
   });
 
   const onRegionDidChange = async () => {
+    setIsmapLoading(false);
     if (mapRef.current) {
       const zoom = await mapRef.current.getZoom();
       const zoomLevel = zoom.toFixed(0);
       const center = await mapRef.current.getCenter();
-      if (zoomLevel) {
+      if (zoomLevel && !IsmapLoading) {
         setQueryParams({
           ...queryParams,
           latitude: center[1],
@@ -819,6 +811,7 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        logoEnabled={false}
         compassEnabled
         compassPosition={{top: isIOS() ? HP('8') : HP('10'), right: 8}}
         compassFadeWhenNorth
@@ -828,11 +821,6 @@ const WellPath = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        onDidFinishLoadingMap={() => {
-          if (searchLocation) {
-            cameraRef?.current?.flyTo(searchLocation, 1500);
-          }
-        }}
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
@@ -1265,7 +1253,7 @@ const WellPath = () => {
           )}
         />
       </GeneralModal>
-      {loaderState && loaderCount === 0 && <AppLoader />}
+      {/* {loaderState && loaderCount === 0 && <AppLoader />} */}
       {/* <AppLoader /> */}
     </MainWrapper>
   );

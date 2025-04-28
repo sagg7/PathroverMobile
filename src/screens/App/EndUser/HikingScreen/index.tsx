@@ -633,6 +633,7 @@ const HikingScreen = ({route, navigation}: any) => {
         onPressWeather={() => setShowWeatherSheet(true)}
       />
       <MapboxGL.MapView
+        logoEnabled={false}
         key={selectedMapType}
         styleURL={selectedMapType}
         style={styles.map}
