@@ -120,7 +120,7 @@ const VerifyNumber = () => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Path Rover" />
+      <AppHeader title="PathRover" />
       <View style={styles.container}>
         <Text style={styles.desc}>
           Please check your phone .We send you the {'\n'}verification code.

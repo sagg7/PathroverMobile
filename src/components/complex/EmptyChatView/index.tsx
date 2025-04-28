@@ -40,7 +40,7 @@ const EmptyChatView = ({
         title={'No chats yet.'}
         buttonTitle={buttonText}
         subTitle={
-          'Chat with contacts who have Path Rover app installed on their phone.'
+          'Chat with contacts who have PathRover app installed on their phone.'
         }
         onPress={onPress}
       />

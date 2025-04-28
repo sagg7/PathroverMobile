@@ -5,7 +5,7 @@ import {svgIcon} from '../../../assets/svg';
 const AccountCreationSuccess = () => {
   return (
     <MainWrapper>
-      <AppHeader title="Path Rover" clickBackIcon={() => {}} />
+      <AppHeader title="PathRover" clickBackIcon={() => {}} />
       <SuccessInfo
         icon={svgIcon.GreenCheck}
         // title="Successfully Created"

@@ -72,8 +72,8 @@ const ContinueAs = ({}) => {
       setShowSheet(false);
       navigation.replace('AppStack');
     } else {
-      console.error('Error:', resp?.error?.data?.errors[0]); 
-      
+      console.error('Error:', resp?.error?.data?.errors[0]);
+
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
@@ -90,7 +90,9 @@ const ContinueAs = ({}) => {
   };
 
   const renderItem = () => (
-    <ImageBackground style={styles.imageStyles} source={appImages.continueAs}>
+    <ImageBackground
+      style={styles.imageStyles}
+      source={showSheet ? appImages.continueAs2 : appImages.continueAs}>
       <View style={styles.textContainer}>
         <AppButton
           title="Login"

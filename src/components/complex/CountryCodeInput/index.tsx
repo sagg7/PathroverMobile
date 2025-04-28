@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -18,9 +18,11 @@ import {
   PFFonts,
   PFFontSize,
 } from '../../../shared/exporter';
-import { svgIcon } from '../../../assets/svg';
-import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal'
-
+import {svgIcon} from '../../../assets/svg';
+import CountryPicker, {
+  Country,
+  CountryCode,
+} from 'react-native-country-picker-modal';
 
 interface AppInputProps {
   placeholder?: string;
@@ -71,24 +73,20 @@ const CountryCodeInput: React.FC<AppInputProps> = ({
   phoneCountryCode,
 }) => {
   const [focused, setFocused] = useState(false);
-  const [countryCode, setCountryCode] = useState<CountryCode>('US')
-  const [country, setCountry] = useState<Country>()
+  const [countryCode, setCountryCode] = useState<CountryCode>('US');
+  const [country, setCountry] = useState<Country>();
 
   useEffect(() => {
     if (phoneCountryCode) {
       setCountryCode(phoneCountryCode);
     }
-  }
-  , [phoneCountryCode]);
-
+  }, [phoneCountryCode]);
 
   const onSelect = (country: Country) => {
-    console.log('Country selected:', country);
-
-    setCountryCode(country.cca2)
-    setCountry(country)
+    setCountryCode(country.cca2);
+    setCountry(country);
     onSelectCode(country);
-  }
+  };
 
   const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -158,6 +156,7 @@ const CountryCodeInput: React.FC<AppInputProps> = ({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             textAlignVertical={textAlignVertical}
+            autoFocus
           />
         </View>
       </View>
@@ -182,8 +181,8 @@ const styles = StyleSheet.create({
     borderColor: isError
       ? PFColors.Red.ErrorColor
       : focused
-        ? PFColors.Blue.Dark
-        : PFColors.Gray.SoftGray,
+      ? PFColors.Blue.Dark
+      : PFColors.Gray.SoftGray,
     backgroundColor: PFColors.Gray.WhisperGray,
     alignSelf: 'center',
   }),
@@ -194,7 +193,6 @@ const styles = StyleSheet.create({
     width: '75%',
     fontSize: PFFontSize.FONT_SIZE_16,
     fontFamily: PFFonts.Foundation.Regular,
-
   }),
   errorTxtStyle: {
     marginVertical: WP('1'),
@@ -206,7 +204,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-  }
+  },
 });
 
-export { CountryCodeInput };
+export {CountryCodeInput};

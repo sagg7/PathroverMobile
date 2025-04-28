@@ -1,18 +1,14 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {Text, View} from 'react-native';
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
-import { AppHeader, AppLoader, MainWrapper } from '../../../components';
-import { useVerifyOtpMutation } from '../../../redux/auth/authApiSlice';
-import {
-  Routes,
-  UNEXPECTED_ERROR,
-  showAlert
-} from '../../../shared/exporter';
+import {AppHeader, AppLoader, MainWrapper} from '../../../components';
+import {useVerifyOtpMutation} from '../../../redux/auth/authApiSlice';
+import {Routes, UNEXPECTED_ERROR, showAlert} from '../../../shared/exporter';
 import styles from './styles';
 
 const VerifyOtpScreen = ({}) => {
@@ -26,7 +22,7 @@ const VerifyOtpScreen = ({}) => {
   });
   const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
   const route = useRoute();
-  const {isEmail, selectedValue} = route?.params;  
+  const {isEmail, selectedValue} = route?.params;
 
   useEffect(() => {
     if (value.length > 3) {
@@ -45,7 +41,6 @@ const VerifyOtpScreen = ({}) => {
       };
 
       const resp: any = await verifyOtp(obj);
-
       if (resp?.data?.message === 'OTP is correct.') {
         navigation.replace(Routes.ResetPassword, {
           value: selectedValue,
@@ -61,7 +56,7 @@ const VerifyOtpScreen = ({}) => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Path Rover" />
+      <AppHeader title="PathRover" />
       <Text style={styles.desc}>
         {`Please check your ${
           isEmail ? 'email' : 'number'
