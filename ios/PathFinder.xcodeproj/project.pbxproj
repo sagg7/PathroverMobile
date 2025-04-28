@@ -54,7 +54,7 @@
 		085A50AC2D6A019200021A45 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		08D96AED2D70D0A60011F29A /* storekitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = storekitConfig.storekit; sourceTree = "<group>"; };
 		0F3C9FE8720C41CB9F0FA8BD /* PlusJakartaSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "PlusJakartaSans-SemiBold.ttf"; path = "../src/assets/fonts/PlusJakartaSans-SemiBold.ttf"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* PathFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PathFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* PathRover.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PathRover.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = PathFinder/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = PathFinder/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = PathFinder/Images.xcassets; sourceTree = "<group>"; };
@@ -209,7 +209,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* PathFinder.app */,
+				13B07F961A680F5B00A75B9A /* PathRover.app */,
 				00E356EE1AD99517003FC87E /* PathFinderTests.xctest */,
 			);
 			name = Products;
@@ -270,7 +270,7 @@
 			);
 			name = PathFinder;
 			productName = PathFinder;
-			productReference = 13B07F961A680F5B00A75B9A /* PathFinder.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* PathRover.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -592,7 +592,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PathFinder/PathFinder.entitlements;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 44;
 				DEVELOPMENT_TEAM = 8S423D32Z4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PathFinder/Info.plist;
@@ -607,7 +607,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.pathrover.org;
-				PRODUCT_NAME = PathFinder;
+				PRODUCT_NAME = PathRover;
 				SWIFT_OBJC_BRIDGING_HEADER = "PathFinder-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -622,7 +622,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PathFinder/PathFinder.entitlements;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 44;
 				DEVELOPMENT_TEAM = 8S423D32Z4;
 				INFOPLIST_FILE = PathFinder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -636,7 +636,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.pathrover.org;
-				PRODUCT_NAME = PathFinder;
+				PRODUCT_NAME = PathRover;
 				SWIFT_OBJC_BRIDGING_HEADER = "PathFinder-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
