@@ -6377,6 +6377,7 @@ __metadata:
     react-native-tab-view: ^4.0.5
     react-native-uuid: ^2.0.3
     react-native-video: ^6.10.1
+    react-native-webview: ^13.13.5
     react-redux: ^9.1.2
     react-test-renderer: 18.2.0
     redux-persist: ^6.0.0
@@ -9679,7 +9680,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invariant@npm:^2.2.4":
+"invariant@npm:2.2.4, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
@@ -13663,6 +13664,19 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: ff2002a0e8ec4253300aa380509e5a73188ac1189e5619f2d8bdf487d527523b6fca1405a783f9cb5c4edbb94622b2fd9cfe7e82f0cf45ec44e2c26b6670c15d
+  languageName: node
+  linkType: hard
+
+"react-native-webview@npm:^13.13.5":
+  version: 13.13.5
+  resolution: "react-native-webview@npm:13.13.5"
+  dependencies:
+    escape-string-regexp: ^4.0.0
+    invariant: 2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 7f3bce1b37d6be9b2f07f0f7481181d5344f9e58022645b0d20dc58cd66056bb6efecacb231963959db6283cc66d977593db62a403c7c151f83568f83041c2eb
   languageName: node
   linkType: hard
 

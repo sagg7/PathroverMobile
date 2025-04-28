@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import {Text, View, StyleSheet} from 'react-native';
 import {
   WP,
   Routes,
@@ -7,8 +7,8 @@ import {
   PFColors,
   PFFonts,
 } from '../../../shared/exporter';
-import { useNavigation } from '@react-navigation/native';
-import { AppButton } from '../..';
+import {useNavigation} from '@react-navigation/native';
+import {AppButton} from '../..';
 
 interface SuccessInfoProps {
   icon?: any;
@@ -25,7 +25,6 @@ const SuccessInfo: React.FC<SuccessInfoProps> = ({
   const navigation = useNavigation();
 
   return (
-
     <View style={styles.container}>
       <View style={styles.innerContainer}>
         {icon}
@@ -35,10 +34,12 @@ const SuccessInfo: React.FC<SuccessInfoProps> = ({
 
       <AppButton
         title={buttonText || ''}
-        handleClick={() => navigation.reset({
-          index: 0,
-          routes: [{ name: 'ContinueAs' }],
-        })}
+        handleClick={() =>
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'ContinueAs'}],
+          })
+        }
         buttonStyle={styles.bottomButton}
       />
     </View>
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: WP('5'),
   },
-  innerContainer: { justifyContent: "center", alignItems: "center", flex: 1 },
+  innerContainer: {justifyContent: 'center', alignItems: 'center', flex: 1},
   titleTextStyle: {
     marginTop: WP('8'),
     marginBottom: WP('2'),
@@ -65,12 +66,11 @@ const styles = StyleSheet.create({
     marginBottom: WP('8'),
     color: PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_20,
-    fontFamily: PFFonts.Foundation.Medium
+    fontFamily: PFFonts.Foundation.Medium,
   },
   bottomButton: {
-    bottom: 40
-  }
-
+    bottom: 40,
+  },
 });
 
-export { SuccessInfo };
+export {SuccessInfo};
