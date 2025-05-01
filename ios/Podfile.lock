@@ -1217,7 +1217,7 @@ PODS:
     - Yoga
   - react-native-keep-awake (1.3.1):
     - React-Core
-  - react-native-pager-view (6.7.0):
+  - react-native-pager-view (6.7.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1242,7 +1242,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (5.4.0):
     - React-Core
-  - react-native-video (6.12.0):
+  - react-native-video (6.13.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1256,7 +1256,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.12.0)
+    - react-native-video/Video (= 6.13.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1264,7 +1264,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.12.0):
+  - react-native-video/Video (6.13.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1652,7 +1652,7 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.8)
   - RNNotifee/NotifeeCore (9.1.8):
     - React-Core
-  - RNPermissions (5.3.0):
+  - RNPermissions (5.4.0):
     - React-Core
   - RNReanimated (3.16.7):
     - DoubleConversion
@@ -2237,10 +2237,10 @@ SPEC CHECKSUMS:
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: fb0c2b3adc3eff6caa3cd6a507a34b9dcc9238dd
   react-native-keep-awake: f242130d32a8e312b53c4b422534fd73ff35885a
-  react-native-pager-view: 08a2230db2a7393ead43299b160d17337837a15e
+  react-native-pager-view: 41e8ddc89e6ea77412d18abbfd16ee1d273bc056
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
   react-native-safe-area-context: 8870dc3e45c8d241336cd8ee3fa3fc76f3a040ac
-  react-native-video: 061634aabc8ffbbfa06ba483e37b67b03858927b
+  react-native-video: cfebaaf4eb1d6d8a5eb761eb3fb3ac50477b1a19
   react-native-webview: db97533d0b7534225f48ad4e0c313b83cfae8a20
   React-nativeconfig: ba9a2e54e2f0882cf7882698825052793ed4c851
   React-NativeModulesApple: 8d11ff8955181540585c944cf48e9e7236952697
@@ -2282,7 +2282,7 @@ SPEC CHECKSUMS:
   RNImageCropPicker: 8e39c01f205e00d739c31e682f068aac315587bf
   rnmapbox-maps: 86b215fe77632a897b34a2dbf0c3ad4e9e8c3570
   RNNotifee: 4a6ee5c7deaf00e005050052d73ee6315dff7ec9
-  RNPermissions: 89058f1ab27edc3df23fa296463ac519b92243ce
+  RNPermissions: 744c91afed106f8456e5a10f74823d342b541eb6
   RNReanimated: b0728bed09875d78b9a3a0ba0e2d1171f63f8b5a
   RNScreens: 177a3fedd12fc8d12af3c23f17e7bbdc9749a2cd
   RNShare: ddc90a41a808268fd75061da52e0239ad416df28
@@ -2300,8 +2300,8 @@ SPEC CHECKSUMS:
   StripeUICore: b59aa9c9e202b6a03a556c3519eff578274f7598
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
-  Yoga: 2246eea72aaf1b816a68a35e6e4b74563653ae09
+  Yoga: 950bbfd7e6f04790fdb51149ed51df41f329fcc8
 
 PODFILE CHECKSUM: e8dc9da36035ccb4431ae52ee037831775720da2
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
