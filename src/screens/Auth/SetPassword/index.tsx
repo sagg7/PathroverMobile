@@ -1,6 +1,8 @@
-import {View} from 'react-native';
-import React, {useEffect, useRef} from 'react';
-import styles from './styles';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
+import React, { useRef } from 'react';
+import { View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   AppButton,
   AppHeader,
@@ -8,26 +10,23 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Formik} from 'formik';
+import { useSignUpMutation } from '../../../redux/auth/authApiSlice';
 import {
   Routes,
   UNEXPECTED_ERROR,
   isIOS,
-  removeNonNumbers,
   resetPasswordVal,
   showAlert,
   signupPasswordObj,
-  useKeyboardListener,
+  useKeyboardListener
 } from '../../../shared/exporter';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {useSignUpMutation} from '../../../redux/auth/authApiSlice';
+import styles from './styles';
 
-const SetPassword = ({}) => {
+const SetPassword = ({ }) => {
   const route = useRoute();
-  const {values} = route?.params;
-  const {email, phone, firstName, lastName} = values;
-  const [signup, {isLoading}] = useSignUpMutation();
+  const { values } = route?.params;
+  const { email, phone, firstName, lastName, callingCode } = values;
+  const [signup, { isLoading }] = useSignUpMutation();
   const navigation = useNavigation();
   const keyboardVisible = useKeyboardListener();
   const ref = useRef();
@@ -35,8 +34,8 @@ const SetPassword = ({}) => {
   const handleContinueBtn = async (val: any) => {
     const obj = {
       user: {
-        ...(email && {email: email?.toLowerCase()}),
-        ...(phone && {phone_number: removeNonNumbers(phone)}),
+        ...(email && { email: email?.toLowerCase() }),
+        ...(phone && { phone_number: callingCode?.includes('+') ? `${callingCode}${phone}` : `+${callingCode}${phone}` }),
         first_name: firstName,
         last_name: lastName,
         password: val.password,
@@ -70,12 +69,12 @@ const SetPassword = ({}) => {
               enableReinitialize
               initialValues={signupPasswordObj}
               validationSchema={resetPasswordVal}
-              onSubmit={(values, {resetForm}) => {
+              onSubmit={(values, { resetForm }) => {
                 handleContinueBtn(values);
               }}>
-              {({handleChange, handleSubmit, values, errors, touched}) => {
+              {({ handleChange, handleSubmit, values, errors, touched }) => {
                 return (
-                  <View style={{alignSelf: 'center'}}>
+                  <View style={{ alignSelf: 'center' }}>
                     <AppInput
                       placeholder="Password"
                       value={values.password}

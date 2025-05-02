@@ -1,20 +1,15 @@
-import {Text, View} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {AppHeader, AppLoader, MainWrapper} from '../../../components';
-import styles from './styles';
-import {
-  Routes,
-  UNEXPECTED_ERROR,
-  removeNonNumbers,
-  showAlert,
-} from '../../../shared/exporter';
+import {Text, View} from 'react-native';
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import {AppHeader, AppLoader, MainWrapper} from '../../../components';
 import {useVerifyOtpMutation} from '../../../redux/auth/authApiSlice';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {Routes, UNEXPECTED_ERROR, showAlert} from '../../../shared/exporter';
+import styles from './styles';
 
 const VerifyOtpScreen = ({}) => {
   const [value, setValue] = useState('');
@@ -40,13 +35,12 @@ const VerifyOtpScreen = ({}) => {
       const obj = {
         user: {
           ...(isEmail && {email: selectedValue?.toLowerCase()}),
-          ...(!isEmail && {phone_number: removeNonNumbers(selectedValue)}),
+          ...(!isEmail && {phone_number: selectedValue}),
           otp: value,
         },
       };
 
       const resp: any = await verifyOtp(obj);
-
       if (resp?.data?.message === 'OTP is correct.') {
         navigation.replace(Routes.ResetPassword, {
           value: selectedValue,
@@ -62,7 +56,7 @@ const VerifyOtpScreen = ({}) => {
 
   return (
     <MainWrapper>
-      <AppHeader title="Path Rover" />
+      <AppHeader title="PathRover" />
       <Text style={styles.desc}>
         {`Please check your ${
           isEmail ? 'email' : 'number'

@@ -21,7 +21,7 @@ const AppStack = () => {
   const navigation = useNavigation();
   const userRole = useSelector(state => state.appRole.userRole);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [updateCall, {error}] = useUpdateCallMutation();
+  const [updateCall, { error }] = useUpdateCallMutation();  
 
   useEffect(() => {
     NotificationListener(navigation);

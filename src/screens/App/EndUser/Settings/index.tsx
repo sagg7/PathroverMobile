@@ -111,7 +111,7 @@ const Settings = ({navigation}: any) => {
         screenName = Routes.Notification;
         break;
       case 3:
-        Linking.openURL(FAQ_LIST_LINK);
+        screenName = Routes.Faqs;
         break;
       case 4:
         screenName = Routes.SupportScreen;

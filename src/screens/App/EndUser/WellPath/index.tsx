@@ -101,6 +101,8 @@ const WellPath = () => {
   const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
   const [showShareWellSheet, setShowShareWellSheet] = useState<boolean>(false);
   const [showPlaceEntrance, setShowPlaceEntrance] = useState<boolean>(false);
+  const [loaderCount, setLoaderCount] = useState(0);
+  const [loaderState, setLoaderState] = useState(true);
 
   const getRadiusForZoomLevel = (zoomLevel: any) => {
     switch (zoomLevel) {
@@ -228,6 +230,8 @@ const WellPath = () => {
 
         return [...prev, ...newWells]; // Add only unique wells
       });
+      setLoaderState(false);
+      setLoaderCount(1);
     }
   }, [allWellLocations]);
   console.log('ALL WELLS LOCAL', allWells?.length);
@@ -1166,18 +1170,18 @@ const WellPath = () => {
           }}
           onPressShare={() => setShowShareSheet(true)}
           onPressStart={() => {
-            if (isIOS()) {
-              navigation.navigate(Routes.TurnByTurnNav, {
-                originCoords: currentLocation,
-                entranceCoords: pinLocationMarker,
-                entranceName: placeName,
-              });
-            } else {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
-                entranceCoords: pinLocationMarker,
-                entranceName: placeName,
-              });
-            }
+            // if (isIOS()) {
+            // navigation.navigate(Routes.TurnByTurnNav, {
+            //   originCoords: currentLocation,
+            //   entranceCoords: pinLocationMarker,
+            //   entranceName: placeName,
+            // });
+            // } else {
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: pinLocationMarker,
+              entranceName: placeName,
+            });
+            // }
 
             setShowNavigationSheet(false);
             clearStates();
@@ -1277,7 +1281,8 @@ const WellPath = () => {
           )}
         />
       </GeneralModal>
-      {/* {isLoading && <AppLoader />} */}
+      {loaderState && loaderCount === 0 && <AppLoader />}
+      {/* <AppLoader /> */}
     </MainWrapper>
   );
 };

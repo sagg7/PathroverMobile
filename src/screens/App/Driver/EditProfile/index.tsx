@@ -1,6 +1,10 @@
-import {Text, View} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import styles from './styles';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Formik } from 'formik';
+import parsePhoneNumberFromString from 'libphonenumber-js';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   AppButton,
   AppHeader,
@@ -8,57 +12,65 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../../components';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Formik} from 'formik';
+import { CountryCodeInput } from '../../../../components/complex/CountryCodeInput';
+import { setLoginUser } from '../../../../redux/auth/authSlice';
+import { useEdtProfileMutation } from '../../../../redux/driver/driverApiSlice';
+import {
+  UNEXPECTED_ERROR,
+  isIOS,
+  showAlert,
+  useKeyboardListener
+} from '../../../../shared/exporter';
 import {
   EditInitialObject,
   EditProfileValidation,
 } from '../../../../shared/utils/validations';
-import {
-  UNEXPECTED_ERROR,
-  formatPhoneNumber,
-  isIOS,
-  removeNonNumbers,
-  showAlert,
-  useKeyboardListener,
-} from '../../../../shared/exporter';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {useDispatch, useSelector} from 'react-redux';
-import {setLoginUser} from '../../../../redux/auth/authSlice';
-import {useEdtProfileMutation} from '../../../../redux/driver/driverApiSlice';
+import styles from './styles';
 
 const EditProfile = () => {
   const keyboardVisible = useKeyboardListener();
-  const [editProfile, {data, isLoading}] = useEdtProfileMutation();
+  const [editProfile, { data, isLoading }] = useEdtProfileMutation();
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
-  const {key} = route?.params;
+  const { key } = route?.params;
   const formikRef = useRef();
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [values, setValues] = useState({title: '', desc: ''});
+  const [values, setValues] = useState({ title: '', desc: '' });
 
   useEffect(() => {
     if (formikRef.current) {
-      const {setFieldValue} = formikRef.current;
-      const {last_name, first_name, phone_number, email} = loginUser;
-      first_name && setFieldValue('firstName', first_name);
-      last_name && setFieldValue('lastName', last_name);
-      email && setFieldValue('email', email);
-      phone_number && setFieldValue('phone', formatPhoneNumber(phone_number));
+      const { setFieldValue } = formikRef.current;
+      const { last_name, first_name, phone_number, email } = loginUser;
+      if (loginUser?.phone_number) {
+
+        const parsedNumber = parsePhoneNumberFromString(loginUser?.phone_number?.includes('+')?   loginUser?.phone_number: '+' + loginUser?.phone_number);
+        if (parsedNumber) {
+          setFieldValue('countryCode', parsedNumber.country?.toString() ?? 'US');
+          setFieldValue('callingCode', parsedNumber.country ? parsedNumber.countryCallingCode : '1');
+          phone_number && setFieldValue('phone', parsedNumber.nationalNumber);
+        } else {
+          setFieldValue('countryCode', 'US');
+          setFieldValue('callingCode', loginUser?.country_code);
+          phone_number && setFieldValue('phone',loginUser?.phone_number);
+        }
+        first_name && setFieldValue('firstName', first_name);
+        last_name && setFieldValue('lastName', last_name);
+        email && setFieldValue('email', email);
+      }
     }
   }, []);
 
   const handleContinueBtn = useCallback(
     async val => {
-      const {email, phone, password, firstName, lastName} = val;
+      const { email, phone, password, firstName, lastName } = val;
       const obj = {
         profile: {
-          ...(email && {email: email?.toLowerCase()}),
-          ...(firstName && {first_name: firstName}),
-          ...(lastName && {last_name: lastName}),
-          ...(password && {password: password}),
-          ...(phone && {phone_number: removeNonNumbers(phone)}),
+          ...(email && { email: email?.toLowerCase() }),
+          ...(firstName && { first_name: firstName }),
+          ...(lastName && { last_name: lastName }),
+          ...(password && { password: password }),
+          ...(phone && { phone_number:val?.callingCode?.includes('+') ? `${val?.callingCode}${phone}` : `+${val?.callingCode}${phone}` }),
         },
       };
 
@@ -115,16 +127,28 @@ const EditProfile = () => {
         );
       case 3:
         return (
-          <AppInput
+          <CountryCodeInput
             placeholder="Phone No"
             value={values.phone}
+            phoneCountryCode={values.countryCode}
             onChangeText={text => {
-              const formatted = formatPhoneNumber(text);
-              setFieldValue('phone', formatted);
+              setFieldValue('phone', text);
+              // Trigger validation
+              if (values.callingCode && values.countryCode) {
+                formikRef.current?.validateField('phone');
+              }
             }}
             touched={touched.phone}
             errorMessage={errors.phone}
             keyboardType="numeric"
+            onSelectCode={country => {
+              setFieldValue('callingCode', country?.callingCode[0]);
+              setFieldValue('countryCode', country?.cca2);
+
+              if (values.callingCode && values.countryCode) {
+                formikRef.current?.validateField('phone');
+              }
+            }}
           />
         );
       case 2:
@@ -157,19 +181,19 @@ const EditProfile = () => {
   useEffect(() => {
     switch (key) {
       case 0:
-        setValues({title: 'Name', desc: 'Change Name'});
+        setValues({ title: 'Name', desc: 'Change Name' });
         break;
       case 1:
-        setValues({title: 'Email', desc: 'Change Email'});
+        setValues({ title: 'Email', desc: 'Change Email' });
         break;
       case 2:
-        setValues({title: 'Password', desc: 'Change Password'});
+        setValues({ title: 'Password', desc: 'Change Password' });
         break;
       case 3:
-        setValues({title: 'Phone', desc: 'Change Phone Number'});
+        setValues({ title: 'Phone', desc: 'Change Phone Number' });
         break;
       default:
-        setValues({title: '', desc: ''});
+        setValues({ title: '', desc: '' });
     }
   }, [key]);
   return (
@@ -201,7 +225,7 @@ const EditProfile = () => {
                 touched,
                 setFieldValue,
               }) => (
-                <View style={{alignSelf: 'center'}}>
+                <View style={{ alignSelf: 'center' }}>
                   {renderFormFields(
                     key,
                     values,

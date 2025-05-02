@@ -9,6 +9,7 @@ import appRoleReduces from './auth/appRoleSlice';
 import managerSlice from './manager/managerSlice';
 import chatSlice from './chat/chatSlice';
 import Enduserslice from './endUser/endUserSlice';
+import { authMiddleware } from './middleware';
 
 const rootReduer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
@@ -42,6 +43,6 @@ export const store = configureStore({
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(apiSlice.middleware),
+    }).concat(apiSlice.middleware, authMiddleware),
 });
 export const persistor = persistStore(store);

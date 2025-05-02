@@ -74,7 +74,7 @@ const AuthBottomSheet: React.FC<AuthBottomSheetProps> = ({
             <TouchableOpacity onPress={onPressFacebook}>
               {svgIcon.Facebook}
             </TouchableOpacity>
-            <TouchableOpacity onPress={onPressGoogle} disabled>
+            <TouchableOpacity onPress={onPressGoogle}>
               {svgIcon.Google}
             </TouchableOpacity>
             {isIOS() && (
