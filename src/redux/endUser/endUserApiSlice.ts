@@ -18,6 +18,7 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
             radius: radius,
             per_page: arg.per_page,
             page: currentPage,
+            state: arg.state,
           }).toString();
 
           console.log('\n\nQUERY PARAM HIT\n', queryParams);

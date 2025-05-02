@@ -18,6 +18,7 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
+  ROUTE_LINE_STYLES,
   showAlert,
 } from '../../../../shared/exporter';
 import {
@@ -489,8 +490,9 @@ const ViewSharedRoutes = ({route}: any) => {
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 6,
-                lineColor: routeLineColor,
+                lineWidth: routeLineHeight || ROUTE_LINE_STYLES.lineWidth,
+                lineColor: routeLineColor || ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -502,8 +504,9 @@ const ViewSharedRoutes = ({route}: any) => {
               key={routeToStartPoint?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 4,
-                lineColor: routeLineColor,
+                lineWidth: routeLineHeight || ROUTE_LINE_STYLES.lineWidth,
+                lineColor: routeLineColor || ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>

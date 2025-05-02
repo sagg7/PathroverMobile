@@ -97,7 +97,7 @@ const SearchTrails = ({navigation}: any) => {
         <View style={styles.searchBox}>
           {svgIcon.Search}
           <TextInput
-            placeholder="Search"
+            placeholder="Search location"
             placeholderTextColor={PFColors.Gray.DarkGray}
             value={simpleSearch}
             onChangeText={handleChangeTextLoc}

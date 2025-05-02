@@ -8,6 +8,7 @@ const initialState = {
     downloadMap: {},
     routeData: {},
     routeType: null,
+    selectedTrail: null,
   },
 };
 
@@ -41,11 +42,13 @@ const endUserSlice = createSlice({
       state.trailRoute.createRouteData = {};
     },
     setdownloadMap: (state, action) => {
-      console.log('action in reducer', state);
       state.trailRoute.downloadMap = action.payload;
     },
     setdownloadMapEmpty: (state, action) => {
       state.trailRoute.downloadMap = {};
+    },
+    setSelectedTrail: (state, action) => {
+      state.trailRoute.selectedTrail = action.payload;
     },
   },
 });
@@ -60,6 +63,7 @@ export const {
   setdownloadMap,
   setdownloadMapEmpty,
   setRouteType,
+  setSelectedTrail,
 } = endUserSlice.actions;
 
 export default endUserSlice.reducer;

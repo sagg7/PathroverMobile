@@ -6,7 +6,7 @@ import {
   FlatList,
   Linking,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles';
 import {appIcons} from '../../../../assets/icons';
 import {svgIcon} from '../../../../assets/svg';
@@ -38,12 +38,22 @@ const Settings = ({navigation}: any) => {
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
     useDeleteUserAccountMutation();
+  const [profilePicture, setProfilePicture] = useState<null>();
 
   const [userName, setUserName] = useState(
     `${loginUser?.first_name ? loginUser?.first_name : ''} ${
       loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+        loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+    setProfilePicture(loginUser?.avatar);
+  }, [loginUser]);
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
@@ -183,9 +193,7 @@ const Settings = ({navigation}: any) => {
         <View style={styles.userProfileContainer}>
           <Image
             source={
-              loginUser?.avatar
-                ? {uri: loginUser?.avatar}
-                : appIcons.userPlaceholder
+              profilePicture ? {uri: profilePicture} : appIcons.userPlaceholder
             }
             style={styles.userPicture}
           />

@@ -55,9 +55,7 @@ const RecordHikingRoute = () => {
   const [confirmReportVisible, setConfirmReportVisible] = useState(false);
   const [selectedReport, setSelectedReport] =
     useState<(typeof REPORTS_LIST)[0]>();
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.272999, 31.453079,
-  ]);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
   const {data: allReports, refetch} = useGetRouteReportQuery({});
 
   const [liveLocation, setLiveLocation] = useState<any>(null);
@@ -383,6 +381,24 @@ const RecordHikingRoute = () => {
 
     return [longitude, adjustedLatitude];
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      resetCompass();
+    }, 300);
+  }, []);
+  const resetCompass = () => {
+    if (cameraRef.current && currentLocation?.length > 0) {
+      cameraRef.current.setCamera({
+        centerCoordinate: currentLocation,
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
+      });
+    }
+  };
+  const distanceInMiles = totalDistance * 0.000621371;
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Record Route" />
@@ -559,7 +575,7 @@ const RecordHikingRoute = () => {
           time={formatTime(elapsedTime)}
           speed={speed}
           elevation={elevation}
-          distance={totalDistance}
+          distance={distanceInMiles}
           value={recordingDetails}
           onChange={setRecordingDetails}
           setHideActionBtn={setHideActionBtn}

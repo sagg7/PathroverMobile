@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {
+  HP,
   isIOS,
   PFColors,
   PFFonts,
@@ -137,6 +138,11 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 20,
     borderTopLeftRadius: 20,
     padding: 20,
+  },
+  recenterIcon: {
+    position: 'absolute',
+    top: isIOS() ? HP('75') : HP('73'),
+    left: 15,
   },
 });
 export default styles;

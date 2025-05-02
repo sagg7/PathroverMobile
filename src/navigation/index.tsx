@@ -79,7 +79,7 @@ import TrailDetails from '../screens/App/EndUser/TrailDetails';
 import SearchTrailResult from '../screens/App/EndUser/SearchTrails/SearchTrailResult';
 import ViewSharedRoutes from '../screens/App/EndUser/ViewSharedRoutes';
 import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
-import { isReadyRef, navigationRef } from './navigationRef';
+import {isReadyRef, navigationRef} from './navigationRef';
 
 import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
 const Stack = createNativeStackNavigator();
@@ -87,7 +87,9 @@ const Stack = createNativeStackNavigator();
 
 const AppNavigation = () => {
   return (
-    <NavigationContainer ref={navigationRef} onReady={() => {
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
         isReadyRef.current = true;
       }}>
       <Stack.Navigator

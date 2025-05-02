@@ -201,14 +201,22 @@ const RecordRoute = () => {
         setLiveLocation([longitude, latitude]);
         setRoute(prev => [...prev, [longitude, latitude]]);
       }
-      if (cameraRef.current) {
-        cameraRef?.current.setCamera({
-          centerCoordinate: [longitude, latitude],
-          zoomLevel: 16,
-          animationDuration: 1000, // Smooth animation
-          bearing: heading,
-        });
-      }
+    }
+  };
+  useEffect(() => {
+    setTimeout(() => {
+      resetCompass();
+    }, 300);
+  }, []);
+  const resetCompass = () => {
+    if (cameraRef.current && currentLocation?.length > 0) {
+      cameraRef.current.setCamera({
+        centerCoordinate: currentLocation,
+        zoomLevel: 18,
+        heading: 220,
+        animationDuration: 1000,
+        pitch: 60,
+      });
     }
   };
 

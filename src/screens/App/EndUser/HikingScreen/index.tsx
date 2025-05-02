@@ -31,6 +31,7 @@ import {
   CHAT_NON_VERIFIED_TEXT,
   HP,
   WP,
+  ROUTE_LINE_STYLES,
 } from '../../../../shared/exporter';
 import styles from './styles';
 import {svgIcon} from '../../../../assets/svg';
@@ -39,7 +40,10 @@ import {useDispatch, useSelector} from 'react-redux';
 import HikingFilter from '../../../../components/complex/HikingFilter';
 import GeneralModal from '../../../../components/complex/GeneralModal';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
-import {resetTrailRoute} from '../../../../redux/endUser/endUserSlice';
+import {
+  resetTrailRoute,
+  setSelectedTrail,
+} from '../../../../redux/endUser/endUserSlice';
 import useLocation from '../../../../hooks/getLocation';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
@@ -62,7 +66,7 @@ const MY_DATA_MODAL_CONTENT = [
     icon: svgIcon.Track,
   },
   {
-    title: 'WayPoint',
+    title: 'WayPoint (H)',
     type: 'hiking_waypoint',
     icon: svgIcon.RouteBlue,
   },
@@ -76,7 +80,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const [userLocation, setUserLocation] = useState<any>(null);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedType, setSelectedType] = useState('hiking');
-  const [trailInfo, setTrailInfo] = useState<boolean>(null);
+  const [trailInfo, setTrailInfo] = useState<any>(null);
   const [isMyDataVisible, setIsMyDataVisible] = useState(false);
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [showFilterSheet, setShowFilterSheet] = useState<boolean>(false);
@@ -293,20 +297,7 @@ const HikingScreen = ({route, navigation}: any) => {
       setShowTrailInfoSheet(true);
     }, 300);
   };
-  const _fetchRoute = async (start, end) => {
-    const accessToken = mapBoxToken;
-    let url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&overview=full&steps=true&access_token=${accessToken}`;
 
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      const route = data.routes[0]?.geometry?.coordinates;
-      return route;
-    } catch (error) {
-      console.error('Error fetching route:', error);
-      return [];
-    }
-  };
   const toRad = (value: any) => (value * Math.PI) / 180;
 
   const getDistanceInKm = (coord1: any, coord2: any) => {
@@ -372,6 +363,8 @@ const HikingScreen = ({route, navigation}: any) => {
       const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
+        console.log('COORDS', coords);
+        // return;
         setPinLocationMarker(coords);
         setPinLocationDetails({
           latitude: coords[1],
@@ -421,7 +414,6 @@ const HikingScreen = ({route, navigation}: any) => {
             })),
           ]
         : [];
-
     const routeObj = {
       user_route: {
         name: trailInfo?.name || '',
@@ -609,18 +601,34 @@ const HikingScreen = ({route, navigation}: any) => {
   };
   const shareContent = async selectedRoute => {
     const options = {
-      // message: 'Shared location',
       url: `https://staging.path-rover.com/download?route_type=${selectedRoute?.route_type}&route_id=${selectedRoute?.id}`, // Optional: A link to share
     };
 
     try {
       const res = await Share.open(options);
-      console.log(res);
       setShowShareSheet(false);
     } catch (err) {
       if (err) {
         console.log(err);
       }
+    }
+  };
+
+  const onPressExploreTrail = () => {
+    console.log('trailInfo', trailInfo);
+    return;
+    if (isIOS()) {
+      dispatch(setSelectedTrail(trailInfo));
+      setTimeout(() => {
+        navigation.navigate(Routes.TurnByTurnNav, {
+          originCoords: [location?.longitude, location?.latitude],
+          entranceCoords: trailInfo?.geometry?.coordinates[0],
+          entranceName: 'Unknown Trail',
+          isTrail: true,
+        });
+      }, 300);
+    } else {
+      navigation.navigate('TrailDetails', {trailInfo});
     }
   };
 
@@ -638,7 +646,6 @@ const HikingScreen = ({route, navigation}: any) => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        // styleURL={MapboxGL.StyleURL.Outdoors}
         onPress={onPressMap}>
         {userLocation && (
           <MapboxGL.Camera
@@ -675,21 +682,17 @@ const HikingScreen = ({route, navigation}: any) => {
                   lineWidth: 4,
                 }}
               />
-              {/* <MapboxGL.PointAnnotation
-                id={`trail-point-${index}`}
-                coordinate={trail.geometry.coordinates[0]}
-                onSelected={() => handleCalloutPress(trail)}>
-                <MapboxGL.Callout title={trail.properties.name || 'Trail'} />
-              </MapboxGL.PointAnnotation> */}
             </MapboxGL.ShapeSource>
           ))}
+
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 5,
-                lineColor: PFColors.Blue.Dark,
+                lineWidth: ROUTE_LINE_STYLES.lineWidth,
+                lineColor: ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -784,10 +787,8 @@ const HikingScreen = ({route, navigation}: any) => {
         trailInfo={trailInfo}
         setModalVisible={() => setShowTrailInfoSheet(false)}
         onPressNavigation={() => {
+          onPressExploreTrail();
           setShowTrailInfoSheet(false);
-          setTimeout(() => {
-            navigation.navigate('TrailDetails', {trailInfo});
-          }, 300);
         }}
       />
       {/* My Data Modal */}
@@ -825,14 +826,6 @@ const HikingScreen = ({route, navigation}: any) => {
         showFilterSheet={showFilterSheet}
         setShowFilterSheet={setShowFilterSheet}
       />
-      {/* {showPinLocationSheet && (
-        <PinYourLocationSheet
-          values={pinLocationDetails}
-          onPressCancel={() => setShowPinLocationSheet(false)}
-          setValues={setPinLocationDetails}
-          onPressSave={() => onPressWaypointSave()}
-        />
-      )} */}
 
       <RBSheet
         ref={pinLocationSheet}
@@ -884,10 +877,19 @@ const HikingScreen = ({route, navigation}: any) => {
           }}
           onPressStart={() => {
             setShowNavigationSheet(false);
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: pinLocationMarker,
-              entranceName: placeName,
-            });
+
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: [location.longitude, location.latitude],
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            } else {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            }
           }}
         />
       )}

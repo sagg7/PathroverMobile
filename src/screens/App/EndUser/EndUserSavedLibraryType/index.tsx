@@ -17,6 +17,7 @@ import {
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
 import {
+  isIOS,
   PFColors,
   Routes,
   SaveRouteSheet,
@@ -26,6 +27,9 @@ import styles from './styles';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import Share from 'react-native-share';
+import useLocation from '../../../../hooks/getLocation';
+import {useDispatch} from 'react-redux';
+import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -42,6 +46,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
   const refScrollable = useRef<any>();
+  const {location} = useLocation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (modalType === 'edit') {
@@ -59,13 +65,70 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       selectedItem?.route_type === 'hiking_waypoint' ||
       selectedItem?.route_type === 'maps_location_pins'
     ) {
-      navigation.navigate(Routes.ViewWellPathNavigation, {
-        entranceCoords: [
-          Number(selectedItem?.dropoff_location?.longitude),
-          Number(selectedItem?.dropoff_location?.latitude),
+      if (isIOS()) {
+        navigation.navigate(Routes.TurnByTurnNav, {
+          originCoords: [location.longitude, location.latitude],
+          entranceCoords: [
+            Number(selectedItem?.dropoff_location?.longitude),
+            Number(selectedItem?.dropoff_location?.latitude),
+          ],
+          entranceName: selectedItem?.name,
+        });
+      } else {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: [
+            Number(selectedItem?.dropoff_location?.longitude),
+            Number(selectedItem?.dropoff_location?.latitude),
+          ],
+          entranceName: selectedItem?.name,
+        });
+      }
+    } else if (selectedItem?.route_type === 'hiking_trail_route') {
+      console.log('WORKING HERE', selectedItem?.locations_attributes);
+      console.log('SELECTED', selectedItem);
+      const coordinates = [
+        [
+          parseFloat(selectedItem?.pickup_location?.longitude),
+          parseFloat(selectedItem?.pickup_location?.latitude),
         ],
-        entranceName: selectedItem?.name,
-      });
+        ...selectedItem?.middle_location_points.map(point => [
+          parseFloat(point.longitude),
+          parseFloat(point.latitude),
+        ]),
+        [
+          parseFloat(selectedItem?.dropoff_location?.longitude),
+          parseFloat(selectedItem?.dropoff_location?.latitude),
+        ],
+      ];
+      const geoJsonFeature = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: coordinates,
+        },
+        properties: {
+          color: selectedItem.color,
+          tags: {
+            highway: 'path',
+          },
+        },
+      };
+
+      if (isIOS()) {
+        dispatch(setSelectedTrail(geoJsonFeature));
+        setTimeout(() => {
+          navigation.navigate(Routes.TurnByTurnNav, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+            entranceName: 'Unknown Trail',
+            isTrail: true,
+          });
+        }, 300);
+      } else {
+        navigation.navigate('TrailDetails', {geoJsonFeature});
+      }
+
+      return;
     } else {
       navigation.navigate(Routes.ViewSaveRoutes, {
         item: selectedItem,
@@ -340,7 +403,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           routeName={routeName || ''}
           onChangeText={handleUpdateName}
           onPressSave={() => handleSave()}
-          btnTitle="Save Map"
+          btnTitle="Save"
         />
         {/* )} */}
       </RBSheet>
