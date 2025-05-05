@@ -144,6 +144,24 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
       },
       transformResponse: (res: any) => res?.news_feed,
     }),
+    getSubscription: builder.query({
+      query: () => {
+        return {
+          url: `subscriptions/my_subscriptions`,
+          method: 'GET',
+        };
+      },
+      transformResponse: (res: any) => res?.subscriptions,
+    }),
+    updateSubscription: builder.mutation({
+      query: data => {
+        return {
+          url: `subscriptions`,
+          method: 'PUT',
+          body: data,
+        };
+      },
+    }),
   }),
 
   overrideExisting: true,
@@ -161,4 +179,6 @@ export const {
   useGetRouteBasedIdMutation,
   useCreateShareLinkRouteMutation,
   useGetNewsBlogsQuery,
+  useGetSubscriptionQuery,
+  useUpdateSubscriptionMutation,
 } = enduserApiSlice;
