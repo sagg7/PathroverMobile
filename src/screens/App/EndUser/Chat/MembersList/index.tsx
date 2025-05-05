@@ -17,6 +17,9 @@ import {Platform} from 'react-native';
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import Contacts from 'react-native-contacts';
 import RenderEmptyUser from '../RenderEmptyUser';
+import parsePhoneNumberFromString, { getCountryCallingCode } from 'libphonenumber-js';
+import { getCountryFromCoordinates } from '../../../../../hooks/getLocation/getcCountry';
+import useLocation from '../../../../../hooks/getLocation';
 
 const MemberList = () => {
   const {params} = useRoute<any>();
@@ -31,6 +34,7 @@ const MemberList = () => {
     members: [],
     selectedMembers: [],
   });
+  const { location } = useLocation();
 
   const [getAllUsers, {isLoading, data: allData}] =
     useGetChatContactsMutation();
@@ -54,15 +58,75 @@ const MemberList = () => {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      if (isFocused) {
-        const permissionGranted = await requestContactsPermission();
-        if (permissionGranted) {
+    const checkNumbers = async (number: any, locationDetail: object) => {
+      try {
+        const parsedNumber = parsePhoneNumberFromString(number);
+  
+        let callingCode = '';
+        if (locationDetail) {
+          callingCode = getCountryCallingCode(locationDetail?.countryCode);
+        }
+  
+        if (parsedNumber?.countryCallingCode && parsedNumber?.country) {
+          return parsedNumber?.number;
+        } else if (number?.includes('+')) {
+          return number;
+        } else {
+  
+          const parsedNumberWithCode = parsePhoneNumberFromString(`+${callingCode}${number}`);
+  
+          if (parsedNumberWithCode?.countryCallingCode && parsedNumberWithCode?.country) {
+            return parsedNumberWithCode?.number;
+          }
+  
+          return `${number}`;
+        }
+      } catch (error) {
+        return number;
+      }
+    }
+  
+    useEffect(() => {
+      (async () => {
+  
+        if (isFocused && location) {
+          let locationDetail = await getCountryFromCoordinates(location?.latitude, location?.longitude)
+  
+          const permissionGranted = await requestContactsPermission();
+          if (!permissionGranted) {
+            return;
+          }
+  
           const allContacts = await Contacts.getAll();
-          const allUsers = await getAllUsers({users: allContacts}).unwrap();
+  
+          // Process contacts asynchronously
+          const parsedNumberArray = await Promise.all(
+            allContacts.map(async (i) => {
+              const originalPhoneNumbers = i.phoneNumbers || [];
+  
+              const updatedPhoneNumbers = await Promise.all(
+                originalPhoneNumbers.map(async (pn, index) => {
+                  if (index === 0) {
+                    const updatedNumber = await checkNumbers(pn.number, locationDetail);
+                    return {
+                      ...pn,
+                      number: updatedNumber,
+                    };
+                  }
+                  return pn;
+                })
+              );
+  
+              return {
+                ...i,
+                phoneNumbers: updatedPhoneNumbers,
+              };
+            })
+          );
+  
+          const allUsers = await getAllUsers({ users: parsedNumberArray }).unwrap();
+          // const allUsers = await getAllUsers({ users: allContacts }).unwrap();
           const formattedContacts = formatContacts(allUsers?.data);
-          // Save full contacts list
 
           const filteredContacts = formattedContacts.filter(
             (contact: any) => contact?.is_exist,
@@ -70,12 +134,9 @@ const MemberList = () => {
 
           setAllContactsList(filteredContacts);
           setMatchedUsers(filteredContacts);
-        } else {
-          console.warn('Contacts permission denied');
         }
-      }
-    })();
-  }, [isFocused]);
+      })();
+    }, [isFocused, location]);
 
   const formatContacts = (contacts: any = []) => {
     const sortedContacts = [...contacts].sort((a: any, b: any) => {
