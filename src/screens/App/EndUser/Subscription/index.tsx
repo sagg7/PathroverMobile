@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   NativeScrollEvent,
@@ -19,8 +20,11 @@ import {
   purchaseUpdatedListener,
   useIAP,
 } from 'react-native-iap';
-import {useNavigation} from '@react-navigation/native';
-import {AppButton, AppLoader, MainWrapper} from '../../../../components';
+import { useDispatch, useSelector } from 'react-redux';
+import { svgIcon } from '../../../../assets/svg';
+import { AppButton, AppLoader, MainWrapper } from '../../../../components';
+import { setLoginUser } from '../../../../redux/auth/authSlice';
+import { useCreateSubscriptionsMutation } from '../../../../redux/endUser/endUserApiSlice';
 import {
   HP,
   isIOS,
@@ -30,10 +34,6 @@ import {
   SubscriptionPackageName,
   WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
-import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {setLoginUser} from '../../../../redux/auth/authSlice';
 
 const SUBSCRIPTIONS_SLIDES = (isTrailAvailed: boolean) =>
   [
@@ -81,13 +81,12 @@ const Subscription = () => {
   const isProcessing = useRef(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
-  const {loginUser} = useSelector((state: any) => state?.auth);
+  const { subscriptions, getSubscriptions, requestSubscription } = useIAP();
+  const { loginUser } = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
   const [currentPurchase, setCurrentPurchase] = useState<any>(null);
 
   const dispatch = useDispatch();
-  console.log('subscriptions', subscriptions);
 
   useEffect(() => {
     const initializeIAP = async () => {
@@ -96,9 +95,9 @@ const Subscription = () => {
         if (Platform.OS === 'android') {
           await flushFailedPurchasesCachedAsPendingAndroid();
         }
-        await getSubscriptions({skus: subscriptionSkus});
+        await getSubscriptions({ skus: subscriptionSkus });
       } catch (error) {
-        console.error('IAP Initialization Error:', error);
+        //
       }
     };
 
@@ -110,8 +109,7 @@ const Subscription = () => {
   }, []);
 
   const handlePurchaseError = useCallback((error: any) => {
-    console.warn('Purchase Error:', error);
-    Alert.alert('Error', 'Failed to process purchase.');
+    Alert.alert('Error', error?.message ? error?.message : 'Failed to process purchase.');
   }, []);
 
   useEffect(() => {
@@ -133,45 +131,56 @@ const Subscription = () => {
     try {
       const offerToken =
         subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
+
       const purchase = await requestSubscription({
         sku,
-        ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
+        ...(offerToken && { subscriptionOffers: [{ sku, offerToken }] }),
       });
-      console.log('PURCHASE', purchase);
-      setCurrentPurchase(purchase);
+      if (!purchase) {
+        setCurrentPurchase(purchase);
 
-      const startDate = new Date();
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 30);
-      const data = {
-        subscription: {
-          plan_name: 'Premium',
-          price: 19.99,
-          status: 'active',
-          start_date: startDate.toISOString(),
-          end_date: endDate.toISOString(),
-        },
-      };
-      createSubscriptions(data)
-        .unwrap()
-        .then(res => {
-          Alert.alert('Success', 'Subscription purchased successfully!');
-          navigation.goBack();
-          dispatch(
-            setLoginUser({
-              ...loginUser,
-              subscription: true,
-              is_aval_trial: true,
-            }),
-          );
-          finishTheTransaction();
-        })
-        .catch(e => {
-          console.log(e);
-        });
+        console.log('purchase', purchase);
+
+        const startDate = new Date();
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 30);
+        const data = {
+          subscription: {
+            plan_name: 'Premium',
+            price: 19.99,
+            status: 'active',
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            receipt: purchase[0] ?? {},
+          },
+        };
+
+        finishTheTransaction(purchase);
+
+        createSubscriptions(data)
+          .unwrap()
+          .then(res => {
+            Alert.alert('Success', 'Subscription purchased successfully!');
+            navigation.goBack();
+            dispatch(
+              setLoginUser({
+                ...loginUser,
+                subscription: true,
+                is_aval_trial: true,
+              }),
+            );
+
+          })
+          .catch(e => {
+            //
+          });
+      } else {
+        Alert.alert('Error', 'Subscription already purchased.');
+      }
     } catch (err) {
-      console.error('Purchase Failed:', err);
-      Alert.alert('Error', 'Failed to purchase subscription.');
+      console.log('Error purchasing subscription:', err?.message);
+
+      Alert.alert('Error', err?.message ? err?.message : 'Failed to purchase subscription.');
     } finally {
       setIsLoading(false);
       isProcessing.current = false;
@@ -188,23 +197,32 @@ const Subscription = () => {
     if (selectedIndex < SUBSCRIPTIONS_SLIDES.length - 1) {
       const nextIndex = selectedIndex + 1;
       setSelectedIndex(nextIndex);
-      scrollRef.current?.scrollTo({x: nextIndex * WP('100'), animated: true});
+      scrollRef.current?.scrollTo({ x: nextIndex * WP('100'), animated: true });
     } else {
       handleBuySubscription(SubscriptionPackageName);
     }
   };
-  const finishTheTransaction = async () => {
-    if (!isIOS()) {
-      await acknowledgePurchaseAndroid({
-        token: currentPurchase[0].purchaseToken,
-        developerPayload: currentPurchase[0].developerPayloadAndroid,
+
+  const finishTheTransaction = async (purchase) => {
+    try {
+      if (!isIOS()) {
+        await acknowledgePurchaseAndroid({
+          token: purchase[0].purchaseToken,
+          developerPayload: purchase[0].developerPayloadAndroid,
+        });
+      }
+
+      console.log('purchase', purchase);
+
+      // finishPurchase(!isIOS() ? currentPurchase[0] : currentPurchase, false);
+      await finishTransaction({
+        purchase: !isIOS() ? purchase[0] : purchase,
+        isConsumable: false,
       });
+
+    } catch (error) {
+      console.log('Error finishing transaction:', error);
     }
-    // finishPurchase(!isIOS() ? currentPurchase[0] : currentPurchase, false);
-    await finishTransaction({
-      purchase: !isIOS() ? currentPurchase[0] : currentPurchase,
-      isConsumable: false,
-    });
   };
 
   return (
@@ -262,7 +280,7 @@ const Subscription = () => {
         {SUBSCRIPTIONS_SLIDES(loginUser?.is_aval_trial).map((_, index) => (
           <View
             key={index}
-            style={[styles.dot, {opacity: index === selectedIndex ? 1 : 0.5}]}
+            style={[styles.dot, { opacity: index === selectedIndex ? 1 : 0.5 }]}
           />
         ))}
       </View>

@@ -1,34 +1,31 @@
-import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  Image,
-  FlatList,
-  Platform,
-  TouchableOpacity,
-} from 'react-native';
 import moment from 'moment';
-import MobileAds from 'react-native-google-mobile-ads';
-import {AskMe, MainWrapper} from '../../../../components';
-import {useFcmTokenUpdateMutation} from '../../../../redux/auth/authApiSlice';
+import React, { useEffect, useState } from 'react';
 import {
-  Routes,
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import MobileAds from 'react-native-google-mobile-ads';
+import { useDispatch, useSelector } from 'react-redux';
+import { AskMe, MainWrapper } from '../../../../components';
+import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
+import { getFCMToken } from '../../../../hooks/NotificationHook';
+import { useFcmTokenUpdateMutation } from '../../../../redux/auth/authApiSlice';
+import { setLoginUser } from '../../../../redux/auth/authSlice';
+import { useGetNewsBlogsQuery, useGetSubscriptionQuery, useUpdateSubscriptionMutation } from '../../../../redux/endUser/endUserApiSlice';
+import {
   appIcons,
   AppLoader,
-  Ads,
-  appImages,
+  Routes
 } from '../../../../shared/exporter';
-import styles from './styles';
-import {useGetNewsBlogsQuery} from '../../../../redux/endUser/endUserApiSlice';
-import {getFCMToken} from '../../../../hooks/NotificationHook';
 import {
-  IOS_ADS,
   ANDROID_ADS,
-  SubscriptionPackageName,
+  IOS_ADS
 } from '../../../../shared/utils/constant';
-import {setLoginUser} from '../../../../redux/auth/authSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {getAvailablePurchases} from 'react-native-iap';
+import styles from './styles';
 MobileAds()
   .setRequestConfiguration({
     // An array of test device IDs to allow.
@@ -43,7 +40,7 @@ MobileAds()
   .then(adapterStatuses => {
     // Initialization complete!
   });
-const Home = ({navigation}: any) => {
+const Home = ({ navigation }: any) => {
   const [search, setSearch] = useState('');
   const [ads, setAds] = useState<any[]>([]);
   const [fcmToken, setFCMToken] = useState(false);
@@ -51,7 +48,10 @@ const Home = ({navigation}: any) => {
   const [data, setData] = useState<any>([]);
   const loginUser = useSelector(state => state?.auth?.loginUser);
 
-  const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
+  const { data: allNewsBlogs, isLoading } = useGetNewsBlogsQuery(null);
+  const { data: subscriptions } = useGetSubscriptionQuery(null);
+  const [updateSubscription] = useUpdateSubscriptionMutation();
+
   const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
@@ -63,9 +63,10 @@ const Home = ({navigation}: any) => {
       }
     })();
   }, [navigation]);
+
   const updateToken = async token => {
     try {
-      await fcmTokenUpdate({device_token: token});
+      await fcmTokenUpdate({ device_token: token });
     } catch (error) {
       //
     }
@@ -76,39 +77,30 @@ const Home = ({navigation}: any) => {
   }, []);
 
   useEffect(() => {
-    checkActiveSubscription();
-  }, []);
-
-  const checkActiveSubscription = async () => {
-    try {
-      const purchases = await getAvailablePurchases();
-
-      const subscription = purchases.find(
-        purchase => purchase.productId === SubscriptionPackageName,
-      );
-      console.log('Test', subscription);
-
-      if (!subscription) {
-        dispatch(
-          setLoginUser({
-            ...loginUser,
-            subscription: false,
-            is_aval_trial: false,
-          }),
-        );
-      } else {
-        dispatch(
-          setLoginUser({
-            ...loginUser,
-            subscription: true,
-            is_aval_trial: true,
-          }),
-        );
-      }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
+    if (subscriptions?.length > 0 && loginUser?.subscription){
+      checkSubscriptionStatus();
     }
-  };
+  }, [subscriptions]);
+
+
+  const checkSubscriptionStatus = async () => {
+    const status = await isSubscriptionActive();
+    const is_valid = status?.validation;
+
+    dispatch(
+      setLoginUser({
+        ...loginUser,
+        subscription: is_valid,
+        is_aval_trial: false,
+      }),
+    );
+    updateSubscription({
+      subscription: {
+        is_subscribed: is_valid,
+        id: subscriptions?.[0]?.id,
+      }
+    });
+  }
 
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
@@ -122,14 +114,14 @@ const Home = ({navigation}: any) => {
       newData?.push(data[i]);
 
       if ((i + 1) % 20 === 0 && ads?.length > 0) {
-        newData?.push({isAd: true, adData: ads[adIndex % ads?.length]}); // Cycle through ads
+        newData?.push({ isAd: true, adData: ads[adIndex % ads?.length] }); // Cycle through ads
         adIndex++;
       }
     }
     setData(newData);
     return newData;
   };
-  const renderItem = ({item, index}: any) => {
+  const renderItem = ({ item, index }: any) => {
     // if (item?.isAd) {
     //   return <Ads item={ads[index / 21]} />; // Pass ad sequentially
     // }
@@ -137,10 +129,10 @@ const Home = ({navigation}: any) => {
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        onPress={() => navigation.navigate(Routes.NewsBlogDetail, {item})}
+        onPress={() => navigation.navigate(Routes.NewsBlogDetail, { item })}
         style={styles.itemContainer}>
         <Image
-          source={item?.image_url ? {uri: item?.image_url} : appIcons.appLogo}
+          source={item?.image_url ? { uri: item?.image_url } : appIcons.appLogo}
           style={styles.imageStyle}
           resizeMode={item?.image_url ? 'cover' : 'contain'}
         />
@@ -175,13 +167,13 @@ const Home = ({navigation}: any) => {
         placeholder={'Ask me anything...'}
         onChangeText={txt => setSearch(txt)}
         onPress={() => {
-          navigation.navigate('AiChat', {search});
+          navigation.navigate('AiChat', { search });
           setSearch('');
         }}
       />
       <Text style={styles.headingTextStyle}>Latest News and Blogs</Text>
       {allNewsBlogs?.length > 0 ? (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <FlatList
             data={data}
             renderItem={renderItem}
