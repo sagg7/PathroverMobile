@@ -82,7 +82,6 @@ const RecordHikingRoute = () => {
   const [speed, setSpeed] = useState<any>(0);
   const [elevation, setElevation] = useState<any>(0);
   const [totalDistance, setTotalDistance] = useState(0);
-
   const [progress, setProgress] = useState(0);
   const [addRouteReport] = useAddRouteReportMutation();
   const [heading, setheading] = useState<number>(0);
@@ -91,6 +90,7 @@ const RecordHikingRoute = () => {
   const BOTTOM_SHEET_HEIGHT = -8;
   const PIXEL_TO_COORDINATE_FACTOR = 0.0002;
   const {location} = useLocation();
+  const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
   const routeRef = useRef<any>([]); // Stores route without triggering re-renders
   const distanceRef = useRef<any>(0);
@@ -110,32 +110,30 @@ const RecordHikingRoute = () => {
   }, [mapLayerStyle]);
 
   useEffect(() => {
-    if (location) {
-      (async () => {
-        setCurrentLocation([location.longitude, location.latitude]);
-        cameraRef.current.setCamera({
-          centerCoordinate: [location.longitude, location.latitude],
+    if (location && !hasCenteredOnce) {
+      const {longitude, latitude} = location;
+      const coords: [number, number] = [longitude, latitude];
+      setLiveLocation(coords);
+      setHasCenteredOnce(true);
+
+      setTimeout(() => {
+        cameraRef.current?.setCamera({
+          centerCoordinate: coords,
           zoomLevel: 16,
+          pitch: 60,
           animationDuration: 1000,
         });
-      })();
+      }, 500);
     }
   }, [location]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-
     if (isRunning) {
       interval = setInterval(() => {
-        if (startTime) {
-          const currentTime = Date.now();
-          const timePassed = (currentTime - startTime) / 1000;
-          setElapsedTime(elapsedTime + timePassed);
-          setStartTime(currentTime);
-        }
+        setElapsedTime(prev => prev + 1); // Increment by 1 per second
       }, 1000);
     }
-
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -240,6 +238,7 @@ const RecordHikingRoute = () => {
     setLiveLocation([longitude, latitude]);
     setSpeed(speedMph);
     setElevation(elevationFeet);
+    setheading(heading);
     const now = Date.now();
     const shouldMoveCamera = now - lastCameraUpdateTimeRef.current > 1000; // move at most once per second
     const newPoint = [longitude, latitude];
@@ -264,18 +263,38 @@ const RecordHikingRoute = () => {
             updateRouteThrottled.current = null;
           }, 1000); // update at most once per second
         }
-        cameraRef.current.setCamera({
-          heading: heading,
-        });
+
+        if (!hasCenteredOnce) {
+          setHasCenteredOnce(true);
+          setTimeout(() => {
+            cameraRef.current?.setCamera({
+              centerCoordinate: [longitude, latitude],
+              heading: heading,
+              pitch: 60,
+              zoomLevel: 16,
+              animationDuration: 1000,
+            });
+          }, 300);
+        }
         setTotalDistance(distanceRef.current?.toFixed(2));
         routeRef.current.push([longitude, latitude]);
       }
     } else {
       routeRef.current.push([longitude, latitude]);
       setRoute([...routeRef.current]);
-      cameraRef.current.setCamera({
-        heading: heading,
-      });
+
+      if (!hasCenteredOnce) {
+        setHasCenteredOnce(true);
+        setTimeout(() => {
+          cameraRef.current?.setCamera({
+            centerCoordinate: [longitude, latitude],
+            heading: heading,
+            pitch: 60,
+            zoomLevel: 16,
+            animationDuration: 1000,
+          });
+        }, 300);
+      }
     }
   };
 
@@ -338,13 +357,16 @@ const RecordHikingRoute = () => {
   };
 
   const centerToLiveLocation = () => {
-    if (cameraRef.current && liveLocation) {
-      const [longitude, latitude] = liveLocation;
-
-      const adjustedLatitude =
-        latitude + BOTTOM_SHEET_HEIGHT * PIXEL_TO_COORDINATE_FACTOR;
-
-      cameraRef.current.flyTo([longitude, adjustedLatitude], 1000);
+    if (liveLocation?.length === 2) {
+      cameraRef.current?.setCamera({
+        centerCoordinate: liveLocation,
+        heading: heading,
+        zoomLevel: 16,
+        pitch: 60,
+        animationDuration: 1000,
+      });
+    } else {
+      showAlert('Error', 'Current location not available.');
     }
   };
 
@@ -359,22 +381,6 @@ const RecordHikingRoute = () => {
     return [longitude, adjustedLatitude];
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      resetCompass();
-    }, 300);
-  }, []);
-  const resetCompass = () => {
-    if (cameraRef.current && currentLocation?.length > 0) {
-      cameraRef.current.setCamera({
-        centerCoordinate: currentLocation,
-        zoomLevel: 16,
-        heading: heading,
-        animationDuration: 1000,
-        pitch: 60,
-      });
-    }
-  };
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Record Route" />
@@ -384,23 +390,25 @@ const RecordHikingRoute = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        // centerOffset={[0, 200]}
         compassEnabled
+        compassFadeWhenNorth
         compassPosition={{top: 8, left: 10}}>
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={16}
-          followUserLocation={isIOS()}
-          centerCoordinate={adjustLocationForBottomSheet(liveLocation)}
+          pitch={60}
+          animationMode="flyTo"
+          animationDuration={1000}
+          heading={heading}
+          centerCoordinate={liveLocation}
         />
         <MapboxGL.UserLocation
           visible
           onUpdate={handleLocationUpdate}
           minDisplacement={isIOS() ? 3 : 10}
-          // minDisplacement={5}
           requestsAlwaysUse
           showsUserHeadingIndicator
-          androidRenderMode="gps"
+          androidRenderMode="compass"
         />
 
         {currentLocation && (

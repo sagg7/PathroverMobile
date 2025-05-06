@@ -23,13 +23,15 @@ const SearchView = ({
           style={styles.searchbar}
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={onPressFilter}>
-        <Image
-          resizeMode="contain"
-          source={appIcons.filterFill}
-          style={styles.filterIcon}
-        />
-      </TouchableOpacity>
+      {onPressFilter && (
+        <TouchableOpacity onPress={onPressFilter}>
+          <Image
+            resizeMode="contain"
+            source={appIcons.filterFill}
+            style={styles.filterIcon}
+          />
+        </TouchableOpacity>
+      )}
       <TouchableOpacity onPress={onPressMenu}>
         <Image
           resizeMode="contain"
