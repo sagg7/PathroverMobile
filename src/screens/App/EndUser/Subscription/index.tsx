@@ -15,6 +15,7 @@ import {
   acknowledgePurchaseAndroid,
   finishTransaction,
   flushFailedPurchasesCachedAsPendingAndroid,
+  getAvailablePurchases,
   initConnection,
   purchaseErrorListener,
   purchaseUpdatedListener,
@@ -132,14 +133,24 @@ const Subscription = () => {
       const offerToken =
         subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
 
-      const purchase = await requestSubscription({
-        sku,
-        ...(offerToken && { subscriptionOffers: [{ sku, offerToken }] }),
-      });
-      if (!purchase) {
+      let byPass = false;
+      if (Platform.OS === 'ios') {
+        const availablePurchases = await getAvailablePurchases();
+        
+        if (availablePurchases?.length === 0) {
+          byPass = true;
+        }
+      } else {
+        byPass = true;
+      }
+
+      if (byPass) {
+        const purchase = await requestSubscription({
+          sku,
+          ...(offerToken && { subscriptionOffers: [{ sku, offerToken }] }),
+        });
         setCurrentPurchase(purchase);
 
-        console.log('purchase', purchase);
 
         const startDate = new Date();
         const endDate = new Date(startDate);
@@ -165,7 +176,7 @@ const Subscription = () => {
             dispatch(
               setLoginUser({
                 ...loginUser,
-                subscription: true,
+                is_subscribed: true,
                 is_aval_trial: true,
               }),
             );
@@ -178,9 +189,7 @@ const Subscription = () => {
         Alert.alert('Error', 'Subscription already purchased.');
       }
     } catch (err) {
-      console.log('Error purchasing subscription:', err?.message);
-
-      Alert.alert('Error', err?.message ? err?.message : 'Failed to purchase subscription.');
+      Alert.alert('Error', err?.message ? err?.message : 'Failed to purchase is_subscribed.');
     } finally {
       setIsLoading(false);
       isProcessing.current = false;

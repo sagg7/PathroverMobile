@@ -167,7 +167,7 @@ const WellPath = () => {
     page: 1,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const { subscription } = useSelector(state => state?.auth?.loginUser);
+  const { is_subscribed } = useSelector(state => state?.auth?.loginUser);
   const user = useSelector(state => state?.auth?.loginUser);
   const { data: subscriptions } = useGetSubscriptionQuery(null);
 
@@ -215,8 +215,8 @@ const WellPath = () => {
   }, [location]);
 
   useEffect(() => {
-    setAvailable(subscription);
-  }, [subscription]);
+    setAvailable(is_subscribed);
+  }, [is_subscribed]);
 
   useEffect(() => {
     if (queryParams.latitude) {
@@ -253,10 +253,10 @@ const WellPath = () => {
 
 
   useEffect(() => {
-    if (subscriptions?.length > 0 && subscription) {
+    if (subscriptions?.length > 0 && is_subscribed) {
       checkSubscriptionStatus();
     }
-  }, [isFocused, subscriptions]);
+  }, [isFocused, subscriptions, is_subscribed]);
 
 
   const checkSubscriptionStatus = async () => {
@@ -268,7 +268,7 @@ const WellPath = () => {
     dispatch(
       setLoginUser({
         ...loginUser,
-        subscription: is_valid,
+        is_subscribed: is_valid,
         is_aval_trial: false,
       }),
     );
@@ -501,7 +501,7 @@ const WellPath = () => {
   };
 
   const onPressToggle = () => {
-    if (!subscription) {
+    if (!is_subscribed) {
       navigation.navigate(Routes.Subscription);
     }
   };
@@ -835,7 +835,7 @@ const WellPath = () => {
 
       <SearchView
         onPressSearch={() =>
-          subscription
+          is_subscribed
             ? navigation.navigate(Routes.SearchWellPath, {
               searchedWells,
               setSearchedWells,
@@ -847,10 +847,10 @@ const WellPath = () => {
             : showPremiumAlert({})
         }
         onPressFilter={() => {
-          subscription ? setShowMapSettigs(true) : showPremiumAlert({});
+          is_subscribed ? setShowMapSettigs(true) : showPremiumAlert({});
         }}
         onPressMenu={() =>
-          subscription ? setShowOptionsSheet(true) : showPremiumAlert({})
+          is_subscribed ? setShowOptionsSheet(true) : showPremiumAlert({})
         }
       />
 
@@ -1021,7 +1021,7 @@ const WellPath = () => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
+          is_subscribed ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
@@ -1033,7 +1033,7 @@ const WellPath = () => {
           setShowOptionsSheet(false);
           setTimeout(() => {
             {
-              subscription
+              is_subscribed
                 ? navigation.navigate(Routes.RecordRoute)
                 : showPremiumAlert({});
             }
@@ -1044,7 +1044,7 @@ const WellPath = () => {
           dispatch(setCreateRouteDataEmpty({}));
           setTimeout(() => {
             {
-              subscription
+              is_subscribed
                 ? navigation.navigate(Routes.CreateRouteEndUser)
                 : showPremiumAlert({});
             }
@@ -1310,7 +1310,7 @@ const WellPath = () => {
           )}
         />
       </GeneralModal>
-      {/* {loaderState && loaderCount === 0 && <AppLoader />} */}
+      {/* {loaderState && loaderCount === 0 && <AppLoader />}  */}
       {/* <AppLoader /> */}
     </MainWrapper>
   );

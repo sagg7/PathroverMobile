@@ -77,7 +77,7 @@ const Home = ({ navigation }: any) => {
   }, []);
 
   useEffect(() => {
-    if (subscriptions?.length > 0 && loginUser?.subscription){
+    if (subscriptions?.length > 0 && loginUser?.is_subscribed){
       checkSubscriptionStatus();
     }
   }, [subscriptions]);
@@ -90,7 +90,7 @@ const Home = ({ navigation }: any) => {
     dispatch(
       setLoginUser({
         ...loginUser,
-        subscription: is_valid,
+        is_subscribed: is_valid,
         is_aval_trial: false,
       }),
     );
