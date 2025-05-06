@@ -36,8 +36,6 @@ export async function isSubscriptionActive() {
                 return expirationInMilliseconds > nowInMilliseconds;
             });
 
-            console.log('isSubValid', isSubValid);
-
             const check = {
                 validation: isSubValid,
                 receipt: availablePurchases[0],
