@@ -272,6 +272,7 @@ const CreateHikeRoute = () => {
           ref={cameraRef}
           zoomLevel={12}
           centerCoordinate={currentLocation}
+          followUserLocation={isIOS()}
         />
         {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>

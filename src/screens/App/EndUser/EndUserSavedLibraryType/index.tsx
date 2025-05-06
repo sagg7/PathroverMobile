@@ -73,6 +73,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
             Number(selectedItem?.dropoff_location?.latitude),
           ],
           entranceName: selectedItem?.name,
+          isTrail: false,
+          routeInfo: selectedItem,
         });
       } else {
         navigation.navigate(Routes.ViewWellPathNavigation, {
@@ -84,8 +86,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         });
       }
     } else if (selectedItem?.route_type === 'hiking_trail_route') {
-      console.log('WORKING HERE', selectedItem?.locations_attributes);
-      console.log('SELECTED', selectedItem);
       const coordinates = [
         [
           parseFloat(selectedItem?.pickup_location?.longitude),
@@ -130,9 +130,25 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
 
       return;
     } else {
-      navigation.navigate(Routes.ViewSaveRoutes, {
-        item: selectedItem,
-      });
+      if (isIOS()) {
+        setTimeout(() => {
+          const coords = selectedItem?.pickup_location;
+          const lngLat = [Number(coords?.longitude), Number(coords?.latitude)];
+
+          navigation.navigate(Routes.TurnByTurnNav, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: lngLat,
+            entranceName: selectedItem?.name,
+            isTrail: false,
+            routeInfo: selectedItem,
+            isLibrary: true,
+          });
+        }, 300);
+      } else {
+        navigation.navigate(Routes.ViewSaveRoutes, {
+          item: selectedItem,
+        });
+      }
     }
   };
 
@@ -220,7 +236,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const transformData = (data: any) => {
     return {
       ...data, // Keep all other key-value pairs unchanged
-      middle_location_points: data.middle_location_points.map((point: any) => [
+      middle_location_points: data.middle_location_points?.map((point: any) => [
         parseFloat(point.longitude), // Convert to float if needed
         parseFloat(point.latitude),
       ]),

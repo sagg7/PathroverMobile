@@ -1479,7 +1479,7 @@ export const UNSANCTIONED = [
 export const ROUTE_LINE_STYLES = {
   lineWidth: 8,
   opacity: 0.7,
-  color: '#4795F9',
+  color: '#0C36FE',
 };
 
 export const stateCodeMap: Record<string, string> = {

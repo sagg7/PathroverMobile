@@ -403,7 +403,6 @@ const HikingScreen = ({route, navigation}: any) => {
   const onPressPin = async (routeData: any) => {
     const trailInfo = routeData?.properties?.tags;
     const trailPath = routeData?.geometry?.coordinates;
-
     const locationsAttributes =
       trailPath?.length > 0
         ? [
@@ -536,11 +535,6 @@ const HikingScreen = ({route, navigation}: any) => {
 
   const fitToBounds = () => {
     // if (!userLocation || !pinLocationMarker) return; // Ensure both points exist
-    // cameraRef.current?.fitBounds(
-    //   [userLocation[0], userLocation[1]], // Southwest corner
-    //   [pinLocationMarker[0], pinLocationMarker[1]],
-    //   100, // Northeast corner
-    // );
   };
 
   const saveShareRouteLink = async (type: string) => {
@@ -615,8 +609,6 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const onPressExploreTrail = () => {
-    console.log('trailInfo', trailInfo);
-    return;
     if (isIOS()) {
       dispatch(setSelectedTrail(trailInfo));
       setTimeout(() => {
@@ -725,11 +717,13 @@ const HikingScreen = ({route, navigation}: any) => {
         onPress={() => moveToCurrentLocation()}>
         {svgIcon.MapWhiteBg}
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
-        {svgIcon.MapLayer}
-      </TouchableOpacity>
+      {routes?.length < 1 && (
+        <TouchableOpacity
+          style={styles.maplayerStyles}
+          onPress={() => setMapLayerSheeet(true)}>
+          {svgIcon.MapLayer}
+        </TouchableOpacity>
+      )}
       <TouchableOpacity
         style={styles.hikeIconStyle}
         onPress={() => navigation.navigate(Routes.CreateHikeRoute)}>

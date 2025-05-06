@@ -24,6 +24,7 @@ import {
 import {
   getTimeAndDistance,
   getTimeAndDistanceForWaypoint,
+  isIOS,
 } from '../../../../shared/utils/helpers';
 import styles from './styles';
 
@@ -419,7 +420,7 @@ const ViewSaveRoutes = ({route}: any) => {
           zoomLevel={10}
           key={isStartBtnPressed ? 'track' : 'fit-route'}
           // followUserMode={MapboxGL.UserTrackingMode.FollowWithHeading}
-          followUserLocation={true}
+          followUserLocation={isIOS()}
           pitch={60}
           bounds={isStartBtnPressed ? undefined : calculateBounds(routes)}
           followUserMode={

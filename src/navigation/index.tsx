@@ -82,6 +82,8 @@ import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 import {isReadyRef, navigationRef} from './navigationRef';
 
 import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
+import TurnByTurnCustomRoute from '../screens/App/EndUser/TurnByTurnCustomRoute';
+import ViewCustomizedSaveRoutes from '../screens/App/EndUser/ViewCustomizedSaveRoutes';
 const Stack = createNativeStackNavigator();
 // const navigationRef = createNavigationContainerRef();
 
@@ -237,7 +239,15 @@ const AppNavigation = () => {
           component={ViewSharedRoutes}
         />
         <Stack.Screen name={Routes.NewsBlogDetail} component={NewsBlogDetail} />
+        {/* <Stack.Screen
+          name={Routes.TurnByTurnCustomRoute}
+          component={TurnByTurnCustomRoute}
+        /> */}
         <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
+        <Stack.Screen
+          name={Routes.ViewCustomizedSaveRoutes}
+          component={ViewCustomizedSaveRoutes}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

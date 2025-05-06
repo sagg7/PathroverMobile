@@ -90,4 +90,6 @@ export const Routes = {
   NewsBlogDetail: 'NewsBlogDetail',
   TurnByTurnNav: 'TurnByTurnNav',
   TrailRouteView: 'TrailRouteView',
+  TurnByTurnCustomRoute: 'TurnByTurnCustomRoute',
+  ViewCustomizedSaveRoutes: 'ViewCustomizedSaveRoutes',
 };

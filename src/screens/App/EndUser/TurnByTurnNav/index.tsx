@@ -3,8 +3,8 @@ import {Text, View, requireNativeComponent} from 'react-native';
 import {AppLoader} from '../../../../components';
 import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
-import {Routes} from '../../../../shared/exporter';
 import TrailRouteView from '../TrailRouteView';
+import ViewCustomizedSaveRoutes from '../ViewCustomizedSaveRoutes';
 
 const MapBoxView = requireNativeComponent('MapBoxView');
 
@@ -14,15 +14,14 @@ const TurnByTurnNav = ({route, navigation}: any) => {
   const {selectedTrail} = useSelector(state => state?.endUser?.trailRoute);
   const dispatch = useDispatch();
   const [isTurnByTurnNavigation, setisTurnByTurnNavigation] = useState(true);
-
-  console.log('\n\n\n===>12345TRAIL', selectedTrail);
-  console.log('\n\n\n===>12345', routeParams?.isTrail);
+  const [isDashedLineDrawn, setIsDashedLineDrawn] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
     }, 2000);
   }, []);
+  const isLibrary = routeParams?.isLibrary;
 
   return (
     <>
@@ -39,25 +38,40 @@ const TurnByTurnNav = ({route, navigation}: any) => {
             hasTrail={routeParams?.isTrail ? 1 : 0}
             onClose={(res: any) => {
               const resp = res?.nativeEvent;
+              if (resp?.isDashedLineDrawn) {
+                setIsDashedLineDrawn(resp?.isDashedLineDrawn);
+                setisTurnByTurnNavigation(false);
+
+                return;
+              }
               if (resp?.isTrail) {
                 if (resp?.message === 'Navigation completed') {
-                  // Move to Trail Path display screen (custom)
-                  // navigation.navigate(Routes.TrailRouteView);
                   setisTurnByTurnNavigation(false);
                 } else if (resp?.message === 'Navigation cancelled') {
-                  // Clear trail data from redux if isTrail true
                   dispatch(setSelectedTrail(null));
                   navigation.goBack();
                 }
               } else {
-                navigation.goBack();
+                if (isLibrary && resp?.message === 'Navigation completed') {
+                  setisTurnByTurnNavigation(false);
+                } else {
+                  navigation.goBack();
+                }
               }
             }}
           />
           {loading && <AppLoader />}
         </View>
+      ) : isLibrary ? (
+        <ViewCustomizedSaveRoutes route={routeParams?.routeInfo} />
       ) : (
-        <TrailRouteView route={selectedTrail} />
+        <TrailRouteView
+          route={selectedTrail}
+          isDashedLineDrawn={isDashedLineDrawn}
+          destinationCords={routeParams?.entranceCoords}
+          isWayPoint={routeParams?.isTrail ? false : true}
+          isTrail={routeParams?.isTrail}
+        />
       )}
     </>
   );

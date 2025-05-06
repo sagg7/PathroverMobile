@@ -62,9 +62,7 @@ const WellPath = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.276313, 31.454005,
-  ]);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
   // const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
   const [available, setAvailable] = useState(false);
@@ -387,7 +385,6 @@ const WellPath = () => {
               searchLocation[1],
               searchLocation[0],
             );
-            console.log('State short code:', code);
             setQueryParams({
               ...queryParams,
               latitude: searchLocation[1],
@@ -998,11 +995,13 @@ const WellPath = () => {
         onPress={() => moveToCurrentLocation()}>
         {svgIcon.MapWhiteBg}
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
-        {svgIcon.MapLayer}
-      </TouchableOpacity>
+      {(route?.length < 1 || waypointRoute?.length < 1) && (
+        <TouchableOpacity
+          style={styles.maplayerStyles}
+          onPress={() => setMapLayerSheeet(true)}>
+          {svgIcon.MapLayer}
+        </TouchableOpacity>
+      )}
       <WellPathMenuSheet
         modalVisible={showOptionsSheet}
         onPressCancel={() => setShowOptionsSheet(false)}

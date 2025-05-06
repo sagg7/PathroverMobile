@@ -14,11 +14,19 @@ import {
   mapBoxToken,
   PFColors,
   StartPointModal,
+  HP,
 } from '../../../../shared/exporter';
 import styles from './styles';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import {getTimeAndDistance, isIOS} from '../../../../shared/utils/helpers';
+import {useNavigation} from '@react-navigation/native';
 
-const TrailRouteView = ({route, navigation}: any) => {
+const TrailRouteView = ({
+  route,
+  isDashedLineDrawn,
+  destinationCords,
+  isWayPoint,
+  isTrail,
+}: any) => {
   const userRef = useRef();
   const [mapLayerSheet, setMapLayerSheet] = useState<boolean>(false);
   const [count, setCount] = useState(1);
@@ -44,17 +52,12 @@ const TrailRouteView = ({route, navigation}: any) => {
     },
   };
 
-  const [queryParams, setQueryParams] = useState<any>({
-    latitude: null,
-    longitude: null,
-    radius: 50,
-  });
-
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
 
   const {location} = useLocation();
 
   const cameraRef = useRef<any>(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     setTimeout(() => {
@@ -63,8 +66,6 @@ const TrailRouteView = ({route, navigation}: any) => {
   }, []);
 
   useEffect(() => {
-    console.log('ON MAIN SCREEN', route);
-
     if (route) {
       const trailDetails = route;
       setTrailInfo(trailDetails?.properties?.tags);
@@ -75,13 +76,16 @@ const TrailRouteView = ({route, navigation}: any) => {
   }, [route]);
 
   useEffect(() => {
+    if (isWayPoint && location && destinationCords) {
+      const startPoint = [location?.longitude, location?.latitude]; // [lng, lat]
+      const offRoad = [[startPoint, destinationCords]];
+      setOffRoadSegment(offRoad);
+    }
+  }, [isWayPoint, destinationCords, location]);
+
+  useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
-      setQueryParams({
-        ...queryParams,
-        latitude: location?.longitude,
-        longitude: location?.latitude,
-      });
     }
   }, [location]);
 
@@ -97,8 +101,10 @@ const TrailRouteView = ({route, navigation}: any) => {
   }, [mapLayerStyle]);
 
   useEffect(() => {
-    if (trailStartPoint && currentLocation) getRoute();
-  }, [trailStartPoint, currentLocation]);
+    if (currentLocation || !isWayPoint) {
+      getRoute();
+    }
+  }, [trailStartPoint, currentLocation, isWayPoint]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -148,7 +154,9 @@ const TrailRouteView = ({route, navigation}: any) => {
 
   const getRoute = async () => {
     if (trailStartPoint && currentLocation) {
-      await fetchRoute(currentLocation, trailStartPoint);
+      if (!isWayPoint) {
+        await fetchRoute(currentLocation, trailStartPoint);
+      }
     }
   };
 
@@ -176,11 +184,11 @@ const TrailRouteView = ({route, navigation}: any) => {
       const data = await response.json();
       const route = data.routes[0]?.geometry?.coordinates;
       if (!route || route?.length === 0) {
-        setRoute([]), setOffRoadSegment([]);
+        setRoute([]);
+        setOffRoadSegment([]);
         return;
       }
 
-      const firstRoutePoint = route[0];
       const lastRoutePoint = route[route.length - 1];
       const toRad = value => (value * Math.PI) / 180;
 
@@ -202,24 +210,12 @@ const TrailRouteView = ({route, navigation}: any) => {
 
         return R * c; // Distance in kilometers
       };
-      const startDistance = getDistanceInKm(start, firstRoutePoint);
-      const endDistance = getDistanceInKm(end, lastRoutePoint);
-
-      const isStartOffRoad = startDistance > 0.01; // 10 meters
-      const isEndOffRoad = endDistance > 0.01;
 
       let offRoad = [];
 
-      if (true) {
-        const formatedArr = start?.map((item: any) => Number(item));
+      const formatedArr = end?.map((item: any) => Number(item));
 
-        offRoad?.push([formatedArr, firstRoutePoint]);
-      }
-      if (isEndOffRoad) {
-        const formatedArr = end?.map((item: any) => Number(item));
-
-        offRoad?.push([lastRoutePoint, formatedArr]);
-      }
+      offRoad?.push([lastRoutePoint, formatedArr]);
 
       setRoute(route);
       setOffRoadSegment(offRoad);
@@ -246,16 +242,18 @@ const TrailRouteView = ({route, navigation}: any) => {
     <GestureHandlerRootView style={styles.gestureView}>
       <MainWrapper style={styles.container}>
         <AppHeader
-          title="Trail Details"
+          title={isTrail ? 'Trail Details' : 'Route detail'}
           // clickBackIcon={() => navigation.goBack()}
         />
 
         <MapboxGL.MapView
           key={selectedMapType}
-          // styleURL={selectedMapType}
           styleURL={MapboxGL.StyleURL.Outdoors}
           style={styles.map}
-          scaleBarEnabled={false}>
+          scaleBarEnabled={false}
+          compassFadeWhenNorth
+          compassEnabled
+          compassPosition={{top: isIOS() ? HP('4') : HP('4'), right: 20}}>
           <MapboxGL.Camera
             ref={cameraRef}
             centerCoordinate={currentLocation}
@@ -264,6 +262,7 @@ const TrailRouteView = ({route, navigation}: any) => {
             animationMode="flyTo"
             animationDuration={2000}
             pitch={60}
+            followUserLocation
           />
           <MapboxGL.UserLocation
             ref={userRef}
@@ -273,8 +272,12 @@ const TrailRouteView = ({route, navigation}: any) => {
             requestsAlwaysUse
             visible={true}
           />
-
-          {trailPath && (
+          {destinationCords && (
+            <MapboxGL.MarkerView coordinate={destinationCords}>
+              {svgIcon.CurrentLocation}
+            </MapboxGL.MarkerView>
+          )}
+          {isTrail && trailPath && (
             <MapboxGL.ShapeSource
               key={'ds'}
               id={`trail-ds`}
@@ -289,18 +292,6 @@ const TrailRouteView = ({route, navigation}: any) => {
               />
             </MapboxGL.ShapeSource>
           )}
-          {/* Route Line */}
-          {/* {routes?.length > 1 && (
-            <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
-              <MapboxGL.LineLayer
-                id="routeLayer-unique"
-                style={{
-                  lineWidth: 5,
-                  lineColor: PFColors.Blue.Dark,
-                }}
-              />
-            </MapboxGL.ShapeSource>
-          )} */}
 
           {offRoadSegment?.length > 0 &&
             offRoadSegment.map((segment, index) => (
@@ -326,9 +317,9 @@ const TrailRouteView = ({route, navigation}: any) => {
             ))}
         </MapboxGL.MapView>
 
-        <TouchableOpacity style={styles.maplayerStyles} onPress={resetCompass}>
+        {/* <TouchableOpacity style={styles.maplayerStyles} onPress={resetCompass}>
           {svgIcon.MapWhiteBg}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <StartPointModal
           modalVisible={showReachModal}
           title="You have arrived at your destination."

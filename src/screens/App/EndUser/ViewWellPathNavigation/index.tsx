@@ -59,7 +59,6 @@ const ViewWellPathNavigation = ({route}: any) => {
   const dispatch = useDispatch();
   const userRef = useRef<any>();
   const flatListRef = useRef<any>(null);
-
   useEffect(() => {
     if (route && route?.params?.entranceCoords?.length > 1) {
       setDestination(route?.params?.entranceCoords);
@@ -67,10 +66,10 @@ const ViewWellPathNavigation = ({route}: any) => {
       if (route?.params?.routeId) getRouteBasedId(route?.params?.routeId);
     }
   }, [route]);
-
   useEffect(() => {
     if (data) {
       const routeData = data?.user_routes[0];
+
       setDestination([
         Number(routeData?.dropoff_location?.longitude),
         Number(routeData?.dropoff_location?.latitude),
