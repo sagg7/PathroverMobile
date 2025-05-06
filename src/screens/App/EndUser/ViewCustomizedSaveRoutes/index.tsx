@@ -46,6 +46,7 @@ const ViewCustomizedSaveRoutes = ({route}: any) => {
 
   const [showReachModal, setShowReachModal] = useState(false);
   const [modalKey, setModalKey] = useState(1);
+  const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
@@ -212,33 +213,38 @@ const ViewCustomizedSaveRoutes = ({route}: any) => {
     },
   };
 
-  const handleLocationUpdate = async location => {
+  const handleLocationUpdate = location => {
     if (location?.coords) {
       const {latitude, longitude, heading} = location.coords;
       setLiveLocation([longitude, latitude]);
-      if (cameraRef.current) {
-        cameraRef.current.setCamera({
-          heading: heading,
-        });
-      }
       setheading(heading);
-      const routeResults: any = await getTimeAndDistance(
-        [longitude, latitude],
-        endPoint,
-      );
-      setResults(routeResults);
+
+      if (!hasCenteredOnce) {
+        setHasCenteredOnce(true);
+        setTimeout(() => {
+          cameraRef.current?.setCamera({
+            centerCoordinate: [longitude, latitude],
+            heading: heading,
+            pitch: 60,
+            zoomLevel: 16,
+            animationDuration: 1000,
+          });
+        }, 300);
+      }
     }
   };
 
   const resetCompass = () => {
-    if (cameraRef.current) {
-      cameraRef.current.setCamera({
+    if (liveLocation?.length === 2) {
+      cameraRef.current?.setCamera({
         centerCoordinate: liveLocation,
-        zoomLevel: 18,
+        heading: heading,
+        zoomLevel: 16,
         pitch: 60,
         animationDuration: 1000,
-        heading: heading,
       });
+    } else {
+      console.log('Error', 'Current location not available.');
     }
   };
 
@@ -269,19 +275,21 @@ const ViewCustomizedSaveRoutes = ({route}: any) => {
         {liveLocation?.length > 0 && (
           <MapboxGL.Camera
             ref={cameraRef}
-            zoomLevel={18}
-            centerCoordinate={liveLocation}
+            zoomLevel={16}
             pitch={60}
-            followUserLocation
+            heading={heading}
+            centerCoordinate={liveLocation}
+            animationMode="flyTo"
+            animationDuration={1000}
           />
         )}
         <MapboxGL.UserLocation
           visible
           onUpdate={handleLocationUpdate}
-          showsUserHeadingIndicator
-          key={route?.length}
           minDisplacement={isIOS() ? 3 : 10}
           requestsAlwaysUse
+          showsUserHeadingIndicator
+          androidRenderMode="compass"
         />
 
         {selectedRoute?.is_road_route &&
