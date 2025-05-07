@@ -18,11 +18,13 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
+  ROUTE_LINE_STYLES,
   showAlert,
 } from '../../../../shared/exporter';
 import {
   getTimeAndDistance,
   getTimeAndDistanceForWaypoint,
+  isIOS,
 } from '../../../../shared/utils/helpers';
 import styles from './styles';
 import usePremiumAlert from '../../../../hooks/usePremiumAlert';
@@ -62,13 +64,14 @@ const ViewSaveRoutes = ({route}: any) => {
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
-  const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
+  const [routeLineHeight, setRouteLineHeight] = useState<any>(6);
   const [showRouteStartedSheet, setShowRouteStartedSheet] =
     useState<boolean>(false);
   const cameraRef = useRef<any>(null);
   const userRef = useRef<any>(null);
 
   const [results, setResults] = useState<null>(null);
+  const [heading, setheading] = useState<number>(0);
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -287,9 +290,9 @@ const ViewSaveRoutes = ({route}: any) => {
 
   const handleLocationUpdate = async location => {
     if (location?.coords) {
-      const {latitude, longitude} = location.coords;
+      const {latitude, longitude, heading} = location.coords;
       setLiveLocation([longitude, latitude]);
-
+      setheading(heading);
       if (isStartBtnPressed) {
         const routeResults: any = await getTimeAndDistance(
           [longitude, latitude],
@@ -337,12 +340,14 @@ const ViewSaveRoutes = ({route}: any) => {
     // getRoute();
     const path = await fetchRoute(currentLocation, startPoint);
 
-    cameraRef.current.setCamera({
+    cameraRef.current?.setCamera({
       centerCoordinate: currentLocation,
       zoomLevel: 18,
-      heading: 220,
-      animationDuration: 1000,
+      heading: heading,
       pitch: 60,
+      animationDuration: 1000,
+      followUserMode: MapboxGL.UserTrackingMode.FollowWithHeading,
+      followUserLocation: true,
     });
 
     setRouteToStartPoint(path);
@@ -386,6 +391,23 @@ const ViewSaveRoutes = ({route}: any) => {
     };
   };
 
+  const resetCompass = () => {
+    if (cameraRef.current && currentLocation?.length > 0) {
+      cameraRef.current.setCamera({
+        centerCoordinate: currentLocation,
+        zoomLevel: 18,
+        heading: heading,
+        animationDuration: 1000,
+        pitch: 60,
+      });
+    }
+  };
+  useEffect(() => {
+    setTimeout(() => {
+      resetCompass();
+    }, 300);
+  }, []);
+
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title={route?.params?.item?.name || route?.params?.name} />
@@ -398,16 +420,22 @@ const ViewSaveRoutes = ({route}: any) => {
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={10}
-          // centerCoordinate={isStartBtnPressed ? currentLocation : undefined}
-          bounds={
-            routes?.length > 0
-              ? calculateBounds(routes)
-              : isStartBtnPressed
-              ? []
-              : calculateBounds(routeToStartPoint)
+          key={isStartBtnPressed ? 'track' : 'fit-route'}
+          // followUserMode={MapboxGL.UserTrackingMode.FollowWithHeading}
+          followUserLocation={isIOS()}
+          pitch={60}
+          bounds={isStartBtnPressed ? undefined : calculateBounds(routes)}
+          followUserMode={
+            isStartBtnPressed
+              ? MapboxGL.UserTrackingMode.FollowWithHeading
+              : undefined
           }
         />
-        <MapboxGL.UserLocation visible onUpdate={handleLocationUpdate} />
+        <MapboxGL.UserLocation
+          visible
+          onUpdate={handleLocationUpdate}
+          showsUserHeadingIndicator
+        />
         {startPoint && (
           <MapboxGL.MarkerView coordinate={startPoint}>
             {svgIcon.BlueMapMarker}
@@ -437,8 +465,9 @@ const ViewSaveRoutes = ({route}: any) => {
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: routeLineHeight || 4,
-                lineColor: routeLineColor,
+                lineWidth: routeLineHeight || ROUTE_LINE_STYLES.lineWidth,
+                lineColor: routeLineColor || ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -529,6 +558,11 @@ const ViewSaveRoutes = ({route}: any) => {
           onPressStart={() => onPressStartBtn()}
           show={false}
         />
+      )}
+      {isStartBtnPressed && (
+        <TouchableOpacity style={styles.recenterIcon} onPress={resetCompass}>
+          {svgIcon.RecenterIcon}
+        </TouchableOpacity>
       )}
 
       <TouchableOpacity

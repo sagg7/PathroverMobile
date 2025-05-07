@@ -6,6 +6,7 @@ import {GiftedChat} from 'react-native-gifted-chat';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   AppHeader,
+  AppLoader,
   ChatBubble,
   MainWrapper,
   RenderDay,
@@ -26,6 +27,7 @@ const AiChat = () => {
   const {messages} = useSelector(state => state.chat);
   const [inputValue, setInputValue] = useState();
   const [uploadImages] = useUploadImagesMutation();
+  const [loader, setLoader] = useState<boolean>(false);
 
   useEffect(() => {
     if (params?.search) {
@@ -42,21 +44,22 @@ const AiChat = () => {
   }, [params]);
 
   const onSend = async (message: string) => {
+    setLoader(true);
     try {
       const form = new FormData();
 
       form.append('file', {
         uri:
-            Platform.OS === 'ios'
-              ? message[0]?.attachment?.sourceURL?.replace('file://', '')
-              : message[0]?.attachment?.path,
+          Platform.OS === 'ios'
+            ? message[0]?.attachment?.sourceURL?.replace('file://', '')
+            : message[0]?.attachment?.path,
         type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
         name: message[0]?.attachment?.filename ?? '',
       });
 
       const res = await uploadImages(form);
 
-      dispatch(addUserMessage([{ ...message?.[0], url: res?.data?.url }]));
+      dispatch(addUserMessage([{...message?.[0], url: res?.data?.url}]));
       const data = JSON.stringify({
         messages: [
           {
@@ -82,8 +85,10 @@ const AiChat = () => {
 
       const response = await axios.request(config);
       dispatch(addBotMessage(response.data.choices[0].message.content));
+      setLoader(false);
     } catch (error) {
       console.error('Error sending message:', error);
+      setLoader(false);
       return 'Error: Could not get a response from AI.';
     }
   };
@@ -118,6 +123,7 @@ const AiChat = () => {
           onSend={messages => onSend(messages)}
         />
       </View>
+      {loader && <AppLoader />}
     </MainWrapper>
   );
 };

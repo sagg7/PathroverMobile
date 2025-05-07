@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {
+  HP,
   isIOS,
   PFColors,
   PFFonts,
@@ -48,6 +49,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: isIOS() ? WP('18') : WP('15'),
     right: 10,
+  },
+  recenterIcon: {
+    position: 'absolute',
+    top: isIOS() ? HP('78') : HP('70'),
+    left: 13,
   },
 });
 export default styles;

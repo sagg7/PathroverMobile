@@ -436,7 +436,7 @@ export const getTimeAndDistanceForWaypoint = async (
       if (data.routes && data.routes.length > 0) {
         return data.routes[0];
       } else {
-        console.error('No route found for segment:', segment);
+        // console.error('No route found for segment:', segment);
       }
     } catch (error) {
       console.error('Error fetching route segment:', error);

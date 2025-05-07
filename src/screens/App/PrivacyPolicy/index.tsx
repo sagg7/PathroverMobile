@@ -4,7 +4,7 @@ import {AppHeader, MainWrapper} from '../../../components';
 import {appImages} from '../../../assets/images';
 import {scale, scrWidth} from '../../../shared/theme/responsive';
 import RenderHTML from 'react-native-render-html';
-import {PFColors} from '../../../shared/exporter';
+import {AppLoader, PFColors} from '../../../shared/exporter';
 import {usePrivacyMutation} from '../../../redux/common/commonDomainApiSlice';
 import {useNavigation} from '@react-navigation/native';
 
@@ -46,6 +46,7 @@ const PrivacyPolicy = () => {
           )}
         </View>
       </ScrollView>
+      {isLoading && <AppLoader />}
     </MainWrapper>
   );
 };

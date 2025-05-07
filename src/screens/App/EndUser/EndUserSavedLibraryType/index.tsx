@@ -17,6 +17,7 @@ import {
   useGetAllSaveRoutesQuery,
 } from '../../../../redux/endUser/endUserApiSlice';
 import {
+  isIOS,
   PFColors,
   Routes,
   SaveRouteSheet,
@@ -26,8 +27,9 @@ import styles from './styles';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import Share from 'react-native-share';
-import usePremiumAlert from '../../../../hooks/usePremiumAlert';
-import {useSelector} from 'react-redux';
+import useLocation from '../../../../hooks/getLocation';
+import {useDispatch} from 'react-redux';
+import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -47,6 +49,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const {showPremiumAlert} = usePremiumAlert();
 
   const refScrollable = useRef<any>();
+  const {location} = useLocation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (modalType === 'edit') {
@@ -64,17 +68,90 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       selectedItem?.route_type === 'hiking_waypoint' ||
       selectedItem?.route_type === 'maps_location_pins'
     ) {
-      navigation.navigate(Routes.ViewWellPathNavigation, {
-        entranceCoords: [
-          Number(selectedItem?.dropoff_location?.longitude),
-          Number(selectedItem?.dropoff_location?.latitude),
+      if (isIOS()) {
+        navigation.navigate(Routes.TurnByTurnNav, {
+          originCoords: [location.longitude, location.latitude],
+          entranceCoords: [
+            Number(selectedItem?.dropoff_location?.longitude),
+            Number(selectedItem?.dropoff_location?.latitude),
+          ],
+          entranceName: selectedItem?.name,
+          isTrail: false,
+          routeInfo: selectedItem,
+        });
+      } else {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: [
+            Number(selectedItem?.dropoff_location?.longitude),
+            Number(selectedItem?.dropoff_location?.latitude),
+          ],
+          entranceName: selectedItem?.name,
+        });
+      }
+    } else if (selectedItem?.route_type === 'hiking_trail_route') {
+      const coordinates = [
+        [
+          parseFloat(selectedItem?.pickup_location?.longitude),
+          parseFloat(selectedItem?.pickup_location?.latitude),
         ],
-        entranceName: selectedItem?.name,
-      });
+        ...selectedItem?.middle_location_points.map(point => [
+          parseFloat(point.longitude),
+          parseFloat(point.latitude),
+        ]),
+        [
+          parseFloat(selectedItem?.dropoff_location?.longitude),
+          parseFloat(selectedItem?.dropoff_location?.latitude),
+        ],
+      ];
+      const geoJsonFeature = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: coordinates,
+        },
+        properties: {
+          color: selectedItem.color,
+          tags: {
+            highway: 'path',
+          },
+        },
+      };
+
+      if (isIOS()) {
+        dispatch(setSelectedTrail(geoJsonFeature));
+        setTimeout(() => {
+          navigation.navigate(Routes.TurnByTurnNav, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+            entranceName: 'Unknown Trail',
+            isTrail: true,
+          });
+        }, 300);
+      } else {
+        navigation.navigate('TrailDetails', {geoJsonFeature});
+      }
+
+      return;
     } else {
-      navigation.navigate(Routes.ViewSaveRoutes, {
-        item: selectedItem,
-      });
+      if (isIOS()) {
+        setTimeout(() => {
+          const coords = selectedItem?.pickup_location;
+          const lngLat = [Number(coords?.longitude), Number(coords?.latitude)];
+
+          navigation.navigate(Routes.TurnByTurnNav, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: lngLat,
+            entranceName: selectedItem?.name,
+            isTrail: false,
+            routeInfo: selectedItem,
+            isLibrary: true,
+          });
+        }, 300);
+      } else {
+        navigation.navigate(Routes.ViewSaveRoutes, {
+          item: selectedItem,
+        });
+      }
     }
   };
 
@@ -162,7 +239,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const transformData = (data: any) => {
     return {
       ...data, // Keep all other key-value pairs unchanged
-      middle_location_points: data.middle_location_points.map((point: any) => [
+      middle_location_points: data.middle_location_points?.map((point: any) => [
         parseFloat(point.longitude), // Convert to float if needed
         parseFloat(point.latitude),
       ]),
@@ -347,7 +424,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           routeName={routeName || ''}
           onChangeText={handleUpdateName}
           onPressSave={() => handleSave()}
-          btnTitle="Save Map"
+          btnTitle="Save"
         />
         {/* )} */}
       </RBSheet>

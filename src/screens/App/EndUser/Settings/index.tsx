@@ -38,6 +38,7 @@ const Settings = ({navigation}: any) => {
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
     useDeleteUserAccountMutation();
+  const [profilePicture, setProfilePicture] = useState<any>();
 
   const [userName, setUserName] = useState(
     `${loginUser?.first_name ? loginUser?.first_name : ''} ${
@@ -51,6 +52,16 @@ const Settings = ({navigation}: any) => {
       } `,
     );
   }, [loginUser?.first_name, loginUser?.last_name]);
+
+  useEffect(() => {
+    if (loginUser)
+      setUserName(
+        `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+          loginUser?.last_name ? loginUser?.last_name : ''
+        } `,
+      );
+    setProfilePicture(loginUser?.avatar);
+  }, [loginUser]);
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
@@ -191,7 +202,7 @@ const Settings = ({navigation}: any) => {
           <Image
             source={
               loginUser?.avatar
-                ? {uri: loginUser?.avatar}
+                ? {uri: profilePicture}
                 : appIcons.userPlaceholder
             }
             style={styles.userPicture}

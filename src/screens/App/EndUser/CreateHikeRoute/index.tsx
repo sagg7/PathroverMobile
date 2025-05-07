@@ -47,10 +47,12 @@ const CreateHikeRoute = () => {
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [routeName, setRouteName] = useState<string>('');
+  const [heading, setHeading] = useState(0);
   const [showRouteLineCustomizeSheet, setShowRouteLineCustomizeSheet] =
     useState(false);
   const isFocused = useIsFocused();
   const [waypoints, setWaypoints] = useState<any>([]);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
   const [routeLineColor, setRouteLineColor] = useState<string>(
     PFColors.Blue.Dark,
   );
@@ -65,7 +67,7 @@ const CreateHikeRoute = () => {
   const cameraRef = useRef<any>(null);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-
+  const hasInitialLocation = useRef(false);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -85,8 +87,18 @@ const CreateHikeRoute = () => {
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
+
+      setHeading(location?.heading);
+      cameraRef.current?.setCamera({
+        centerCoordinate: currentLocation,
+        heading: location?.heading,
+        zoomLevel: 16,
+        pitch: 60,
+        animationDuration: 1000,
+      });
     }
   }, [location]);
+
   useEffect(() => {
     if (mapLayerStyle) {
       setSelectedMapType(mapLayerStyle);
@@ -149,7 +161,7 @@ const CreateHikeRoute = () => {
   };
 
   const centerMap = () => {
-    if (route?.length > 2) {
+    if (route?.length > 1) {
       const allPoints = route;
       const longitudes = allPoints?.map(point => point[0]);
       const latitudes = allPoints?.map(point => point[1]);
@@ -158,7 +170,7 @@ const CreateHikeRoute = () => {
       const minLatitude = Math.min(...latitudes);
       const maxLatitude = Math.max(...latitudes);
 
-      const buffer = 0.09;
+      const buffer = 0.0019;
       const adjustedMinLongitude = minLongitude - buffer;
       const adjustedMaxLongitude = maxLongitude + buffer;
       const adjustedMinLatitude = minLatitude - buffer;
@@ -168,14 +180,20 @@ const CreateHikeRoute = () => {
         [adjustedMinLongitude, adjustedMinLatitude],
         [adjustedMaxLongitude, adjustedMaxLatitude],
         {
-          Left: 100,
-          Right: 100,
-          Top: 80,
-          Bottom: 80,
+          left: 100,
+          right: 100,
+          top: 80,
+          bottom: 80,
         },
       );
     } else {
-      cameraRef.current.flyTo(currentLocation, 100);
+      cameraRef.current?.setCamera({
+        centerCoordinate: currentLocation,
+        heading: heading,
+        zoomLevel: 16,
+        pitch: 60,
+        animationDuration: 1000,
+      });
     }
   };
 
@@ -259,6 +277,35 @@ const CreateHikeRoute = () => {
     }
   };
 
+  const handleLocationUpdate = location => {
+    if (hasInitialLocation.current || !location?.coords) return;
+
+    const {latitude, longitude, heading} = location.coords;
+
+    hasInitialLocation.current = true; // prevent future updates
+    setHeading(heading);
+    setTimeout(() => {
+      cameraRef.current?.setCamera({
+        centerCoordinate: [longitude, latitude],
+        heading: heading,
+        pitch: 60,
+        zoomLevel: 16,
+        animationDuration: 1000,
+      });
+    }, 300);
+  };
+  const resetHeading = () => {
+    setTimeout(() => {
+      cameraRef.current?.setCamera({
+        centerCoordinate: currentLocation,
+        heading: heading,
+        pitch: 60,
+        zoomLevel: 16,
+        animationDuration: 1000,
+      });
+    }, 300);
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Create Route" />
@@ -268,17 +315,35 @@ const CreateHikeRoute = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
+        compassFadeWhenNorth
+        compassEnabled
+        onRegionWillChange={() => setIsUserInteracting(true)}
+        onRegionDidChange={() =>
+          setTimeout(() => setIsUserInteracting(false), 2000)
+        } // cooldown before re-follow
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={12}
+          zoomLevel={16}
           centerCoordinate={currentLocation}
+          animationMode="flyTo"
+          animationDuration={1000}
+          pitch={60}
+          heading={heading}
         />
-        {currentLocation && (
+        <MapboxGL.UserLocation
+          visible
+          minDisplacement={isIOS() ? 3 : 10}
+          requestsAlwaysUse
+          showsUserHeadingIndicator
+          androidRenderMode="compass"
+          onUpdate={handleLocationUpdate}
+        />
+        {/* {currentLocation && (
           <MapboxGL.MarkerView coordinate={currentLocation}>
             {svgIcon.BlueMapMarker}
           </MapboxGL.MarkerView>
-        )}
+        )} */}
 
         {route?.map((coordinate, index) => (
           <MapboxGL.PointAnnotation

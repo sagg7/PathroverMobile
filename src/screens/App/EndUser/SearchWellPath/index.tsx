@@ -5,8 +5,9 @@ import {
   TextInput,
   FlatList,
   Image,
-  ViewStyle,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
@@ -31,12 +32,14 @@ import {svgIcon} from '../../../../assets/svg';
 import {useDispatch, useSelector} from 'react-redux';
 import {setRecentDestSearch} from '../../../../redux/manager/managerSlice';
 import {useWellSearchMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface SelectionBoxProps {
   isSelected: boolean;
   onPress: () => void;
   title: string;
 }
+
 const SearchWellPath = ({route, navigation}: any) => {
   const {
     searchedWells,
@@ -61,6 +64,7 @@ const SearchWellPath = ({route, navigation}: any) => {
     latitude: '',
     longitude: '',
   });
+
   useEffect(() => {
     if (searchLocation) {
       setSearchValues({
@@ -140,6 +144,7 @@ const SearchWellPath = ({route, navigation}: any) => {
     };
     dispatch(setRecentDestSearch(data));
   };
+
   const isValidLatLng = () => {
     const lat = parseFloat(searchValues.latitude);
     const lng = parseFloat(searchValues?.longitude);
@@ -152,6 +157,7 @@ const SearchWellPath = ({route, navigation}: any) => {
       lng <= 180
     );
   };
+
   const handleSearchBtn = () => {
     if (isValidLatLng()) {
       setSearchLocation([
@@ -161,6 +167,7 @@ const SearchWellPath = ({route, navigation}: any) => {
       navigation.goBack();
     }
   };
+
   const onSelectFromList = (place: any) => {
     setSearchLocationNames(place?.placeName);
     const [longitude, latitude] = place.coords || place;
@@ -168,6 +175,7 @@ const SearchWellPath = ({route, navigation}: any) => {
     setSearchLocation([longitude, latitude]);
     navigation.goBack();
   };
+
   const renderSearchHistoryList = ({item}: any) => {
     return (
       <TouchableOpacity onPress={() => onSelectFromList(item)}>
@@ -180,147 +188,160 @@ const SearchWellPath = ({route, navigation}: any) => {
       </TouchableOpacity>
     );
   };
+
   return (
     <MainWrapper>
-      <AppHeader title="Search" />
-      <View style={styles.selectorMainView}>
-        <SelectionBox
-          onPress={() => setIsAddressSelected(true)}
-          isSelected={isAddressSelected}
-          title="Address"
-        />
-        <SelectionBox
-          onPress={() => setIsAddressSelected(false)}
-          isSelected={!isAddressSelected}
-          title="Latitude-Longitude"
-        />
-      </View>
-      {isAddressSelected ? (
-        <>
-          <View style={styles.searchBox}>
-            {svgIcon.Search}
-            <TextInput
-              placeholder="Search"
-              placeholderTextColor={PFColors.Gray.DarkGray}
-              value={simpleSearch}
-              onChangeText={handleChangeText}
-              style={styles.input}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{flex: 1}}>
+        <KeyboardAwareScrollView
+          enableOnAndroid
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            paddingBottom: 30,
+            flex: 1,
+          }}>
+          <AppHeader title="Search" />
+          <View style={styles.selectorMainView}>
+            <SelectionBox
+              onPress={() => setIsAddressSelected(true)}
+              isSelected={isAddressSelected}
+              title="Address"
+            />
+            <SelectionBox
+              onPress={() => setIsAddressSelected(false)}
+              isSelected={!isAddressSelected}
+              title="Latitude-Longitude"
             />
           </View>
-          {suggestions?.length > 0 && (
-            <FlatList
-              data={suggestions}
-              keyExtractor={(item: any) => item.id}
-              contentContainerStyle={styles.suggestionContainer}
-              renderItem={({item}: any) => (
-                <TouchableOpacity onPress={() => handleSelect(item)}>
-                  <Text style={{padding: 10, color: PFColors.Standard.Black}}>
-                    {item.place_name}
-                  </Text>
-                </TouchableOpacity>
+          {isAddressSelected ? (
+            <>
+              <View style={styles.searchBox}>
+                {svgIcon.Search}
+                <TextInput
+                  placeholder="Search"
+                  placeholderTextColor={PFColors.Gray.DarkGray}
+                  value={simpleSearch}
+                  onChangeText={handleChangeText}
+                  style={styles.input}
+                />
+              </View>
+              {suggestions?.length > 0 && (
+                <FlatList
+                  data={suggestions}
+                  keyExtractor={(item: any) => item.id}
+                  contentContainerStyle={styles.suggestionContainer}
+                  renderItem={({item}: any) => (
+                    <TouchableOpacity onPress={() => handleSelect(item)}>
+                      <Text
+                        style={{
+                          padding: 10,
+                          color: PFColors.Standard.Black,
+                        }}>
+                        {item.place_name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
               )}
+            </>
+          ) : (
+            <>
+              <AppInput
+                maxLength={10}
+                placeholder="Longitude"
+                inputContainerStyle={styles.inputContainerStyle}
+                value={searchValues.longitude}
+                onChangeText={(value: string) => {
+                  const isValidNumber = (): boolean => {
+                    const regex = /^-?\d*\.?\d*$/;
+                    return regex.test(value);
+                  };
+                  if (isValidNumber()) {
+                    setSearchValues({
+                      ...searchValues,
+                      longitude: value,
+                    });
+                  }
+                }}
+              />
+              <AppInput
+                maxLength={10}
+                placeholder="Latitude"
+                inputContainerStyle={styles.inputContainerStyle}
+                value={searchValues.latitude}
+                onChangeText={(value: string) => {
+                  const isValidNumber = (): boolean => {
+                    const regex = /^-?\d*\.?\d*$/;
+                    return regex.test(value);
+                  };
+                  if (isValidNumber()) {
+                    setSearchValues({
+                      ...searchValues,
+                      latitude: value,
+                    });
+                  }
+                }}
+              />
+            </>
+          )}
+          {suggestions?.length < 1 && (
+            <View style={{...styles.rowView, padding: WP('5')}}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setSearchType('wells')}
+                style={styles.rowView}>
+                {searchType == 'wells'
+                  ? svgIcon.RadioActive
+                  : svgIcon.RadioInactive}
+                <Text style={styles.searchLabel}>{'Search by wells'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setSearchType('places')}
+                style={styles.rowView}>
+                {searchType == 'places'
+                  ? svgIcon.RadioActive
+                  : svgIcon.RadioInactive}
+                <Text style={styles.searchLabel}>{'Search by places'}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {suggestions?.length < 1 && searchType != 'wells' && (
+            <>
+              <Text style={styles.recentTitle}>{'Recently Searches'}</Text>
+              <FlatList
+                data={recentSearches}
+                renderItem={renderSearchHistoryList}
+              />
+            </>
+          )}
+          {!isAddressSelected && (
+            <AppButton
+              title="Search"
+              buttonStyle={styles.btnStyles}
+              handleClick={
+                searchType == 'wells' ? handleSearchWell : handleSearchBtn
+              }
+              isLoading={isSearchingWell}
+              disabled={
+                searchValues.latitude?.length < 4 ||
+                searchValues.longitude?.length < 4 ||
+                isSearchingWell
+              }
             />
           )}
-        </>
-      ) : (
-        <>
-          <AppInput
-            maxLength={10}
-            placeholder="Longitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={searchValues.longitude}
-            onChangeText={(value: string) => {
-              const isValidNumber = (): boolean => {
-                const regex = /^-?\d*\.?\d*$/;
-                return regex.test(value);
-              };
-              if (isValidNumber()) {
-                setSearchValues({
-                  ...searchValues,
-                  longitude: value,
-                });
-              }
-            }}
-          />
-          <AppInput
-            maxLength={10}
-            placeholder="Latitude"
-            inputContainerStyle={styles.inputContainerStyle}
-            value={searchValues.latitude}
-            onChangeText={(value: string) => {
-              const isValidNumber = (): boolean => {
-                const regex = /^-?\d*\.?\d*$/;
-                return regex.test(value);
-              };
-              if (isValidNumber()) {
-                setSearchValues({
-                  ...searchValues,
-                  latitude: value,
-                });
-              }
-            }}
-          />
-        </>
-      )}
-      {suggestions?.length < 1 && (
-        <View
-          style={{
-            ...styles.rowView,
-            padding: WP('5'),
-          }}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSearchType('wells')}
-            style={styles.rowView}>
-            {searchType == 'wells'
-              ? svgIcon.RadioActive
-              : svgIcon.RadioInactive}
-            <Text style={styles.searchLabel}>{'Search by wells'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSearchType('places')}
-            style={styles.rowView}>
-            {searchType == 'places'
-              ? svgIcon.RadioActive
-              : svgIcon.RadioInactive}
-            <Text style={styles.searchLabel}>{'Search by places'}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {suggestions?.length < 1 && searchType != 'wells' && (
-        <>
-          <Text style={styles.recentTitle}>{'Recently Searches'}</Text>
-          <FlatList
-            data={recentSearches}
-            renderItem={renderSearchHistoryList}
-          />
-        </>
-      )}
-      {!isAddressSelected && (
-        <AppButton
-          title="Search"
-          buttonStyle={styles.btnStyles}
-          handleClick={
-            searchType == 'wells' ? handleSearchWell : handleSearchBtn
-          }
-          isLoading={isSearchingWell}
-          disabled={
-            searchValues.latitude?.length < 4 ||
-            searchValues.longitude?.length < 4 ||
-            isSearchingWell
-          }
-        />
-      )}
-      {isAddressSelected && searchType == 'wells' && (
-        <AppButton
-          title="Search"
-          isLoading={isSearchingWell}
-          buttonStyle={styles.btnStyles}
-          handleClick={handleSearchWell}
-          disabled={!simpleSearch || isSearchingWell}
-        />
-      )}
+          {isAddressSelected && searchType == 'wells' && (
+            <AppButton
+              title="Search"
+              isLoading={isSearchingWell}
+              buttonStyle={styles.btnStyles}
+              handleClick={handleSearchWell}
+              disabled={!simpleSearch || isSearchingWell}
+            />
+          )}
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     </MainWrapper>
   );
 };

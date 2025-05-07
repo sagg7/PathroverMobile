@@ -71,22 +71,19 @@ const CreateRouteEndUser = () => {
     (state: any) => state?.manager?.mapLayerStyle,
   );
   const dispatch = useDispatch();
-
+  const [heading, setHeading] = useState(0);
+  2;
   const [searchValues, setSearchValues] = useState<any>({
     start: '',
     end: '',
   });
-  console.log(' CreateRouteEndUser ~ searchValues==>', searchValues);
   const [searchValuesByAddress, setSearchValuesByAddress] = useState<any>({
     start: '',
     end: '',
   });
-  console.log(
-    ' CreateRouteEndUser ~ searchValuesByAddress==>',
-    searchValuesByAddress,
-  );
 
   const refScrollable = useRef<any>();
+  const hasInitialLocation = useRef(false);
 
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
@@ -120,6 +117,7 @@ const CreateRouteEndUser = () => {
   useEffect(() => {
     if (location) {
       setCurrentLocation([location?.longitude, location?.latitude]);
+      // setHeading(location?.heading);
     }
   }, [location]);
   useEffect(() => {
@@ -216,46 +214,7 @@ const CreateRouteEndUser = () => {
   };
 
   const centerMap = () => {
-    const isEmptyAdress = Object.values(searchValuesByAddress)?.every(
-      value => value === '',
-    );
-    const hasSearchValues =
-      Array.isArray(searchValues.start) &&
-      searchValues?.start?.length > 0 &&
-      Array.isArray(searchValues?.end) &&
-      searchValues?.end.length > 0;
-
-    const hasAddressValues =
-      Array.isArray(searchValuesByAddress.start) &&
-      searchValuesByAddress?.start?.length > 0 &&
-      Array.isArray(searchValuesByAddress?.end) &&
-      searchValuesByAddress?.end.length > 0;
-
-    if (hasAddressValues) {
-      const {start, end} = searchValuesByAddress;
-      const minLongitude = Math.min(start[0], end[0]);
-      const maxLongitude = Math.max(start[0], end[0]);
-      const minLatitude = Math.min(start[1], end[1]);
-      const maxLatitude = Math.max(start[1], end[1]);
-
-      const buffer = 0.09;
-      const adjustedMinLongitude = minLongitude - buffer;
-      const adjustedMaxLongitude = maxLongitude + buffer;
-      const adjustedMinLatitude = minLatitude - buffer;
-      const adjustedMaxLatitude = maxLatitude + buffer;
-
-      cameraRef.current.fitBounds(
-        [adjustedMinLongitude, adjustedMinLatitude],
-        [adjustedMaxLongitude, adjustedMaxLatitude],
-        {
-          Left: 100,
-          Right: 100,
-          Top: 80,
-          Bottom: 80,
-        },
-      );
-    }
-    if (route?.length > 2 && isEmptyAdress) {
+    if (route?.length > 1) {
       const allPoints = route;
       const longitudes = allPoints?.map((point: any) => point[0]);
       const latitudes = allPoints?.map((point: any) => point[1]);
@@ -264,7 +223,7 @@ const CreateRouteEndUser = () => {
       const minLatitude = Math.min(...latitudes);
       const maxLatitude = Math.max(...latitudes);
 
-      const buffer = 0.09;
+      const buffer = 0.0019;
       const adjustedMinLongitude = minLongitude - buffer;
       const adjustedMaxLongitude = maxLongitude + buffer;
       const adjustedMinLatitude = minLatitude - buffer;
@@ -274,12 +233,20 @@ const CreateRouteEndUser = () => {
         [adjustedMinLongitude, adjustedMinLatitude],
         [adjustedMaxLongitude, adjustedMaxLatitude],
         {
-          Left: 100,
-          Right: 100,
-          Top: 80,
-          Bottom: 80,
+          left: 100,
+          right: 100,
+          top: 80,
+          bottom: 80,
         },
       );
+    } else {
+      cameraRef.current?.setCamera({
+        centerCoordinate: currentLocation,
+        // heading: heading,
+        zoomLevel: 16,
+        pitch: 60,
+        animationDuration: 1000,
+      });
     }
   };
 
@@ -441,6 +408,24 @@ const CreateRouteEndUser = () => {
     }
   }, [createRouteData, isFocused]);
 
+  const handleLocationUpdate = location => {
+    if (hasInitialLocation.current || !location?.coords) return;
+
+    const {latitude, longitude, heading} = location.coords;
+
+    hasInitialLocation.current = true; // prevent future updates
+    setHeading(heading);
+    setTimeout(() => {
+      cameraRef.current?.setCamera({
+        centerCoordinate: [longitude, latitude],
+        heading: heading,
+        pitch: 60,
+        zoomLevel: 16,
+        animationDuration: 1000,
+      });
+    }, 300);
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <AppHeader title="Create Route" />
@@ -464,17 +449,28 @@ const CreateRouteEndUser = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        onPress={onPressMap}>
+        onPress={onPressMap}
+        compassEnabled
+        // compassFadeWhenNorth
+        compassPosition={{top: isIOS() ? HP('15') : HP('4'), right: 12}}>
         <MapboxGL.Camera
           ref={cameraRef}
-          zoomLevel={12}
+          zoomLevel={16}
           centerCoordinate={currentLocation}
+          animationMode="flyTo"
+          animationDuration={1000}
+          pitch={60}
+          heading={heading}
         />
-        {currentLocation && (
-          <MapboxGL.MarkerView coordinate={currentLocation}>
-            {svgIcon.BlueMapMarker}
-          </MapboxGL.MarkerView>
-        )}
+        <MapboxGL.UserLocation
+          visible
+          minDisplacement={isIOS() ? 3 : 10}
+          requestsAlwaysUse
+          showsUserHeadingIndicator
+          androidRenderMode="compass"
+          onUpdate={handleLocationUpdate}
+        />
+
         {searchValuesByAddress?.start && (
           <MapboxGL.MarkerView coordinate={searchValuesByAddress?.start}>
             {svgIcon.CurrentLocation}

@@ -18,6 +18,7 @@ import {
   mapBoxToken,
   MapTypes,
   PFColors,
+  ROUTE_LINE_STYLES,
   Routes,
   showAlert,
   UNEXPECTED_ERROR,
@@ -51,6 +52,8 @@ import Share from 'react-native-share';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import { setLoginUser } from '../../../../redux/auth/authSlice';
 import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
+import { useStateShortCode } from '../../../../hooks/getStateName';
+
 const WellPath = () => {
   const isFocused = useIsFocused();
   const navigation: any = useNavigation();
@@ -58,9 +61,8 @@ const WellPath = () => {
   const [mapLayerSheeet, setMapLayerSheeet] = useState<boolean>(false);
   const [mapTypesArr, setMapTypesArr] = useState(MapTypes);
   const [selectedMapType, setSelectedMapType] = useState(Default_Map_Style);
-  const [currentLocation, setCurrentLocation] = useState<any>([
-    74.276313, 31.454005,
-  ]);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  // const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [route, setRoute] = useState<any>([]);
   const [available, setAvailable] = useState(false);
   const [showMapSettigs, setShowMapSettigs] = useState<boolean>(false);
@@ -94,7 +96,7 @@ const WellPath = () => {
 
   const [createShareLinkRoute, { isLoading: linkRouteLoading }] =
     useCreateShareLinkRouteMutation();
-
+  const { shortCode, getShortCodeFromCoords } = useStateShortCode();
   const dispatch = useDispatch();
   const [selectedSearchedWell, setSelectedSearchedWell] = useState<any>(null);
   const [wellDistances, setWellDistances] = useState({});
@@ -112,6 +114,7 @@ const WellPath = () => {
   const [showPlaceEntrance, setShowPlaceEntrance] = useState<boolean>(false);
   const [loaderCount, setLoaderCount] = useState(0);
   const [loaderState, setLoaderState] = useState(true);
+  const [IsmapLoading, setIsmapLoading] = useState(true);
 
   const getRadiusForZoomLevel = (zoomLevel: any) => {
     switch (zoomLevel) {
@@ -173,20 +176,19 @@ const WellPath = () => {
 
   const { showPremiumAlert } = usePremiumAlert();
 
-  // useEffect(() => {
-  //   setQueryParams(prev => ({
-  //     ...prev,
-  //     radius: getRadiusForZoomLevel(zoom),
-  //   }));
-  // }, [zoom]);
-
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
     longitude: '',
     name: '',
   });
 
-  const { data: allWellLocations, refetch } = useGetAllWellsQuery(queryParams);
+  const {
+    data: allWellLocations,
+    isLoading,
+    refetch,
+  } = useGetAllWellsQuery(queryParams, {
+    skip: queryParams.longitude === null || IsmapLoading,
+  });
   const { location } = useLocation();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
@@ -197,20 +199,23 @@ const WellPath = () => {
   const [allWells, setAllWells] = useState<any>([]);
   // const [allPins, setAllPins] = useState<any>([]);
 
-  // useEffect(() => {
-  //   if (allWellLocations && queryParams.page === 1) {
-  //     setQueryParams(prev => ({...prev, page: 2})); // Set page 2 after page 1 loads
-  //   }
-  // }, [allWellLocations]);
-
   useEffect(() => {
     if (location) {
-      setCurrentLocation([location?.longitude, location?.latitude]);
-      setQueryParams({
-        ...queryParams,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-      });
+      (async () => {
+        setCurrentLocation([location.longitude, location.latitude]);
+
+        const code = await getShortCodeFromCoords(
+          location.latitude,
+          location.longitude,
+        );
+
+        setQueryParams({
+          ...queryParams,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          state: code, // optional: if you want to use it
+        });
+      })();
     }
   }, [location]);
 
@@ -218,11 +223,16 @@ const WellPath = () => {
     setAvailable(is_subscribed);
   }, [is_subscribed]);
 
-  useEffect(() => {
-    if (queryParams.latitude) {
-      refetch();
-    }
-  }, [queryParams, refetch]);
+  // useEffect(() => {
+  //   if (queryParams.latitude) {
+  //     refetch();
+  //   }
+  // }, [queryParams, refetch]);
+  // useEffect(() => {
+  //   if (queryParams.latitude && !IsmapLoading) {
+  //     refetch();
+  //   }
+  // }, [queryParams, refetch, IsmapLoading]);
 
   useEffect(() => {
     if (allWellLocations?.length > 0) {
@@ -235,6 +245,10 @@ const WellPath = () => {
 
         return [...prev, ...newWells]; // Add only unique wells
       });
+      setLoaderState(false);
+      setLoaderCount(1);
+    }
+    if (allWellLocations) {
       setLoaderState(false);
       setLoaderCount(1);
     }
@@ -403,31 +417,40 @@ const WellPath = () => {
   useEffect(() => {
     if (searchLocation?.length > 0) {
       setTimeout(() => {
-        if (cameraRef.current) {
-          cameraRef.current.moveTo(searchLocation, 1500);
-          setQueryParams({
-            ...queryParams,
-            latitude: searchLocation[1],
-            longitude: searchLocation[0],
-            page: 1,
-            per_page: 2000,
-          });
-          setShowRouteActionSheet(true);
-          fetchPlaceName(searchLocation[1], searchLocation[0]);
+        (async () => {
+          if (cameraRef.current) {
+            cameraRef.current.moveTo(searchLocation, 1500);
 
-          setPinLocationDetails({
-            latitude: searchLocation[1],
-            longitude: searchLocation[0],
-            name: pinLocationDetails?.name || placeName || '',
-          });
+            const code = await getShortCodeFromCoords(
+              searchLocation[1],
+              searchLocation[0],
+            );
+            setQueryParams({
+              ...queryParams,
+              latitude: searchLocation[1],
+              longitude: searchLocation[0],
+              page: 1,
+              per_page: 2000,
+              state: code,
+            });
 
-          refetch();
-        } else {
-          showAlert(
-            'Error',
-            'Your coordinates are incorrect, Unable to locate.',
-          );
-        }
+            setShowRouteActionSheet(true);
+            fetchPlaceName(searchLocation[1], searchLocation[0]);
+
+            setPinLocationDetails({
+              latitude: searchLocation[1],
+              longitude: searchLocation[0],
+              name: pinLocationDetails?.name || placeName || '',
+            });
+
+            refetch();
+          } else {
+            showAlert(
+              'Error',
+              'Your coordinates are incorrect, Unable to locate.',
+            );
+          }
+        })();
       }, 200);
     }
   }, [searchLocation, searchLocationName]);
@@ -438,7 +461,6 @@ const WellPath = () => {
 
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
-
         if (showAddEntranceSheet) {
           setEntranceCoords(coords);
         } else {
@@ -582,11 +604,13 @@ const WellPath = () => {
   });
 
   const onRegionDidChange = async () => {
+    setIsmapLoading(false);
     if (mapRef.current) {
       const zoom = await mapRef.current.getZoom();
       const zoomLevel = zoom.toFixed(0);
       const center = await mapRef.current.getCenter();
-      if (zoomLevel) {
+      const code = await getShortCodeFromCoords(center[1], center[0]);
+      if (zoomLevel && !IsmapLoading) {
         setQueryParams({
           ...queryParams,
           latitude: center[1],
@@ -594,6 +618,7 @@ const WellPath = () => {
           page: 1,
           per_page: 2000,
           radius: getRadiusForZoomLevel(zoom),
+          state: code,
         });
       }
 
@@ -855,6 +880,7 @@ const WellPath = () => {
       />
 
       <MapboxGL.MapView
+        logoEnabled={false}
         compassEnabled
         compassPosition={{ top: isIOS() ? HP('8') : HP('10'), right: 8 }}
         compassFadeWhenNorth
@@ -864,11 +890,6 @@ const WellPath = () => {
         styleURL={selectedMapType}
         style={styles.map}
         scaleBarEnabled={false}
-        onDidFinishLoadingMap={() => {
-          if (searchLocation) {
-            cameraRef?.current?.flyTo(searchLocation, 1500);
-          }
-        }}
         onPress={onPressMap}>
         <MapboxGL.Camera
           ref={cameraRef}
@@ -969,8 +990,9 @@ const WellPath = () => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 5,
-                lineColor: PFColors.Blue.Dark,
+                lineWidth: ROUTE_LINE_STYLES.lineWidth,
+                lineColor: ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -991,7 +1013,7 @@ const WellPath = () => {
               <MapboxGL.LineLayer
                 id={`off-road-line-${index}`}
                 style={{
-                  lineWidth: 3,
+                  lineWidth: 5,
                   lineColor: 'red',
                   lineDasharray: [0.8, 3],
                 }}
@@ -1006,8 +1028,9 @@ const WellPath = () => {
             <MapboxGL.LineLayer
               id="routeLayer-unique"
               style={{
-                lineWidth: 4,
-                lineColor: PFColors.Blue.Dark,
+                lineWidth: ROUTE_LINE_STYLES.lineWidth,
+                lineColor: ROUTE_LINE_STYLES.color,
+                lineOpacity: ROUTE_LINE_STYLES.opacity,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -1018,13 +1041,15 @@ const WellPath = () => {
         onPress={() => moveToCurrentLocation()}>
         {svgIcon.MapWhiteBg}
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.maplayerStyles}
-        onPress={() => {
-          is_subscribed ? setMapLayerSheeet(true) : showPremiumAlert({});
-        }}>
-        {svgIcon.MapLayer}
-      </TouchableOpacity>
+      {(route?.length < 1 || waypointRoute?.length < 1) && (
+        <TouchableOpacity
+          style={styles.maplayerStyles}
+          onPress={() => {
+            is_subscribed ? setMapLayerSheeet(true) : showPremiumAlert({});
+          }}>
+          {svgIcon.MapLayer}
+        </TouchableOpacity>
+      )}
       <WellPathMenuSheet
         modalVisible={showOptionsSheet}
         onPressCancel={() => setShowOptionsSheet(false)}
@@ -1091,10 +1116,19 @@ const WellPath = () => {
         }}
         onPressRouteToWell={() => {
           setShowPinAddress(false);
-          navigation.navigate(Routes.ViewWellPathNavigation, {
-            entranceCoords: selectedWell,
-            entranceName: selectedWellName?.well_name,
-          });
+          const converted = selectedWell.map(item => Number(item));
+          if (isIOS()) {
+            navigation.navigate(Routes.TurnByTurnNav, {
+              originCoords: currentLocation,
+              entranceCoords: converted,
+              entranceName: selectedWellName?.well_name,
+            });
+          } else {
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: selectedWell,
+              entranceName: selectedWellName?.well_name,
+            });
+          }
         }}
       />
 
@@ -1107,10 +1141,19 @@ const WellPath = () => {
           entranceName={entranceName}
           isEntranceMarker={entranceCoords}
           onPressPlaceToEntrance={() => {
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: entranceCoords,
-              entranceName: entranceName,
-            });
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: currentLocation,
+                entranceCoords: entranceCoords,
+                entranceName: entranceName || 'Destination',
+              });
+            } else {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: entranceCoords,
+                entranceName: entranceName,
+              });
+            }
+
             setShowAddEntranceSheet(false);
             setEntranceCoords(null);
             setEntranceName(null);
@@ -1140,10 +1183,20 @@ const WellPath = () => {
           }}
           onPressStart={() => {
             setShowRouteActionSheet(false);
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: searchLocation,
-              entranceName: searchLocationName,
-            });
+
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: currentLocation,
+                entranceCoords: searchLocation,
+                entranceName: searchLocationName,
+              });
+            } else {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: searchLocation,
+                entranceName: searchLocationName,
+              });
+            }
+
             setOffRoadSegment([]);
           }}
           show={true}
@@ -1199,18 +1252,19 @@ const WellPath = () => {
           }}
           onPressShare={() => setShowShareSheet(true)}
           onPressStart={() => {
-            // if (isIOS()) {
-            // navigation.navigate(Routes.TurnByTurnNav, {
-            //   originCoords: currentLocation,
-            //   entranceCoords: pinLocationMarker,
-            //   entranceName: placeName,
-            // });
-            // } else {
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: pinLocationMarker,
-              entranceName: placeName,
-            });
-            // }
+            setShowNavigationSheet(false);
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: currentLocation,
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            } else {
+              navigation.navigate(Routes.ViewWellPathNavigation, {
+                entranceCoords: pinLocationMarker,
+                entranceName: placeName,
+              });
+            }
 
             setShowNavigationSheet(false);
             clearStates();
@@ -1310,9 +1364,8 @@ const WellPath = () => {
           )}
         />
       </GeneralModal>
-      {/* {loaderState && loaderCount === 0 && <AppLoader />}  */}
-      {/* <AppLoader /> */}
-    </MainWrapper>
+      {/* {loaderState && loaderCount === 0 && <AppLoader />} */}
+    </MainWrapper >
   );
 };
 
