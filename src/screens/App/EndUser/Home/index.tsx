@@ -19,9 +19,15 @@ import {
   appImages,
 } from '../../../../shared/exporter';
 import styles from './styles';
-import {useGetNewsBlogsQuery} from '../../../../redux/endUser/endUserApiSlice';
+import {
+  useGetCurrentUserProfileQuery,
+  useGetNewsBlogsQuery,
+} from '../../../../redux/endUser/endUserApiSlice';
 import {getFCMToken} from '../../../../hooks/NotificationHook';
 import {IOS_ADS, ANDROID_ADS} from '../../../../shared/utils/constant';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {useIsFocused} from '@react-navigation/native';
 MobileAds()
   .setRequestConfiguration({
     // An array of test device IDs to allow.
@@ -43,6 +49,10 @@ const Home = ({navigation}: any) => {
   const [fcmTokenUpdate] = useFcmTokenUpdateMutation();
   const [data, setData] = useState<any>([]);
   const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
+  const {data: userProfile, refetch} = useGetCurrentUserProfileQuery(null);
+  const dispatch = useDispatch();
+  const isFocued = useIsFocused();
+
   useEffect(() => {
     (async () => {
       const token = await getFCMToken();
@@ -67,6 +77,17 @@ const Home = ({navigation}: any) => {
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
   }, [allNewsBlogs, ads]);
+  useEffect(() => {
+    if (isFocued) {
+      refetch();
+    }
+  }, [isFocued]);
+
+  useEffect(() => {
+    if (userProfile) {
+      dispatch(setLoginUser(userProfile));
+    }
+  }, [userProfile]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];
