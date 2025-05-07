@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 import TrailRouteView from '../TrailRouteView';
 import ViewCustomizedSaveRoutes from '../ViewCustomizedSaveRoutes';
+import {MapTypes} from '../../../../shared/exporter';
 
 const MapBoxView = requireNativeComponent('MapBoxView');
 
@@ -15,12 +16,23 @@ const TurnByTurnNav = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const [isTurnByTurnNavigation, setisTurnByTurnNavigation] = useState(true);
   const [isDashedLineDrawn, setIsDashedLineDrawn] = useState(false);
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const [selectedMapStyle, setSelectedMapStyle] = useState<any>('default');
 
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
     }, 2000);
   }, []);
+
+  useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapStyle(
+        MapTypes?.find(item => item.type === mapLayerStyle)?.value,
+      );
+    }
+  }, [mapLayerStyle]);
+
   const isLibrary = routeParams?.isLibrary;
 
   return (
@@ -35,6 +47,7 @@ const TurnByTurnNav = ({route, navigation}: any) => {
             originName="Origin"
             destinationName={routeParams?.entranceName}
             style={{flex: 1}}
+            mapStyle={selectedMapStyle} // "default", "satellite", or "terrain"
             hasTrail={routeParams?.isTrail ? 1 : 0}
             onClose={(res: any) => {
               const resp = res?.nativeEvent;

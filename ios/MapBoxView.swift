@@ -24,8 +24,9 @@ class MapBoxView: UIView, NavigationViewControllerDelegate {
             isTrail = hasTrail.boolValue
         }
     }
+    @objc var mapStyle: NSString = "default"
     @objc var onClose: RCTBubblingEventBlock?
- 
+  
     override init(frame: CGRect) { super.init(frame: frame) }
     required init?(coder: NSCoder) { super.init(coder: coder) }
  
@@ -101,6 +102,25 @@ class MapBoxView: UIView, NavigationViewControllerDelegate {
                             let actualDestination = CLLocationCoordinate2D(latitude: self.endLat.doubleValue, longitude: self.endLng.doubleValue)
  
                             if let mapView = navVC.navigationMapView?.mapView {
+                                // Apply custom map style
+                              let styleURLString: String
+                                                            switch self.mapStyle as String {
+                                                              case "satellite":
+                                                                styleURLString = "mapbox://styles/mapbox/satellite-streets-v12"
+                                                              case "terrain":
+                                                                styleURLString = "mapbox://styles/mapbox/navigation-day-v1"
+                                                              default:
+                                                                styleURLString = "mapbox://styles/mapbox/streets-v12"
+                                                              }
+                               
+                                                              guard let url = URL(string: styleURLString),
+                                                                    let styleURI = StyleURI(url: url) else {
+                                                                  print("❌ Failed to construct valid StyleURI from: \(styleURLString)")
+                                                                  return
+                                                              }
+                               
+                                                              mapView.mapboxMap.loadStyleURI(styleURI)
+                              
                                 mapView.mapboxMap.onNext(event: .styleLoaded) { _ in
  
                                     if self.isTrail == false {

@@ -687,6 +687,7 @@ export const MapTypes = [
     icon: svgIcon.Terrain,
     type: 'mapbox://styles/mapbox/navigation-day-v1',
     isSelected: false,
+    value: 'terrain',
   },
   {
     id: 2,
@@ -694,6 +695,7 @@ export const MapTypes = [
     icon: svgIcon.Sattelite,
     type: 'mapbox://styles/mapbox/satellite-streets-v12',
     isSelected: false,
+    value: 'satellite',
   },
   {
     id: 3,
@@ -701,6 +703,7 @@ export const MapTypes = [
     icon: svgIcon.DefaultMarker,
     type: 'mapbox://styles/mapbox/streets-v12',
     isSelected: true,
+    value: 'default',
   },
 ];
 export const CancelReasons = [

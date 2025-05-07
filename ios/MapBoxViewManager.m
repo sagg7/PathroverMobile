@@ -16,5 +16,6 @@
   RCT_EXPORT_VIEW_PROPERTY(endLng, NSNumber)
   RCT_EXPORT_VIEW_PROPERTY(destinationName, NSString)
   RCT_EXPORT_VIEW_PROPERTY(hasTrail, NSNumber)
+  RCT_EXPORT_VIEW_PROPERTY(mapStyle, NSString)
   RCT_EXPORT_VIEW_PROPERTY(onClose, RCTBubblingEventBlock)
 @end
