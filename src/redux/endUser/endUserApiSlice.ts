@@ -146,6 +146,15 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
       },
       transformResponse: (res: any) => res?.news_feed,
     }),
+    getCurrentUserProfile: builder.query({
+      query: () => {
+        return {
+          url: `profiles/my_profile`,
+          method: 'GET',
+        };
+      },
+      transformResponse: (res: any) => res?.user,
+    }),
   }),
 
   overrideExisting: true,
@@ -163,4 +172,5 @@ export const {
   useGetRouteBasedIdMutation,
   useCreateShareLinkRouteMutation,
   useGetNewsBlogsQuery,
+  useGetCurrentUserProfileQuery,
 } = enduserApiSlice;
