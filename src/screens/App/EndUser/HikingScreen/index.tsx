@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -34,25 +34,26 @@ import {
   ROUTE_LINE_STYLES,
 } from '../../../../shared/exporter';
 import styles from './styles';
-import { svgIcon } from '../../../../assets/svg';
+import {svgIcon} from '../../../../assets/svg';
 import HeaderView from '../HikingScreen/HeaderView';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import HikingFilter from '../../../../components/complex/HikingFilter';
 import GeneralModal from '../../../../components/complex/GeneralModal';
-import { setMapLayerStyle } from '../../../../redux/manager/managerSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {
   resetTrailRoute,
   setSelectedTrail,
 } from '../../../../redux/endUser/endUserSlice';
 import useLocation from '../../../../hooks/getLocation';
-import { useCreateRouteMutation } from '../../../../redux/manager/managerApiSlice';
-import { RouteToWellSheet } from '../../../../components/complex/RouteToWellSheet';
+import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
+import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet';
 import usePlaceName from '../../../../hooks/getPlaceName';
-import { getTimeAndDistance, isIOS } from '../../../../shared/utils/helpers';
+import {getTimeAndDistance, isIOS} from '../../../../shared/utils/helpers';
 import SharedSheet from '../../../../components/complex/SharedSheet';
-import { useCreateShareLinkRouteMutation } from '../../../../redux/endUser/endUserApiSlice';
+import {useCreateShareLinkRouteMutation} from '../../../../redux/endUser/endUserApiSlice';
 import Share from 'react-native-share';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -72,7 +73,7 @@ const MY_DATA_MODAL_CONTENT = [
   },
 ];
 
-const HikingScreen = ({ route, navigation }: any) => {
+const HikingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const cameraRef = useRef<any>(null);
   const [weather, setWeather] = useState<any>([]);
@@ -94,14 +95,14 @@ const HikingScreen = ({ route, navigation }: any) => {
   const [results, setResults] = useState<null>(null);
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const { subscription } = useSelector(state => state?.auth?.loginUser);
-  const { showPremiumAlert } = usePremiumAlert();
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
 
   const [showNavigationSheet, setShowNavigationSheet] =
     useState<boolean>(false);
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
-  const { placeName, fetchPlaceName } = usePlaceName();
-  const { location } = useLocation();
+  const {placeName, fetchPlaceName} = usePlaceName();
+  const {location} = useLocation();
 
   const [showTrailInfoSheet, setShowTrailInfoSheet] = useState<boolean>(false);
   const [routes, setRoute] = useState<any>([]);
@@ -109,8 +110,8 @@ const HikingScreen = ({ route, navigation }: any) => {
   const [showTrailShareSheet, setShowTrailShareSheet] =
     useState<boolean>(false);
 
-  const { loginUser } = useSelector(state => state.auth);
-  const [createRoute, { isLoading }] = useCreateRouteMutation();
+  const {loginUser} = useSelector(state => state.auth);
+  const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,
     start: false,
@@ -120,7 +121,7 @@ const HikingScreen = ({ route, navigation }: any) => {
   const pinLocationSheet = useRef<any>(null);
   console.log('subscription', subscription);
 
-  const [createShareLinkRoute, { isLoading: linkRouteLoading }] =
+  const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
     useCreateShareLinkRouteMutation();
   // Get user location
   useEffect(() => {
@@ -159,12 +160,12 @@ const HikingScreen = ({ route, navigation }: any) => {
     } else {
       Geolocation.getCurrentPosition(
         position => {
-          const { latitude, longitude } = position.coords;
+          const {latitude, longitude} = position.coords;
           setUserLocation([longitude, latitude]);
           fetchNearbyTrails(latitude, longitude);
         },
         error => Alert.alert('Error', error.message),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
       );
     }
   }, [route]);
@@ -272,7 +273,7 @@ const HikingScreen = ({ route, navigation }: any) => {
         type: 'FeatureCollection',
         features: data.elements.map((element: any, index: any) => ({
           type: 'Feature',
-          properties: { tags: element?.tags, color: getTrailColor(index) },
+          properties: {tags: element?.tags, color: getTrailColor(index)},
           geometry: {
             type: 'LineString',
             // coordinates: offsetCoordinates(
@@ -328,7 +329,7 @@ const HikingScreen = ({ route, navigation }: any) => {
       const data = await response.json();
       const route = data?.routes[0]?.geometry?.coordinates;
 
-      if (!route || route?.length === 0) return { mainRoute: [], offRoad: [] };
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
 
       const firstRoutePoint = route[0];
       const lastRoutePoint = route[route.length - 1];
@@ -356,13 +357,13 @@ const HikingScreen = ({ route, navigation }: any) => {
         offRoad: offRoad,
       };
     } catch (error) {
-      return { mainRoute: [], offRoad: [] };
+      return {mainRoute: [], offRoad: []};
     }
   };
 
   const onPressMap = async (event: any) => {
     try {
-      const { geometry } = event;
+      const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
         console.log('COORDS', coords);
@@ -375,7 +376,7 @@ const HikingScreen = ({ route, navigation }: any) => {
         });
 
         fetchPlaceName(coords[1], coords[0]);
-        const { mainRoute, offRoad } = await fetchRoute(userLocation, coords);
+        const {mainRoute, offRoad} = await fetchRoute(userLocation, coords);
         setRoute(mainRoute);
         setOffRoadSegment(offRoad);
         const locResults: any = await getTimeAndDistance(userLocation, coords);
@@ -408,12 +409,12 @@ const HikingScreen = ({ route, navigation }: any) => {
     const locationsAttributes =
       trailPath?.length > 0
         ? [
-          ...trailPath.map(([longitude, latitude], index) => ({
-            latitude: latitude.toString(),
-            longitude: longitude.toString(),
-            name: `Point ${index + 1}`,
-          })),
-        ]
+            ...trailPath.map(([longitude, latitude], index) => ({
+              latitude: latitude.toString(),
+              longitude: longitude.toString(),
+              name: `Point ${index + 1}`,
+            })),
+          ]
         : [];
     const routeObj = {
       user_route: {
@@ -472,7 +473,7 @@ const HikingScreen = ({ route, navigation }: any) => {
     cameraRef.current.flyTo(userLocation, 100);
   };
 
-  const ActionBtn = ({ icon, onPress }: any) => (
+  const ActionBtn = ({icon, onPress}: any) => (
     <TouchableOpacity onPress={onPress}>
       <Image
         source={icon}
@@ -567,12 +568,12 @@ const HikingScreen = ({ route, navigation }: any) => {
       const locationsAttributes =
         trailPath?.length > 0
           ? [
-            ...trailPath.map(([longitude, latitude], index) => ({
-              latitude: latitude.toString(),
-              longitude: longitude.toString(),
-              name: `Point ${index + 1}`,
-            })),
-          ]
+              ...trailPath.map(([longitude, latitude], index) => ({
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
+                name: `Point ${index + 1}`,
+              })),
+            ]
           : [];
 
       routeData = {
@@ -622,7 +623,7 @@ const HikingScreen = ({ route, navigation }: any) => {
         });
       }, 300);
     } else {
-      navigation.navigate('TrailDetails', { trailInfo });
+      navigation.navigate('TrailDetails', {trailInfo});
     }
   };
 
@@ -810,14 +811,14 @@ const HikingScreen = ({ route, navigation }: any) => {
         onClose={() => setIsMyDataVisible(false)}>
         <FlatList
           data={MY_DATA_MODAL_CONTENT}
-          renderItem={({ item }) => {
+          renderItem={({item}) => {
             return (
               <TouchableOpacity
                 activeOpacity={0.4}
                 style={styles.tagView}
                 onPress={() => {
                   setIsMyDataVisible(false),
-                    navigation.navigate(Routes.EndUserSavedLibraryType, { item });
+                    navigation.navigate(Routes.EndUserSavedLibraryType, {item});
                 }}>
                 <View style={styles.tagRow}>
                   {item?.icon}
