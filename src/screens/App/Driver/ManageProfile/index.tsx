@@ -5,7 +5,7 @@ import {
   FlatList,
   ImageBackground,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   AppButton,
   AppHeader,
@@ -35,6 +35,7 @@ const ManageProfile = ({navigation}: any) => {
       loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+  const [displayPicture, setDisplayPicture] = useState(null);
   const dispatch = useDispatch();
   const uploadFromGallery = async () => {
     const result = await launchImageLibrary(IMAGE_OPTIONS);
@@ -63,13 +64,28 @@ const ManageProfile = ({navigation}: any) => {
     });
     const resp = await editProfile(data);
     if (resp?.data) {
-      dispatch(setLoginUser(resp?.data?.profile));
+      dispatch(
+        setLoginUser({
+          ...loginUser,
+          avatar: resp?.data?.profile?.avatar,
+        }),
+      );
       setProfileImage(null);
       showAlert('Alert', `Profile has been updated.`);
     } else {
       showAlert('Error', resp?.error?.data?.errors[0] || UNEXPECTED_ERROR);
     }
   };
+
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+        loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+    setDisplayPicture(loginUser?.avatar);
+  }, [loginUser]);
+
   return (
     <MainWrapper>
       <AppHeader title="Manage Profile" />
@@ -82,8 +98,8 @@ const ManageProfile = ({navigation}: any) => {
             source={
               profileImage
                 ? profileImage
-                : loginUser?.avatar
-                ? {uri: loginUser?.avatar}
+                : displayPicture
+                ? {uri: displayPicture}
                 : appIcons.imagePlaceholder
             }
             resizeMode="cover">

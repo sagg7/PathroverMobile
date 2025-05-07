@@ -1,6 +1,12 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
-import {PFColors, PFFonts, PFFontSize, Routes} from '../../../shared/exporter';
+import {
+  isIOS,
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  Routes,
+} from '../../../shared/exporter';
 import Svg from '../../../assets/svg/blueMarker.svg';
 import moment from 'moment';
 import {useDispatch} from 'react-redux';
@@ -64,10 +70,23 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         formatedData?.type === 'Pin Point' ||
         formatedData?.type === 'Way point'
       ) {
-        navigation.navigate(Routes.ViewWellPathNavigation, {
-          entranceCoords: formatedData?.endingPoint,
-          entranceName: formatedData?.name,
-        });
+        // navigation.navigate(Routes.ViewWellPathNavigation, {
+        //   entranceCoords: formatedData?.endingPoint,
+        //   entranceName: formatedData?.name,
+        // });
+
+        if (isIOS()) {
+          navigation.navigate(Routes.TurnByTurnNav, {
+            originCoords: [location.longitude, location.laatitude],
+            entranceCoords: formatedData?.endingPoint,
+            entranceName: formatedData?.name,
+          });
+        } else {
+          navigation.navigate(Routes.ViewWellPathNavigation, {
+            entranceCoords: formatedData?.endingPoint,
+            entranceName: formatedData?.name,
+          });
+        }
       } else if (
         formatedData?.route_type === 'hiking_trail_route' ||
         type === 'trail'

@@ -12,17 +12,22 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
 
         try {
           // while (currentPage != totalPages) {
-          const queryParams: any = new URLSearchParams({
+          const params: Record<string, any> = {
             latitude: arg.latitude,
             longitude: arg.longitude,
             radius: radius,
             per_page: arg.per_page,
             page: currentPage,
-          }).toString();
+          };
 
-          console.log('\n\nQUERY PARAM HIT\n', queryParams);
+          if (arg.state != null || arg.state != undefined) {
+            params.state = arg.state;
+          }
+          const queryString = new URLSearchParams(params).toString();
+          console.log('params', queryString);
+
           const result = await baseQuery(
-            `user_routes/well_location?${queryParams}`,
+            `user_routes/well_location?${queryString}`,
             _queryApi,
             _extraOptions,
           );
@@ -31,9 +36,6 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
             throw new Error(result.error.message || 'Failed to fetch wells');
           }
           const data: any = result.data;
-          // console.log(
-          //   `Fetched page ${currentPage}/${data.total_pages}, Wells: ${data.wells.length}`,
-          // );
 
           allWells = [...allWells, ...data.wells];
           totalPages = data.total_pages;

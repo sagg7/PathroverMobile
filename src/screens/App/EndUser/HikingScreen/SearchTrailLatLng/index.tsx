@@ -38,6 +38,7 @@ import {
 import {
   CHAT_NON_VERIFIED_TEXT,
   REPORTS_LIST,
+  ROUTE_LINE_STYLES,
   UNEXPECTED_ERROR,
 } from '../../../../../shared/utils/constant';
 import {getTimeAndDistance, isIOS} from '../../../../../shared/utils/helpers';
@@ -428,8 +429,8 @@ const SearchTrailLatLng = () => {
               key={routes?.length}
               id="routeLayer-unique"
               style={{
-                lineWidth: 6,
-                lineColor: 'red',
+                lineWidth: ROUTE_LINE_STYLES.lineWidth,
+                lineColor: ROUTE_LINE_STYLES.color,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -532,7 +533,17 @@ const SearchTrailLatLng = () => {
             });
             // centerMap();
           }}
-          onPressStart={() => onPressStartBtn()}
+          onPressStart={() => {
+            if (isIOS()) {
+              navigation.navigate(Routes.TurnByTurnNav, {
+                originCoords: currentLocation,
+                entranceCoords: endingPoint,
+                entranceName: 'location',
+              });
+            } else {
+              onPressStartBtn();
+            }
+          }}
           show
           onPressShare={onPressShare}
           onPressPin={() => handlePinBtn()}

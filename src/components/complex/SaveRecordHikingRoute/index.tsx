@@ -36,7 +36,7 @@ const SaveRecordHikingRouteSheet = ({
   elevation,
   value,
   onChange,
-  distance,
+  distance = 0.0,
   setHideActionBtn,
 }: SaveRecordHikingRouteSheetProps) => {
   const [btnStatus, setBtnStatus] = useState('play');
@@ -75,7 +75,7 @@ const SaveRecordHikingRouteSheet = ({
           {btnStatus === 'play' && (
             <View style={styles.distanceView}>
               <Text style={styles.distanceNumberText}>
-                {distance?.toFixed(2)}
+                {String(distance)} m
               </Text>
               <Text style={styles.distanceText}>Distance</Text>
             </View>

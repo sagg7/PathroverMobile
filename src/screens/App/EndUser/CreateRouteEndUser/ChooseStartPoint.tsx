@@ -14,11 +14,12 @@ import {useDispatch, useSelector} from 'react-redux';
 import {svgIcon} from '../../../../assets/svg';
 import {
   fetchSuggestions,
+  isIOS,
   PFColors,
   PFFonts,
   showAlert,
 } from '../../../../shared/exporter';
-import {scale, WP} from '../../../../shared/theme/responsive';
+import {HP, scale, WP} from '../../../../shared/theme/responsive';
 import useLocation from '../../../../hooks/getLocation';
 import usePlaceName from '../../../../hooks/getPlaceName';
 import {setCreateRouteData} from '../../../../redux/endUser/endUserSlice';
@@ -41,6 +42,10 @@ const ChooseStartPoint = ({route, navigation}: any) => {
   const {location} = useLocation();
 
   useEffect(() => {
+    console.log('isTart', createRouteData);
+
+    console.log('createRouteData', createRouteData);
+
     if ('start' in createRouteData) {
       setCurrentLocation(
         isStartPoint
@@ -57,7 +62,16 @@ const ChooseStartPoint = ({route, navigation}: any) => {
           ? createRouteData?.start?.placeName
           : createRouteData?.end?.placeName,
       );
+      console.log('here working', 3);
+    } else if ('end' in createRouteData) {
+      console.log('here working createRouteData', createRouteData);
+
+      setCurrentLocation(setCurrentLocation(createRouteData?.end?.coords));
+      fetchPlaceName(location?.latitude, location?.longitude);
+      setSimpleSearch(placeName);
     } else if (location) {
+      console.log('here working', location);
+
       setCurrentLocation([location?.longitude, location?.latitude]);
       fetchPlaceName(location?.latitude, location?.longitude);
       setSimpleSearch(placeName);
@@ -132,6 +146,7 @@ const ChooseStartPoint = ({route, navigation}: any) => {
       }
     }, 1500);
   };
+  console.log('currentLocation', currentLocation);
 
   return (
     <MainWrapper>
@@ -290,7 +305,7 @@ const styles = StyleSheet.create({
   },
   textinputStyles: {
     position: 'absolute',
-    top: 50,
+    top: isIOS() ? HP('12') : HP('10'),
     width: WP('100'),
   },
   suggestionContainer: {

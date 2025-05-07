@@ -1,9 +1,9 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {DriverTabs} from './DriverTabs';
 import {ManagerTabs} from './ManagerTabs';
 import {useSelector} from 'react-redux';
-import {APP_ROLE, Routes} from '../../shared/exporter';
+import {APP_ROLE, isIOS, Routes} from '../../shared/exporter';
 import {EndUserTabs} from './EndUserTabs';
 import AuthStack from '../stacks/authStack';
 import {
@@ -15,13 +15,17 @@ import {Linking} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useUpdateCallMutation} from '../../redux/chat/chatApiSlice';
 import messaging, {getMessaging} from '@react-native-firebase/messaging';
+import {useGetRouteBasedIdMutation} from '../../redux/endUser/endUserApiSlice';
+import useLocation from '../../hooks/getLocation';
 
 const Tab = createBottomTabNavigator();
 const AppStack = () => {
   const navigation = useNavigation();
   const userRole = useSelector(state => state.appRole.userRole);
   const loginUser = useSelector(state => state?.auth?.loginUser);
-  const [updateCall, { error }] = useUpdateCallMutation();  
+  const [updateCall, {error}] = useUpdateCallMutation();
+  const [getRouteBasedId, {isLoading, data}] = useGetRouteBasedIdMutation();
+  const {location} = useLocation();
 
   useEffect(() => {
     NotificationListener(navigation);
@@ -91,6 +95,23 @@ const AppStack = () => {
 
     return {routeType: params['route_type'], routeId: params['route_id']};
   };
+  useEffect(() => {
+    if (data) {
+      const routeData = data?.user_routes[0];
+      // setDestination([
+      //   Number(routeData?.dropoff_location?.longitude),
+      //   Number(routeData?.dropoff_location?.latitude),
+      // ]);
+      navigation.navigate(Routes.TurnByTurnNav, {
+        entranceCoords: [
+          Number(routeData?.dropoff_location?.longitude),
+          Number(routeData?.dropoff_location?.latitude),
+        ],
+        entranceName: 'Test',
+        originCoords: [location?.longitude, location?.latitude],
+      });
+    }
+  }, [data]);
 
   const handleDeepLink = (url: string | null) => {
     if (url) {
@@ -101,11 +122,15 @@ const AppStack = () => {
           routeType === 'waypoint_route' ||
           routeType === 'maps_location_pins'
         ) {
-          navigation.navigate(Routes.ViewWellPathNavigation, {
-            entranceCoords: [],
-            routeId: routeId,
-            entranceName: '',
-          });
+          if (isIOS()) {
+            if (routeId) getRouteBasedId(routeId);
+          } else {
+            navigation.navigate(Routes.ViewWellPathNavigation, {
+              entranceCoords: [],
+              routeId: routeId,
+              entranceName: '',
+            });
+          }
         } else {
           navigation.navigate(Routes.ViewSharedRoutes, {routeType, routeId});
         }
