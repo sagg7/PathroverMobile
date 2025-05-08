@@ -126,25 +126,24 @@ const Subscription = () => {
   const handleBuySubscription = async (sku: any) => {
     if (isProcessing.current || isLoading) return;
     isProcessing.current = true;
-    setIsLoading(true);
+    const availablePurchases = await getAvailablePurchases();
 
-    // return;
     try {
-      const offerToken =
-        subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
-
-      let byPass = false;
+      setIsLoading(true);
+      let byPass = true;
       if (Platform.OS === 'ios') {
-        const availablePurchases = await getAvailablePurchases();
-        
         if (availablePurchases?.length === 0) {
           byPass = true;
         }
       } else {
         byPass = true;
       }
-
+      
       if (byPass) {
+        setIsLoading(true);
+        const offerToken =
+          subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
+                
         const purchase = await requestSubscription({
           sku,
           ...(offerToken && { subscriptionOffers: [{ sku, offerToken }] }),
@@ -186,6 +185,7 @@ const Subscription = () => {
             //
           });
       } else {
+        setIsLoading(false);
         Alert.alert('Error', 'Subscription already purchased.');
       }
     } catch (err) {
