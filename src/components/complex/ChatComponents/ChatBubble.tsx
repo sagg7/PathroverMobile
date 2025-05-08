@@ -1,6 +1,7 @@
 import moment from 'moment';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
+  Dimensions,
   Image,
   Linking,
   StyleSheet,
@@ -11,12 +12,12 @@ import {
 } from 'react-native';
 import FitImage from 'react-native-fit-image';
 import Modal from 'react-native-modal';
-import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
-import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType';
+import { PFColors, PFFonts, PFFontSize, scale } from '../../../shared/exporter';
+import { identifyAttachmentTypeFromUrl } from '../../../helpers/getAttachmentType';
 import AudioMessage from './AudioMessage';
 import VideoMessage from './VideoMessage';
 import FileMessage from './FileMessage';
-import {MESSAGE_CONTAINS_LOCATION} from '../../../shared/utils/constant';
+import { MESSAGE_CONTAINS_LOCATION } from '../../../shared/utils/constant';
 import LocationMessage from './LocationMessage';
 
 const THRESHOLD = 60 * 1000;
@@ -36,11 +37,11 @@ const getShowTime = (currentMessage, nextMessage) => {
   return nextTime - currentTime > THRESHOLD;
 };
 
-const ChatBubble = ({props}) => {
-  const {currentMessage, position, nextMessage} = props;
+const ChatBubble = ({ props }) => {
+  const { currentMessage, position, nextMessage } = props;
   const isLeft = position === 'left';
 
-  const {content, created_at, image, message_attachment, text} = currentMessage;
+  const { content, created_at, image, message_attachment, text } = currentMessage;
   const isLocation = content?.includes(MESSAGE_CONTAINS_LOCATION);
   const showTime = getShowTime(currentMessage, nextMessage);
   const fileType =
@@ -71,7 +72,7 @@ const ChatBubble = ({props}) => {
             styles.url,
             ,
             isLeft ? styles.leftMessageText : styles.rightMessageText,
-            {opacity: 0.8},
+            { opacity: 0.8 },
           ]}>
           {part}
         </Text>
@@ -159,7 +160,7 @@ const ChatBubble = ({props}) => {
                 ]}>
                 {renderTextWithUrls(content || text)}
               </Text>
-              <View style={{width: 10}} />
+              <View style={{ width: 10 }} />
             </>
           )}
         </View>
@@ -179,10 +180,14 @@ const ChatBubble = ({props}) => {
         useNativeDriver={true}
         style={styles.modalContainer}>
         <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
-          <Image
-            source={{uri: selectedImage}}
+          <FitImage
+            indicatorColor={
+              isLeft ? PFColors.Standard.Black : PFColors.Standard.White
+            }
+            indicatorSize={'small'}
+            source={{ uri: selectedImage }}
             style={styles.fullImageStyle}
-            resizeMode="contain"
+            resizeMode='contain'
           />
         </TouchableWithoutFeedback>
       </Modal>
@@ -275,9 +280,11 @@ const styles = StyleSheet.create({
     height: 80,
   },
   fullImageStyle: {
-    width: '96%',
-    flexGrow: 1,
+    // width: '96%',
+    // flexGrow: 1,
     alignSelf: 'center',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
   imageStyle: {
     flex: 1,
@@ -291,4 +298,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {ChatBubble};
+export { ChatBubble };
