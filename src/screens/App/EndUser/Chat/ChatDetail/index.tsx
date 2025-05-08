@@ -179,7 +179,7 @@ const ChatDetail = () => {
       form.append('message[message_type]', 'private');
       form.append('message[read]', false);
 
-      const res = await createChatMessage({data: form, id: item?.id});
+      const res = await createChatMessage({ data: form, id: item?.id });
       if (res) {
         await getChatMessage(item?.id);
       }
