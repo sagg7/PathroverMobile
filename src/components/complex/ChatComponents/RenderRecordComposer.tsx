@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,21 +7,27 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import {Composer} from 'react-native-gifted-chat';
+import { Composer, Send } from 'react-native-gifted-chat';
 import {
   PFColors,
   PFFonts,
   PFFontSize,
+  RenderSend,
   showAlert,
 } from '../../../shared/exporter';
-import {svgIcon} from '../../../assets/svg';
+import { svgIcon } from '../../../assets/svg';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
-import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { useSelector } from 'react-redux';
 
-const RenderRecordComposer = props => {
-  const [isRecording, setIsRecording] = useState(false);
+const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) => {
+    const { loginUser } = useSelector(state => state.auth);
+  
+  // const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState('00:00');
+  const [isPaused, setIsPaused] = useState(false);
+
   const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
   const recordingPath = useRef('');
 
@@ -124,35 +130,7 @@ const RenderRecordComposer = props => {
     }
   };
 
-  // const onStartRecord = async () => {
-  //   const hasPermission = await checkMicrophonePermissions();
-  //   if (!hasPermission) {
-  //     showAlert(
-  //       'Permission Denied',
-  //       'Microphone access is required to record audio.',
-  //     );
-  //     return;
-  //   }
 
-  //   console.log('Starting recording...');
-  //   const path = getAudioFilePath();
-  //   console.log('File path:', path);
-  //   recordingPath.current = path;
-
-  //   try {
-  //     await audioRecorderPlayer.startRecorder(path);
-  //     console.log('Recording started at:', path);
-  //     audioRecorderPlayer.addRecordBackListener(e => {
-  //       const time = formatTime(e.currentPosition);
-  //       setRecordTime(time);
-  //     });
-  //     setIsRecording(true);
-  //   } catch (error) {
-  //     console.error('Failed to start recording:', error);
-  //     showAlert('Error', 'Failed to start recording. Please try again.');
-  //     setIsRecording(false);
-  //   }
-  // };
 
   const onStopRecord = async () => {
     if (!isRecording) {
@@ -160,10 +138,10 @@ const RenderRecordComposer = props => {
       return;
     }
 
-    // console.log('Stopping recording...');
+    console.log('Stopping recording...');
     try {
       const result = await audioRecorderPlayer.stopRecorder();
-      // console.log('Recording stopped, file saved at:', result);
+      console.log('Recording stopped, file saved at:', result);
       audioRecorderPlayer.removeRecordBackListener();
       setIsRecording(false);
       setRecordTime('00:00');
@@ -177,8 +155,8 @@ const RenderRecordComposer = props => {
             text: '',
             createdAt: new Date(),
             user: {
-              _id: props.user._id,
-              name: props.user.name,
+              _id: loginUser?.id,
+              name: loginUser?.name,
             },
             attachment: {
               uri: result,
@@ -186,9 +164,10 @@ const RenderRecordComposer = props => {
               type: 'audio/m4a',
             },
           };
-          props.onSend([message]);
+          onSend([message]);
+          // props.onSend([message]);
         } else {
-          console.error('File does not exist:', result);
+          // console.error('File does not exist:', result);
           showAlert('Error', 'The recorded file does not exist.');
         }
       } else if (result === 'Already stopped') {
@@ -202,12 +181,17 @@ const RenderRecordComposer = props => {
               text: '',
               createdAt: new Date(),
               user: {
-                _id: props.user._id,
-                name: props.user.name,
+                _id: loginUser?.id,
+                name: loginUser?.name,
               },
+              // user: {
+              //   _id: props.user._id,
+              //   name: props.user.name,
+              // },
               attachment: recordingPath.current,
             };
-            props.send([message]);
+            onSend([message]);
+            // props.send([message]);
           } else {
             // console.error(
             //   'File does not exist at stored path:',
@@ -229,23 +213,75 @@ const RenderRecordComposer = props => {
     }
   };
 
+
+  const onPauseRecord = async () => {
+    if (!isRecording) {
+      // console.log('Recording is already paused.');
+      return;
+    }
+
+    // console.log('Pausing recording...');
+    try {
+      if (isPaused) {
+        await audioRecorderPlayer.resumeRecorder();
+        setIsPaused(false);
+      } else {
+        await audioRecorderPlayer.pauseRecorder();
+        setIsPaused(true);
+      }
+    } catch (error) {
+      // console.error('Failed to pause recording:', error);
+      showAlert('Error', 'Failed to pause recording. Please try again.');
+    }
+  };
+
   const handleRecordPress = async () => {
     // await audioRecorderPlayer.stopRecorder();
     if (isRecording) {
-      onStopRecord();
+      // onStopRecord();
+      onPauseRecord();
     } else {
       onStartRecord();
     }
   };
+  const handleDelete = async () => {
+    if (isRecording) {
+      await audioRecorderPlayer.stopRecorder();
+      audioRecorderPlayer.removeRecordBackListener();
+      setIsRecording(false);
+      setRecordTime('00:00');
+    }
+  };
 
   return (
-    <View style={styles.viewStyle}>
-      <Composer {...props} textInputStyle={styles.textInputStyle} />
-      <TouchableOpacity onPress={handleRecordPress}>
-        {isRecording ? svgIcon.StopIcon : svgIcon.RecordIcon}
-      </TouchableOpacity>
-      {isRecording && <Text style={styles.recordingText}>{recordTime}</Text>}
-    </View>
+    <>
+      <View style={styles.viewStyle}>
+        {!isRecording && <Composer {...props} textInputStyle={styles.textInputStyle} />}
+        <View style={styles.iconView}>
+          <View style={styles.innerLeftView}>
+            {isRecording && <TouchableOpacity onPress={handleRecordPress} style={styles.iconStyling}>
+              {isPaused ? svgIcon.PauseIcon : svgIcon.StopIcon}
+            </TouchableOpacity>}
+            {isRecording && <Text style={styles.recordingText}>{recordTime}</Text>}
+          </View>
+          {isRecording && <TouchableOpacity onPress={handleDelete} style={styles.iconStyling}>
+            {svgIcon.Delete}
+          </TouchableOpacity>}
+        </View>
+        {!isRecording && <TouchableOpacity onPress={handleRecordPress}>
+          {svgIcon.RecordIcon}
+        </TouchableOpacity>}
+      </View>
+      {isRecording && <TouchableOpacity
+        disabled={isPaused}
+        onPress={() => {
+          console.log("Send pressed");
+          onStopRecord();
+        }}
+        style={styles.containerStyle(isPaused)}>
+        {svgIcon.SendMsg}
+      </TouchableOpacity>}
+    </>
   );
 };
 
@@ -273,10 +309,66 @@ const styles = StyleSheet.create({
   },
   recordingText: {
     color: PFColors.Standard.Black,
-    fontSize: PFFontSize.FONT_SIZE_10,
+    fontSize: PFFontSize.FONT_SIZE_14,
     fontFamily: PFFonts.Foundation.Medium,
     marginLeft: 4,
   },
+  iconStyling: {
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+  },
+  iconView: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  innerLeftView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  containerStyle: (disable: boolean) => ({
+    justifyContent: 'center',
+    height: 44,
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: PFColors.Blue.Dark,
+    borderRadius: 44,
+    width: 44,
+    opacity: disable ? 1 : 0.4,
+  }),
 });
 
-export {RenderRecordComposer};
+export { RenderRecordComposer };
+
+
+// const onStartRecord = async () => {
+//   const hasPermission = await checkMicrophonePermissions();
+//   if (!hasPermission) {
+//     showAlert(
+//       'Permission Denied',
+//       'Microphone access is required to record audio.',
+//     );
+//     return;
+//   }
+
+//   console.log('Starting recording...');
+//   const path = getAudioFilePath();
+//   console.log('File path:', path);
+//   recordingPath.current = path;
+
+//   try {
+//     await audioRecorderPlayer.startRecorder(path);
+//     console.log('Recording started at:', path);
+//     audioRecorderPlayer.addRecordBackListener(e => {
+//       const time = formatTime(e.currentPosition);
+//       setRecordTime(time);
+//     });
+//     setIsRecording(true);
+//   } catch (error) {
+//     console.error('Failed to start recording:', error);
+//     showAlert('Error', 'Failed to start recording. Please try again.');
+//     setIsRecording(false);
+//   }
+// };
