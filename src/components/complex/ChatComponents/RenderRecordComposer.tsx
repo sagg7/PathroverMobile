@@ -273,7 +273,7 @@ const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) =>
         </TouchableOpacity>}
       </View>
       {isRecording && <TouchableOpacity
-        disabled={isPaused}
+        disabled={!isPaused}
         onPress={() => {
           console.log("Send pressed");
           onStopRecord();
