@@ -23,8 +23,8 @@ import {
   useReadChatMessageMutation,
 } from '../../../../../redux/chat/chatApiSlice';
 import { REQ_LIST_SOCKET_URL } from '../../../../../shared/exporter';
-import styles from './styles';
 import { MESSAGE_CONTAINS_LOCATION } from '../../../../../shared/utils/constant';
+import styles from './styles';
 
 interface HeaderProps {
   title: string;
@@ -82,16 +82,19 @@ const ChatDetail = () => {
   const { shareTrail } = params;
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [show, setShow] = useState(false);
-  const [messages, setMessages] = useState([]);
   const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
   const { subscribe, unsubscribe } = useChannel(actionCable);
-  const [isConnected, setIsConnected] = useState(false);
+
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage, { isLoading }] = useCreateChatMessageMutation();
   const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
+
+  const [show, setShow] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     try {
@@ -107,7 +110,7 @@ const ChatDetail = () => {
             readChat();
           },
           connected: () => {
-            setIsConnected(true);
+            // setIsConnected(true);
           },
         },
       );
@@ -208,7 +211,7 @@ const ChatDetail = () => {
       form.append('message[content]', message?.[0]?.text);
       form.append('message[user_id]', loginUser?.id);
       form.append('message[message_type]', 'private');
-      form.append('message[read]', false);
+      form.append('message[read]', false);      
 
       const res = await createChatMessage({ data: form, id: item?.id });
       if (res) {
@@ -255,7 +258,7 @@ const ChatDetail = () => {
           user={{
             _id: loginUser?.id,
           }}
-          keyExtractor={item => `${item._id}-${item.created_at}`}
+          keyExtractor={item => `${item?._id}-${item?.created_at}`}
           messages={messages}
           renderAvatar={null}
           showUserAvatar={false}
@@ -268,7 +271,7 @@ const ChatDetail = () => {
           renderTime={RenderTime}
           renderMessageImage={RenderMessageImage}
           renderInputToolbar={props =>
-            RenderInputToolbar(props, () => { }, true)
+            RenderInputToolbar(props, () => { }, true, isRecording, setIsRecording, onSend)
           }
           listViewProps={{
             showsVerticalScrollIndicator: false,

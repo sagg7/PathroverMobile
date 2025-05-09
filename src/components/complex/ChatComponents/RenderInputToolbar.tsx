@@ -1,21 +1,26 @@
-import React from 'react';
-import {Platform, StyleSheet, View} from 'react-native';
-import {RenderComposer} from './RenderComposer';
+import React, { useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { RenderComposer } from './RenderComposer';
 import RenderActions from './RenderActions';
-import {RenderSend} from './RenderSend';
-import {PFColors, scale} from '../../../shared/exporter';
-import {RenderRecordComposer} from './RenderRecordComposer';
+import { RenderSend } from './RenderSend';
+import { PFColors, scale } from '../../../shared/exporter';
+import { RenderRecordComposer } from './RenderRecordComposer';
 
-const RenderInputToolbar = (props, onPress, isRecord) => {
+const RenderInputToolbar = (props, onPress, isRecord, isRecording, setIsRecording, onSend) => {
   return (
     <View style={styles.mainContainer}>
       <RenderActions {...props} isRecord={isRecord} />
       {isRecord ? (
-        <RenderRecordComposer {...props} />
+        <RenderRecordComposer
+          {...props}
+          onSend={onSend}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
+        />
       ) : (
         <RenderComposer {...props} />
       )}
-      <RenderSend {...props} />
+      {!isRecording && <RenderSend {...props} />}
     </View>
   );
 };
@@ -55,4 +60,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {RenderInputToolbar};
+export { RenderInputToolbar };

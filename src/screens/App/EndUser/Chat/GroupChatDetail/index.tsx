@@ -57,8 +57,7 @@ const GroupChatDetail = () => {
   const { params } = useRoute();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [show, setShow] = useState(false);
-  const [messages, setMessages] = useState([]);
+
   const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
   const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
@@ -67,6 +66,11 @@ const GroupChatDetail = () => {
   const [createGroupMessage] = useCreateGroupMessageMutation();
   const [getGroupChatMessages, { data }] = useGetGroupChatMessagesMutation();
   const [readGroupChatMessage] = useReadGroupChatMessageMutation();
+
+  const [show, setShow] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);  
+
 
   useEffect(() => {
     try {
@@ -203,7 +207,7 @@ const GroupChatDetail = () => {
           user={{
             _id: loginUser?.id,
           }}
-          keyExtractor={item => `${item._id}-${item.created_at}`}
+          keyExtractor={item => `${item?._id}-${item?.created_at}`}
           messages={messages}
           renderAvatar={null}
           showUserAvatar={false}
@@ -217,7 +221,7 @@ const GroupChatDetail = () => {
           renderMessageImage={RenderMessageImage}
           renderMessageAudio={props => <AudioMessage {...props} />}
           renderInputToolbar={props =>
-            RenderInputToolbar(props, () => { }, true)
+            RenderInputToolbar(props, () => { }, true, isRecording, setIsRecording, onSend)
           }
           listViewProps={{
             showsVerticalScrollIndicator: false,
