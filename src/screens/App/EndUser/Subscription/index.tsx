@@ -130,7 +130,7 @@ const Subscription = () => {
 
     try {
       setIsLoading(true);
-      let byPass = true;
+      let byPass = false;
       if (Platform.OS === 'ios') {
         if (availablePurchases?.length === 0) {
           byPass = true;
