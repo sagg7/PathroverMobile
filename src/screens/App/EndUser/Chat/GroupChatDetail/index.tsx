@@ -1,10 +1,10 @@
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
-import {Image, Platform, Text, TouchableOpacity, View} from 'react-native';
-import {GiftedChat} from 'react-native-gifted-chat';
-import {useSelector} from 'react-redux';
-import {appIcons} from '../../../../../assets/icons';
-import {svgIcon} from '../../../../../assets/svg';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { useSelector } from 'react-redux';
+import { appIcons } from '../../../../../assets/icons';
+import { svgIcon } from '../../../../../assets/svg';
 import {
   MainWrapper,
   RenderDay,
@@ -12,17 +12,17 @@ import {
   RenderMessageText,
   RenderTime,
 } from '../../../../../components';
-import {GroupChatBubble} from '../../../../../components/complex/ChatComponents/GroupChatBubble';
+import { GroupChatBubble } from '../../../../../components/complex/ChatComponents/GroupChatBubble';
 import RenderMessageImage from '../../../../../components/complex/ChatComponents/RenderMessageImage';
 import CreateGroupModal from '../../../../../components/complex/CreateGroupModal';
-import {useActionCable} from '../../../../../hooks/socket/useActionCable';
-import {useChannel} from '../../../../../hooks/socket/useChannel';
+import { useActionCable } from '../../../../../hooks/socket/useActionCable';
+import { useChannel } from '../../../../../hooks/socket/useChannel';
 import {
   useCreateGroupMessageMutation,
   useGetGroupChatMessagesMutation,
   useReadGroupChatMessageMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import { REQ_LIST_SOCKET_URL } from '../../../../../shared/exporter';
 import styles from './styles';
 import AudioMessage from '../../../../../components/complex/ChatComponents/AudioMessage';
 
@@ -32,7 +32,7 @@ interface HeaderProps {
   onPressMenu?: () => void;
 }
 
-const Header = ({onPressBack, onPressMenu, title}: HeaderProps) => {
+const Header = ({ onPressBack, onPressMenu, title }: HeaderProps) => {
   return (
     <View style={styles.groupHeader}>
       <TouchableOpacity onPress={onPressBack} hitSlop={20}>
@@ -42,8 +42,8 @@ const Header = ({onPressBack, onPressMenu, title}: HeaderProps) => {
         <Text style={styles.groupNameText}>
           {title && typeof title === 'object' && title.user
             ? [title.user.first_name, title.user.last_name]
-                .filter(Boolean)
-                .join(' ')
+              .filter(Boolean)
+              .join(' ')
             : title?.name || ''}
         </Text>
       </View>
@@ -54,18 +54,18 @@ const Header = ({onPressBack, onPressMenu, title}: HeaderProps) => {
   );
 };
 const GroupChatDetail = () => {
-  const {params} = useRoute();
+  const { params } = useRoute();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [show, setShow] = useState(false);
   const [messages, setMessages] = useState([]);
-  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
-  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const {subscribe, unsubscribe} = useChannel(actionCable);
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
 
   const [createGroupMessage] = useCreateGroupMessageMutation();
-  const [getGroupChatMessages, {data}] = useGetGroupChatMessagesMutation();
+  const [getGroupChatMessages, { data }] = useGetGroupChatMessagesMutation();
   const [readGroupChatMessage] = useReadGroupChatMessageMutation();
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const GroupChatDetail = () => {
             getGroupChatMessages(params?.item?.id);
             readChat();
           },
-          connected: () => {},
+          connected: () => { },
         },
       );
     } catch (err) {
@@ -99,7 +99,7 @@ const GroupChatDetail = () => {
         ...i,
         _id: i?.id,
         createdAt: i?.created_at,
-        user: {...i?.user, _id: i?.user?.id},
+        user: { ...i?.user, _id: i?.user?.id },
       }));
       setMessages(rearrange);
     }
@@ -116,34 +116,65 @@ const GroupChatDetail = () => {
 
   const onSend = async (message: string) => {
     try {
-      const {item} = params;
-      const form = new FormData();
+      const { item } = params;
 
+      let uriFile = '';
+      let uriName = '';
+      let uriType = '';
+
+      const form = new FormData();
       if (message[0]?.attachment) {
+        uriFile = Platform.OS === 'ios'
+          ? message[0]?.attachment?.sourceURL?.replace('file://', '') ||
+          message[0]?.attachment?.uri?.replace('file://', '') ||
+          message[0]?.attachment?.path
+          : message[0]?.attachment?.sourceURL?.uri ||
+          message[0]?.attachment?.uri ||
+          message[0]?.attachment?.path;
+        uriName = message[0]?.attachment?.filename ||
+          message[0]?.attachment?.fileName ||
+          message[0]?.attachment?.name ||
+          '';
+        uriType = message[0]?.attachment?.mime || message[0]?.attachment?.type;
+
         form.append('message[message_attachment]', {
-          uri:
-            Platform.OS === 'ios'
-              ? message[0]?.attachment?.sourceURL?.replace('file://', '') ||
-                message[0]?.attachment?.uri?.replace('file://', '') ||
-                message[0]?.attachment?.path
-              : message[0]?.attachment?.sourceURL?.uri ||
-                message[0]?.attachment?.uri ||
-                message[0]?.attachment?.path,
-          type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
-          name:
-            message[0]?.attachment?.filename ||
-            message[0]?.attachment?.fileName ||
-            message[0]?.attachment?.name ||
-            '',
+          uri: uriFile,
+          type: uriType,
+          name: uriName,
         });
       }
+
+      const randomNumber = Math.floor(Math.random() * (10000 - 1000 + 1)) + 10000;
+
+      setMessages(prevMessages =>
+        GiftedChat.append(prevMessages, [
+          {
+            _id: randomNumber,
+            createdAt: new Date(),
+            text: message?.[0]?.text,
+            user: {
+              _id: loginUser?.id,
+              name: loginUser?.first_name,
+            },
+            ...(message[0]?.attachment && {
+              message_attachment: {
+                url: uriFile,
+                file_name: uriName,
+                type: uriType,
+                content_type: uriType,
+              },
+            }),
+          },
+        ])
+      );
+
       form.append('message[content]', message[0]?.text);
       form.append('message[user_id]', loginUser?.id);
       form.append('message[message_type]', 'group');
       form.append('message[read]', false);
       form.append('message[group_id]', item?.id);
 
-      const res = await createGroupMessage({data: form, id: item?.id});
+      const res = await createGroupMessage({ data: form, id: item?.id });
       if (res) {
         await getGroupChatMessages(item?.id);
       }
@@ -186,7 +217,7 @@ const GroupChatDetail = () => {
           renderMessageImage={RenderMessageImage}
           renderMessageAudio={props => <AudioMessage {...props} />}
           renderInputToolbar={props =>
-            RenderInputToolbar(props, () => {}, true)
+            RenderInputToolbar(props, () => { }, true)
           }
           listViewProps={{
             showsVerticalScrollIndicator: false,
@@ -203,7 +234,7 @@ const GroupChatDetail = () => {
           onPressClose={() => setShow(false)}
           onPress={() => {
             setShow(false);
-            navigation.navigate('GroupInfo', {item: params?.item});
+            navigation.navigate('GroupInfo', { item: params?.item });
           }}
         />
       )}

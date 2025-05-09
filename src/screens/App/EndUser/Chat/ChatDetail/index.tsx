@@ -1,10 +1,10 @@
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
-import {Image, Keyboard, Platform, Text, TouchableOpacity, View} from 'react-native';
-import {GiftedChat} from 'react-native-gifted-chat';
-import {useSelector} from 'react-redux';
-import {appIcons} from '../../../../../assets/icons';
-import {svgIcon} from '../../../../../assets/svg';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Image, Keyboard, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { useSelector } from 'react-redux';
+import { appIcons } from '../../../../../assets/icons';
+import { svgIcon } from '../../../../../assets/svg';
 import {
   ChatBubble,
   MainWrapper,
@@ -15,16 +15,16 @@ import {
 } from '../../../../../components';
 import RenderMessageImage from '../../../../../components/complex/ChatComponents/RenderMessageImage';
 import CreateGroupModal from '../../../../../components/complex/CreateGroupModal';
-import {useActionCable} from '../../../../../hooks/socket/useActionCable';
-import {useChannel} from '../../../../../hooks/socket/useChannel';
+import { useActionCable } from '../../../../../hooks/socket/useActionCable';
+import { useChannel } from '../../../../../hooks/socket/useChannel';
 import {
   useCreateChatMessageMutation,
   useGetChatMessageMutation,
   useReadChatMessageMutation,
 } from '../../../../../redux/chat/chatApiSlice';
-import {REQ_LIST_SOCKET_URL} from '../../../../../shared/exporter';
+import { REQ_LIST_SOCKET_URL } from '../../../../../shared/exporter';
 import styles from './styles';
-import {MESSAGE_CONTAINS_LOCATION} from '../../../../../shared/utils/constant';
+import { MESSAGE_CONTAINS_LOCATION } from '../../../../../shared/utils/constant';
 
 interface HeaderProps {
   title: string;
@@ -48,7 +48,7 @@ const Header = ({
         <Image
           source={
             title?.user?.avatar
-              ? {uri: title?.user?.avatar}
+              ? { uri: title?.user?.avatar }
               : appIcons.userPlaceholder
           }
           style={styles.imageStyle}
@@ -56,8 +56,8 @@ const Header = ({
         <Text style={styles.groupNameText}>
           {title && typeof title === 'object' && title.user
             ? [title.user.first_name, title.user.last_name]
-                .filter(Boolean)
-                .join(' ')
+              .filter(Boolean)
+              .join(' ')
             : title?.name || ''}
         </Text>
       </View>
@@ -65,12 +65,12 @@ const Header = ({
       <View style={styles.iconView}>
         <TouchableOpacity
           onPress={onPressPhone}
-          hitSlop={{top: 10, bottom: 10}}>
+          hitSlop={{ top: 10, bottom: 10 }}>
           {svgIcon.BlackPhone}
         </TouchableOpacity>
         <TouchableOpacity
           onPress={onPressVideo}
-          hitSlop={{top: 10, bottom: 10}}>
+          hitSlop={{ top: 10, bottom: 10 }}>
           {svgIcon.VideoIcon}
         </TouchableOpacity>
       </View>
@@ -78,20 +78,20 @@ const Header = ({
   );
 };
 const ChatDetail = () => {
-  const {params} = useRoute<any>();
-  const {shareTrail} = params;
+  const { params } = useRoute<any>();
+  const { shareTrail } = params;
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const [show, setShow] = useState(false);
   const [messages, setMessages] = useState([]);
-  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
-  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const {subscribe, unsubscribe} = useChannel(actionCable);
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
   const [isConnected, setIsConnected] = useState(false);
   const [readChatMessage] = useReadChatMessageMutation();
-  const [createChatMessage] = useCreateChatMessageMutation();
-  const [getChatMessage, {data: chat}] = useGetChatMessageMutation();
+  const [createChatMessage, { isLoading }] = useCreateChatMessageMutation();
+  const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
 
   useEffect(() => {
     try {
@@ -126,7 +126,7 @@ const ChatDetail = () => {
         ...i,
         _id: i?.id,
         createdAt: i?.created_at,
-        user: {...i.user, _id: i.user.id},
+        user: { ...i.user, _id: i.user.id },
       }));
       setMessages(rearrange);
     }
@@ -146,33 +146,64 @@ const ChatDetail = () => {
     // console.log('WORKING', isConnected + shareTrail);
     if (shareTrail) {
       onSend([
-        {text: JSON.stringify({[MESSAGE_CONTAINS_LOCATION]: shareTrail})},
+        { text: JSON.stringify({ [MESSAGE_CONTAINS_LOCATION]: shareTrail }) },
       ]);
     }
   }, [shareTrail]);
 
   const onSend = async (message: string) => {
     try {
-      const {item} = params;
+      const { item } = params;
+
+      let uriFile = '';
+      let uriName = '';
+      let uriType = '';
+
       const form = new FormData();
       if (message[0]?.attachment) {
+        uriFile = Platform.OS === 'ios'
+          ? message[0]?.attachment?.sourceURL?.replace('file://', '') ||
+          message[0]?.attachment?.uri?.replace('file://', '') ||
+          message[0]?.attachment?.path
+          : message[0]?.attachment?.sourceURL?.uri ||
+          message[0]?.attachment?.uri ||
+          message[0]?.attachment?.path;
+        uriName = message[0]?.attachment?.filename ||
+          message[0]?.attachment?.fileName ||
+          message[0]?.attachment?.name ||
+          '';
+        uriType = message[0]?.attachment?.mime || message[0]?.attachment?.type;
+
         form.append('message[message_attachment]', {
-          uri:
-            Platform.OS === 'ios'
-              ? message[0]?.attachment?.sourceURL?.replace('file://', '') ||
-                message[0]?.attachment?.uri?.replace('file://', '') ||
-                message[0]?.attachment?.path
-              : message[0]?.attachment?.sourceURL?.uri ||
-                message[0]?.attachment?.uri ||
-                message[0]?.attachment?.path,
-          type: message[0]?.attachment?.mime || message[0]?.attachment?.type,
-          name:
-            message[0]?.attachment?.filename ||
-            message[0]?.attachment?.fileName ||
-            message[0]?.attachment?.name ||
-            '',
+          uri: uriFile,
+          type: uriType,
+          name: uriName,
         });
       }
+
+      const randomNumber = Math.floor(Math.random() * (10000 - 1000 + 1)) + 10000;
+
+      setMessages(prevMessages =>
+        GiftedChat.append(prevMessages, [
+          {
+            _id: randomNumber,
+            createdAt: new Date(),
+            text: message?.[0]?.text,
+            user: {
+              _id: loginUser?.id,
+              name: loginUser?.first_name,
+            },
+            ...(message[0]?.attachment && {
+              message_attachment: {
+                url: uriFile,
+                file_name: uriName,
+                type: uriType,
+                content_type: uriType,
+              },
+            }),
+          },
+        ])
+      );
 
       form.append('message[content]', message?.[0]?.text);
       form.append('message[user_id]', loginUser?.id);
@@ -237,7 +268,7 @@ const ChatDetail = () => {
           renderTime={RenderTime}
           renderMessageImage={RenderMessageImage}
           renderInputToolbar={props =>
-            RenderInputToolbar(props, () => {}, true)
+            RenderInputToolbar(props, () => { }, true)
           }
           listViewProps={{
             showsVerticalScrollIndicator: false,
@@ -254,7 +285,7 @@ const ChatDetail = () => {
           onPressClose={() => setShow(false)}
           onPress={() => {
             setShow(false);
-            navigation.navigate('GroupInfo', {item: params?.item});
+            navigation.navigate('GroupInfo', { item: params?.item });
           }}
         />
       )}
