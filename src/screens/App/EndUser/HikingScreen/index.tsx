@@ -428,7 +428,7 @@ const HikingScreen = ({route, navigation}: any) => {
     setShowTrailInfoSheet(false);
     const resp = await createRoute(routeObj);
     if (resp?.data) {
-      showAlert('Alert', 'Your recording has been saved.');
+      showAlert('Alert', 'Your trail has been saved.');
     } else {
       showAlert('Error', UNEXPECTED_ERROR);
     }
@@ -439,6 +439,7 @@ const HikingScreen = ({route, navigation}: any) => {
     const routeData = trailInfo;
     const startingPoint = routeData?.geometry?.coordinates?.[0];
     const endingPoint = routeData?.geometry?.coordinates?.at(-1);
+    console.log('', startingPoint);
 
     setShowTrailInfoSheet(false);
 
@@ -601,6 +602,7 @@ const HikingScreen = ({route, navigation}: any) => {
     try {
       const res = await Share.open(options);
       setShowShareSheet(false);
+      setShowTrailShareSheet(false);
     } catch (err) {
       if (err) {
         console.log(err);
@@ -611,6 +613,7 @@ const HikingScreen = ({route, navigation}: any) => {
   const onPressExploreTrail = () => {
     if (isIOS()) {
       dispatch(setSelectedTrail(trailInfo));
+
       setTimeout(() => {
         navigation.navigate(Routes.TurnByTurnNav, {
           originCoords: [location?.longitude, location?.latitude],
