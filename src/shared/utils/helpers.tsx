@@ -1,5 +1,5 @@
 import {Platform} from 'react-native';
-import {mapBoxToken} from './constant';
+import {mapBoxToken, ROUTE_LINE_STYLES} from './constant';
 
 export const formatPhoneNumber = (phoneNumber: string) => {
   const cleaned = ('' + phoneNumber).replace(/\D/g, '');
@@ -482,4 +482,37 @@ export const extractType = (content: any): string | undefined => {
     console.error('JSON parsing error:', error);
     return '';
   }
+};
+
+export const generateGeoJsonFeature = (routeData: any) => {
+  if (!routeData) return null;
+
+  const coordinates = [
+    [
+      parseFloat(routeData?.pickup_location?.longitude),
+      parseFloat(routeData?.pickup_location?.latitude),
+    ],
+    ...(routeData?.middle_location_points || []).map(point => [
+      parseFloat(point.longitude),
+      parseFloat(point.latitude),
+    ]),
+    [
+      parseFloat(routeData?.dropoff_location?.longitude),
+      parseFloat(routeData?.dropoff_location?.latitude),
+    ],
+  ];
+
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: coordinates,
+    },
+    properties: {
+      color: routeData.color || ROUTE_LINE_STYLES.color,
+      tags: {
+        highway: 'path',
+      },
+    },
+  };
 };

@@ -28,12 +28,31 @@ const MapSettingSheet = ({
   setWell,
   onPressClear,
 }: MapSettingSheetProps) => {
-  const SwitchView = ({value, setValue, title}: any) => {
+  const SwitchView = ({
+    value,
+    setValue,
+    title,
+    otherValue,
+    setOtherValue,
+  }: any) => {
+    const handleToggle = () => {
+      if (value) {
+        // Trying to turn off this toggle
+        if (!otherValue) {
+          setOtherValue(true);
+        }
+        setValue(false);
+      } else {
+        // Turning this toggle on is always allowed
+        setValue(true);
+      }
+    };
+
     return (
       <View style={styles.switchView}>
         <SwitchToggle
           switchOn={value}
-          onPress={() => setValue(!value)}
+          onPress={handleToggle}
           circleColorOff={PFColors.Gray.AshGray}
           circleColorOn={PFColors.Blue.Dark}
           backgroundColorOn={PFColors.Blue.SoftGlacier}
@@ -57,8 +76,21 @@ const MapSettingSheet = ({
           {svgIcon.CancelIcon}
         </TouchableOpacity>
       </View>
-      <SwitchView value={well} setValue={setWell} title={'Wells'} />
-      <SwitchView value={pin} setValue={setPin} title={'Pins'} />
+      <SwitchView
+        value={well}
+        setValue={setWell}
+        otherValue={pin}
+        setOtherValue={setPin}
+        title={'Wells'}
+      />
+
+      <SwitchView
+        value={pin}
+        setValue={setPin}
+        otherValue={well}
+        setOtherValue={setWell}
+        title={'Pins'}
+      />
 
       <View style={styles.btnContainer}>
         <AppButton

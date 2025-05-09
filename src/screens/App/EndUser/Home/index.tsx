@@ -26,6 +26,11 @@ import {
   IOS_ADS
 } from '../../../../shared/utils/constant';
 import styles from './styles';
+import {
+  useGetCurrentUserProfileQuery,
+} from '../../../../redux/endUser/endUserApiSlice';
+import {useIsFocused} from '@react-navigation/native';
+import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 MobileAds()
   .setRequestConfiguration({
     // An array of test device IDs to allow.
@@ -52,7 +57,10 @@ const Home = ({ navigation }: any) => {
   const { data: subscriptions } = useGetSubscriptionQuery(null);
   const [updateSubscription] = useUpdateSubscriptionMutation();
 
+  const {data: userProfile, refetch} = useGetCurrentUserProfileQuery(null);
   const dispatch = useDispatch();
+  const isFocued = useIsFocused();
+
   useEffect(() => {
     (async () => {
       const token = await getFCMToken();
@@ -105,6 +113,17 @@ const Home = ({ navigation }: any) => {
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
   }, [allNewsBlogs, ads]);
+  useEffect(() => {
+    if (isFocued) {
+      refetch();
+    }
+  }, [isFocued]);
+
+  useEffect(() => {
+    if (userProfile) {
+      dispatch(setLoginUser(userProfile));
+    }
+  }, [userProfile]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];
@@ -153,7 +172,12 @@ const Home = ({ navigation }: any) => {
     <MainWrapper>
       <View style={styles.headerContainer}>
         <Text style={styles.homeTextStyle}>Home</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+        <TouchableOpacity
+          hitSlop={{top: 6, bottom: 6, left: 6, right: 6}}
+          onPress={() => {
+            navigation.navigate('Settings');
+            dispatch(setSelectedTrail(null));
+          }}>
           <Image
             resizeMode="contain"
             style={styles.settingIcon}

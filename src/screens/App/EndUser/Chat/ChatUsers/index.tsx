@@ -240,6 +240,7 @@ const ChatUsers = () => {
         </View>
         {item?.is_exist ? (
           <TouchableOpacity
+            hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
             activeOpacity={0.7}
             onPress={() => initiateChat(item)}>
             <ChatIcon height={WP('11')} width={WP('11')} />

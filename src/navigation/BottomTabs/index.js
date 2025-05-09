@@ -2,8 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {DriverTabs} from './DriverTabs';
 import {ManagerTabs} from './ManagerTabs';
-import {useSelector} from 'react-redux';
-import {APP_ROLE, isIOS, Routes} from '../../shared/exporter';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  APP_ROLE,
+  generateGeoJsonFeature,
+  isIOS,
+  Routes,
+} from '../../shared/exporter';
 import {EndUserTabs} from './EndUserTabs';
 import AuthStack from '../stacks/authStack';
 import {
@@ -17,6 +22,7 @@ import {useUpdateCallMutation} from '../../redux/chat/chatApiSlice';
 import messaging, {getMessaging} from '@react-native-firebase/messaging';
 import {useGetRouteBasedIdMutation} from '../../redux/endUser/endUserApiSlice';
 import useLocation from '../../hooks/getLocation';
+import {setSelectedTrail} from '../../redux/endUser/endUserSlice';
 
 const Tab = createBottomTabNavigator();
 const AppStack = () => {
@@ -26,6 +32,7 @@ const AppStack = () => {
   const [updateCall, {error}] = useUpdateCallMutation();
   const [getRouteBasedId, {isLoading, data}] = useGetRouteBasedIdMutation();
   const {location} = useLocation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     NotificationListener(navigation);
@@ -97,19 +104,41 @@ const AppStack = () => {
   };
   useEffect(() => {
     if (data) {
+      let formatedHikeData;
       const routeData = data?.user_routes[0];
-      // setDestination([
-      //   Number(routeData?.dropoff_location?.longitude),
-      //   Number(routeData?.dropoff_location?.latitude),
-      // ]);
-      navigation.navigate(Routes.TurnByTurnNav, {
-        entranceCoords: [
-          Number(routeData?.dropoff_location?.longitude),
-          Number(routeData?.dropoff_location?.latitude),
-        ],
-        entranceName: 'Test',
-        originCoords: [location?.longitude, location?.latitude],
-      });
+      if (routeData?.route_type === 'hiking_trail_route') {
+        formatedHikeData = generateGeoJsonFeature(routeData);
+        dispatch(setSelectedTrail(formatedHikeData));
+
+        navigation.navigate(Routes.TurnByTurnNav, {
+          entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+          entranceName: routeData?.name,
+          originCoords: [location?.longitude, location?.latitude],
+          isTrail: true,
+        });
+      } else {
+        navigation.navigate(Routes.TurnByTurnNav, {
+          entranceCoords: [
+            Number(routeData?.dropoff_location?.longitude),
+            Number(routeData?.dropoff_location?.latitude),
+          ],
+          entranceName: routeData?.name,
+          originCoords: [location?.longitude, location?.latitude],
+          isTrail: false,
+          routeInfo: routeData,
+        });
+      }
+
+      // navigation.navigate(Routes.TurnByTurnNav, {
+      //   // entranceCoords: [
+      //   //   Number(routeData?.dropoff_location?.longitude),
+      //   //   Number(routeData?.dropoff_location?.latitude),
+      //   // ],
+      //   entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+      //   entranceName: routeData?.name,
+      //   originCoords: [location?.longitude, location?.latitude],
+      //   isTrail: routeData?.route_type === 'hiking_trail_route',
+      // });
     }
   }, [data]);
 
@@ -117,11 +146,7 @@ const AppStack = () => {
     if (url) {
       const {routeType, routeId} = extractParams(url);
       if (routeType) {
-        if (
-          routeType === 'hiking_waypoint' ||
-          routeType === 'waypoint_route' ||
-          routeType === 'maps_location_pins'
-        ) {
+        if (routeType) {
           if (isIOS()) {
             if (routeId) getRouteBasedId(routeId);
           } else {

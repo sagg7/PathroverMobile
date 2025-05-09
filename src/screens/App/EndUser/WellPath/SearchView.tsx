@@ -23,7 +23,7 @@ const SearchView = ({
           style={styles.searchbar}
         />
       </TouchableOpacity>
-      <TouchableOpacity onPress={onPressFilter} disabled>
+      <TouchableOpacity onPress={onPressFilter}>
         <Image
           resizeMode="contain"
           source={appIcons.filterFill}

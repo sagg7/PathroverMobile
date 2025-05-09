@@ -38,12 +38,12 @@ const HeaderView = ({
           {svgIcon.SearchView}
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           activeOpacity={0.7}
           style={styles.iconStyle}
           onPress={onPressFilter}>
           {svgIcon.FilterOrange}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={onPressWeather}>
           {svgIcon.WeatherIcon}
         </TouchableOpacity>

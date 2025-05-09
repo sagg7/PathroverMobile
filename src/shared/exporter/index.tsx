@@ -78,6 +78,7 @@ export {
   fetchSuggestions,
   formatDate,
   getTimeAndDistanceForWaypoint,
+  generateGeoJsonFeature,
 } from '../utils/helpers.tsx';
 export * from '../../hooks/getPlaceName';
 export * from '../../components';

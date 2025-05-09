@@ -14,7 +14,7 @@ const HeaderView = ({onPressToggle, switchOn}: HeaderViewProp) => {
     <View style={styles.headerView}>
       <Text style={styles.titleStyles}>WellPath</Text>
       <View style={styles.toggleView}>
-        <Text style={styles.freeFeatureText}>Free Feature</Text>
+        <Text style={styles.freeFeatureText}>Elite Tools</Text>
         <SwitchToggle
           switchOn={switchOn}
           onPress={onPressToggle}
