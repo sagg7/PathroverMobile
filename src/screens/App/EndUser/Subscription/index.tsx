@@ -106,10 +106,13 @@ const Subscription = () => {
   }, []);
 
   const handlePurchaseUpdate = useCallback(async (purchase: any) => {
-    // API
+    setIsLoading(false);
+    isProcessing.current = false;
   }, []);
 
   const handlePurchaseError = useCallback((error: any) => {
+    setIsLoading(false);
+    isProcessing.current = false;
     Alert.alert('Error', error?.message ? error?.message : 'Failed to process purchase.');
   }, []);
 
@@ -126,6 +129,7 @@ const Subscription = () => {
   const handleBuySubscription = async (sku: any) => {
     if (isProcessing.current || isLoading) return;
     isProcessing.current = true;
+    setIsLoading(true);
     const availablePurchases = await getAvailablePurchases();
 
     try {
@@ -186,9 +190,13 @@ const Subscription = () => {
           });
       } else {
         setIsLoading(false);
-        Alert.alert('Error', 'Subscription already purchased.');
+        if (Platform.OS === 'ios' && availablePurchases?.length > 0){
+          Alert.alert('Error', 'Subscription already purchased.');
+        }
       }
     } catch (err) {
+      isProcessing.current = false;
+      setIsLoading(false);
       Alert.alert('Error', err?.message ? err?.message : 'Failed to purchase is_subscribed.');
     } finally {
       setIsLoading(false);
