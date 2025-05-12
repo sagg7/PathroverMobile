@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,7 +7,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import { Composer, Send } from 'react-native-gifted-chat';
+import {Composer, Send} from 'react-native-gifted-chat';
 import {
   PFColors,
   PFFonts,
@@ -15,15 +15,15 @@ import {
   RenderSend,
   showAlert,
 } from '../../../shared/exporter';
-import { svgIcon } from '../../../assets/svg';
+import {svgIcon} from '../../../assets/svg';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
-import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import { useSelector } from 'react-redux';
+import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import {useSelector} from 'react-redux';
 
-const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) => {
-    const { loginUser } = useSelector(state => state.auth);
-  
+const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
+  const {loginUser} = useSelector(state => state.auth);
+
   // const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState('00:00');
   const [isPaused, setIsPaused] = useState(false);
@@ -130,8 +130,6 @@ const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) =>
     }
   };
 
-
-
   const onStopRecord = async () => {
     if (!isRecording) {
       // console.log('Recording is already stopped.');
@@ -213,7 +211,6 @@ const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) =>
     }
   };
 
-
   const onPauseRecord = async () => {
     if (!isRecording) {
       // console.log('Recording is already paused.');
@@ -256,31 +253,45 @@ const RenderRecordComposer = ({ props, isRecording, setIsRecording, onSend }) =>
   return (
     <>
       <View style={styles.viewStyle}>
-        {!isRecording && <Composer {...props} textInputStyle={styles.textInputStyle} />}
+        {!isRecording && (
+          <Composer {...props} textInputStyle={styles.textInputStyle} />
+        )}
         <View style={styles.iconView}>
           <View style={styles.innerLeftView}>
-            {isRecording && <TouchableOpacity onPress={handleRecordPress} style={styles.iconStyling}>
-              {isPaused ? svgIcon.PauseIcon : svgIcon.StopIcon}
-            </TouchableOpacity>}
-            {isRecording && <Text style={styles.recordingText}>{recordTime}</Text>}
+            {/* {isRecording && (
+              <TouchableOpacity
+                onPress={handleRecordPress}
+                style={styles.iconStyling}>
+                {isPaused ? svgIcon.PauseIcon : svgIcon.StopIcon}
+              </TouchableOpacity>
+            )} */}
+            {isRecording && (
+              <Text style={styles.recordingText}>{recordTime}</Text>
+            )}
           </View>
-          {isRecording && <TouchableOpacity onPress={handleDelete} style={styles.iconStyling}>
-            {svgIcon.Delete}
-          </TouchableOpacity>}
+          {isRecording && (
+            <TouchableOpacity onPress={handleDelete} style={styles.iconStyling}>
+              {svgIcon.Delete}
+            </TouchableOpacity>
+          )}
         </View>
-        {!isRecording && <TouchableOpacity onPress={handleRecordPress}>
-          {svgIcon.RecordIcon}
-        </TouchableOpacity>}
+        {!isRecording && (
+          <TouchableOpacity onPress={handleRecordPress}>
+            {svgIcon.RecordIcon}
+          </TouchableOpacity>
+        )}
       </View>
-      {isRecording && <TouchableOpacity
-        disabled={!isPaused}
-        onPress={() => {
-          console.log("Send pressed");
-          onStopRecord();
-        }}
-        style={styles.containerStyle(isPaused)}>
-        {svgIcon.SendMsg}
-      </TouchableOpacity>}
+      {isRecording && (
+        <TouchableOpacity
+          // disabled={!isPaused}
+          onPress={() => {
+            console.log('Send pressed');
+            onStopRecord();
+          }}
+          style={styles.containerStyle(true)}>
+          {svgIcon.SendMsg}
+        </TouchableOpacity>
+      )}
     </>
   );
 };
@@ -340,8 +351,7 @@ const styles = StyleSheet.create({
   }),
 });
 
-export { RenderRecordComposer };
-
+export {RenderRecordComposer};
 
 // const onStartRecord = async () => {
 //   const hasPermission = await checkMicrophonePermissions();

@@ -46,7 +46,9 @@ const RouteToWell = ({route}: any) => {
     start: false,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
 

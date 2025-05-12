@@ -95,7 +95,9 @@ const HikingScreen = ({route, navigation}: any) => {
   const [results, setResults] = useState<null>(null);
 
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
 
   const [showNavigationSheet, setShowNavigationSheet] =
@@ -119,7 +121,6 @@ const HikingScreen = ({route, navigation}: any) => {
   const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
   const pinLocationSheet = useRef<any>(null);
-  console.log('subscription', subscription);
 
   const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
     useCreateShareLinkRouteMutation();
@@ -762,10 +763,13 @@ const HikingScreen = ({route, navigation}: any) => {
         />
         <ActionBtn
           icon={appIcons.offlineMap}
+          // onPress={() => {
+          //   subscription
+          //     ? navigation.navigate(Routes.DownloadedMapList)
+          //     : showPremiumAlert({});
+          // }}
           onPress={() => {
-            subscription
-              ? navigation.navigate(Routes.DownloadedMapList)
-              : showPremiumAlert({});
+            navigation.navigate(Routes.DownloadedMapList);
           }}
         />
         <ActionBtn

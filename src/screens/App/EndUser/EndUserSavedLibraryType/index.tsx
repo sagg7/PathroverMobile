@@ -28,8 +28,9 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import Share from 'react-native-share';
 import useLocation from '../../../../hooks/getLocation';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -370,7 +371,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     }
   };
   // showPremiumAlert({});
-  console.log('subscription', subscription);
 
   return (
     <MainWrapper>

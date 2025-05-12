@@ -59,7 +59,9 @@ const CreateHikeRoute = () => {
   const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const dispatch = useDispatch();
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
   const refScrollable = useRef<any>();
 

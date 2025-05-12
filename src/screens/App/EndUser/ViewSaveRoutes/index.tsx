@@ -52,7 +52,9 @@ const ViewSaveRoutes = ({route}: any) => {
   const [isStartBtnPressed, setIsStartBtnPressed] = useState<boolean>(false);
   const [showReachModal, setShowReachModal] = useState(false);
   const [modalKey, setModalKey] = useState(1);
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
   const [actionBtn, setActionBtn] = useState<any>({
     direction: true,

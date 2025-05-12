@@ -75,7 +75,9 @@ const SearchTrailLatLng = () => {
     direction: true,
     start: false,
   });
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
   // API
   const [addRouteReport] = useAddRouteReportMutation();

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import { svgIcon } from '../../../assets/svg';
-import { PFColors, PFFonts, PFFontSize } from '../../../shared/exporter';
+import {svgIcon} from '../../../assets/svg';
+import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
 
 const audioRecorderPlayer = new AudioRecorderPlayer();
 audioRecorderPlayer.setSubscriptionDuration(0.09);
 
-const AudioMessage = ({ currentMessage, position }) => {
-  const { message_attachment } = currentMessage;
+const AudioMessage = ({currentMessage, position}) => {
+  const {message_attachment} = currentMessage;
   const isLeft = position === 'left';
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,7 +24,6 @@ const AudioMessage = ({ currentMessage, position }) => {
       }
     };
   }, []);
-
 
   const onStartPlay = async () => {
     let audioPath = message_attachment?.url;
@@ -88,7 +87,6 @@ const AudioMessage = ({ currentMessage, position }) => {
     }
   };
 
-
   // const onStartPlay = async () => {
   //   const audioPath = message_attachment?.url;
   //   console.log('Audio Path:', audioPath);
@@ -139,7 +137,7 @@ const AudioMessage = ({ currentMessage, position }) => {
 
       <View style={styles.progressContainer}>
         <View style={styles.progressBarContainer(isLeft)}>
-          <View style={[styles.progressBar(isLeft), { width: `${progress}%` }]} />
+          <View style={[styles.progressBar(isLeft), {width: `${progress}%`}]} />
         </View>
         <Text style={styles.audioDuration(isLeft)}>
           {audioRecorderPlayer.mmss(Math.floor(currentPosition / 1000))} /{' '}
@@ -213,7 +211,6 @@ const styles = StyleSheet.create({
 
 export default AudioMessage;
 
-
 // const audioRecorderPlayer = new AudioRecorderPlayer();
 
 // const AudioMessage = ({currentMessage, position}) => {
@@ -226,7 +223,7 @@ export default AudioMessage;
 
 //   const onStartPlay = async () => {
 //     const audioPath = message_attachment?.url;
-//     console.log('Audio Path:', audioPath); 
+//     console.log('Audio Path:', audioPath);
 //     if (!audioPath) {
 //       console.error('Audio path is missing');
 //       return;
@@ -244,7 +241,7 @@ export default AudioMessage;
 //       });
 //       setIsPlaying(true);
 //     } catch (error) {
-//       console.error('Error playing audio:', error); 
+//       console.error('Error playing audio:', error);
 //     }
 //   };
 
@@ -253,9 +250,9 @@ export default AudioMessage;
 //       await audioRecorderPlayer.stopPlayer();
 //       audioRecorderPlayer.removePlayBackListener();
 //       setIsPlaying(false);
-//       console.log('Audio playback stopped'); 
+//       console.log('Audio playback stopped');
 //     } catch (error) {
-//       console.error('Error stopping audio:', error); 
+//       console.error('Error stopping audio:', error);
 //     }
 //   };
 
