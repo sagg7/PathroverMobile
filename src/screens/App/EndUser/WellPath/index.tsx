@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import MapboxGL from '@rnmapbox/maps';
 import styles from './styles';
 import {
@@ -8,7 +8,7 @@ import {
   PinYourLocationSheet,
   WellPathMenuSheet,
 } from '../../../../components';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
   AppLoader,
   CHAT_NON_VERIFIED_TEXT,
@@ -24,12 +24,12 @@ import {
   UNEXPECTED_ERROR,
   WP,
 } from '../../../../shared/exporter';
-import { svgIcon } from '../../../../assets/svg';
+import {svgIcon} from '../../../../assets/svg';
 import useLocation from '../../../../hooks/getLocation';
 import SearchView from './SearchView';
 import HeaderView from './HeaderView';
-import { MapSettingSheet } from '../../../../components/complex/MapSettingSheet';
-import { PinLocationAddress } from '../../../../components/complex/PinLocationAddress';
+import {MapSettingSheet} from '../../../../components/complex/MapSettingSheet';
+import {PinLocationAddress} from '../../../../components/complex/PinLocationAddress';
 import {
   useCreateShareLinkRouteMutation,
   useGetAllWellsQuery,
@@ -51,9 +51,9 @@ import marker from '../../../../assets/icons/wellsMarker.png';
 import usePlaceName from '../../../../hooks/getPlaceName';
 import Share from 'react-native-share';
 import SharedSheet from '../../../../components/complex/SharedSheet';
-import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
-import { useStateShortCode } from '../../../../hooks/getStateName';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {isSubscriptionActive} from '../../../../hooks/iap-hook/iapPurchaseHook';
+import {useStateShortCode} from '../../../../hooks/getStateName';
 
 const WellPath = () => {
   const isFocused = useIsFocused();
@@ -91,12 +91,12 @@ const WellPath = () => {
     useState<boolean>(false);
   const [entranceCoords, setEntranceCoords] = useState<any>(null);
   const [entranceName, setEntranceName] = useState<any>('');
-  const [createRoute, { isLoading: PinLoading }] = useCreateRouteMutation();
+  const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
   const [updateSubscription] = useUpdateSubscriptionMutation();
 
-  const [createShareLinkRoute, { isLoading: linkRouteLoading }] =
+  const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
     useCreateShareLinkRouteMutation();
-  const { shortCode, getShortCodeFromCoords } = useStateShortCode();
+  const {shortCode, getShortCodeFromCoords} = useStateShortCode();
   const dispatch = useDispatch();
   const [selectedSearchedWell, setSelectedSearchedWell] = useState<any>(null);
   const [wellDistances, setWellDistances] = useState({});
@@ -106,7 +106,7 @@ const WellPath = () => {
     name: null,
   });
   const [waypointRoute, setWayPointRoute] = useState<any>([]);
-  const { placeName, fetchPlaceName, setPlaceName, error, loading } =
+  const {placeName, fetchPlaceName, setPlaceName, error, loading} =
     usePlaceName();
   const [pinLocationMarker, setPinLocationMarker] = useState<any>([]);
 
@@ -172,11 +172,10 @@ const WellPath = () => {
     page: 1,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const { is_subscribed } = useSelector(state => state?.auth?.loginUser);
-  const user = useSelector(state => state?.auth?.loginUser);
-  const { data: subscriptions } = useGetSubscriptionQuery(null);
+  const {is_subscribed} = useSelector(state => state?.auth?.loginUser);
+  const {data: subscriptions} = useGetSubscriptionQuery(null);
 
-  const { showPremiumAlert } = usePremiumAlert();
+  const {showPremiumAlert} = usePremiumAlert();
 
   const [pinYourLocation, setPinYourLocation] = useState<any>({
     latitude: '',
@@ -189,9 +188,9 @@ const WellPath = () => {
     isLoading,
     refetch,
   } = useGetAllWellsQuery(queryParams, {
-    skip: queryParams.longitude === null || IsmapLoading,
+    skip: queryParams.longitude === null || IsmapLoading || !is_subscribed,
   });
-  const { location } = useLocation();
+  const {location} = useLocation();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
 
@@ -276,13 +275,11 @@ const WellPath = () => {
     }
   }, [mapLayerStyle]);
 
-
   useEffect(() => {
     if (subscriptions?.length > 0 && is_subscribed) {
       checkSubscriptionStatus();
     }
   }, [isFocused, subscriptions, is_subscribed]);
-
 
   const checkSubscriptionStatus = async () => {
     const status = await isSubscriptionActive();
@@ -301,9 +298,9 @@ const WellPath = () => {
       subscription: {
         is_subscribed: is_valid,
         id: subscriptions?.[0]?.id,
-      }
+      },
     });
-  }
+  };
 
   // TODO AFTER WELL PINS FINAL FIXES
 
@@ -359,7 +356,7 @@ const WellPath = () => {
       const data = await response.json();
       const route = data?.routes[0]?.geometry?.coordinates;
 
-      if (!route || route?.length === 0) return { mainRoute: [], offRoad: [] };
+      if (!route || route?.length === 0) return {mainRoute: [], offRoad: []};
 
       const firstRoutePoint = route[0];
       const lastRoutePoint = route[route.length - 1];
@@ -388,13 +385,13 @@ const WellPath = () => {
         offRoad: offRoad,
       };
     } catch (error) {
-      return { mainRoute: [], offRoad: [] };
+      return {mainRoute: [], offRoad: []};
     }
   };
 
   const getRoute = async () => {
     if (searchLocation && currentLocation) {
-      const { mainRoute, offRoad } = await fetchRoute(
+      const {mainRoute, offRoad} = await fetchRoute(
         currentLocation,
         searchLocation,
       );
@@ -468,7 +465,7 @@ const WellPath = () => {
 
   const onPressMap = async (event: any) => {
     try {
-      const { geometry } = event;
+      const {geometry} = event;
 
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
@@ -484,7 +481,7 @@ const WellPath = () => {
 
           fetchPlaceName(coords[1], coords[0]);
 
-          const { mainRoute, offRoad } = await fetchRoute(
+          const {mainRoute, offRoad} = await fetchRoute(
             currentLocation,
             coords,
           );
@@ -605,7 +602,7 @@ const WellPath = () => {
     type: 'FeatureCollection',
     features: wells?.map(well => ({
       type: 'Feature',
-      properties: { well: well },
+      properties: {well: well},
 
       geometry: {
         type: 'Point',
@@ -872,16 +869,14 @@ const WellPath = () => {
 
       <SearchView
         onPressSearch={() =>
-          is_subscribed
-            ? navigation.navigate(Routes.SearchWellPath, {
-              searchedWells,
-              setSearchedWells,
-              searchLocation,
-              setSearchLocation,
-              searchLocationName,
-              setSearchLocationNames,
-            })
-            : showPremiumAlert({})
+          navigation.navigate(Routes.SearchWellPath, {
+            searchedWells,
+            setSearchedWells,
+            searchLocation,
+            setSearchLocation,
+            searchLocationName,
+            setSearchLocationNames,
+          })
         }
         onPressFilter={() => {
           is_subscribed ? setShowMapSettigs(true) : showPremiumAlert({});
@@ -894,7 +889,7 @@ const WellPath = () => {
       <MapboxGL.MapView
         logoEnabled={false}
         compassEnabled
-        compassPosition={{ top: isIOS() ? HP('8') : HP('10'), right: 8 }}
+        compassPosition={{top: isIOS() ? HP('8') : HP('10'), right: 8}}
         compassFadeWhenNorth
         ref={mapRef}
         onRegionDidChange={onRegionDidChange}
@@ -922,7 +917,7 @@ const WellPath = () => {
               onPress={() => onPressSearched(selectedSearchedWell)}>
               <Image
                 source={require('../../.././../assets/icons/wellsMarker.png')}
-                style={{ height: 80, width: 80 }}
+                style={{height: 80, width: 80}}
               />
               {/* {svgIcon.BlueMapMarker} */}
             </TouchableOpacity>
@@ -1261,7 +1256,9 @@ const WellPath = () => {
               pinMapLocation?.current?.open();
             }, 500);
           }}
-          onPressShare={() => setShowShareSheet(true)}
+          onPressShare={() =>
+            is_subscribed ? setShowShareSheet(true) : showPremiumAlert({})
+          }
           onPressStart={() => {
             setShowNavigationSheet(false);
             if (isIOS()) {
@@ -1334,7 +1331,7 @@ const WellPath = () => {
       <GeneralModal
         title="Well"
         swipeDirection={undefined}
-        contentContainerStyle={{ maxHeight: HP('70') }}
+        contentContainerStyle={{maxHeight: HP('70')}}
         visible={searchedWells?.length > 0}
         onClose={() => {
           setSearchedWells([]);
@@ -1347,7 +1344,7 @@ const WellPath = () => {
           }
           nestedScrollEnabled
           initialNumToRender={10}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <TouchableOpacity onPress={() => onPressSearched(item)}>
               <View style={styles.searchWellContainer}>
                 <View style={[styles.searchWellContainer]}>
@@ -1376,7 +1373,7 @@ const WellPath = () => {
         />
       </GeneralModal>
       {/* {loaderState && loaderCount === 0 && <AppLoader />} */}
-    </MainWrapper >
+    </MainWrapper>
   );
 };
 

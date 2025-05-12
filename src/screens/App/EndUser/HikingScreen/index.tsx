@@ -183,8 +183,10 @@ const HikingScreen = ({route, navigation}: any) => {
   }, [mapLayerStyle]);
 
   useEffect(() => {
-    if (userLocation) fetchNearbyTrails(userLocation?.[1], userLocation?.[0]);
-  }, [selectedType]);
+    if (subscription) {
+      fetchNearbyTrails(userLocation?.[1], userLocation?.[0]);
+    }
+  }, [selectedType, userLocation]);
 
   const getOverpassQuery = (latitude, longitude, type) => {
     let filters = '';
@@ -258,40 +260,42 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const fetchNearbyTrails = async (latitude: any, longitude: any) => {
-    const overpassQuery = getOverpassQuery(latitude, longitude, selectedType);
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
-      overpassQuery,
-    )}`;
+    if (subscription) {
+      const overpassQuery = getOverpassQuery(latitude, longitude, selectedType);
+      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
+        overpassQuery,
+      )}`;
 
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-      if (!data.elements) return;
+        if (!data.elements) return;
 
-      // Convert Overpass API response to GeoJSON format
-      const geoJson = {
-        type: 'FeatureCollection',
-        features: data.elements.map((element: any, index: any) => ({
-          type: 'Feature',
-          properties: {tags: element?.tags, color: getTrailColor(index)},
-          geometry: {
-            type: 'LineString',
-            // coordinates: offsetCoordinates(
-            //   element.geometry.map((point: any) => [point.lon, point.lat]),
-            //   0.0001,
-            // ),
-            coordinates: element.geometry.map((point: any) => [
-              point.lon,
-              point.lat,
-            ]),
-          },
-        })),
-      };
+        // Convert Overpass API response to GeoJSON format
+        const geoJson = {
+          type: 'FeatureCollection',
+          features: data.elements.map((element: any, index: any) => ({
+            type: 'Feature',
+            properties: {tags: element?.tags, color: getTrailColor(index)},
+            geometry: {
+              type: 'LineString',
+              // coordinates: offsetCoordinates(
+              //   element.geometry.map((point: any) => [point.lon, point.lat]),
+              //   0.0001,
+              // ),
+              coordinates: element.geometry.map((point: any) => [
+                point.lon,
+                point.lat,
+              ]),
+            },
+          })),
+        };
 
-      setTrailsData(geoJson?.features);
-    } catch (error) {
-      console.error('Error fetching trails:', error);
+        setTrailsData(geoJson?.features);
+      } catch (error) {
+        console.error('Error fetching trails:', error);
+      }
     }
   };
 
@@ -636,7 +640,11 @@ const HikingScreen = ({route, navigation}: any) => {
       <HeaderView
         userPicture={loginUser?.avatar}
         onPressFilter={() => setShowFilterSheet(true)}
-        onPressSearch={() => navigation.navigate('SearchTrails')}
+        onPressSearch={() =>
+          subscription
+            ? navigation.navigate('SearchTrails')
+            : showPremiumAlert({})
+        }
         onPressWeather={() => {
           subscription ? setShowWeatherSheet(true) : showPremiumAlert({});
         }}
@@ -748,7 +756,12 @@ const HikingScreen = ({route, navigation}: any) => {
         style={styles.searcRoute}
         onPress={() => {
           dispatch(resetTrailRoute());
-          navigation.navigate(Routes.SearchTrailLatLng);
+          if (subscription) {
+            navigation.navigate(Routes.SearchTrailLatLng);
+          } else {
+            // showPremiumAlert({});
+            navigation.navigate(Routes.SearchTrailLatLng);
+          }
         }}>
         {svgIcon.SearchRoute}
       </TouchableOpacity>
@@ -873,11 +886,14 @@ const HikingScreen = ({route, navigation}: any) => {
           routeLength={route?.length}
           onpressCancel={() => clearStates()}
           onPressShare={() => {
-            setShowNavigationSheet(false);
-
-            setTimeout(() => {
-              setShowShareSheet(true);
-            }, 1000);
+            if (subscription) {
+              setShowNavigationSheet(false);
+              setTimeout(() => {
+                setShowShareSheet(true);
+              }, 1000);
+            } else {
+              showPremiumAlert({});
+            }
           }}
           routeName={placeName}
           distanceInfo={results}
