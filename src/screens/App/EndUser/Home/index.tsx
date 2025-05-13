@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -9,26 +9,21 @@ import {
   View,
 } from 'react-native';
 import MobileAds from 'react-native-google-mobile-ads';
-import { useDispatch, useSelector } from 'react-redux';
-import { AskMe, MainWrapper } from '../../../../components';
-import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
-import { getFCMToken } from '../../../../hooks/NotificationHook';
-import { useFcmTokenUpdateMutation } from '../../../../redux/auth/authApiSlice';
-import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { useGetNewsBlogsQuery, useGetSubscriptionQuery, useUpdateSubscriptionMutation } from '../../../../redux/endUser/endUserApiSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {AskMe, MainWrapper} from '../../../../components';
+import {isSubscriptionActive} from '../../../../hooks/iap-hook/iapPurchaseHook';
+import {getFCMToken} from '../../../../hooks/NotificationHook';
+import {useFcmTokenUpdateMutation} from '../../../../redux/auth/authApiSlice';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
 import {
-  appIcons,
-  AppLoader,
-  Routes
-} from '../../../../shared/exporter';
-import {
-  ANDROID_ADS,
-  IOS_ADS
-} from '../../../../shared/utils/constant';
-import styles from './styles';
-import {
-  useGetCurrentUserProfileQuery,
+  useGetNewsBlogsQuery,
+  useGetSubscriptionQuery,
+  useUpdateSubscriptionMutation,
 } from '../../../../redux/endUser/endUserApiSlice';
+import {appIcons, AppLoader, Routes} from '../../../../shared/exporter';
+import {ANDROID_ADS, IOS_ADS} from '../../../../shared/utils/constant';
+import styles from './styles';
+import {useGetCurrentUserProfileQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {useIsFocused} from '@react-navigation/native';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 MobileAds()
@@ -45,7 +40,7 @@ MobileAds()
   .then(adapterStatuses => {
     // Initialization complete!
   });
-const Home = ({ navigation }: any) => {
+const Home = ({navigation}: any) => {
   const [search, setSearch] = useState('');
   const [ads, setAds] = useState<any[]>([]);
   const [fcmToken, setFCMToken] = useState(false);
@@ -53,8 +48,8 @@ const Home = ({ navigation }: any) => {
   const [data, setData] = useState<any>([]);
   const loginUser = useSelector(state => state?.auth?.loginUser);
 
-  const { data: allNewsBlogs, isLoading } = useGetNewsBlogsQuery(null);
-  const { data: subscriptions } = useGetSubscriptionQuery(null);
+  const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
+  const {data: subscriptions} = useGetSubscriptionQuery(null);
   const [updateSubscription] = useUpdateSubscriptionMutation();
 
   const {data: userProfile, refetch} = useGetCurrentUserProfileQuery(null);
@@ -74,7 +69,7 @@ const Home = ({ navigation }: any) => {
 
   const updateToken = async token => {
     try {
-      await fcmTokenUpdate({ device_token: token });
+      await fcmTokenUpdate({device_token: token});
     } catch (error) {
       //
     }
@@ -85,11 +80,10 @@ const Home = ({ navigation }: any) => {
   }, []);
 
   useEffect(() => {
-    if (subscriptions?.length > 0 && loginUser?.is_subscribed){
+    if (subscriptions?.length > 0 && loginUser?.is_subscribed) {
       checkSubscriptionStatus();
     }
   }, [subscriptions]);
-
 
   const checkSubscriptionStatus = async () => {
     const status = await isSubscriptionActive();
@@ -106,9 +100,9 @@ const Home = ({ navigation }: any) => {
       subscription: {
         is_subscribed: is_valid,
         id: subscriptions?.[0]?.id,
-      }
+      },
     });
-  }
+  };
 
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
@@ -120,10 +114,14 @@ const Home = ({ navigation }: any) => {
   }, [isFocued]);
 
   useEffect(() => {
-    if (userProfile) {
-      dispatch(setLoginUser(userProfile));
+    if (userProfile && isFocued) {
+      const obj = {
+        ...userProfile,
+        is_subscribed: true,
+      };
+      dispatch(setLoginUser(obj));
     }
-  }, [userProfile]);
+  }, [userProfile, isFocued]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];
@@ -133,14 +131,14 @@ const Home = ({ navigation }: any) => {
       newData?.push(data[i]);
 
       if ((i + 1) % 20 === 0 && ads?.length > 0) {
-        newData?.push({ isAd: true, adData: ads[adIndex % ads?.length] }); // Cycle through ads
+        newData?.push({isAd: true, adData: ads[adIndex % ads?.length]}); // Cycle through ads
         adIndex++;
       }
     }
     setData(newData);
     return newData;
   };
-  const renderItem = ({ item, index }: any) => {
+  const renderItem = ({item, index}: any) => {
     // if (item?.isAd) {
     //   return <Ads item={ads[index / 21]} />; // Pass ad sequentially
     // }
@@ -148,10 +146,10 @@ const Home = ({ navigation }: any) => {
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        onPress={() => navigation.navigate(Routes.NewsBlogDetail, { item })}
+        onPress={() => navigation.navigate(Routes.NewsBlogDetail, {item})}
         style={styles.itemContainer}>
         <Image
-          source={item?.image_url ? { uri: item?.image_url } : appIcons.appLogo}
+          source={item?.image_url ? {uri: item?.image_url} : appIcons.appLogo}
           style={styles.imageStyle}
           resizeMode={item?.image_url ? 'cover' : 'contain'}
         />
@@ -191,13 +189,13 @@ const Home = ({ navigation }: any) => {
         placeholder={'Ask me anything...'}
         onChangeText={txt => setSearch(txt)}
         onPress={() => {
-          navigation.navigate('AiChat', { search });
+          navigation.navigate('AiChat', {search});
           setSearch('');
         }}
       />
       <Text style={styles.headingTextStyle}>Latest News and Blogs</Text>
       {allNewsBlogs?.length > 0 ? (
-        <View style={{ flex: 1 }}>
+        <View style={{flex: 1}}>
           <FlatList
             data={data}
             renderItem={renderItem}
