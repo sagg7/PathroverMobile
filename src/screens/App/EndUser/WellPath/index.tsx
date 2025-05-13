@@ -222,17 +222,6 @@ const WellPath = () => {
     setAvailable(is_subscribed);
   }, [is_subscribed]);
 
-  // useEffect(() => {
-  //   if (queryParams.latitude) {
-  //     refetch();
-  //   }
-  // }, [queryParams, refetch]);
-  // useEffect(() => {
-  //   if (queryParams.latitude && !IsmapLoading) {
-  //     refetch();
-  //   }
-  // }, [queryParams, refetch, IsmapLoading]);
-
   useEffect(() => {
     if (allWellLocations?.length > 0) {
       setAllWells(prev => {
@@ -301,32 +290,16 @@ const WellPath = () => {
       },
     });
   };
+  useEffect(() => {
+    const filtered = filteredWells?.filter((item: any) => {
+      if (nearbyWells && nearbyPins) return true;
+      if (nearbyWells) return item.is_well === true;
+      if (nearbyPins) return item.is_well === false;
+      return false;
+    });
 
-  // TODO AFTER WELL PINS FINAL FIXES
-
-  const filterByType = (type: 'wells' | 'pin') => {
-    return (
-      allWellLocations?.wells?.filter((item: any) =>
-        type === 'wells' ? item?.is_well : !item?.is_well,
-      ) ?? []
-    );
-  };
-
-  // useEffect(() => {
-  //   let filteredWells;
-
-  //   if (!nearbyPins && nearbyWells) {
-  //     filteredWells = filterByType('wells');
-  //   } else if (!nearbyWells && nearbyPins) {
-  //     filteredWells = filterByType('pin');
-  //   } else if (nearbyPins && nearbyWells) {
-  //     filteredWells = allWellLocations?.wells;
-  //   } else {
-  //     filteredWells = [];
-  //   }
-
-  //   setAllWells(filteredWells);
-  // }, [nearbyWells, nearbyPins, allWellLocations]);
+    setAllWells(filtered);
+  }, [nearbyWells, nearbyPins]);
 
   const toRad = value => (value * Math.PI) / 180;
 
@@ -1063,22 +1036,18 @@ const WellPath = () => {
         onPressRecordRoute={() => {
           setShowOptionsSheet(false);
           setTimeout(() => {
-            {
-              is_subscribed
-                ? navigation.navigate(Routes.RecordRoute)
-                : showPremiumAlert({});
-            }
+            is_subscribed
+              ? navigation.navigate(Routes.RecordRoute)
+              : showPremiumAlert({});
           }, 1000);
         }}
         onPressCreateRoute={() => {
           setShowOptionsSheet(false);
           dispatch(setCreateRouteDataEmpty({}));
           setTimeout(() => {
-            {
-              is_subscribed
-                ? navigation.navigate(Routes.CreateRouteEndUser)
-                : showPremiumAlert({});
-            }
+            is_subscribed
+              ? navigation.navigate(Routes.CreateRouteEndUser)
+              : showPremiumAlert({});
           }, 1000);
         }}
       />
