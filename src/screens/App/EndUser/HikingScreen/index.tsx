@@ -775,13 +775,10 @@ const HikingScreen = ({route, navigation}: any) => {
         />
         <ActionBtn
           icon={appIcons.offlineMap}
-          // onPress={() => {
-          //   subscription
-          //     ? navigation.navigate(Routes.DownloadedMapList)
-          //     : showPremiumAlert({});
-          // }}
           onPress={() => {
-            navigation.navigate(Routes.DownloadedMapList);
+            subscription
+              ? navigation.navigate(Routes.DownloadedMapList)
+              : showPremiumAlert({});
           }}
         />
         <ActionBtn
