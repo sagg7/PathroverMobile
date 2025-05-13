@@ -43,7 +43,6 @@ const RenderActions = props => {
       ImagePicker.openPicker({
         width: 300,
         height: 300,
-        cropping: true,
       })
         .then(image => {
           const message = {

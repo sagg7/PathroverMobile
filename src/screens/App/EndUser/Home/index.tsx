@@ -114,10 +114,14 @@ const Home = ({navigation}: any) => {
   }, [isFocued]);
 
   useEffect(() => {
-    if (userProfile) {
-      dispatch(setLoginUser(userProfile));
+    if (userProfile && isFocued) {
+      const obj = {
+        ...userProfile,
+        is_subscribed: true,
+      };
+      dispatch(setLoginUser(obj));
     }
-  }, [userProfile]);
+  }, [userProfile, isFocued]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];

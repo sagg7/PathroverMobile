@@ -1024,7 +1024,7 @@ const WellPath = () => {
         <TouchableOpacity
           style={styles.maplayerStyles}
           onPress={() => {
-            is_subscribed ? setMapLayerSheeet(true) : showPremiumAlert({});
+            setMapLayerSheeet(true);
           }}>
           {svgIcon.MapLayer}
         </TouchableOpacity>

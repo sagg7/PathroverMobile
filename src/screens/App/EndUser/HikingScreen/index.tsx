@@ -738,7 +738,7 @@ const HikingScreen = ({route, navigation}: any) => {
         <TouchableOpacity
           style={styles.maplayerStyles}
           onPress={() => {
-            subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
+            setMapLayerSheeet(true);
           }}>
           {svgIcon.MapLayer}
         </TouchableOpacity>
