@@ -755,12 +755,11 @@ const HikingScreen = ({route, navigation}: any) => {
       <TouchableOpacity
         style={styles.searcRoute}
         onPress={() => {
-          dispatch(resetTrailRoute());
           if (subscription) {
+            dispatch(resetTrailRoute());
             navigation.navigate(Routes.SearchTrailLatLng);
           } else {
-            // showPremiumAlert({});
-            navigation.navigate(Routes.SearchTrailLatLng);
+            showPremiumAlert({});
           }
         }}>
         {svgIcon.SearchRoute}
