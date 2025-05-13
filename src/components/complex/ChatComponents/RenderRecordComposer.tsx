@@ -20,6 +20,7 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {useSelector} from 'react-redux';
+import {useAudioPlayer} from '../../../shared/utils/AudioPlayerContext';
 
 const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
   const {loginUser} = useSelector(state => state.auth);
@@ -30,6 +31,8 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
 
   const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
   const recordingPath = useRef('');
+  const {isPlaying} = useAudioPlayer();
+  console.log('isPlaying', isPlaying);
 
   const formatTime = milliseconds => {
     const totalSeconds = Math.floor(milliseconds / 1000);

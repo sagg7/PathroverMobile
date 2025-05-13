@@ -115,11 +115,11 @@ const Home = ({navigation}: any) => {
 
   useEffect(() => {
     if (userProfile && isFocued) {
-      const obj = {
-        ...userProfile,
-        is_subscribed: true,
-      };
-      dispatch(setLoginUser(obj));
+      // const obj = {
+      //   ...userProfile,
+      //   is_subscribed: true,
+      // };
+      dispatch(setLoginUser(userProfile));
     }
   }, [userProfile, isFocued]);
 

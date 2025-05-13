@@ -447,8 +447,6 @@ const HikingScreen = ({route, navigation}: any) => {
     const routeData = trailInfo;
     const startingPoint = routeData?.geometry?.coordinates?.[0];
     const endingPoint = routeData?.geometry?.coordinates?.at(-1);
-    console.log('', startingPoint);
-
     setShowTrailInfoSheet(false);
 
     setTimeout(() => {
@@ -929,6 +927,7 @@ const HikingScreen = ({route, navigation}: any) => {
         onPressOther={() => saveShareRouteLink('well')}
         onPressShare={() => {
           setShowNavigationSheet(false);
+          setShowShareSheet(false);
           setTimeout(() => {
             navigation.navigate(Routes.ChatUsers, {
               shareTrail: {
