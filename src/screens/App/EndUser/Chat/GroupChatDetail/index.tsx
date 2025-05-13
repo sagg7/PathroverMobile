@@ -25,6 +25,7 @@ import {
 import { REQ_LIST_SOCKET_URL } from '../../../../../shared/exporter';
 import styles from './styles';
 import AudioMessage from '../../../../../components/complex/ChatComponents/AudioMessage';
+import { Keyboard } from 'react-native';
 
 interface HeaderProps {
   title: string;
@@ -69,7 +70,7 @@ const GroupChatDetail = () => {
 
   const [show, setShow] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [isRecording, setIsRecording] = useState(false);  
+  const [isRecording, setIsRecording] = useState(false);
 
 
   useEffect(() => {
@@ -198,7 +199,12 @@ const GroupChatDetail = () => {
   return (
     <MainWrapper>
       <Header
-        onPressBack={() => navigation.navigate('Chat')}
+        onPressBack={() => {
+          Keyboard.dismiss();
+          setTimeout(() => {
+            navigation.navigate('Chat');
+          }, 10);
+        }}
         onPressMenu={() => setShow(true)}
         title={params?.item || 'Group Chat'}
       />

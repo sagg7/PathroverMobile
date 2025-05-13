@@ -211,7 +211,7 @@ const ChatDetail = () => {
       form.append('message[content]', message?.[0]?.text);
       form.append('message[user_id]', loginUser?.id);
       form.append('message[message_type]', 'private');
-      form.append('message[read]', false);      
+      form.append('message[read]', false);
 
       const res = await createChatMessage({ data: form, id: item?.id });
       if (res) {
@@ -235,7 +235,9 @@ const ChatDetail = () => {
       <Header
         onPressBack={() => {
           Keyboard.dismiss();
-          navigation.navigate('Chat')
+          setTimeout(() => {
+            navigation.navigate('Chat');
+          }, 10);
         }}
         title={params?.item || 'Group Chat'}
         onPressPhone={() => {
@@ -253,6 +255,7 @@ const ChatDetail = () => {
           });
         }}
       />
+
       <View style={styles.container}>
         <GiftedChat
           user={{
