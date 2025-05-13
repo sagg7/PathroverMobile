@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,7 +7,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import {Composer, Send} from 'react-native-gifted-chat';
+import { Composer, Send } from 'react-native-gifted-chat';
 import {
   PFColors,
   PFFonts,
@@ -15,14 +15,18 @@ import {
   RenderSend,
   showAlert,
 } from '../../../shared/exporter';
-import {svgIcon} from '../../../assets/svg';
+import { svgIcon } from '../../../assets/svg';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
-import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
-import {useSelector} from 'react-redux';
+import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import { useSelector } from 'react-redux';
 
-const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
-  const {loginUser} = useSelector(state => state.auth);
+const RenderRecordComposer = ({
+  props,
+  isRecording,
+  setIsRecording,
+  onSend }) => {
+  const { loginUser } = useSelector(state => state.auth);
 
   // const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState('00:00');
@@ -120,6 +124,7 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
           setIsRecording(true);
         })
         .catch(err => {
+          onStartRecord()
           // console.log('err----->>>', err);
         });
       // console.log('Recording started at:', path);
@@ -252,12 +257,12 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
 
   return (
     <>
-      
+
       <View style={styles.viewStyle}>
         {!isRecording && (
-          <View style={{ width: '85%'}}>
+          <View style={{ width: '85%' }}>
             <Composer {...props} textInputStyle={styles.textInputStyle} />
-            </View>
+          </View>
         )}
         <View style={styles.iconView}>
           <View style={styles.innerLeftView}>
@@ -356,7 +361,7 @@ const styles = StyleSheet.create({
   }),
 });
 
-export {RenderRecordComposer};
+export { RenderRecordComposer };
 
 // const onStartRecord = async () => {
 //   const hasPermission = await checkMicrophonePermissions();
