@@ -28,6 +28,7 @@ export function identifyAttachmentTypeFromUrl(contentType) {
     'audio/flac': 'audio',
     'audio/aac': 'audio',
     'audio/m4a': 'audio',
+    'audio/mp3': 'audio',
 
     // Documents
     'application/pdf': 'document',
