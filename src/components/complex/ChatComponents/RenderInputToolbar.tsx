@@ -12,7 +12,7 @@ const RenderInputToolbar = (props, onPress, isRecord, isRecording, setIsRecordin
       <RenderActions {...props} isRecord={isRecord} />
       {isRecord ? (
         <RenderRecordComposer
-          {...props}
+          props={props}
           onSend={onSend}
           isRecording={isRecording}
           setIsRecording={setIsRecording}
