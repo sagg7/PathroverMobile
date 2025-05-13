@@ -196,6 +196,12 @@ const GroupChatDetail = () => {
     }
   };
 
+  const scrollToBottomComponent = () => {
+    return (
+      <Image source={appIcons.chevron} style={styles.arrowIconStyle} />
+    )
+  }
+
   return (
     <MainWrapper>
       <Header
@@ -234,6 +240,8 @@ const GroupChatDetail = () => {
             onEndReachedThreshold: 0.3,
           }}
           onSend={messages => onSend(messages)}
+          scrollToBottomComponent={scrollToBottomComponent}
+          scrollToBottomStyle={styles.scrollToBottomStyle}
         />
       </View>
 
