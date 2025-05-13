@@ -46,7 +46,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
-  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {is_subscribed: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
   const {showPremiumAlert} = usePremiumAlert();
 
   const refScrollable = useRef<any>();

@@ -1093,6 +1093,10 @@ const WellPath = () => {
           setShowPinAddress(false);
           const converted = selectedWell.map(item => Number(item));
           if (isIOS()) {
+            console.log('====>1', currentLocation);
+            console.log('====>2', converted);
+            console.log('----3', selectedWellName?.well_name);
+
             navigation.navigate(Routes.TurnByTurnNav, {
               originCoords: currentLocation,
               entranceCoords: converted,
