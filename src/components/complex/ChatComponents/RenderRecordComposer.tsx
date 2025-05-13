@@ -252,9 +252,12 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
 
   return (
     <>
+      
       <View style={styles.viewStyle}>
         {!isRecording && (
-          <Composer {...props} textInputStyle={styles.textInputStyle} />
+          <View style={{ width: '85%'}}>
+            <Composer {...props} textInputStyle={styles.textInputStyle} />
+            </View>
         )}
         <View style={styles.iconView}>
           <View style={styles.innerLeftView}>
@@ -305,9 +308,10 @@ const styles = StyleSheet.create({
     fontSize: PFFontSize.FONT_SIZE_14,
     color: PFColors.Gray.DarkGray,
     fontFamily: PFFonts.Foundation.Regular,
+    paddingHorizontal: 0,
   },
   viewStyle: {
-    width: '72%',
+    width: '68%',
     backgroundColor: PFColors.Gray.LightMist,
     borderRadius: 100,
     paddingHorizontal: 6,
@@ -315,6 +319,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
+    justifyContent: 'space-between',
     left: -6,
     marginTop: 4,
   },
