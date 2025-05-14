@@ -16,7 +16,7 @@ import {
   showAlert,
 } from '../../../shared/exporter';
 import { svgIcon } from '../../../assets/svg';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {useSelector} from 'react-redux';
@@ -81,8 +81,8 @@ const RenderRecordComposer = ({
   };
 
   const getAudioFilePath = () => {
-    const fileName = `audio_${new Date().getTime()}.m4a`;
-
+    const fileName =  `audio_${new Date().getTime()}.aac`;
+    
     return Platform.OS === 'ios'
       ? `file://${RNFS.CachesDirectoryPath}/${fileName}`
       : `${RNFS.ExternalDirectoryPath}/${fileName}`;
@@ -109,6 +109,14 @@ const RenderRecordComposer = ({
       return;
     }
 
+    const audioSet: AudioSet = {
+      AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+      AudioSourceAndroid: AudioSourceAndroidType.MIC,
+      AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
+      AVNumberOfChannelsKeyIOS: 2,
+      AVFormatIDKeyIOS: AVEncodingOption.aac,
+    };
+
     // console.log('Starting recording...');
     const path = getAudioFilePath();
     // console.log('File path:', path);
@@ -117,9 +125,8 @@ const RenderRecordComposer = ({
     try {
       await ensureDirectoryExists(path);
       await audioRecorderPlayer
-        .startRecorder(path)
+        .startRecorder(path, audioSet)
         .then(res => {
-          // console.log('res===>>', res);
           audioRecorderPlayer.addRecordBackListener(e => {
             const time = formatTime(e.currentPosition);
             setRecordTime(time);
@@ -166,8 +173,8 @@ const RenderRecordComposer = ({
             },
             attachment: {
               uri: result,
-              name: `audio_${new Date().getTime()}.m4a`,
-              type: 'audio/m4a',
+              name: `audio_${new Date().getTime()}.aac`,
+              type: 'audio/aac',
             },
           };
           onSend([message]);
