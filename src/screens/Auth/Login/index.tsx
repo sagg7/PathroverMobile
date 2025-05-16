@@ -1,9 +1,9 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useDispatch } from 'react-redux';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {Formik} from 'formik';
+import React, {useEffect, useState} from 'react';
+import {Text, View} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {useDispatch} from 'react-redux';
 import {
   AppButton,
   AppHeader,
@@ -11,18 +11,18 @@ import {
   AppLoader,
   MainWrapper,
 } from '../../../components';
-import { CountryCodeInput } from '../../../components/complex/CountryCodeInput';
-import { getFCMToken } from '../../../hooks/NotificationHook';
-import { setUserRole } from '../../../redux/auth/appRoleSlice';
-import { useLoginMutation } from '../../../redux/auth/authApiSlice';
-import { setLoginUser } from '../../../redux/auth/authSlice';
+import {CountryCodeInput} from '../../../components/complex/CountryCodeInput';
+import {getFCMToken} from '../../../hooks/NotificationHook';
+import {setUserRole} from '../../../redux/auth/appRoleSlice';
+import {useLoginMutation} from '../../../redux/auth/authApiSlice';
+import {setLoginUser} from '../../../redux/auth/authSlice';
 import {
   APP_ROLE,
   Routes,
   UNEXPECTED_ERROR,
   isIOS,
   showAlert,
-  useKeyboardListener
+  useKeyboardListener,
 } from '../../../shared/exporter';
 import {
   loginInitialObj,
@@ -30,14 +30,14 @@ import {
 } from '../../../shared/utils/validations';
 import styles from './styles';
 
-const LoginScreen = ({ }) => {
+const LoginScreen = ({}) => {
   const keyboardVisible = useKeyboardListener();
-  const [login, { data, isLoading }] = useLoginMutation();
+  const [login, {data, isLoading}] = useLoginMutation();
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
   const formikRef = React.useRef(null);
-  const { isEmail } = route?.params;
+  const {isEmail} = route?.params;
   const [FCMToken, setFCMToken] = useState(null);
 
   useEffect(() => {
@@ -51,18 +51,26 @@ const LoginScreen = ({ }) => {
   }, [navigation]);
 
   const handleContinueBtn = async (val: any) => {
-    const { email, phone, password } = val;
+    const {email, phone, password} = val;
     const obj = {
       user: {
-        ...(email && { email: email?.toLowerCase() }),
-        ...(phone && { phone_number: val?.callingCode?.includes('+') ? `${val?.callingCode}${phone}` : `+${val?.callingCode}${phone}` }),
+        ...(email && {email: email?.toLowerCase()}),
+        ...(phone && {
+          phone_number: val?.callingCode?.includes('+')
+            ? `${val?.callingCode}${phone}`
+            : `+${val?.callingCode}${phone}`,
+        }),
         password: password,
       },
       device_token: FCMToken,
-    };    
+    };
 
-    const resp = await login(obj);    
-    dispatch(setLoginUser(resp?.data?.user));
+    const resp = await login(obj);
+    const res = {
+      ...resp?.data?.user,
+      is_subscribed: true,
+    };
+    dispatch(setLoginUser(res));
     dispatch(setUserRole(APP_ROLE.END_USER));
 
     if (resp?.data) {
@@ -106,7 +114,7 @@ const LoginScreen = ({ }) => {
                 setFieldValue,
               }) => {
                 return (
-                  <View style={{ alignSelf: 'center' }}>
+                  <View style={{alignSelf: 'center'}}>
                     {isEmail ? (
                       <AppInput
                         placeholder="Email"

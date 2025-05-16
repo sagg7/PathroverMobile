@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,7 +7,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import { Composer, Send } from 'react-native-gifted-chat';
+import {Composer, Send} from 'react-native-gifted-chat';
 import {
   PFColors,
   PFFonts,
@@ -15,19 +15,21 @@ import {
   RenderSend,
   showAlert,
 } from '../../../shared/exporter';
-import { svgIcon } from '../../../assets/svg';
-import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption } from 'react-native-audio-recorder-player';
+import {svgIcon} from '../../../assets/svg';
+import AudioRecorderPlayer, {
+  AudioEncoderAndroidType,
+  AudioSet,
+  AudioSourceAndroidType,
+  AVEncoderAudioQualityIOSType,
+  AVEncodingOption,
+} from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {useSelector} from 'react-redux';
 import {useAudioPlayer} from '../../../shared/utils/AudioPlayerContext';
 
-const RenderRecordComposer = ({
-  props,
-  isRecording,
-  setIsRecording,
-  onSend }) => {
-  const { loginUser } = useSelector(state => state.auth);
+const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
+  const {loginUser} = useSelector(state => state.auth);
 
   // const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState('00:00');
@@ -81,8 +83,8 @@ const RenderRecordComposer = ({
   };
 
   const getAudioFilePath = () => {
-    const fileName =  `audio_${new Date().getTime()}.aac`;
-    
+    const fileName = `audio_${new Date().getTime()}.aac`;
+
     return Platform.OS === 'ios'
       ? `file://${RNFS.CachesDirectoryPath}/${fileName}`
       : `${RNFS.ExternalDirectoryPath}/${fileName}`;
@@ -134,7 +136,7 @@ const RenderRecordComposer = ({
           setIsRecording(true);
         })
         .catch(err => {
-          onStartRecord()
+          onStartRecord();
           // console.log('err----->>>', err);
         });
       // console.log('Recording started at:', path);
@@ -144,7 +146,9 @@ const RenderRecordComposer = ({
       setIsRecording(false);
     }
   };
-
+  function getFileExtension(uri) {
+    return uri.split('.').pop().split('?')[0];
+  }
   const onStopRecord = async () => {
     if (!isRecording) {
       // console.log('Recording is already stopped.');
@@ -173,8 +177,8 @@ const RenderRecordComposer = ({
             },
             attachment: {
               uri: result,
-              name: `audio_${new Date().getTime()}.aac`,
-              type: 'audio/aac',
+              name: `audio${getFileExtension(result)}`,
+              type: `audio/${getFileExtension(result)}`,
             },
           };
           onSend([message]);
@@ -267,10 +271,9 @@ const RenderRecordComposer = ({
 
   return (
     <>
-
       <View style={styles.viewStyle}>
         {!isRecording && (
-          <View style={{ width: '85%' }}>
+          <View style={{width: '85%'}}>
             <Composer {...props} textInputStyle={styles.textInputStyle} />
           </View>
         )}
@@ -371,7 +374,7 @@ const styles = StyleSheet.create({
   }),
 });
 
-export { RenderRecordComposer };
+export {RenderRecordComposer};
 
 // const onStartRecord = async () => {
 //   const hasPermission = await checkMicrophonePermissions();

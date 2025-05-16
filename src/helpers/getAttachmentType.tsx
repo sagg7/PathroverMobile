@@ -47,6 +47,7 @@ export function identifyAttachmentTypeFromUrl(contentType) {
     'application/vnd.oasis.opendocument.spreadsheet': 'document', // .ods
     'application/x-ole-storage': 'document', // OLE storage (e.g., .doc, .xls, .ppt)
   };
+  console.log('\n\n\ncontentType', contentType);
 
   // Check if the content_type is in the categoryMap
   if (categoryMap[contentType]) {

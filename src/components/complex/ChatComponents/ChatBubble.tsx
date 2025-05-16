@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Dimensions,
   Image,
@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import FitImage from 'react-native-fit-image';
 import Modal from 'react-native-modal';
-import { PFColors, PFFonts, PFFontSize, scale } from '../../../shared/exporter';
-import { identifyAttachmentTypeFromUrl } from '../../../helpers/getAttachmentType';
+import {PFColors, PFFonts, PFFontSize, scale} from '../../../shared/exporter';
+import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType';
 import AudioMessage from './AudioMessage';
 import VideoMessage from './VideoMessage';
 import FileMessage from './FileMessage';
-import { MESSAGE_CONTAINS_LOCATION } from '../../../shared/utils/constant';
+import {MESSAGE_CONTAINS_LOCATION} from '../../../shared/utils/constant';
 import LocationMessage from './LocationMessage';
 
 const THRESHOLD = 60 * 1000;
@@ -37,16 +37,21 @@ const getShowTime = (currentMessage, nextMessage) => {
   return nextTime - currentTime > THRESHOLD;
 };
 
-const ChatBubble = ({ props }) => {
-  const { currentMessage, position, nextMessage } = props;
+const ChatBubble = ({props}) => {
+  const {currentMessage, position, nextMessage} = props;
   const isLeft = position === 'left';
 
-  const { content, created_at, image, message_attachment, text } = currentMessage;
+  const {content, created_at, image, message_attachment, text} = currentMessage;
   const isLocation = content?.includes(MESSAGE_CONTAINS_LOCATION);
   const showTime = getShowTime(currentMessage, nextMessage);
   const fileType =
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.content_type);
+  console.log(
+    '\n\n\nmessage_attachment?.content_type',
+    message_attachment?.content_type,
+  );
+
   // identifyAttachmentTypeFromUrl(message_attachment?.url);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -72,7 +77,7 @@ const ChatBubble = ({ props }) => {
             styles.url,
             ,
             isLeft ? styles.leftMessageText : styles.rightMessageText,
-            { opacity: 0.8 },
+            {opacity: 0.8},
           ]}>
           {part}
         </Text>
@@ -160,7 +165,7 @@ const ChatBubble = ({ props }) => {
                 ]}>
                 {renderTextWithUrls(content || text)}
               </Text>
-              <View style={{ width: 10 }} />
+              <View style={{width: 10}} />
             </>
           )}
         </View>
@@ -185,9 +190,9 @@ const ChatBubble = ({ props }) => {
               isLeft ? PFColors.Standard.Black : PFColors.Standard.White
             }
             indicatorSize={'small'}
-            source={{ uri: selectedImage }}
+            source={{uri: selectedImage}}
             style={styles.fullImageStyle}
-            resizeMode='contain'
+            resizeMode="contain"
           />
         </TouchableWithoutFeedback>
       </Modal>
@@ -298,4 +303,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { ChatBubble };
+export {ChatBubble};
