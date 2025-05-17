@@ -26,7 +26,6 @@ import AudioRecorderPlayer, {
 import RNFS from 'react-native-fs';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {useSelector} from 'react-redux';
-import {useAudioPlayer} from '../../../shared/utils/AudioPlayerContext';
 
 const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
   const {loginUser} = useSelector(state => state.auth);
@@ -37,8 +36,6 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
 
   const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
   const recordingPath = useRef('');
-  const {isPlaying} = useAudioPlayer();
-  console.log('isPlaying', isPlaying);
 
   const formatTime = milliseconds => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -88,9 +85,6 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
     return Platform.OS === 'ios'
       ? `file://${RNFS.CachesDirectoryPath}/${fileName}`
       : `${RNFS.ExternalDirectoryPath}/${fileName}`;
-    // return Platform.OS === 'ios'
-    //   ? `${RNFS.DocumentDirectoryPath}/${fileName}`
-    //   : `${RNFS.ExternalDirectoryPath}/${fileName}`;
   };
 
   const ensureDirectoryExists = async path => {
@@ -119,9 +113,7 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
       AVFormatIDKeyIOS: AVEncodingOption.aac,
     };
 
-    // console.log('Starting recording...');
     const path = getAudioFilePath();
-    // console.log('File path:', path);
     recordingPath.current = path;
 
     try {
@@ -137,11 +129,8 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
         })
         .catch(err => {
           onStartRecord();
-          // console.log('err----->>>', err);
         });
-      // console.log('Recording started at:', path);
     } catch (error) {
-      // console.error('Failed to start recording:', error);
       showAlert('Error', 'Failed to start recording. Please try again.');
       setIsRecording(false);
     }
@@ -151,18 +140,20 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
   }
   const onStopRecord = async () => {
     if (!isRecording) {
-      // console.log('Recording is already stopped.');
       return;
     }
-
     console.log('Stopping recording...');
     try {
       const result = await audioRecorderPlayer.stopRecorder();
       console.log('Recording stopped, file saved at:', result);
+      console.log('`audio${getFileExtensi', {
+        uri: result,
+        name: `${new Date().getTime()}.${getFileExtension(result)}`,
+        type: `audio/.${getFileExtension(result)}`,
+      });
       audioRecorderPlayer.removeRecordBackListener();
       setIsRecording(false);
       setRecordTime('00:00');
-
       if (result && result !== 'Already stopped') {
         const fileExists = await RNFS.exists(result);
         if (fileExists) {
@@ -177,14 +168,13 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
             },
             attachment: {
               uri: result,
-              name: `audio${getFileExtension(result)}`,
+              name: `${new Date().getTime()}.${getFileExtension(result)}`,
               type: `audio/${getFileExtension(result)}`,
             },
           };
           onSend([message]);
           // props.onSend([message]);
         } else {
-          // console.error('File does not exist:', result);
           showAlert('Error', 'The recorded file does not exist.');
         }
       } else if (result === 'Already stopped') {
@@ -199,12 +189,8 @@ const RenderRecordComposer = ({props, isRecording, setIsRecording, onSend}) => {
               createdAt: new Date(),
               user: {
                 _id: loginUser?.id,
-                name: loginUser?.name,
+                name: loginUser?.first_name,
               },
-              // user: {
-              //   _id: props.user._id,
-              //   name: props.user.name,
-              // },
               attachment: recordingPath.current,
             };
             onSend([message]);

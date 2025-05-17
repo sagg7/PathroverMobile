@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Alert,
   NativeScrollEvent,
@@ -21,11 +21,11 @@ import {
   purchaseUpdatedListener,
   useIAP,
 } from 'react-native-iap';
-import { useDispatch, useSelector } from 'react-redux';
-import { svgIcon } from '../../../../assets/svg';
-import { AppButton, AppLoader, MainWrapper } from '../../../../components';
-import { setLoginUser } from '../../../../redux/auth/authSlice';
-import { useCreateSubscriptionsMutation } from '../../../../redux/endUser/endUserApiSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {svgIcon} from '../../../../assets/svg';
+import {AppButton, AppLoader, MainWrapper} from '../../../../components';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
 import {
   HP,
   isIOS,
@@ -82,8 +82,8 @@ const Subscription = () => {
   const isProcessing = useRef(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { subscriptions, getSubscriptions, requestSubscription } = useIAP();
-  const { loginUser } = useSelector((state: any) => state?.auth);
+  const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
+  const {loginUser} = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
   const [currentPurchase, setCurrentPurchase] = useState<any>(null);
 
@@ -96,7 +96,9 @@ const Subscription = () => {
         if (Platform.OS === 'android') {
           await flushFailedPurchasesCachedAsPendingAndroid();
         }
-        await getSubscriptions({ skus: subscriptionSkus });
+
+        const test = await getSubscriptions({skus: subscriptionSkus});
+        console.log('IOS', test);
       } catch (error) {
         //
       }
@@ -113,7 +115,10 @@ const Subscription = () => {
   const handlePurchaseError = useCallback((error: any) => {
     setIsLoading(false);
     isProcessing.current = false;
-    Alert.alert('Error', error?.message ? error?.message : 'Failed to process purchase.');
+    Alert.alert(
+      'Error',
+      error?.message ? error?.message : 'Failed to process purchase.',
+    );
   }, []);
 
   useEffect(() => {
@@ -142,18 +147,17 @@ const Subscription = () => {
       } else {
         byPass = true;
       }
-      
+
       if (byPass) {
         setIsLoading(true);
         const offerToken =
           subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
-                
+
         const purchase = await requestSubscription({
           sku,
-          ...(offerToken && { subscriptionOffers: [{ sku, offerToken }] }),
+          ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
         });
         setCurrentPurchase(purchase);
-
 
         const startDate = new Date();
         const endDate = new Date(startDate);
@@ -183,21 +187,23 @@ const Subscription = () => {
                 is_aval_trial: true,
               }),
             );
-
           })
           .catch(e => {
             //
           });
       } else {
         setIsLoading(false);
-        if (Platform.OS === 'ios' && availablePurchases?.length > 0){
+        if (Platform.OS === 'ios' && availablePurchases?.length > 0) {
           Alert.alert('Error', 'Subscription already purchased.');
         }
       }
     } catch (err) {
       isProcessing.current = false;
       setIsLoading(false);
-      Alert.alert('Error', err?.message ? err?.message : 'Failed to purchase is_subscribed.');
+      Alert.alert(
+        'Error',
+        err?.message ? err?.message : 'Failed to purchase is_subscribed.',
+      );
     } finally {
       setIsLoading(false);
       isProcessing.current = false;
@@ -214,13 +220,13 @@ const Subscription = () => {
     if (selectedIndex < SUBSCRIPTIONS_SLIDES.length - 1) {
       const nextIndex = selectedIndex + 1;
       setSelectedIndex(nextIndex);
-      scrollRef.current?.scrollTo({ x: nextIndex * WP('100'), animated: true });
+      scrollRef.current?.scrollTo({x: nextIndex * WP('100'), animated: true});
     } else {
       handleBuySubscription(SubscriptionPackageName);
     }
   };
 
-  const finishTheTransaction = async (purchase) => {
+  const finishTheTransaction = async purchase => {
     try {
       if (!isIOS()) {
         await acknowledgePurchaseAndroid({
@@ -236,7 +242,6 @@ const Subscription = () => {
         purchase: !isIOS() ? purchase[0] : purchase,
         isConsumable: false,
       });
-
     } catch (error) {
       console.log('Error finishing transaction:', error);
     }
@@ -297,7 +302,7 @@ const Subscription = () => {
         {SUBSCRIPTIONS_SLIDES(loginUser?.is_aval_trial).map((_, index) => (
           <View
             key={index}
-            style={[styles.dot, { opacity: index === selectedIndex ? 1 : 0.5 }]}
+            style={[styles.dot, {opacity: index === selectedIndex ? 1 : 0.5}]}
           />
         ))}
       </View>
