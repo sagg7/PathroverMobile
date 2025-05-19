@@ -63,10 +63,10 @@ const EditProfile = () => {
           setFieldValue('callingCode', loginUser?.country_code);
           phone_number && setFieldValue('phone', loginUser?.phone_number);
         }
-        first_name && setFieldValue('firstName', first_name);
-        last_name && setFieldValue('lastName', last_name);
-        email && setFieldValue('email', email);
       }
+      first_name && setFieldValue('firstName', first_name);
+      last_name && setFieldValue('lastName', last_name);
+      email && setFieldValue('email', email);
     }
   }, []);
 

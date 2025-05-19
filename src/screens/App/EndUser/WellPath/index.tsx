@@ -188,7 +188,7 @@ const WellPath = () => {
     isLoading,
     refetch,
   } = useGetAllWellsQuery(queryParams, {
-    skip: queryParams.longitude === null || IsmapLoading || !is_subscribed,
+    skip: queryParams.longitude === null || !is_subscribed,
   });
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);

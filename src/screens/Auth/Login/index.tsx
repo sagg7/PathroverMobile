@@ -66,11 +66,7 @@ const LoginScreen = ({}) => {
     };
 
     const resp = await login(obj);
-    const res = {
-      ...resp?.data?.user,
-      is_subscribed: true,
-    };
-    dispatch(setLoginUser(res));
+    dispatch(setLoginUser(resp?.data?.user));
     dispatch(setUserRole(APP_ROLE.END_USER));
 
     if (resp?.data) {

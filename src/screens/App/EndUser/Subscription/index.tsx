@@ -82,7 +82,8 @@ const Subscription = () => {
   const isProcessing = useRef(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
+  const {subscriptions, getSubscriptions, requestSubscription, connected} =
+    useIAP();
   const {loginUser} = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
   const [currentPurchase, setCurrentPurchase] = useState<any>(null);
@@ -93,19 +94,24 @@ const Subscription = () => {
     const initializeIAP = async () => {
       try {
         await initConnection();
-        if (Platform.OS === 'android') {
-          await flushFailedPurchasesCachedAsPendingAndroid();
+        if (connected) {
+          if (Platform.OS === 'android') {
+            await flushFailedPurchasesCachedAsPendingAndroid();
+          }
+          await getSubscriptions({skus: subscriptionSkus});
         }
-
-        const test = await getSubscriptions({skus: subscriptionSkus});
-        console.log('IOS', test);
       } catch (error) {
         //
+        // console.log('eroor in initialize', error);
       }
     };
 
     initializeIAP();
   }, []);
+
+  useEffect(() => {
+    console.log('SUBSCRIPTION==>', subscriptions);
+  }, [subscriptions]);
 
   const handlePurchaseUpdate = useCallback(async (purchase: any) => {
     setIsLoading(false);
@@ -132,13 +138,15 @@ const Subscription = () => {
   }, [handlePurchaseUpdate, handlePurchaseError]);
 
   const handleBuySubscription = async (sku: any) => {
-    if (isProcessing.current || isLoading) return;
+    if (isProcessing.current || isLoading || subscriptions?.length === 0)
+      return;
     isProcessing.current = true;
-    setIsLoading(true);
-    const availablePurchases = await getAvailablePurchases();
+    // setIsLoading(true);
 
     try {
       setIsLoading(true);
+      const availablePurchases = await getAvailablePurchases();
+      // let byPass = true;
       let byPass = false;
       if (Platform.OS === 'ios') {
         if (availablePurchases?.length === 0) {
@@ -148,7 +156,7 @@ const Subscription = () => {
         byPass = true;
       }
 
-      if (byPass) {
+      if (byPass && subscriptions?.length > 0) {
         setIsLoading(true);
         const offerToken =
           subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
@@ -235,7 +243,7 @@ const Subscription = () => {
         });
       }
 
-      console.log('purchase', purchase);
+      // console.log('purchase', purchase);
 
       // finishPurchase(!isIOS() ? currentPurchase[0] : currentPurchase, false);
       await finishTransaction({
