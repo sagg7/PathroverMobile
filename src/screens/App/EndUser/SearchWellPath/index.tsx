@@ -59,7 +59,7 @@ const SearchWellPath = ({route, navigation}: any) => {
   const [searchType, setSearchType] = useState<'wells' | 'places'>('wells');
   const [recentSearches, setRecentSearches] = useState(recentDestSearch);
   const [wellSearch, {isLoading: isSearchingWell}] = useWellSearchMutation();
-  const {is_subscribed} = useSelector(state => state?.auth?.loginUser);
+  const {subscription_purchased} = useSelector(state => state?.auth?.loginUser);
 
   const dispatch = useDispatch();
   const [searchValues, setSearchValues] = useState({
@@ -76,12 +76,12 @@ const SearchWellPath = ({route, navigation}: any) => {
     }
   }, [searchLocation]);
   useEffect(() => {
-    if (is_subscribed) {
+    if (subscription_purchased) {
       setSearchType('wells');
     } else {
       setSearchType('places');
     }
-  }, [is_subscribed]);
+  }, [subscription_purchased]);
 
   useEffect(() => {
     if (searchLocationName) setSimpleSearch(searchLocationName);
@@ -296,7 +296,7 @@ const SearchWellPath = ({route, navigation}: any) => {
           )}
           {suggestions?.length < 1 && (
             <View style={{...styles.rowView, padding: WP('5')}}>
-              {is_subscribed && (
+              {subscription_purchased && (
                 <>
                   <TouchableOpacity
                     activeOpacity={0.7}

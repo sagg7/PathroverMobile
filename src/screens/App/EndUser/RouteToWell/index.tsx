@@ -46,7 +46,7 @@ const RouteToWell = ({route}: any) => {
     start: false,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const {is_subscribed: subscription} = useSelector(
+  const {subscription_purchased: subscription} = useSelector(
     state => state?.auth?.loginUser,
   );
   const {showPremiumAlert} = usePremiumAlert();

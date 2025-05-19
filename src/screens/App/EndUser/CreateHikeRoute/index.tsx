@@ -59,7 +59,7 @@ const CreateHikeRoute = () => {
   const [routeLineHeight, setRouteLineHeight] = useState<any>(4);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const dispatch = useDispatch();
-  const {is_subscribed: subscription} = useSelector(
+  const {subscription_purchased: subscription} = useSelector(
     state => state?.auth?.loginUser,
   );
   const {showPremiumAlert} = usePremiumAlert();

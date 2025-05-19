@@ -89,7 +89,7 @@ const CreateRouteEndUser = () => {
   const cameraRef = useRef<any>(null);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const {is_subscribed: subscription} = useSelector(
+  const {subscription_purchased: subscription} = useSelector(
     (state: any) => state?.auth?.loginUser,
   );
   const {showPremiumAlert} = usePremiumAlert();

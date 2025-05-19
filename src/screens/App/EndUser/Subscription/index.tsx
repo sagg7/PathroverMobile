@@ -193,6 +193,7 @@ const Subscription = () => {
                 ...loginUser,
                 is_subscribed: true,
                 is_aval_trial: true,
+                subscription_purchased: true,
               }),
             );
           })

@@ -172,8 +172,8 @@ const WellPath = () => {
     page: 1,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-  const {is_subscribed} = useSelector(state => state?.auth?.loginUser);
-  const {data: subscriptions} = useGetSubscriptionQuery(null);
+  const {subscription_purchased} = useSelector(state => state?.auth?.loginUser);
+  const { data: subscriptions } = useGetSubscriptionQuery(null);  
 
   const {showPremiumAlert} = usePremiumAlert();
 
@@ -188,7 +188,7 @@ const WellPath = () => {
     isLoading,
     refetch,
   } = useGetAllWellsQuery(queryParams, {
-    skip: queryParams.longitude === null || !is_subscribed,
+    skip: queryParams.longitude === null || !subscription_purchased,
   });
   const {location} = useLocation();
   const cameraRef = useRef<any>(null);
@@ -219,8 +219,8 @@ const WellPath = () => {
   }, [location]);
 
   useEffect(() => {
-    setAvailable(is_subscribed);
-  }, [is_subscribed]);
+    setAvailable(subscription_purchased);
+  }, [subscription_purchased]);
 
   useEffect(() => {
     if (allWellLocations?.length > 0) {
@@ -265,16 +265,16 @@ const WellPath = () => {
   }, [mapLayerStyle]);
 
   useEffect(() => {
-    if (subscriptions?.length > 0 && is_subscribed) {
+    if (subscriptions?.length > 0 && subscription_purchased) {
       checkSubscriptionStatus();
     }
-  }, [isFocused, subscriptions, is_subscribed]);
+  }, [isFocused, subscriptions, subscription_purchased]);
 
   const checkSubscriptionStatus = async () => {
     const status = await isSubscriptionActive();
     const is_valid = status?.validation;
 
-    setAvailable(is_valid);
+    // setAvailable(is_valid);
 
     dispatch(
       setLoginUser({
@@ -504,7 +504,7 @@ const WellPath = () => {
   };
 
   const onPressToggle = () => {
-    if (!is_subscribed) {
+    if (!subscription_purchased) {
       navigation.navigate(Routes.Subscription);
     }
   };
@@ -853,10 +853,10 @@ const WellPath = () => {
           })
         }
         onPressFilter={() => {
-          is_subscribed ? setShowMapSettigs(true) : showPremiumAlert({});
+          subscription_purchased ? setShowMapSettigs(true) : showPremiumAlert({});
         }}
         onPressMenu={() =>
-          is_subscribed ? setShowOptionsSheet(true) : showPremiumAlert({})
+          subscription_purchased ? setShowOptionsSheet(true) : showPremiumAlert({})
         }
       />
 
@@ -1037,7 +1037,7 @@ const WellPath = () => {
         onPressRecordRoute={() => {
           setShowOptionsSheet(false);
           setTimeout(() => {
-            is_subscribed
+            subscription_purchased
               ? navigation.navigate(Routes.RecordRoute)
               : showPremiumAlert({});
           }, 1000);
@@ -1046,7 +1046,7 @@ const WellPath = () => {
           setShowOptionsSheet(false);
           dispatch(setCreateRouteDataEmpty({}));
           setTimeout(() => {
-            is_subscribed
+            subscription_purchased
               ? navigation.navigate(Routes.CreateRouteEndUser)
               : showPremiumAlert({});
           }, 1000);
@@ -1227,7 +1227,7 @@ const WellPath = () => {
             }, 500);
           }}
           onPressShare={() =>
-            is_subscribed ? setShowShareSheet(true) : showPremiumAlert({})
+            subscription_purchased ? setShowShareSheet(true) : showPremiumAlert({})
           }
           onPressStart={() => {
             setShowNavigationSheet(false);
