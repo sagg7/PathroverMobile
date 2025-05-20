@@ -102,10 +102,10 @@ export const onDisplayNotification = async (message) => {
     });
 
     // Determine notification type from message data
-    const notificationType = message?.notification?.title === 'Missed Call' ? 'Missed Call' :  JSON.parse(message?.data?.data)?.call_type;
+    const notificationType = message?.notification?.title === 'Missed Call' ? 'Missed Call' : JSON.parse(message?.data?.data)?.call_type;
 
     // console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
-    
+
     // const notificationType = message?.data?.type;
 
     // Base notification configuration
@@ -123,7 +123,7 @@ export const onDisplayNotification = async (message) => {
           launchActivity: 'default',
         },
         importance: AndroidImportance.HIGH,
-        ongoing: message?.notification?.title === 'Missed Call' ? false: true,
+        ongoing: message?.notification?.title === 'Missed Call' ? false : true,
         loopSound: message?.notification?.title === 'Missed Call' ? false : true,
         // loopSound: message?.data?.type === 'ringing',
       },
@@ -144,7 +144,7 @@ export const onDisplayNotification = async (message) => {
 
     // Add actions based on notification type
     // console.log('notificationType----onDisplayNotification--------------->>>>>>>>>>>>>>', notificationType);
-    
+
     switch (notificationType) {
       case 'audio_call':
         await setupNotificationChannels();
@@ -191,7 +191,7 @@ export const onDisplayNotification = async (message) => {
 
     await clearAllCallNotifications()
     await notifee.displayNotification(notificationConfig);
-    
+
   } catch (error) {
     // console.error('Error displaying notification:', error);
   }
@@ -282,8 +282,8 @@ export const setupActionHandlers = (navigation, updateCallStatus) => {
 
 const handleNotificationPress = (notification, navigation, updateCallStatus) => {
   // const { data } = notification;
-  
-  const data = JSON.parse(notification?.data?.data) ?? {} 
+
+  const data = JSON.parse(notification?.data?.data) ?? {}
 
   // console.log('Notification pressed:', data);
 
@@ -293,7 +293,9 @@ const handleNotificationPress = (notification, navigation, updateCallStatus) => 
   // }
   switch (data?.type) {
     case 'incoming_call':
-      data?.user_call_id && updateCallStatus('not_attended', data?.user_call_id, data?.user_info?.callerId);
+      data?.user_call_id && updateCallStatus('active', data?.user_call_id, data?.user_info?.callerId);
+      onNotifyPress(notification, navigation);
+      //   data?.user_call_id && updateCallStatus('not_attended', data?.user_call_id, data?.user_info?.callerId);
       clearAllCallNotifications()
       break;
     default:
@@ -304,10 +306,10 @@ const handleNotificationPress = (notification, navigation, updateCallStatus) => 
 const handleNotificationAction = (actionId, notification, navigation, updateCallStatus) => {
   // console.log('Action pressed:', actionId);
   // console.log('Action notification:', notification);
-  const data = JSON.parse(notification?.data?.data) ?? {} 
+  const data = JSON.parse(notification?.data?.data) ?? {}
 
   // console.log('data------------------->>>>>>>>>>>>>>', data);
-  
+
 
   switch (actionId) {
     case 'accept':
@@ -332,7 +334,7 @@ export const onNotifyPress = (notify, navigation) => {
   const { channelName } = user_info || {};
 
   // console.log('Handling notification onNotifyPress:', user_call_id);
-  
+
   // console.log('Handling notification data:', JSON.parse(data?.data));
   // console.log('Handling notification call_type:', call_type);
 
@@ -341,11 +343,11 @@ export const onNotifyPress = (notify, navigation) => {
       navigation.navigate('VoiceCalling', {
         user: user_info,
         channel: channelName,
-        id: user_call_id ,
+        id: user_call_id,
       });
 
       // console.log('navifatoihih--------audio_call---------------------------');
-      
+
       break;
     case 'video_call':
       navigation.navigate('VideoCalling', {
