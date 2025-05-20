@@ -248,9 +248,9 @@ const Settings = ({ navigation }: any) => {
   };
 
   const settingOption = ({ item }) => {
-    // if (item?.id === 13 && !loginUser?.subscription_purchased) {
-    //   return;
-    // }
+    if (item?.id === 13 && !loginUser?.subscription_purchased) {
+      return;
+    }
     return (
       <TouchableOpacity
         style={styles.listConatainer}
