@@ -54,7 +54,7 @@ const Home = ({navigation}: any) => {
 
   const {data: userProfile, refetch} = useGetCurrentUserProfileQuery(null);
   const dispatch = useDispatch();
-  const isFocued = useIsFocused();
+  const isFocued = useIsFocused();  
 
   useEffect(() => {
     (async () => {
@@ -80,7 +80,7 @@ const Home = ({navigation}: any) => {
   }, []);
 
   useEffect(() => {
-    if (subscriptions?.length > 0 && loginUser?.is_subscribed) {
+    if (subscriptions?.length > 0 && loginUser?.subscription_purchased) {
       checkSubscriptionStatus();
     }
   }, [subscriptions]);
