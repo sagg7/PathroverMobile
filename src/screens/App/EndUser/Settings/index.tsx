@@ -1,37 +1,35 @@
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  Linking,
   Alert,
+  FlatList,
+  Image,
+  Linking,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styles from './styles';
+import { useDispatch, useSelector } from 'react-redux';
 import { appIcons } from '../../../../assets/icons';
 import { svgIcon } from '../../../../assets/svg';
 import { AppHeader, MainWrapper, SwitchRoleSheet } from '../../../../components';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
+import { setUserRole } from '../../../../redux/auth/appRoleSlice';
+import { setAccessToken, setLoginUser } from '../../../../redux/auth/authSlice';
+import { useGetSubscriptionQuery, useUpdateSubscriptionMutation } from '../../../../redux/endUser/endUserApiSlice';
+import { useDeleteUserAccountMutation } from '../../../../redux/manager/managerApiSlice';
+import { setManagerRouteEmpty } from '../../../../redux/manager/managerSlice';
+import { AppLoader, Routes } from '../../../../shared/exporter';
 import {
   APP_ROLE,
   EndUserProfileMenu,
-  FAQ_LIST_LINK,
   showAlert,
   UNEXPECTED_ERROR,
-  USER_PROFILE,
+  USER_PROFILE
 } from '../../../../shared/utils/constant';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppLoader, Routes } from '../../../../shared/exporter';
-import { setAccessToken, setLoginUser } from '../../../../redux/auth/authSlice';
-import { setUserRole } from '../../../../redux/auth/appRoleSlice';
-import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import { setManagerRouteEmpty } from '../../../../redux/manager/managerSlice';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useDeleteUserAccountMutation } from '../../../../redux/manager/managerApiSlice';
-import { Platform } from 'react-native';
-import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
-import { useGetSubscriptionQuery, useUpdateSubscriptionMutation } from '../../../../redux/endUser/endUserApiSlice';
-import { initConnection, purchaseUpdatedListener } from 'react-native-iap';
+import styles from './styles';
 
 const Settings = ({ navigation }: any) => {
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
@@ -120,30 +118,29 @@ const Settings = ({ navigation }: any) => {
     setTimeout(async () => {
       try {
         console.log('inside checkSubscriptionStatus');
+          const status = await isSubscriptionActive();
+          const is_valid = status?.validation;
 
-        const status = await isSubscriptionActive();
-        const is_valid = status?.validation;
-
-        dispatch(
-          setLoginUser({
-            ...loginUser,
-            is_subscribed: is_valid,
-            is_aval_trial: false,
-            subscription_purchased: is_valid ?? false,
-          }),
-        );
-        updateSubscription({
-          subscription: {
-            is_subscribed: is_valid,
-            id: subscriptions?.[0]?.id,
-            subscription_purchased: is_valid ?? false,
-          },
-        });
+          dispatch(
+            setLoginUser({
+              ...loginUser,
+              is_subscribed: is_valid,
+              is_aval_trial: false,
+              subscription_purchased: is_valid ?? false,
+            }),
+          );
+          updateSubscription({
+            subscription: {
+              is_subscribed: is_valid,
+              id: subscriptions?.[0]?.id,
+              subscription_purchased: is_valid ?? false,
+            },
+          });
         setLoading(false);
       } catch (error) {
         setLoading(false);
       }
-    }, 60000);
+    }, 90000);
   };
 
   const unSubscribe = () => {
