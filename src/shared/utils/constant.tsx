@@ -640,6 +640,11 @@ export const EndUserProfileMenu = [
     icon: appIcons.privacy,
   },
   {
+    id: 13,
+    title: 'Unsubscribe',
+    icon: appIcons.logout,
+  },
+  {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
@@ -649,6 +654,7 @@ export const EndUserProfileMenu = [
     title: 'Delete',
     icon: appIcons.logout,
   },
+  
 ];
 
 export const ManageProfileArr = [
