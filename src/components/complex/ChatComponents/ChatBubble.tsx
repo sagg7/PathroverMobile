@@ -47,10 +47,6 @@ const ChatBubble = ({props}) => {
   const fileType =
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.content_type);
-  console.log(
-    '\n\n\nmessage_attachment?.content_type',
-    message_attachment?.content_type,
-  );
 
   // identifyAttachmentTypeFromUrl(message_attachment?.url);
 
