@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { PFColors } from '../../../shared/exporter';
+import { Text } from 'react-native';
 
-const AppLoader: React.FC<{}> = () => {
+const AppLoader: React.FC<{}> = ({title}) => {
   return (
     <View style={styles.container}>
       <ActivityIndicator size={'large'} color={PFColors.Blue.Dark} />
+      {title && (<Text style={styles.titleStyle}>{title}</Text>)}
     </View>
   );
 };
@@ -20,10 +22,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 999,
     alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'center',
     backgroundColor: 'transparent',
   },
+  titleStyle: {
+    fontSize: 16,
+    color: PFColors.Standard.Black,
+    marginTop: 10,
+  }
 });
 
 export { AppLoader };
