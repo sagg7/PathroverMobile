@@ -27,15 +27,20 @@ export function identifyAttachmentTypeFromUrl(contentType) {
     'audio/mp4': 'audio', // .m4a
     'audio/flac': 'audio',
     'audio/aac': 'audio',
+    'audio/m4a': 'audio',
+    'audio/mp3': 'audio',
 
     // Documents
     'application/pdf': 'document',
     'application/msword': 'document', // .doc
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'document', // .docx
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      'document', // .docx
     'application/vnd.ms-excel': 'document', // .xls
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'document', // .xlsx
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      'document', // .xlsx
     'application/vnd.ms-powerpoint': 'document', // .ppt
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'document', // .pptx
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      'document', // .pptx
     'text/plain': 'document', // .txt
     'text/csv': 'document', // .csv
     'application/vnd.oasis.opendocument.text': 'document', // .odt
@@ -58,7 +63,10 @@ export function identifyAttachmentTypeFromUrl(contentType) {
   if (contentType.startsWith('audio/')) {
     return 'audio';
   }
-  if (contentType.startsWith('application/') || contentType.startsWith('text/')) {
+  if (
+    contentType.startsWith('application/') ||
+    contentType.startsWith('text/')
+  ) {
     return 'document';
   }
 

@@ -51,6 +51,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '15%',
   },
+  arrowIconStyle: {
+    tintColor: PFColors.Standard.White,
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+  },
+  scrollToBottomStyle: {
+    backgroundColor: PFColors.Blue.Dark,
+  }
 });
 
 export default styles;

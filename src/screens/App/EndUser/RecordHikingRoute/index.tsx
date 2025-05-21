@@ -366,7 +366,7 @@ const RecordHikingRoute = () => {
         animationDuration: 1000,
       });
     } else {
-      showAlert('Error', 'Current location not available.');
+      console.log('Error', 'Current location not available.');
     }
   };
 

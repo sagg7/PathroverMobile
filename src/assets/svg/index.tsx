@@ -164,6 +164,7 @@ import CheckboxFill from './checkbox_fill.svg';
 import CheckboxBlank from './checkbox_blank.svg';
 import SearchIcon from './search_icon.svg';
 import RecenterIcon from './recenterIcon.svg';
+import PauseIcon from './pauseIcon.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -331,4 +332,5 @@ export const svgIcon = {
   CheckboxBlank: <CheckboxBlank />,
   SearchIcon: <SearchIcon />,
   RecenterIcon: <RecenterIcon />,
+  PauseIcon: <PauseIcon />,
 };

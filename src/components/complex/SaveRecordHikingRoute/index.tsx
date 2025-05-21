@@ -75,7 +75,7 @@ const SaveRecordHikingRouteSheet = ({
           {btnStatus === 'play' && (
             <View style={styles.distanceView}>
               <Text style={styles.distanceNumberText}>
-                {String(distance)} m
+                {String(distance)} mi
               </Text>
               <Text style={styles.distanceText}>Distance</Text>
             </View>

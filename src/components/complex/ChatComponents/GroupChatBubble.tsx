@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -18,10 +18,11 @@ import {
   PFFontSize,
   scale,
 } from '../../../shared/exporter';
-import {identifyAttachmentTypeFromUrl} from '../../../helpers/getAttachmentType';
+import { identifyAttachmentTypeFromUrl } from '../../../helpers/getAttachmentType';
 import AudioMessage from './AudioMessage';
 import VideoMessage from './VideoMessage';
 import FileMessage from './FileMessage';
+import { Dimensions } from 'react-native';
 
 const THRESHOLD = 60 * 1000;
 
@@ -40,16 +41,16 @@ const getShowTime = (currentMessage, nextMessage) => {
   return nextTime - currentTime > THRESHOLD;
 };
 
-const GroupChatBubble = ({props}) => {
-  const {currentMessage, position, previousMessage, nextMessage} = props;
+const GroupChatBubble = ({ props }) => {
+  const { currentMessage, position, previousMessage, nextMessage } = props;
   const isLeft = position === 'left';
-  const {content, created_at, image, message_attachment, text, user} =
+  const { content, created_at, image, message_attachment, text, user } =
     currentMessage;
-  const {avatar, name} = user;
+  const { avatar, name } = user;
   const fileType =
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.content_type);
-    // identifyAttachmentTypeFromUrl(message_attachment?.url);
+  // identifyAttachmentTypeFromUrl(message_attachment?.url);
 
   // const showAvatar =
   //   !previousMessage ||
@@ -87,7 +88,7 @@ const GroupChatBubble = ({props}) => {
           style={[
             styles.url,
             isLeft ? styles.leftMessageText : styles.rightMessageText,
-            {opacity: 0.8},
+            { opacity: 0.8 },
           ]}>
           {part}
         </Text>
@@ -110,7 +111,7 @@ const GroupChatBubble = ({props}) => {
         (isLeft ? (
           <View style={styles.userViewLeft}>
             <Image
-              source={avatar ? {uri: avatar} : appImages.userPlaceholder}
+              source={avatar ? { uri: avatar } : appImages.userPlaceholder}
               style={styles.userIconStyle}
             />
             <Text style={styles.userNameText}>{name}</Text>
@@ -119,7 +120,7 @@ const GroupChatBubble = ({props}) => {
           <View style={styles.userViewRight}>
             <Text style={styles.userNameText}>{name}</Text>
             <Image
-              source={avatar ? {uri: avatar} : appImages.userPlaceholder}
+              source={avatar ? { uri: avatar } : appImages.userPlaceholder}
               style={styles.userIconStyle}
             />
           </View>
@@ -142,7 +143,7 @@ const GroupChatBubble = ({props}) => {
                 isLeft ? PFColors.Standard.Black : PFColors.Standard.White
               }
               indicatorSize={'small'}
-              source={{uri: image?.sourceURL ?? message_attachment?.url}}
+              source={{ uri: image?.sourceURL ?? message_attachment?.url }}
               style={{
                 width: scale(90),
                 height: scale(90),
@@ -177,7 +178,7 @@ const GroupChatBubble = ({props}) => {
                 ]}>
                 {renderTextWithUrls(content || text)}
               </Text>
-              <View style={{width: 10}} />
+              <View style={{ width: 10 }} />
             </>
           )}
         </View>
@@ -197,10 +198,14 @@ const GroupChatBubble = ({props}) => {
         onBackdropPress={onClose}
         style={styles.modalContainer}>
         <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
-          <Image
-            source={{uri: selectedImage}}
+          <FitImage
+            indicatorColor={
+              isLeft ? PFColors.Standard.Black : PFColors.Standard.White
+            }
+            indicatorSize={'small'}
+            source={{ uri: selectedImage }}
             style={styles.fullImageStyle}
-            resizeMode="contain"
+            resizeMode='contain'
           />
         </TouchableWithoutFeedback>
       </Modal>
@@ -295,9 +300,11 @@ const styles = StyleSheet.create({
     height: 80,
   },
   fullImageStyle: {
-    width: '96%',
-    flexGrow: 1,
+    // width: '96%',
+    // flexGrow: 1,
     alignSelf: 'center',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
   imageStyle: {
     flex: 1,
@@ -333,4 +340,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {GroupChatBubble};
+export { GroupChatBubble };

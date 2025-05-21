@@ -1,56 +1,67 @@
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
+  Alert,
   FlatList,
+  Image,
   Linking,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import styles from './styles';
-import {appIcons} from '../../../../assets/icons';
-import {svgIcon} from '../../../../assets/svg';
-import {AppHeader, MainWrapper, SwitchRoleSheet} from '../../../../components';
+import { useDispatch, useSelector } from 'react-redux';
+import { appIcons } from '../../../../assets/icons';
+import { svgIcon } from '../../../../assets/svg';
+import { AppHeader, MainWrapper, SwitchRoleSheet } from '../../../../components';
+import ConsentSheet from '../../../../components/complex/ConsentSheet';
+import { isSubscriptionActive } from '../../../../hooks/iap-hook/iapPurchaseHook';
+import { setUserRole } from '../../../../redux/auth/appRoleSlice';
+import { setAccessToken, setLoginUser } from '../../../../redux/auth/authSlice';
+import { useGetSubscriptionQuery, useUpdateSubscriptionMutation } from '../../../../redux/endUser/endUserApiSlice';
+import { useDeleteUserAccountMutation } from '../../../../redux/manager/managerApiSlice';
+import { setManagerRouteEmpty } from '../../../../redux/manager/managerSlice';
+import { AppLoader, Routes } from '../../../../shared/exporter';
 import {
   APP_ROLE,
   EndUserProfileMenu,
-  FAQ_LIST_LINK,
   showAlert,
   UNEXPECTED_ERROR,
-  USER_PROFILE,
+  USER_PROFILE
 } from '../../../../shared/utils/constant';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppLoader, Routes} from '../../../../shared/exporter';
-import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
-import {setUserRole} from '../../../../redux/auth/appRoleSlice';
-import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import {setManagerRouteEmpty} from '../../../../redux/manager/managerSlice';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
+import styles from './styles';
 
-const Settings = ({navigation}: any) => {
+const Settings = ({ navigation }: any) => {
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
   const [profiles, setProfiles] = useState(USER_PROFILE);
+  const [loading, setLoading] = useState(false);
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const dispatch = useDispatch();
   const userRole = useSelector(state => state?.appRole.userRole);
   const consentSheetRef = useRef<any>(null);
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
-  const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
+  const [deleteUserAccount, { isLoading: isLoadingDeleteAccounnt }] =
     useDeleteUserAccountMutation();
   const [profilePicture, setProfilePicture] = useState<any>();
+  const { data: subscriptions } = useGetSubscriptionQuery(null);
+  const [updateSubscription] = useUpdateSubscriptionMutation();
+
 
   const [userName, setUserName] = useState(
-    `${loginUser?.first_name ? loginUser?.first_name : ''} ${
-      loginUser?.last_name ? loginUser?.last_name : ''
+    `${loginUser?.first_name ? loginUser?.first_name : ''} ${loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+  }, [loginUser?.first_name, loginUser?.last_name]);
 
   useEffect(() => {
     if (loginUser)
       setUserName(
-        `${loginUser?.first_name ? loginUser?.first_name : ''} ${
-          loginUser?.last_name ? loginUser?.last_name : ''
+        `${loginUser?.first_name ? loginUser?.first_name : ''} ${loginUser?.last_name ? loginUser?.last_name : ''
         } `,
       );
     setProfilePicture(loginUser?.avatar);
@@ -102,6 +113,67 @@ const Settings = ({navigation}: any) => {
     }, 1000);
   };
 
+  const checkSubscriptionStatus = async () => {
+    setLoading(true);
+    setTimeout(async () => {
+      try {
+        console.log('inside checkSubscriptionStatus');
+          const status = await isSubscriptionActive();
+          const is_valid = status?.validation;
+
+          dispatch(
+            setLoginUser({
+              ...loginUser,
+              is_subscribed: is_valid,
+              is_aval_trial: false,
+              subscription_purchased: is_valid ?? false,
+            }),
+          );
+          updateSubscription({
+            subscription: {
+              is_subscribed: is_valid,
+              id: subscriptions?.[0]?.id,
+              subscription_purchased: is_valid ?? false,
+            },
+          });
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+      }
+    }, 90000);
+  };
+
+  const unSubscribe = () => {
+    try {
+      if (Platform.OS === 'ios') {
+        {
+          const url = 'itms-apps://apps.apple.com/account/subscriptions';
+
+          Linking?.openURL(url)?.catch(err => {
+            Alert.alert('Error', 'Failed to open subscription page')
+            setLoading(false);
+            return;
+          }
+          );
+        }
+      } else if (Platform.OS === 'android') {
+        const url = 'https://play.google.com/store/account/subscriptions?package=com.pathrover';
+        // ?package=com.my.package&sku=mySKU
+        Linking?.openURL(url)?.catch(err => {
+          Alert.alert('Error', 'Failed to open subscription page')
+          setLoading(false);
+          return;
+        }
+        );
+      }
+      checkSubscriptionStatus();
+    } catch (error) {
+      console.log('error', error);
+      
+      //
+    }
+  }
+
   const handleNavigation = (itemId: any) => {
     let screenName = '';
     switch (itemId) {
@@ -146,6 +218,9 @@ const Settings = ({navigation}: any) => {
         navigation.navigate(Routes.EndUserSavedLibrary);
         // setshowSwitchRoleSheet(true);
         break;
+      case 13:
+        unSubscribe();
+        break;
     }
     if (screenName) {
       navigation.navigate(screenName);
@@ -169,7 +244,10 @@ const Settings = ({navigation}: any) => {
     }
   };
 
-  const settingOption = ({item}) => {
+  const settingOption = ({ item }) => {
+    if (item?.id === 13 && !loginUser?.subscription_purchased) {
+      return;
+    }
     return (
       <TouchableOpacity
         style={styles.listConatainer}
@@ -195,7 +273,7 @@ const Settings = ({navigation}: any) => {
           <Image
             source={
               loginUser?.avatar
-                ? {uri: profilePicture}
+                ? { uri: profilePicture }
                 : appIcons.userPlaceholder
             }
             style={styles.userPicture}
@@ -232,6 +310,7 @@ const Settings = ({navigation}: any) => {
         setModalVisible={() => setshowSwitchRoleSheet(false)}
       />
       {isLoadingDeleteAccounnt && <AppLoader />}
+      {loading && <AppLoader title={'Please wait...'} />}
     </MainWrapper>
   );
 };

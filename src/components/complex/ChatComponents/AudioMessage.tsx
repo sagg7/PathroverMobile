@@ -1,51 +1,38 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import {Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {svgIcon} from '../../../assets/svg';
 import {PFColors, PFFonts, PFFontSize} from '../../../shared/exporter';
-
-const audioRecorderPlayer = new AudioRecorderPlayer();
+import {useAudioPlayer} from '../../../shared/utils/AudioPlayerContext';
 
 const AudioMessage = ({currentMessage, position}) => {
   const {message_attachment} = currentMessage;
   const isLeft = position === 'left';
+  const audioPath =
+    Platform.OS === 'android'
+      ? message_attachment?.url?.replace('.m4a', '.mp3')
+      : message_attachment?.url;
 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentPosition, setCurrentPosition] = useState(0);
 
-  const onStartPlay = async () => {
-    const audioPath = message_attachment?.url;
-    console.log('Audio Path:', audioPath); 
-    if (!audioPath) {
-      console.error('Audio path is missing');
-      return;
-    }
+  const {playAudio, pauseAudio, isPlaying, currentPlayingUrl} =
+    useAudioPlayer();
+  const isThisPlaying = isPlaying && currentPlayingUrl === audioPath;
 
-    try {
-      await audioRecorderPlayer.startPlayer(audioPath);
-      console.log('Audio playback started');
-      audioRecorderPlayer.addPlayBackListener(e => {
-        setCurrentPosition(e.currentPosition);
-        setDuration(e.duration);
-        if (e.currentPosition === e.duration) {
-          setIsPlaying(false);
-        }
-      });
-      setIsPlaying(true);
-    } catch (error) {
-      console.error('Error playing audio:', error); 
-    }
-  };
-
-  const onStopPlay = async () => {
-    try {
-      await audioRecorderPlayer.stopPlayer();
-      audioRecorderPlayer.removePlayBackListener();
-      setIsPlaying(false);
-      console.log('Audio playback stopped'); 
-    } catch (error) {
-      console.error('Error stopping audio:', error); 
+  const handlePlayPause = () => {
+    if (isThisPlaying) {
+      pauseAudio(); // Pause instead of stop
+    } else {
+      playAudio(
+        audioPath,
+        e => {
+          setCurrentPosition(e.currentPosition);
+          setDuration(e.duration);
+        },
+        () => {
+          setCurrentPosition(0);
+        },
+      );
     }
   };
 
@@ -54,10 +41,8 @@ const AudioMessage = ({currentMessage, position}) => {
   return (
     <View style={styles.audioContainer(isLeft)}>
       {!isLeft && (
-        <TouchableOpacity
-          onPress={isPlaying ? onStopPlay : onStartPlay}
-          style={styles.playButton}>
-          {isPlaying ? svgIcon.StopIcon : svgIcon.RecordIcon}
+        <TouchableOpacity onPress={handlePlayPause} style={styles.playButton}>
+          {isThisPlaying ? svgIcon.StopIcon : svgIcon.RecordIcon}
         </TouchableOpacity>
       )}
 
@@ -66,19 +51,26 @@ const AudioMessage = ({currentMessage, position}) => {
           <View style={[styles.progressBar(isLeft), {width: `${progress}%`}]} />
         </View>
         <Text style={styles.audioDuration(isLeft)}>
-          {audioRecorderPlayer.mmss(Math.floor(currentPosition / 1000))} /{' '}
-          {audioRecorderPlayer.mmss(Math.floor(duration / 1000))}
+          {formatTime(currentPosition)} / {formatTime(duration)}
         </Text>
       </View>
+
       {isLeft && (
         <TouchableOpacity
-          onPress={isPlaying ? onStopPlay : onStartPlay}
+          onPress={handlePlayPause}
           style={styles.playButtonLeft}>
-          {isPlaying ? svgIcon.OrangeStopIcon : svgIcon.OrangeRecordIcon}
+          {isThisPlaying ? svgIcon.OrangeStopIcon : svgIcon.OrangeRecordIcon}
         </TouchableOpacity>
       )}
     </View>
   );
+};
+
+const formatTime = (millis: number) => {
+  const totalSeconds = Math.floor(millis / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
 const styles = StyleSheet.create({

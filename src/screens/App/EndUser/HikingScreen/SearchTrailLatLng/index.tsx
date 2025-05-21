@@ -43,6 +43,7 @@ import {
 } from '../../../../../shared/utils/constant';
 import {getTimeAndDistance, isIOS} from '../../../../../shared/utils/helpers';
 import styles from './styles';
+import usePremiumAlert from '../../../../../hooks/usePremiumAlert';
 
 const SearchTrailLatLng = () => {
   const {location} = useLocation();
@@ -74,7 +75,10 @@ const SearchTrailLatLng = () => {
     direction: true,
     start: false,
   });
-  const [showRedPins, setShowRedPins] = useState(true);
+  const {subscription_purchased: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
+  const {showPremiumAlert} = usePremiumAlert();
   // API
   const [addRouteReport] = useAddRouteReportMutation();
   const {data: allReports, refetch} = useGetRouteReportQuery({});
@@ -105,8 +109,6 @@ const SearchTrailLatLng = () => {
 
   const getRoute = async () => {
     if (currentLocation) {
-      console.log('wokring12');
-
       try {
         const path = await fetchRoute(currentLocation, startingPoint);
         setRouteToStartPoint(path);
@@ -118,8 +120,6 @@ const SearchTrailLatLng = () => {
 
   const getRoadRoute = async (start, end) => {
     try {
-      console.log('wokring13');
-
       const path = await fetchRoute(start, end);
       setRoute(path);
     } catch (error: any) {
@@ -388,16 +388,20 @@ const SearchTrailLatLng = () => {
   };
 
   const onPressShare = () => {
-    if (loginUser?.verified) {
-      navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {
-          startingPoint,
-          endingPoint,
-          type: routeType ? routeType : 'trail',
-        },
-      });
+    if (subscription) {
+      if (loginUser?.verified) {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint,
+            endingPoint,
+            type: routeType ? routeType : 'trail',
+          },
+        });
+      } else {
+        showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+      }
     } else {
-      showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+      showPremiumAlert({});
     }
   };
 

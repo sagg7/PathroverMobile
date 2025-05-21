@@ -1,6 +1,7 @@
 import moment from 'moment';
 import React, {useState} from 'react';
 import {
+  Dimensions,
   Image,
   Linking,
   StyleSheet,
@@ -46,6 +47,7 @@ const ChatBubble = ({props}) => {
   const fileType =
     message_attachment &&
     identifyAttachmentTypeFromUrl(message_attachment?.content_type);
+
   // identifyAttachmentTypeFromUrl(message_attachment?.url);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -179,7 +181,11 @@ const ChatBubble = ({props}) => {
         useNativeDriver={true}
         style={styles.modalContainer}>
         <TouchableWithoutFeedback onPress={onClose} style={styles.imageStyle}>
-          <Image
+          <FitImage
+            indicatorColor={
+              isLeft ? PFColors.Standard.Black : PFColors.Standard.White
+            }
+            indicatorSize={'small'}
             source={{uri: selectedImage}}
             style={styles.fullImageStyle}
             resizeMode="contain"
@@ -275,9 +281,11 @@ const styles = StyleSheet.create({
     height: 80,
   },
   fullImageStyle: {
-    width: '96%',
-    flexGrow: 1,
+    // width: '96%',
+    // flexGrow: 1,
     alignSelf: 'center',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
   imageStyle: {
     flex: 1,

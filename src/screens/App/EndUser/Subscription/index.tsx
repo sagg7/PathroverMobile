@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Alert,
   NativeScrollEvent,
@@ -11,24 +12,29 @@ import {
   View,
 } from 'react-native';
 import {
+  acknowledgePurchaseAndroid,
+  finishTransaction,
   flushFailedPurchasesCachedAsPendingAndroid,
+  getAvailablePurchases,
   initConnection,
   purchaseErrorListener,
   purchaseUpdatedListener,
   useIAP,
 } from 'react-native-iap';
-import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {svgIcon} from '../../../../assets/svg';
 import {AppButton, AppLoader, MainWrapper} from '../../../../components';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
 import {
   HP,
+  isIOS,
   PFColors,
   PFFonts,
   PFFontSize,
+  SubscriptionPackageName,
   WP,
 } from '../../../../shared/exporter';
-import {svgIcon} from '../../../../assets/svg';
-import {useCreateSubscriptionsMutation} from '../../../../redux/endUser/endUserApiSlice';
-import {useSelector} from 'react-redux';
 
 const SUBSCRIPTIONS_SLIDES = (isTrailAvailed: boolean) =>
   [
@@ -76,33 +82,49 @@ const Subscription = () => {
   const isProcessing = useRef(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const {subscriptions, getSubscriptions, requestSubscription} = useIAP();
+  const {subscriptions, getSubscriptions, requestSubscription, connected} =
+    useIAP();
   const {loginUser} = useSelector((state: any) => state?.auth);
   const [createSubscriptions] = useCreateSubscriptionsMutation();
+  const [currentPurchase, setCurrentPurchase] = useState<any>(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const initializeIAP = async () => {
       try {
         await initConnection();
-        if (Platform.OS === 'android') {
-          await flushFailedPurchasesCachedAsPendingAndroid();
+        if (connected) {
+          if (Platform.OS === 'android') {
+            await flushFailedPurchasesCachedAsPendingAndroid();
+          }
+          await getSubscriptions({skus: subscriptionSkus});
         }
-        await getSubscriptions({skus: subscriptionSkus});
       } catch (error) {
-        console.error('IAP Initialization Error:', error);
+        //
+        // console.log('eroor in initialize', error);
       }
     };
 
     initializeIAP();
   }, []);
 
+  useEffect(() => {
+    console.log('SUBSCRIPTION==>', subscriptions);
+  }, [subscriptions]);
+
   const handlePurchaseUpdate = useCallback(async (purchase: any) => {
-    // API
+    setIsLoading(false);
+    isProcessing.current = false;
   }, []);
 
   const handlePurchaseError = useCallback((error: any) => {
-    console.warn('Purchase Error:', error);
-    Alert.alert('Error', 'Failed to process purchase.');
+    setIsLoading(false);
+    isProcessing.current = false;
+    Alert.alert(
+      'Error',
+      error?.message ? error?.message : 'Failed to process purchase.',
+    );
   }, []);
 
   useEffect(() => {
@@ -116,41 +138,81 @@ const Subscription = () => {
   }, [handlePurchaseUpdate, handlePurchaseError]);
 
   const handleBuySubscription = async (sku: any) => {
-    if (isProcessing.current || isLoading) return;
+    if (isProcessing.current || isLoading || subscriptions?.length === 0)
+      return;
     isProcessing.current = true;
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
-      const offerToken =
-        subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
-      await requestSubscription({
-        sku,
-        ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
-      });
-      const startDate = new Date();
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 30);
-      const data = {
-        subscription: {
-          plan_name: 'Premium',
-          price: 19.99,
-          status: 'active',
-          start_date: startDate.toISOString(),
-          end_date: endDate.toISOString(),
-        },
-      };
-      createSubscriptions(data)
-        .unwrap()
-        .then(res => {
-          Alert.alert('Success', 'Subscription purchased successfully!');
-          navigation.goBack();
-        })
-        .catch(e => {
-          console.log(e);
+      setIsLoading(true);
+      const availablePurchases = await getAvailablePurchases();
+      // let byPass = true;
+      let byPass = false;
+      if (Platform.OS === 'ios') {
+        if (availablePurchases?.length === 0) {
+          byPass = true;
+        }
+      } else {
+        byPass = true;
+      }
+
+      if (byPass && subscriptions?.length > 0) {
+        setIsLoading(true);
+        const offerToken =
+          subscriptions?.[0]?.subscriptionOfferDetails?.[0]?.offerToken || null;
+
+        const purchase = await requestSubscription({
+          sku,
+          ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
         });
+        setCurrentPurchase(purchase);
+
+        const startDate = new Date();
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 30);
+        const data = {
+          subscription: {
+            plan_name: 'Premium',
+            price: 19.99,
+            status: 'active',
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            receipt: purchase[0] ?? {},
+          },
+        };
+
+        finishTheTransaction(purchase);
+
+        createSubscriptions(data)
+          .unwrap()
+          .then(res => {
+            Alert.alert('Success', 'Subscription purchased successfully!');
+            navigation.goBack();
+            dispatch(
+              setLoginUser({
+                ...loginUser,
+                is_subscribed: true,
+                is_aval_trial: true,
+                subscription_purchased: true,
+              }),
+            );
+          })
+          .catch(e => {
+            //
+          });
+      } else {
+        setIsLoading(false);
+        if (Platform.OS === 'ios' && availablePurchases?.length > 0) {
+          Alert.alert('Error', 'Subscription already purchased.');
+        }
+      }
     } catch (err) {
-      console.error('Purchase Failed:', err);
-      Alert.alert('Error', 'Failed to purchase subscription.');
+      isProcessing.current = false;
+      setIsLoading(false);
+      Alert.alert(
+        'Error',
+        err?.message ? err?.message : 'Failed to purchase is_subscribed.',
+      );
     } finally {
       setIsLoading(false);
       isProcessing.current = false;
@@ -169,7 +231,28 @@ const Subscription = () => {
       setSelectedIndex(nextIndex);
       scrollRef.current?.scrollTo({x: nextIndex * WP('100'), animated: true});
     } else {
-      handleBuySubscription('com.pathrover.monthly');
+      handleBuySubscription(SubscriptionPackageName);
+    }
+  };
+
+  const finishTheTransaction = async purchase => {
+    try {
+      if (!isIOS()) {
+        await acknowledgePurchaseAndroid({
+          token: purchase[0].purchaseToken,
+          developerPayload: purchase[0].developerPayloadAndroid,
+        });
+      }
+
+      // console.log('purchase', purchase);
+
+      // finishPurchase(!isIOS() ? currentPurchase[0] : currentPurchase, false);
+      await finishTransaction({
+        purchase: !isIOS() ? purchase[0] : purchase,
+        isConsumable: false,
+      });
+    } catch (error) {
+      console.log('Error finishing transaction:', error);
     }
   };
 

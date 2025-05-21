@@ -43,7 +43,8 @@ const RenderActions = props => {
       ImagePicker.openPicker({
         width: 300,
         height: 300,
-        cropping: true,
+        mediaType: 'photo',
+        maxFiles: 2,
       })
         .then(image => {
           const message = {
@@ -177,17 +178,19 @@ const RenderActions = props => {
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.buttonStyle(isVisible)}
-        onPress={() => {
-          if (props?.isRecord) {
-            setIsVisible(true);
-          } else {
-            handleGallery();
-          }
-        }}>
-        {svgIcon.AddButton}
-      </TouchableOpacity>
+      {props?.isRecord && (
+        <TouchableOpacity
+          style={styles.buttonStyle(isVisible)}
+          onPress={() => {
+            if (props?.isRecord) {
+              setIsVisible(true);
+            } else {
+              handleGallery();
+            }
+          }}>
+          {svgIcon.AddButton}
+        </TouchableOpacity>
+      )}
       {isVisible && (
         <MediaModal
           isVisible={isVisible}

@@ -8,7 +8,6 @@ import styles from './styles';
 
 const NewsBlogDetail = ({route}: any) => {
   const item = route.params?.item;
-
   return (
     <MainWrapper>
       <AppHeader title="Detail" />
@@ -23,10 +22,10 @@ const NewsBlogDetail = ({route}: any) => {
           <Text style={styles.timeTextStyle}>
             {moment(item?.created_at).format('MM-DD-YYYY')}
           </Text>
-          {item?.content?.body && (
+          {item?.content_in_text && (
             <RenderHTML
               contentWidth={scrWidth}
-              source={{html: item?.content?.body}}
+              source={{html: item?.content_in_text}}
               baseStyle={styles.htmlBaseStyle}
             />
           )}

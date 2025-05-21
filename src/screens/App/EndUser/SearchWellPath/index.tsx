@@ -59,6 +59,8 @@ const SearchWellPath = ({route, navigation}: any) => {
   const [searchType, setSearchType] = useState<'wells' | 'places'>('wells');
   const [recentSearches, setRecentSearches] = useState(recentDestSearch);
   const [wellSearch, {isLoading: isSearchingWell}] = useWellSearchMutation();
+  const {subscription_purchased} = useSelector(state => state?.auth?.loginUser);
+
   const dispatch = useDispatch();
   const [searchValues, setSearchValues] = useState({
     latitude: '',
@@ -73,6 +75,13 @@ const SearchWellPath = ({route, navigation}: any) => {
       });
     }
   }, [searchLocation]);
+  useEffect(() => {
+    if (subscription_purchased) {
+      setSearchType('wells');
+    } else {
+      setSearchType('places');
+    }
+  }, [subscription_purchased]);
 
   useEffect(() => {
     if (searchLocationName) setSimpleSearch(searchLocationName);
@@ -287,24 +296,28 @@ const SearchWellPath = ({route, navigation}: any) => {
           )}
           {suggestions?.length < 1 && (
             <View style={{...styles.rowView, padding: WP('5')}}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setSearchType('wells')}
-                style={styles.rowView}>
-                {searchType == 'wells'
-                  ? svgIcon.RadioActive
-                  : svgIcon.RadioInactive}
-                <Text style={styles.searchLabel}>{'Search by wells'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setSearchType('places')}
-                style={styles.rowView}>
-                {searchType == 'places'
-                  ? svgIcon.RadioActive
-                  : svgIcon.RadioInactive}
-                <Text style={styles.searchLabel}>{'Search by places'}</Text>
-              </TouchableOpacity>
+              {subscription_purchased && (
+                <>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setSearchType('wells')}
+                    style={styles.rowView}>
+                    {searchType == 'wells'
+                      ? svgIcon.RadioActive
+                      : svgIcon.RadioInactive}
+                    <Text style={styles.searchLabel}>{'Search by wells'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setSearchType('places')}
+                    style={styles.rowView}>
+                    {searchType == 'places'
+                      ? svgIcon.RadioActive
+                      : svgIcon.RadioInactive}
+                    <Text style={styles.searchLabel}>{'Search by places'}</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           )}
           {suggestions?.length < 1 && searchType != 'wells' && (

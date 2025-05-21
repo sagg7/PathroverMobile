@@ -1,33 +1,31 @@
-import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  Image,
-  FlatList,
-  Platform,
-  TouchableOpacity,
-} from 'react-native';
 import moment from 'moment';
+import React, {useEffect, useState} from 'react';
+import {
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import MobileAds from 'react-native-google-mobile-ads';
-import {AskMe, MainWrapper} from '../../../../components';
-import {useFcmTokenUpdateMutation} from '../../../../redux/auth/authApiSlice';
-import {
-  Routes,
-  appIcons,
-  AppLoader,
-  Ads,
-  appImages,
-} from '../../../../shared/exporter';
-import styles from './styles';
-import {
-  useGetCurrentUserProfileQuery,
-  useGetNewsBlogsQuery,
-} from '../../../../redux/endUser/endUserApiSlice';
-import {getFCMToken} from '../../../../hooks/NotificationHook';
-import {IOS_ADS, ANDROID_ADS} from '../../../../shared/utils/constant';
-import {setLoginUser} from '../../../../redux/auth/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import {AskMe, MainWrapper} from '../../../../components';
+import {isSubscriptionActive} from '../../../../hooks/iap-hook/iapPurchaseHook';
+import {getFCMToken} from '../../../../hooks/NotificationHook';
+import {useFcmTokenUpdateMutation} from '../../../../redux/auth/authApiSlice';
+import {setLoginUser} from '../../../../redux/auth/authSlice';
+import {
+  useGetNewsBlogsQuery,
+  useGetSubscriptionQuery,
+  useUpdateSubscriptionMutation,
+} from '../../../../redux/endUser/endUserApiSlice';
+import {appIcons, AppLoader, Routes} from '../../../../shared/exporter';
+import {ANDROID_ADS, IOS_ADS} from '../../../../shared/utils/constant';
+import styles from './styles';
+import {useGetCurrentUserProfileQuery} from '../../../../redux/endUser/endUserApiSlice';
 import {useIsFocused} from '@react-navigation/native';
+import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 MobileAds()
   .setRequestConfiguration({
     // An array of test device IDs to allow.
@@ -48,10 +46,15 @@ const Home = ({navigation}: any) => {
   const [fcmToken, setFCMToken] = useState(false);
   const [fcmTokenUpdate] = useFcmTokenUpdateMutation();
   const [data, setData] = useState<any>([]);
+  const loginUser = useSelector(state => state?.auth?.loginUser);
+
   const {data: allNewsBlogs, isLoading} = useGetNewsBlogsQuery(null);
+  const {data: subscriptions} = useGetSubscriptionQuery(null);
+  const [updateSubscription] = useUpdateSubscriptionMutation();
+
   const {data: userProfile, refetch} = useGetCurrentUserProfileQuery(null);
   const dispatch = useDispatch();
-  const isFocued = useIsFocused();
+  const isFocued = useIsFocused();  
 
   useEffect(() => {
     (async () => {
@@ -63,6 +66,7 @@ const Home = ({navigation}: any) => {
       }
     })();
   }, [navigation]);
+
   const updateToken = async token => {
     try {
       await fcmTokenUpdate({device_token: token});
@@ -74,6 +78,32 @@ const Home = ({navigation}: any) => {
     const checkPlatform = Platform.OS === 'ios';
     setAds(checkPlatform ? IOS_ADS : ANDROID_ADS);
   }, []);
+
+  useEffect(() => {
+    if (subscriptions?.length > 0 && loginUser?.subscription_purchased) {
+      checkSubscriptionStatus();
+    }
+  }, [subscriptions]);
+
+  const checkSubscriptionStatus = async () => {
+    const status = await isSubscriptionActive();
+    const is_valid = status?.validation;
+
+    dispatch(
+      setLoginUser({
+        ...loginUser,
+        is_subscribed: is_valid,
+        is_aval_trial: false,
+      }),
+    );
+    updateSubscription({
+      subscription: {
+        is_subscribed: is_valid,
+        id: subscriptions?.[0]?.id,
+      },
+    });
+  };
+
   useEffect(() => {
     if (allNewsBlogs && allNewsBlogs?.length > 0) injectAds(allNewsBlogs, ads);
   }, [allNewsBlogs, ads]);
@@ -84,10 +114,15 @@ const Home = ({navigation}: any) => {
   }, [isFocued]);
 
   useEffect(() => {
-    if (userProfile) {
-      dispatch(setLoginUser(userProfile));
+    if (userProfile && isFocued) {
+      const obj = {
+        ...userProfile,
+        // is_subscribed: true,
+      };
+
+      dispatch(setLoginUser(obj));
     }
-  }, [userProfile]);
+  }, [userProfile, isFocued]);
 
   const injectAds = (data: any[], ads: any[]) => {
     let newData = [];
@@ -104,6 +139,7 @@ const Home = ({navigation}: any) => {
     setData(newData);
     return newData;
   };
+
   const renderItem = ({item, index}: any) => {
     // if (item?.isAd) {
     //   return <Ads item={ads[index / 21]} />; // Pass ad sequentially
@@ -122,7 +158,7 @@ const Home = ({navigation}: any) => {
         <View style={styles.contentContainer}>
           <Text style={styles.titleTextStyle}>{item?.title}</Text>
           <Text numberOfLines={3} style={styles.descTextStyle}>
-            {item?.content_in_text?.trim()}
+            {item?.content?.trim()}
           </Text>
           <Text style={styles.timeTextStyle}>
             {moment(item?.created_at).format('MM-DD-YYYY')}
@@ -136,7 +172,12 @@ const Home = ({navigation}: any) => {
     <MainWrapper>
       <View style={styles.headerContainer}>
         <Text style={styles.homeTextStyle}>Home</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+        <TouchableOpacity
+          hitSlop={{top: 6, bottom: 6, left: 6, right: 6}}
+          onPress={() => {
+            navigation.navigate('Settings');
+            dispatch(setSelectedTrail(null));
+          }}>
           <Image
             resizeMode="contain"
             style={styles.settingIcon}

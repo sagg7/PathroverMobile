@@ -15,6 +15,7 @@ import {
   setEndingPoint,
   setRouteData,
   setRouteType,
+  setSelectedTrail,
   setStartingPoint,
 } from '../../../redux/endUser/endUserSlice';
 import {useNavigation} from '@react-navigation/native';
@@ -25,12 +26,24 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
   const navigation: any = useNavigation();
   const {location} = useLocation();
 
-  const {startingPoint, endingPoint, type, data} =
+  const {startingPoint, endingPoint, type, data, hiking_trail, trailData} =
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
     if (type === 'Chosen Trail') {
-      navigation.navigate(Routes.TrailDetails, {trailInfo: data});
+      if (isIOS()) {
+        dispatch(setSelectedTrail(data));
+        navigation.navigate(Routes.TurnByTurnNav, {
+          originCoords: [location.longitude, location.latitude],
+          entranceCoords: startingPoint,
+          entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
+        });
+      } else {
+        navigation.navigate(Routes.ViewWellPathNavigation, {
+          entranceCoords: startingPoint,
+          entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
+        });
+      }
     } else {
       dispatch(resetTrailRoute());
       if (startingPoint?.length > 0) {
@@ -60,6 +73,7 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         dispatch(setRouteData(data));
       }
       const formatedData = JSON.parse(content)?.messageContainsLocation;
+
       if (
         formatedData?.route_type === 'waypoint_route' ||
         formatedData?.route_type === 'hiking_waypoint' ||
@@ -70,16 +84,11 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         formatedData?.type === 'Pin Point' ||
         formatedData?.type === 'Way point'
       ) {
-        // navigation.navigate(Routes.ViewWellPathNavigation, {
-        //   entranceCoords: formatedData?.endingPoint,
-        //   entranceName: formatedData?.name,
-        // });
-
         if (isIOS()) {
           navigation.navigate(Routes.TurnByTurnNav, {
-            originCoords: [location.longitude, location.laatitude],
+            originCoords: [location.longitude, location.latitude],
             entranceCoords: formatedData?.endingPoint,
-            entranceName: formatedData?.name,
+            entranceName: 'Destination',
           });
         } else {
           navigation.navigate(Routes.ViewWellPathNavigation, {
@@ -89,15 +98,48 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         }
       } else if (
         formatedData?.route_type === 'hiking_trail_route' ||
-        type === 'trail'
+        type === 'trail' ||
+        type === 'hiking_trail_route'
       ) {
-        navigation.navigate(Routes.SearchTrailLatLng);
+        if (isIOS()) {
+          dispatch(setSelectedTrail(trailData));
+          setTimeout(() => {
+            navigation.navigate(Routes.TurnByTurnNav, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: trailData?.geometry?.coordinates[0],
+              entranceName: 'Unknown Trail',
+              isTrail: true,
+            });
+          }, 300);
+        } else {
+          navigation.navigate('TrailDetails', {trailData});
+        }
       } else {
-        navigation.navigate(Routes.ViewSaveRoutes, {
-          item: formatedData,
-        });
+        if (isIOS()) {
+          setTimeout(() => {
+            const coords = formatedData?.pickup_location;
+
+            const lngLat = [
+              Number(coords?.longitude),
+              Number(coords?.latitude),
+            ];
+            navigation.navigate(Routes.TurnByTurnNav, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: lngLat,
+              entranceName: formatedData?.name,
+              isTrail: false,
+              routeInfo: formatedData,
+              isLibrary: true,
+            });
+          }, 300);
+        } else {
+          navigation.navigate(Routes.ViewSaveRoutes, {
+            item: formatedData,
+          });
+        }
       }
     }
+    22;
   };
 
   return (

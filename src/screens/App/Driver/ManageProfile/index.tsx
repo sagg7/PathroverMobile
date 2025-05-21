@@ -29,12 +29,22 @@ import {setLoginUser} from '../../../../redux/auth/authSlice';
 const ManageProfile = ({navigation}: any) => {
   const [profileImage, setProfileImage] = useState<any>(null);
   const loginUser = useSelector(state => state?.auth?.loginUser);
+
   const [editProfile, {data, isLoading}] = useEdtProfileMutation();
   const [userName, setUserName] = useState(
     `${loginUser?.first_name ? loginUser?.first_name : ''} ${
       loginUser?.last_name ? loginUser?.last_name : ''
     } `,
   );
+
+  useEffect(() => {
+    setUserName(
+      `${loginUser?.first_name ? loginUser?.first_name : ''} ${
+        loginUser?.last_name ? loginUser?.last_name : ''
+      } `,
+    );
+  }, [loginUser?.first_name, loginUser?.last_name]);
+
   const [displayPicture, setDisplayPicture] = useState(null);
   const dispatch = useDispatch();
   const uploadFromGallery = async () => {

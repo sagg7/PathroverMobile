@@ -19,9 +19,8 @@ export const REQ_LIST_SOCKET_URL = 'wss://staging.path-rover.com/cable?';
 export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
-// export const BASE_URL = 'https://staging.pathfinder-app.com/api/v1/';
 export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
-// export const BASE_URL = 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
+// 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
 // export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
 export const FAQ_LIST_LINK = 'https://staging.path-rover.com/faq_list';
 export const DOMAIN_BASE_URL = 'https://staging.path-rover.com/';
@@ -641,6 +640,11 @@ export const EndUserProfileMenu = [
     icon: appIcons.privacy,
   },
   {
+    id: 13,
+    title: 'Unsubscribe',
+    icon: appIcons.logout,
+  },
+  {
     id: 8,
     title: 'Logout',
     icon: appIcons.logout,
@@ -650,6 +654,7 @@ export const EndUserProfileMenu = [
     title: 'Delete',
     icon: appIcons.logout,
   },
+  
 ];
 
 export const ManageProfileArr = [
@@ -1479,6 +1484,7 @@ export const UNSANCTIONED = [
     label: 'Yes',
   },
 ];
+export const SubscriptionPackageName = 'com.pathrover.monthly';
 export const ROUTE_LINE_STYLES = {
   lineWidth: 8,
   opacity: 0.7,

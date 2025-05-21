@@ -22,6 +22,7 @@ import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {RouteToWellStartedSheet} from '../../../../components/complex/RouteToWellStartedSheet';
 import {useCreateRouteMutation} from '../../../../redux/manager/managerApiSlice';
 import {useSelector} from 'react-redux';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const RouteToWell = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -45,7 +46,10 @@ const RouteToWell = ({route}: any) => {
     start: false,
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
-
+  const {subscription_purchased: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
+  const {showPremiumAlert} = usePremiumAlert();
   const [createRoute, {isLoading: PinLoading}] = useCreateRouteMutation();
 
   const {location} = useLocation();
@@ -183,16 +187,20 @@ const RouteToWell = ({route}: any) => {
   };
 
   const onPressShare = () => {
-    if (loginUser?.verified) {
-      navigation.navigate(Routes.ChatUsers, {
-        shareTrail: {
-          startingPoint: [],
-          endingPoint: destination,
-          type: 'route to well',
-        },
-      });
-    } else {
-      showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+    if (subscription)
+      if (loginUser?.verified) {
+        navigation.navigate(Routes.ChatUsers, {
+          shareTrail: {
+            startingPoint: [],
+            endingPoint: destination,
+            type: 'route to well',
+          },
+        });
+      } else {
+        showAlert('Alert', CHAT_NON_VERIFIED_TEXT);
+      }
+    else {
+      showPremiumAlert({});
     }
   };
 
@@ -412,7 +420,7 @@ const RouteToWell = ({route}: any) => {
       <TouchableOpacity
         style={styles.maplayerStyles}
         onPress={() => {
-          setMapLayerSheeet(true);
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
         }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>

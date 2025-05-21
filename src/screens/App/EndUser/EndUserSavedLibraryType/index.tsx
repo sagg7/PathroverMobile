@@ -28,8 +28,9 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import SharedSheet from '../../../../components/complex/SharedSheet';
 import Share from 'react-native-share';
 import useLocation from '../../../../hooks/getLocation';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
 
 const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const item = route?.params?.item;
@@ -45,6 +46,11 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const {data, isLoading, refetch} = useGetAllSaveRoutesQuery(queryParams);
   const [editRoute, {isLoading: isEditing}] = useEditRouteMutation();
   const [deleteRoute, {isLoading: isDeleting}] = useDeleteRouteMutation();
+  const {subscription_purchased: subscription} = useSelector(
+    state => state?.auth?.loginUser,
+  );
+  const {showPremiumAlert} = usePremiumAlert();
+
   const refScrollable = useRef<any>();
   const {location} = useLocation();
   const dispatch = useDispatch();
@@ -113,7 +119,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           },
         },
       };
-
+      // return;
       if (isIOS()) {
         dispatch(setSelectedTrail(geoJsonFeature));
         setTimeout(() => {
@@ -236,7 +242,9 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
   const transformData = (data: any) => {
     return {
       ...data, // Keep all other key-value pairs unchanged
-      middle_location_points: data.middle_location_points?.map((point: any) => [
+      middle_location_points: data.hiking_trail?.map((point: any) => [
+        // middle_location_points: data.middle_location_points?.map((point: any) => [
+
         parseFloat(point.longitude), // Convert to float if needed
         parseFloat(point.latitude),
       ]),
@@ -247,11 +255,10 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
     setShowShareSheet(false);
 
     if (routeData?.is_chosen_trail) {
-      const trailPath = routeData?.middle_location_points;
+      const outputPath = transformData(routeData);
+      const trailPath = outputPath?.middle_location_points;
       const startingPoint = trailPath?.[0];
       const endingPoint = trailPath?.at(-1);
-
-      const outputPath = transformData(routeData);
 
       const trailInfo = {
         geometry: {coordinates: outputPath?.middle_location_points},
@@ -273,6 +280,51 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           },
         });
       }, 300);
+    } else if (routeData?.route_type === 'hiking_trail_route') {
+      const coordinates = [
+        [
+          parseFloat(routeData?.pickup_location?.longitude),
+          parseFloat(routeData?.pickup_location?.latitude),
+        ],
+        ...routeData?.middle_location_points.map(point => [
+          parseFloat(point.longitude),
+          parseFloat(point.latitude),
+        ]),
+        [
+          parseFloat(routeData?.dropoff_location?.longitude),
+          parseFloat(routeData?.dropoff_location?.latitude),
+        ],
+      ];
+      const geoJsonFeature = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: coordinates,
+        },
+        properties: {
+          color: routeData.color,
+          tags: {
+            highway: 'path',
+          },
+        },
+      };
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: [
+            parseFloat(routeData?.pickup_location?.longitude),
+            parseFloat(routeData?.pickup_location?.latitude),
+          ],
+          endingPoint: [
+            parseFloat(routeData?.dropoff_location?.longitude),
+            parseFloat(routeData?.dropoff_location?.latitude),
+          ],
+
+          type: 'Custom Trail',
+          trailData: geoJsonFeature,
+        },
+      });
+
+      // return;
     } else {
       // const hasCustom = routeData?.route_type.includes('custom');
       const startingPoint = extractCoordinates(routeData?.pickup_location);
@@ -320,6 +372,7 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
       }
     }
   };
+  // showPremiumAlert({});
 
   return (
     <MainWrapper>
@@ -345,11 +398,11 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         onClose={() => handleModal(null, null)}>
         <TouchableOpacity
           style={styles.menuOption}
-          // onPress={() => handleShareOption(selectedRoute)}
           onPress={() => {
             setModalType(null);
             setTimeout(() => {
-              setShowShareSheet(true);
+              // setShowShareSheet(true);
+              subscription ? setShowShareSheet(true) : showPremiumAlert({});
             }, 1000);
           }}>
           {/* <EditSvg fill={PFColors.Blue.Dark} height={20} width={20} /> */}

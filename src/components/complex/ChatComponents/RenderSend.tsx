@@ -8,10 +8,10 @@ const RenderSend = props => {
   return (
     <Send
       {...props}
-      disabled={!props.text.trim()}
+      disabled={!props?.text?.trim()}
       alwaysShowSend
       onSend={props.onSend}
-      containerStyle={styles.containerStyle(!props.text.trim())}>
+      containerStyle={styles.containerStyle(!props?.text?.trim())}>
       {svgIcon.SendMsg}
     </Send>
   );

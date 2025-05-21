@@ -9,7 +9,7 @@ import {withIAPContext} from 'react-native-iap';
 import {LogBox, PermissionsAndroid, Platform, Linking} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import {createNavigationContainerRef} from '@react-navigation/native';
-
+import {AudioPlayerProvider} from './src/shared/utils/AudioPlayerContext';
 const navigationRef = createNavigationContainerRef();
 
 const navigate = (name: string, params?: object) => {
@@ -123,14 +123,16 @@ const App = () => {
         '123757988773-c0sece94e2pm7eqj1g48b3b15b2avm46.apps.googleusercontent.com',
       offlineAccess: true,
       forceCodeForRefreshToken: true,
-      profileImageSize: 120
+      profileImageSize: 120,
     });
   }, []);
 
   return (
     <Provider store={store}>
       {/* Directly render AppNavigation, since it already contains NavigationContainer */}
-      <AppNavigation />
+      <AudioPlayerProvider>
+        <AppNavigation />
+      </AudioPlayerProvider>
     </Provider>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Platform, StyleSheet, View} from 'react-native';
 import {RenderComposer} from './RenderComposer';
 import RenderActions from './RenderActions';
@@ -6,16 +6,28 @@ import {RenderSend} from './RenderSend';
 import {PFColors, scale} from '../../../shared/exporter';
 import {RenderRecordComposer} from './RenderRecordComposer';
 
-const RenderInputToolbar = (props, onPress, isRecord) => {
+const RenderInputToolbar = (
+  props,
+  onPress,
+  isRecord,
+  isRecording,
+  setIsRecording,
+  onSend,
+) => {
   return (
     <View style={styles.mainContainer}>
       <RenderActions {...props} isRecord={isRecord} />
       {isRecord ? (
-        <RenderRecordComposer {...props} />
+        <RenderRecordComposer
+          props={props}
+          onSend={onSend}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
+        />
       ) : (
         <RenderComposer {...props} />
       )}
-      <RenderSend {...props} />
+      {!isRecording && <RenderSend {...props} />}
     </View>
   );
 };

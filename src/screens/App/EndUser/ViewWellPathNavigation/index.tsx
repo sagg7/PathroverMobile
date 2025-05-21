@@ -24,14 +24,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {getTimeAndDistance} from '../../../../shared/utils/helpers';
 import {useDispatch, useSelector} from 'react-redux';
+import {getTimeAndDistance} from '../../../../shared/utils/helpers';
+import usePremiumAlert from '../../../../hooks/usePremiumAlert';
+import {useGetRouteBasedIdMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {
   activateKeepAwake,
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
-import {useGetRouteBasedIdMutation} from '../../../../redux/endUser/endUserApiSlice';
-import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 
 const ViewWellPathNavigation = ({route}: any) => {
   const navigation: any = useNavigation();
@@ -51,6 +52,9 @@ const ViewWellPathNavigation = ({route}: any) => {
   const screenWidth = Dimensions.get('window').width;
   const memoizedTourStops = useMemo(() => tourStops, [tourStops]);
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const {subscription} = useSelector(state => state?.auth?.loginUser);
+  const {showPremiumAlert} = usePremiumAlert();
+
   const [getRouteBasedId, {isLoading, data}] = useGetRouteBasedIdMutation();
   const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
 
@@ -143,12 +147,10 @@ const ViewWellPathNavigation = ({route}: any) => {
 
       if (isStartOffRoad) {
         const formatedArr = start?.map((item: any) => Number(item));
-
         offRoad?.push([formatedArr, firstRoutePoint]);
       }
       if (isEndOffRoad) {
         const formatedArr = end?.map((item: any) => Number(item));
-
         offRoad?.push([lastRoutePoint, formatedArr]);
       }
 
@@ -228,7 +230,7 @@ const ViewWellPathNavigation = ({route}: any) => {
       coordinates: routes,
     },
   };
-  const maneuverIcons = {
+  const maneuverIcons: any = {
     depart: require('../../../../assets/icons/depart.png'), // Start point
     turn: {
       left: require('../../../../assets/icons/turn-left.png'),
@@ -426,26 +428,7 @@ const ViewWellPathNavigation = ({route}: any) => {
               />
             </MapboxGL.ShapeSource>
           )}
-          {/* {offRoadSegment?.length > 0 && (
-          <MapboxGL.ShapeSource
-            shape={{
-              type: 'Feature',
-              geometry: {
-                type: 'LineString',
-                coordinates: offRoadSegment,
-              },
-            }}
-            id="off-road-source">
-            <MapboxGL.LineLayer
-              id="off-road-line"
-              style={{
-                lineWidth: 3,
-                lineColor: 'red',
-                lineDasharray: [0.8, 3], // Small dots with short gaps
-              }}
-            />
-          </MapboxGL.ShapeSource>
-        )} */}
+
           {offRoadSegment?.length > 0 &&
             offRoadSegment.map((segment, index) => (
               <MapboxGL.ShapeSource
@@ -515,7 +498,9 @@ const ViewWellPathNavigation = ({route}: any) => {
       )}
       <TouchableOpacity
         style={styles.maplayerStyles}
-        onPress={() => setMapLayerSheeet(true)}>
+        onPress={() => {
+          subscription ? setMapLayerSheeet(true) : showPremiumAlert({});
+        }}>
         {svgIcon.MapLayer}
       </TouchableOpacity>
 
