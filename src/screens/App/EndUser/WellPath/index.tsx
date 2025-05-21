@@ -173,7 +173,7 @@ const WellPath = () => {
   });
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const {subscription_purchased} = useSelector(state => state?.auth?.loginUser);
-  const { data: subscriptions } = useGetSubscriptionQuery(null);  
+  const {data: subscriptions} = useGetSubscriptionQuery(null);
 
   const {showPremiumAlert} = usePremiumAlert();
 
@@ -853,10 +853,14 @@ const WellPath = () => {
           })
         }
         onPressFilter={() => {
-          subscription_purchased ? setShowMapSettigs(true) : showPremiumAlert({});
+          subscription_purchased
+            ? setShowMapSettigs(true)
+            : showPremiumAlert({});
         }}
         onPressMenu={() =>
-          subscription_purchased ? setShowOptionsSheet(true) : showPremiumAlert({})
+          subscription_purchased
+            ? setShowOptionsSheet(true)
+            : showPremiumAlert({})
         }
       />
 
@@ -1100,8 +1104,9 @@ const WellPath = () => {
               entranceName: selectedWellName?.well_name,
             });
           } else {
-            navigation.navigate(Routes.ViewWellPathNavigation, {
-              entranceCoords: selectedWell,
+            navigation.navigate(Routes.TurnByTurnNavAndroid, {
+              originCoords: currentLocation,
+              entranceCoords: converted,
               entranceName: selectedWellName?.well_name,
             });
           }
@@ -1227,7 +1232,9 @@ const WellPath = () => {
             }, 500);
           }}
           onPressShare={() =>
-            subscription_purchased ? setShowShareSheet(true) : showPremiumAlert({})
+            subscription_purchased
+              ? setShowShareSheet(true)
+              : showPremiumAlert({})
           }
           onPressStart={() => {
             setShowNavigationSheet(false);
@@ -1238,7 +1245,14 @@ const WellPath = () => {
                 entranceName: placeName,
               });
             } else {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
+              console.log('control');
+
+              // navigation.navigate(Routes.ViewWellPathNavigation, {
+              //   entranceCoords: pinLocationMarker,
+              //   entranceName: placeName,
+              // });
+              navigation.navigate(Routes.TurnByTurnNavAndroid, {
+                originCoords: currentLocation,
                 entranceCoords: pinLocationMarker,
                 entranceName: placeName,
               });
