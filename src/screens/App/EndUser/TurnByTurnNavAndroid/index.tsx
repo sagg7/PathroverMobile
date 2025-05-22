@@ -1,16 +1,39 @@
 import {useRoute} from '@react-navigation/native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Alert, requireNativeComponent} from 'react-native';
+import {useSelector} from 'react-redux';
+import {AppLoader, MapTypes} from '../../../../shared/exporter';
 
 const MapBoxView = requireNativeComponent('MapBoxView');
 
 const TurnByTurnNavAndroid = ({navigation, route}: any) => {
+  console.log('ROUTE', route);
+  const routeParams = route?.params;
+  const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
+  const [selectedMapStyle, setSelectedMapStyle] = useState<any>('default');
+  const [loader, setLoader] = useState(true);
+  const [isTurnByTurnNavigation, setisTurnByTurnNavigation] = useState(true);
+  const [isDashedLineDrawn, setIsDashedLineDrawn] = useState(false);
+
+  useEffect(() => {
+    if (mapLayerStyle) {
+      setSelectedMapStyle(
+        MapTypes?.find(item => item.type === mapLayerStyle)?.value,
+      );
+    }
+  }, [mapLayerStyle]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoader(false);
+    }, 1500);
+  }, []);
+
   const handleDisplayError = (event: any) => {
     const {error} = event.nativeEvent;
     // const route = useRoute();
     const regex = /message=(.*?)(?:,|\])/;
     const match = error.match(regex);
-    console.log('ROUTE', route);
 
     if (match) {
       const [, message] = match;
@@ -34,32 +57,58 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
     }
   };
 
+  const handleUserArrival = (event: any) => {
+    const {hasTrail, drawDashedLine} = event.nativeEvent;
+    console.log('Has Trail => ', hasTrail);
+    console.log('Has Dashed Line => ', drawDashedLine);
+    Alert.alert(
+      'Arrived',
+      hasTrail || drawDashedLine
+        ? 'Off-road navigation begins here. Follow the dashed line to your destination.'
+        : 'You have reached your destination.',
+      [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+    );
+  };
+
   return (
-    <MapBoxView
-      style={{flex: 1}}
-      showsEndOfRouteFeedback={true}
-      shouldSimulateRoute={true}
-      origin={[74.2753, 31.4542]}
-      destination={[74.2774, 31.4563]}
-      onLocationChange={(event: any) => {
-        // console.log('onLocationChange', event.nativeEvent);
-      }}
-      onRouteProgressChange={(event: any) => {
-        // console.log('onRouteProgressChange', event.nativeEvent);
-      }}
-      onError={(event: any) => handleDisplayError(event)}
-      onArrive={(event: any) => {
-        navigation.goBack();
-        console.log('Has Trail => ', event.nativeEvent.hasTrail);
-        console.log('Has Dashed Line => ', event.nativeEvent.drawDashedLine);
-      }}
-      mapStyle="satellite" // or 'terrain', 'default'
-      originName="Origin"
-      destinationName="Destination"
-      hasTrail={true}
-      drawDashedLine={false}
-      onCancelNavigation={(event: any) => navigation.goBack()}
-    />
+    <>
+      {loader ? (
+        <AppLoader />
+      ) : (
+        <MapBoxView
+          style={{flex: 1}}
+          showsEndOfRouteFeedback={true}
+          mapStyle={selectedMapStyle} // or 'terrain', 'default'
+          // shouldSimulateRoute={true}
+          origin={[
+            routeParams?.originCoords?.[0],
+            routeParams?.originCoords?.[1],
+          ]}
+          destination={[
+            routeParams?.entranceCoords?.[0],
+            routeParams?.entranceCoords?.[1],
+          ]}
+          onLocationChange={(event: any) => {
+            // console.log('onLocationChange', event.nativeEvent);
+          }}
+          onRouteProgressChange={(event: any) => {
+            // console.log('onRouteProgressChange', event.nativeEvent);
+          }}
+          onError={(event: any) => handleDisplayError(event)}
+          onArrive={(event: any) => handleUserArrival(event)}
+          originName="Origin"
+          destinationName={routeParams?.entranceName}
+          hasTrail={true}
+          drawDashedLine={false}
+          onCancelNavigation={(event: any) => navigation.goBack()}
+        />
+      )}
+    </>
   );
 };
 
