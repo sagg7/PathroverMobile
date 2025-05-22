@@ -12,5 +12,5 @@ export const appImages = {
   userPlaceholder: require('../images/placeholder.jpg'),
   locationView: require('../images/locationView.jpeg'),
   sittingView: require('../images/sittingArea.jpeg'),
-  continueAs2: require('../images/ContinueAs2.png'),
+  continueAs2: require('../images/ContinueAs2.jpg'),
 };
