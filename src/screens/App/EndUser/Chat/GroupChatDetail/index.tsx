@@ -83,7 +83,22 @@ const GroupChatDetail = () => {
         },
         {
           received: res => {
-            getGroupChatMessages(params?.item?.id);
+            console.log('res', res);
+            setMessages((prevMessages) =>
+              GiftedChat.append(prevMessages, [
+                {
+                  ...res,
+                  _id: res?.id,
+                  createdAt: res?.created_at,
+                  user: {
+                    ...res?.user,
+                    _id: res?.user?.id,
+                  },
+                },
+              ]),
+            );
+            
+            // getGroupChatMessages(params?.item?.id);
             readChat();
           },
           connected: () => { },
@@ -151,27 +166,27 @@ const GroupChatDetail = () => {
 
       const randomNumber = Math.floor(Math.random() * (10000 - 1000 + 1)) + 10000;
 
-      setMessages(prevMessages =>
-        GiftedChat.append(prevMessages, [
-          {
-            _id: randomNumber,
-            createdAt: new Date(),
-            text: message?.[0]?.text,
-            user: {
-              _id: loginUser?.id,
-              name: loginUser?.first_name,
-            },
-            ...(message[0]?.attachment && {
-              message_attachment: {
-                url: uriFile,
-                file_name: uriName,
-                type: uriType,
-                content_type: uriType,
-              },
-            }),
-          },
-        ])
-      );
+      // setMessages(prevMessages =>
+      //   GiftedChat.append(prevMessages, [
+      //     {
+      //       _id: randomNumber,
+      //       createdAt: new Date(),
+      //       text: message?.[0]?.text,
+      //       user: {
+      //         _id: loginUser?.id,
+      //         name: loginUser?.first_name,
+      //       },
+      //       ...(message[0]?.attachment && {
+      //         message_attachment: {
+      //           url: uriFile,
+      //           file_name: uriName,
+      //           type: uriType,
+      //           content_type: uriType,
+      //         },
+      //       }),
+      //     },
+      //   ])
+      // );
 
       form.append('message[content]', message[0]?.text);
       form.append('message[user_id]', loginUser?.id);
@@ -181,7 +196,7 @@ const GroupChatDetail = () => {
 
       const res = await createGroupMessage({ data: form, id: item?.id });
       if (res) {
-        await getGroupChatMessages(item?.id);
+        // await getGroupChatMessages(item?.id);
       }
     } catch (error) {
       //
