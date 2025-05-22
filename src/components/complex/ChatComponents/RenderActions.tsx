@@ -86,7 +86,7 @@ const RenderActions = props => {
             const imageAsset = response.assets[0];
 
             const message = {
-              _id: Math.random().toString(36).substring(7),
+              _id: Math?.random()?.toString(36)?.substring(7),
               text: '',
               createdAt: new Date(),
               user: {
@@ -110,7 +110,7 @@ const RenderActions = props => {
       const options = {
         mediaType: 'video',
         videoQuality: 'high',
-        durationLimit: 600,
+        durationLimit: 60,
         includeBase64: false,
       };
 
@@ -121,6 +121,11 @@ const RenderActions = props => {
           console.log('ImagePicker Error: ', response.errorMessage);
         } else {
           const videoUri = response.assets && response.assets[0];
+
+          if (response?.assets?.[0] && response?.assets?.[0]?.duration && response?.assets?.[0]?.duration > 60) {
+            alert('Please select a video less than 1 minute.');
+            return;
+          }
 
           const message = {
             _id: Math.random().toString(36).substring(7),
@@ -153,17 +158,26 @@ const RenderActions = props => {
           types.pptx,
           types.xls,
           types.xlsx,
+          types.csv,
+          types.json,
           // types.zip,
         ],
       })
         .then(file => {
+          console.log('Selected file: ', file);
+
+          if(file?.size > 10485760) {
+            alert('Please select a file less than 10 MB.');
+            return;
+          }
+          
           const message = {
-            _id: Math.random().toString(36).substring(7),
+            _id: Math?.random()?.toString(36)?.substring(7),
             text: '',
             createdAt: new Date(),
             user: {
-              _id: props.user._id,
-              name: props.user.name,
+              _id: props?.user?._id,
+              name: props?.user?.name,
             },
             attachment: file,
           };
