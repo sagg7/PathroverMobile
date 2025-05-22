@@ -23,7 +23,7 @@ import {
   USER_PROFILE,
   showAlert,
 } from '../../../../shared/utils/constant';
-import {useSwitchRoleMutation} from '../../../../redux/auth/authApiSlice';
+import {useLogoutUserMutation, useSwitchRoleMutation} from '../../../../redux/auth/authApiSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {Routes} from '../../../../shared/exporter';
 import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
@@ -48,6 +48,7 @@ const Settings = ({navigation}: any) => {
   const userRole = useSelector(state => state?.appRole.userRole);
   const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
     useDeleteUserAccountMutation();
+  const [logoutUser] = useLogoutUserMutation();
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
@@ -87,12 +88,17 @@ const Settings = ({navigation}: any) => {
   };
 
   const handleLogout = async () => {
-    dispatch(setAccessToken(null));
-    dispatch(setLoginUser(null));
-    dispatch(setUserRole(APP_ROLE.END_USER));
-    dispatch(setManagerRouteEmpty({}));
-
-    await GoogleSignin.signOut();
+    try {
+      await logoutUser();
+      dispatch(setAccessToken(null));
+      dispatch(setLoginUser(null));
+      dispatch(setUserRole(APP_ROLE.END_USER));
+      dispatch(setManagerRouteEmpty({}));
+      
+      await GoogleSignin.signOut();
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const settingOption = ({item}) => {
