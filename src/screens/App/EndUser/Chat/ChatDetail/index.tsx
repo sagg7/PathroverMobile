@@ -96,7 +96,7 @@ const ChatDetail = () => {
 
   const [readChatMessage] = useReadChatMessageMutation();
   const [createChatMessage, { isLoading }] = useCreateChatMessageMutation();
-  const [getChatMessage, { data: chat }] = useGetChatMessageMutation();
+  const [getChatMessage, { data: chat, isLoading: chatLoading }] = useGetChatMessageMutation();
 
   const [show, setShow] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -113,26 +113,29 @@ const ChatDetail = () => {
         },
         {
           received: res => {
-            console.log('res', res);
-            setMessages((prevMessages) =>
-              GiftedChat.append(prevMessages, [
-                {
-                  ...res,
-                  _id: res?.id,
-                  createdAt: res?.created_at,
-                  user: {
-                    ...res?.user,
-                    _id: res?.user?.id,
+            const timer = (chatLoading && isLoading && chat?.length === 0) ? 30000 : 0;
+            setTimeout(() => {
+              setMessages((prevMessages) =>
+                GiftedChat.append(prevMessages, [
+                  {
+                    ...res,
+                    _id: res?.id,
+                    createdAt: res?.created_at,
+                    user: {
+                      ...res?.user,
+                      _id: res?.user?.id,
+                    },
                   },
-                },
-              ]),
-            );
+                ]),
+              );
+            }, timer);
 
             // getChatMessage(params?.item?.id);
             readChat();
           },
-          connected: () => {            
-            // setIsConnected(true);
+          connected: () => {
+            // console.log('connected----->>>>');
+            setIsConnected(true);
           },
         },
       );
@@ -143,7 +146,7 @@ const ChatDetail = () => {
     return () => {
       unsubscribe();
     };
-  }, [params, isFocused]);
+  }, [isFocused]);
 
   useEffect(() => {
     if (chat?.length > 0) {
@@ -168,13 +171,12 @@ const ChatDetail = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    // console.log('WORKING', isConnected + shareTrail);
-    if (shareTrail) {
+    if (shareTrail && isConnected && !chatLoading) {
       onSend([
         { text: JSON.stringify({ [MESSAGE_CONTAINS_LOCATION]: shareTrail }) },
       ]);
     }
-  }, [shareTrail]);
+  }, [shareTrail, isConnected, chatLoading]);
 
   const onSend = async (message: string) => {
     try {
@@ -215,7 +217,8 @@ const ChatDetail = () => {
 
       const res = await createChatMessage({ data: form, id: item?.id });
       if (res) {
-        console.log('aoi res--->>', res?.data);
+        // console.log('aoi res--->>', res?.data);
+        navigation.setParams({ shareTrail: null });
         // await getChatMessage(item?.id);
       }
     } catch (error) {
