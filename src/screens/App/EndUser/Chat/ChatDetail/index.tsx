@@ -103,8 +103,6 @@ const ChatDetail = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  console.log('chat', chat?.[0]);
-
   useEffect(() => {
     try {
       subscribe(
@@ -133,7 +131,7 @@ const ChatDetail = () => {
             // getChatMessage(params?.item?.id);
             readChat();
           },
-          connected: () => {
+          connected: () => {            
             // setIsConnected(true);
           },
         },
@@ -145,7 +143,7 @@ const ChatDetail = () => {
     return () => {
       unsubscribe();
     };
-  }, [params]);
+  }, [params, isFocused]);
 
   useEffect(() => {
     if (chat?.length > 0) {
@@ -210,31 +208,6 @@ const ChatDetail = () => {
         });
       }
 
-      const randomNumber =
-        Math.floor(Math.random() * (10000 - 1000 + 1)) + 10000;
-
-      // setMessages(prevMessages =>
-      //   GiftedChat.append(prevMessages, [
-      //     {
-      //       _id: randomNumber,
-      //       createdAt: new Date(),
-      //       text: message?.[0]?.text,
-      //       user: {
-      //         _id: loginUser?.id,
-      //         name: loginUser?.first_name,
-      //       },
-      //       ...(message[0]?.attachment && {
-      //         message_attachment: {
-      //           url: uriFile,
-      //           file_name: uriName,
-      //           type: uriType,
-      //           content_type: uriType,
-      //         },
-      //       }),
-      //     },
-      //   ]),
-      // );
-
       form.append('message[content]', message?.[0]?.text);
       form.append('message[user_id]', loginUser?.id);
       form.append('message[message_type]', 'private');
@@ -242,20 +215,7 @@ const ChatDetail = () => {
 
       const res = await createChatMessage({ data: form, id: item?.id });
       if (res) {
-        // console.log('aoi res--->>', res?.data);
-        // setMessages((prevMessages) =>
-        //   GiftedChat.append(prevMessages, [
-        //     {
-        //       ...res?.data,
-        //       _id: res?.data?.id,
-        //       createdAt: res?.data?.created_at,
-        //       user: {
-        //         ...res?.data?.user,
-        //         _id: res?.data?.user?.id,
-        //       },
-        //     },
-        //   ]),
-        // );
+        console.log('aoi res--->>', res?.data);
         // await getChatMessage(item?.id);
       }
     } catch (error) {
