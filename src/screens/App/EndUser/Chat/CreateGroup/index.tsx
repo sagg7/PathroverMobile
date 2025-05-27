@@ -73,13 +73,13 @@ const CreateGroup = () => {
           });
         }
 
-        const res = await createGroup(form);
+        const res = await createGroup(form);        
 
         if (res.data) {
           navigation.navigate('Chat');
         }
       } catch (error) {
-        //
+        //        
       }
     } else if (!name) {
       showAlert('Create Group', 'Please enter group name');

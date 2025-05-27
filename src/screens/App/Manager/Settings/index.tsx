@@ -6,11 +6,11 @@ import {
   FlatList,
   Linking,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './styles';
-import {appIcons} from '../../../../assets/icons';
-import {svgIcon} from '../../../../assets/svg';
-import {AppLoader, MainWrapper, SwitchRoleSheet} from '../../../../components';
+import { appIcons } from '../../../../assets/icons';
+import { svgIcon } from '../../../../assets/svg';
+import { AppLoader, MainWrapper, SwitchRoleSheet } from '../../../../components';
 import {
   APP_ROLE,
   ManagerProfileMenu,
@@ -18,27 +18,28 @@ import {
   USER_PROFILE,
   showAlert,
 } from '../../../../shared/utils/constant';
-import {useSwitchRoleMutation} from '../../../../redux/auth/authApiSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {Routes} from '../../../../shared/exporter';
-import {setAccessToken, setLoginUser} from '../../../../redux/auth/authSlice';
-import {RatingStars} from '../../../../components';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {setUserRole} from '../../../../redux/auth/appRoleSlice';
+import { useLogoutUserMutation, useSwitchRoleMutation } from '../../../../redux/auth/authApiSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { Routes } from '../../../../shared/exporter';
+import { setAccessToken, setLoginUser } from '../../../../redux/auth/authSlice';
+import { RatingStars } from '../../../../components';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { setUserRole } from '../../../../redux/auth/appRoleSlice';
 import ConsentSheet from '../../../../components/complex/ConsentSheet';
-import {useDeleteUserAccountMutation} from '../../../../redux/manager/managerApiSlice';
+import { useDeleteUserAccountMutation } from '../../../../redux/manager/managerApiSlice';
 
-const ManagerSettings = ({navigation}: any) => {
+const ManagerSettings = ({ navigation }: any) => {
   const consentSheetRef = useRef<any>(null);
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
   const [sheetToOpen, setSheetToOpen] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(USER_PROFILE);
-  const [switchProfile, {isLoading}] = useSwitchRoleMutation();
+  const [switchProfile, { isLoading }] = useSwitchRoleMutation();
   const loginUser = useSelector(state => state?.auth?.loginUser);
   const dispatch = useDispatch();
   const userRole = useSelector(state => state?.appRole.userRole);
-  const [deleteUserAccount, {isLoading: isLoadingDeleteAccounnt}] =
+  const [deleteUserAccount, { isLoading: isLoadingDeleteAccounnt }] =
     useDeleteUserAccountMutation();
+  const [logoutUser] = useLogoutUserMutation();
 
   const handleCard = (v: any) => {
     const arr = profiles?.map(i => {
@@ -78,13 +79,18 @@ const ManagerSettings = ({navigation}: any) => {
   };
 
   const handleLogout = async () => {
-    dispatch(setAccessToken(null));
-    dispatch(setLoginUser(null));
-    dispatch(setUserRole(APP_ROLE.END_USER));
-    await GoogleSignin.signOut();
+    try {
+      await logoutUser();
+      dispatch(setAccessToken(null));
+      dispatch(setLoginUser(null));
+      dispatch(setUserRole(APP_ROLE.END_USER));
+      await GoogleSignin.signOut();
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
-  const settingOption = ({item}) => {
+  const settingOption = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.listConatainer}

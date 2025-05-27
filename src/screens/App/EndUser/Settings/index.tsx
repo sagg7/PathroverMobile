@@ -30,6 +30,7 @@ import {
   USER_PROFILE
 } from '../../../../shared/utils/constant';
 import styles from './styles';
+import { useLogoutUserMutation } from '../../../../redux/auth/authApiSlice';
 
 const Settings = ({ navigation }: any) => {
   const [showSwitchRoleSheet, setshowSwitchRoleSheet] = useState(false);
@@ -45,6 +46,7 @@ const Settings = ({ navigation }: any) => {
   const [profilePicture, setProfilePicture] = useState<any>();
   const { data: subscriptions } = useGetSubscriptionQuery(null);
   const [updateSubscription] = useUpdateSubscriptionMutation();
+  const [logoutUser] = useLogoutUserMutation();
 
 
   const [userName, setUserName] = useState(
@@ -103,14 +105,19 @@ const Settings = ({ navigation }: any) => {
   };
 
   const handleLogout = async () => {
-    dispatch(setAccessToken(null));
-    dispatch(setLoginUser(null));
-    dispatch(setUserRole(APP_ROLE.END_USER));
-    dispatch(setManagerRouteEmpty({}));
-    await GoogleSignin.signOut();
-    setTimeout(() => {
-      navigation.replace('AuthStack');
-    }, 1000);
+    try {
+      await logoutUser();
+      dispatch(setAccessToken(null));
+      dispatch(setLoginUser(null));
+      dispatch(setUserRole(APP_ROLE.END_USER));
+      dispatch(setManagerRouteEmpty({}));
+      await GoogleSignin.signOut();
+      setTimeout(() => {
+        navigation.replace('AuthStack');
+      }, 1000);
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const checkSubscriptionStatus = async () => {
@@ -118,24 +125,24 @@ const Settings = ({ navigation }: any) => {
     setTimeout(async () => {
       try {
         console.log('inside checkSubscriptionStatus');
-          const status = await isSubscriptionActive();
-          const is_valid = status?.validation;
+        const status = await isSubscriptionActive();
+        const is_valid = status?.validation;
 
-          dispatch(
-            setLoginUser({
-              ...loginUser,
-              is_subscribed: is_valid,
-              is_aval_trial: false,
-              subscription_purchased: is_valid ?? false,
-            }),
-          );
-          updateSubscription({
-            subscription: {
-              is_subscribed: is_valid,
-              id: subscriptions?.[0]?.id,
-              subscription_purchased: is_valid ?? false,
-            },
-          });
+        dispatch(
+          setLoginUser({
+            ...loginUser,
+            is_subscribed: is_valid,
+            is_aval_trial: false,
+            subscription_purchased: is_valid ?? false,
+          }),
+        );
+        updateSubscription({
+          subscription: {
+            is_subscribed: is_valid,
+            id: subscriptions?.[0]?.id,
+            subscription_purchased: is_valid ?? false,
+          },
+        });
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -169,7 +176,7 @@ const Settings = ({ navigation }: any) => {
       checkSubscriptionStatus();
     } catch (error) {
       console.log('error', error);
-      
+
       //
     }
   }
