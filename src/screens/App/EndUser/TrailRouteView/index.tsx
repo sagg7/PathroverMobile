@@ -262,7 +262,7 @@ const TrailRouteView = ({
             animationMode="flyTo"
             animationDuration={2000}
             pitch={60}
-            followUserLocation
+            followUserLocation={isIOS() ? true : false}
           />
           <MapboxGL.UserLocation
             ref={userRef}

@@ -3,17 +3,19 @@ import React, {useEffect, useState} from 'react';
 import {Alert, requireNativeComponent} from 'react-native';
 import {useSelector} from 'react-redux';
 import {AppLoader, MapTypes} from '../../../../shared/exporter';
+import ViewCustomizedSaveRoutes from '../ViewCustomizedSaveRoutes';
+import TrailRouteView from '../TrailRouteView';
 
 const MapBoxView = requireNativeComponent('MapBoxView');
 
 const TurnByTurnNavAndroid = ({navigation, route}: any) => {
-  console.log('ROUTE', route);
   const routeParams = route?.params;
   const mapLayerStyle = useSelector(state => state?.manager?.mapLayerStyle);
   const [selectedMapStyle, setSelectedMapStyle] = useState<any>('default');
   const [loader, setLoader] = useState(true);
   const [isTurnByTurnNavigation, setisTurnByTurnNavigation] = useState(true);
-  const [isDashedLineDrawn, setIsDashedLineDrawn] = useState(false);
+  const {selectedTrail} = useSelector(state => state?.endUser?.trailRoute);
+  const isLibrary = routeParams?.isLibrary;
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -69,7 +71,7 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
       [
         {
           text: 'OK',
-          onPress: () => navigation.goBack(),
+          onPress: () => setisTurnByTurnNavigation(false),
         },
       ],
     );
@@ -79,7 +81,7 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
     <>
       {loader ? (
         <AppLoader />
-      ) : (
+      ) : isTurnByTurnNavigation ? (
         <MapBoxView
           style={{flex: 1}}
           showsEndOfRouteFeedback={true}
@@ -103,9 +105,18 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
           onArrive={(event: any) => handleUserArrival(event)}
           originName="Origin"
           destinationName={routeParams?.entranceName}
-          hasTrail={true}
+          hasTrail={routeParams?.isTrail ? true : false}
           drawDashedLine={false}
           onCancelNavigation={(event: any) => navigation.goBack()}
+        />
+      ) : isLibrary ? (
+        <ViewCustomizedSaveRoutes route={routeParams?.routeInfo} />
+      ) : (
+        <TrailRouteView
+          route={selectedTrail}
+          destinationCords={routeParams?.entranceCoords}
+          isWayPoint={routeParams?.isTrail ? false : true}
+          isTrail={routeParams?.isTrail}
         />
       )}
     </>

@@ -39,7 +39,8 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
           entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
         });
       } else {
-        navigation.navigate(Routes.ViewWellPathNavigation, {
+        navigation.navigate(Routes.TurnByTurnNavAndroid, {
+          originCoords: [location.longitude, location.latitude],
           entranceCoords: startingPoint,
           entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
         });
@@ -91,9 +92,10 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             entranceName: 'Destination',
           });
         } else {
-          navigation.navigate(Routes.ViewWellPathNavigation, {
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            originCoords: [location.longitude, location.latitude],
             entranceCoords: formatedData?.endingPoint,
-            entranceName: formatedData?.name,
+            entranceName: 'Destination',
           });
         }
       } else if (
@@ -112,7 +114,14 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             });
           }, 300);
         } else {
-          navigation.navigate('TrailDetails', {trailData});
+          setTimeout(() => {
+            navigation.navigate(Routes.TurnByTurnNavAndroid, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: trailData?.geometry?.coordinates[0],
+              entranceName: 'Unknown Trail',
+              isTrail: true,
+            });
+          }, 300);
         }
       } else {
         if (isIOS()) {
@@ -133,9 +142,22 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             });
           }, 300);
         } else {
-          navigation.navigate(Routes.ViewSaveRoutes, {
-            item: formatedData,
-          });
+          setTimeout(() => {
+            const coords = formatedData?.pickup_location;
+
+            const lngLat = [
+              Number(coords?.longitude),
+              Number(coords?.latitude),
+            ];
+            navigation.navigate(Routes.TurnByTurnNavAndroid, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: lngLat,
+              entranceName: formatedData?.name,
+              isTrail: false,
+              routeInfo: formatedData,
+              isLibrary: true,
+            });
+          }, 300);
         }
       }
     }

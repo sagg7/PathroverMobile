@@ -95,6 +95,13 @@ import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MapBoxView(private val context: ThemedReactContext, private val accessToken: String?) :
     FrameLayout(context.baseContext) {
@@ -117,7 +124,9 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
      * Debug tool used to play, pause and seek route progress events that can be used to produce mocked location updates along the route.
      */
     private val mapboxReplayer = MapboxReplayer()
+    private var routeJob: Job? = null
 
+    // private val viewScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     /**
      * Debug tool that mocks location updates with an input from the [mapboxReplayer].
      */
@@ -352,11 +361,7 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         val maneuvers = maneuverApi.getManeuvers(routeProgress)
         maneuvers.fold(
             { error ->
-                Toast.makeText(
-                    context,
-                    error.errorMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.e("Eror ", error.errorMessage ?: "Route progress not found")
             },
             {
                 binding.maneuverView.visibility = View.VISIBLE
@@ -392,14 +397,38 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
      * - driver got off route and a reroute was executed
      */
 
+    private val offRouteObserver = OffRouteObserver { isOffRoute ->
+        if (isOffRoute) {
+            Log.d("OffRoute", "User is off route, re-routing...")
+
+            val currentLocation = navigationLocationProvider.lastLocation
+            if (currentLocation != null && this.destination != null) {
+                val originPoint =
+                    Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
+                if (originPoint.longitude() != 0.0) {
+                    originPoint?.let {
+                        this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }
+                    }
+                } else {
+                    Toast.makeText(
+                        context,
+                        "origin is null",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                // reRouteToDestination(currentLocation, this.destination!!)
+            }
+        }
+    }
+
     private val routesObserver = RoutesObserver { routeUpdateResult ->
         routeLineApi.setNavigationRoutes(routeUpdateResult.navigationRoutes) {
             mapboxMap.getStyle()?.let { style ->
                 routeLineApi.getRouteDrawData { expectedResult ->
                     if (expectedResult.isValue) {
-                        //    routeLineView.renderRouteDrawData(style, expectedResult)
+                        routeLineView.renderRouteDrawData(style, expectedResult)
 
-//                        drawDashedLine(binding.mapView, routes.first())
+                        // drawDashedLine(binding.mapView, routes.first())
                     } else {
                         Log.e("MapboxRouteDraw", "Error drawing route: ${expectedResult.error}")
                     }
@@ -417,13 +446,10 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                         Log.e("MapboxCrash", "Error rendering route: ${value.toString()}")
 
                         // routeLineView.renderRouteDrawData(style, value)
-
                     }
                 }else{
                     Log.e("MapboxCrash", "Error rendering route:  ${value.toString()}")
-
                 }
-
             }
 
             // update the camera position to account for the new route
@@ -448,7 +474,6 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         }
     }
 
-
     private val arrivalObserver = object : ArrivalObserver {
 
         override fun onWaypointArrival(routeProgress: RouteProgress) {
@@ -469,7 +494,6 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                 .receiveEvent(id, "onArrive", event)
         }
     }
-
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -634,8 +658,6 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         setCameraPositionToOrigin()
         // load map style
         applyMapStyle()
-//        mapboxMap.loadStyleUri(Style.MAPBOX_STREETS)
-
 
         // initialize view interactions
         binding.stop.setOnClickListener {
@@ -744,23 +766,24 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         pointAnnotationManager.create(pointAnnotationOptions)
     }
 
-
     private fun startRoute() {
         // register event listeners
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
-//        mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+        // mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
 
-        this.origin?.let { this.destination?.let { it1 -> this.findRoute(it, it1) }}
+        this.origin?.let { this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }}
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
@@ -777,37 +800,51 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
     }
 
     private fun findRoute(origin: Point, destination: Point) {
-        try {
-            mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(context)
-                    .coordinatesList(listOf(origin, destination))
-                    .profile(DirectionsCriteria.PROFILE_DRIVING)
-                    .steps(true)
-                    .build(),
-                object : NavigationRouterCallback {
-                    override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
-                        // no impl
-                    }
+        val viewScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        routeJob =  viewScope.launch {
+            try {
+                mapboxNavigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .coordinatesList(listOf(origin, destination))
+                        .profile(DirectionsCriteria.PROFILE_DRIVING)
+                        .steps(true)
+                        .build(),
+                    object : NavigationRouterCallback {
+                        override fun onCanceled(
+                            routeOptions: RouteOptions,
+                            routerOrigin: RouterOrigin
+                        ) {
+                            // no impl
+                            viewScope.cancel()
+                            routeJob?.cancel()
+                        }
 
-                    override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
-                        // no impl
-                        sendErrorToReact("Error finding route $reasons")
-                    }
+                        override fun onFailure(
+                            reasons: List<RouterFailure>,
+                            routeOptions: RouteOptions
+                        ) {
+                            // no impl
+                            viewScope.cancel()
+                            routeJob?.cancel()
+                            sendErrorToReact("Error finding route $reasons")
+                        }
 
-                    override fun onRoutesReady(
-                        routes: List<NavigationRoute>,
-                        routerOrigin: RouterOrigin
-                    ) {
-                        setRouteAndStartNavigation(routes)
-                        addCustomMarker(context, binding.mapView, destination)
+                        override fun onRoutesReady(
+                            routes: List<NavigationRoute>,
+                            routerOrigin: RouterOrigin
+                        ) {
+                            setRouteAndStartNavigation(routes)
+                            addCustomMarker(context, binding.mapView, destination)
+                            viewScope.cancel()
+                            routeJob?.cancel()
+                        }
                     }
-                }
-
-            )
-        } catch (ex: Exception) {
-            sendErrorToReact("Find Route Error !!")
+                )
+            } catch (ex: Exception) {
+                sendErrorToReact("Find Route Error !!")
+            }
         }
     }
 

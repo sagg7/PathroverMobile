@@ -83,12 +83,15 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           routeInfo: selectedItem,
         });
       } else {
-        navigation.navigate(Routes.ViewWellPathNavigation, {
+        navigation.navigate(Routes.TurnByTurnNavAndroid, {
+          originCoords: [location.longitude, location.latitude],
           entranceCoords: [
             Number(selectedItem?.dropoff_location?.longitude),
             Number(selectedItem?.dropoff_location?.latitude),
           ],
           entranceName: selectedItem?.name,
+          isTrail: false,
+          routeInfo: selectedItem,
         });
       }
     } else if (selectedItem?.route_type === 'hiking_trail_route') {
@@ -119,7 +122,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           },
         },
       };
-      // return;
       if (isIOS()) {
         dispatch(setSelectedTrail(geoJsonFeature));
         setTimeout(() => {
@@ -131,7 +133,14 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           });
         }, 300);
       } else {
-        navigation.navigate('TrailDetails', {geoJsonFeature});
+        setTimeout(() => {
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+            entranceName: 'Unknown Trail',
+            isTrail: true,
+          });
+        }, 300);
       }
 
       return;
@@ -140,7 +149,6 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
         setTimeout(() => {
           const coords = selectedItem?.pickup_location;
           const lngLat = [Number(coords?.longitude), Number(coords?.latitude)];
-
           navigation.navigate(Routes.TurnByTurnNav, {
             originCoords: [location?.longitude, location?.latitude],
             entranceCoords: lngLat,
@@ -151,9 +159,18 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           });
         }, 300);
       } else {
-        navigation.navigate(Routes.ViewSaveRoutes, {
-          item: selectedItem,
-        });
+        setTimeout(() => {
+          const coords = selectedItem?.pickup_location;
+          const lngLat = [Number(coords?.longitude), Number(coords?.latitude)];
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            originCoords: [location?.longitude, location?.latitude],
+            entranceCoords: lngLat,
+            entranceName: selectedItem?.name,
+            isTrail: false,
+            routeInfo: selectedItem,
+            isLibrary: true,
+          });
+        }, 300);
       }
     }
   };

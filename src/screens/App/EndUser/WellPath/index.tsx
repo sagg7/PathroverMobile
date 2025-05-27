@@ -1129,9 +1129,10 @@ const WellPath = () => {
                 entranceName: entranceName || 'Destination',
               });
             } else {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
+              navigation.navigate(Routes.TurnByTurnNavAndroid, {
+                originCoords: currentLocation,
                 entranceCoords: entranceCoords,
-                entranceName: entranceName,
+                entranceName: entranceName || 'Destination',
               });
             }
 
@@ -1172,7 +1173,8 @@ const WellPath = () => {
                 entranceName: searchLocationName,
               });
             } else {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
+              navigation.navigate(Routes.TurnByTurnNavAndroid, {
+                originCoords: currentLocation,
                 entranceCoords: searchLocation,
                 entranceName: searchLocationName,
               });
@@ -1245,12 +1247,6 @@ const WellPath = () => {
                 entranceName: placeName,
               });
             } else {
-              console.log('control');
-
-              // navigation.navigate(Routes.ViewWellPathNavigation, {
-              //   entranceCoords: pinLocationMarker,
-              //   entranceName: placeName,
-              // });
               navigation.navigate(Routes.TurnByTurnNavAndroid, {
                 originCoords: currentLocation,
                 entranceCoords: pinLocationMarker,
