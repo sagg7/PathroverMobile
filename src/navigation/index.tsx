@@ -82,10 +82,9 @@ import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 import {isReadyRef, navigationRef} from './navigationRef';
 
 import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
-import TurnByTurnCustomRoute from '../screens/App/EndUser/TurnByTurnCustomRoute';
 import ViewCustomizedSaveRoutes from '../screens/App/EndUser/ViewCustomizedSaveRoutes';
+import TurnByTurnNavAndroid from '../screens/App/EndUser/TurnByTurnNavAndroid';
 const Stack = createNativeStackNavigator();
-// const navigationRef = createNavigationContainerRef();
 
 const AppNavigation = () => {
   return (
@@ -243,10 +242,14 @@ const AppNavigation = () => {
           name={Routes.TurnByTurnCustomRoute}
           component={TurnByTurnCustomRoute}
         /> */}
-        <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
+        {/* <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} /> */}
         <Stack.Screen
           name={Routes.ViewCustomizedSaveRoutes}
           component={ViewCustomizedSaveRoutes}
+        />
+        <Stack.Screen
+          name={Routes.TurnByTurnNavAndroid}
+          component={TurnByTurnNavAndroid}
         />
       </Stack.Navigator>
     </NavigationContainer>

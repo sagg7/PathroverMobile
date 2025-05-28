@@ -474,7 +474,11 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const moveToCurrentLocation = () => {
-    cameraRef.current.flyTo(userLocation, 100);
+    cameraRef.current?.setCamera({
+      centerCoordinate: userLocation,
+      zoomLevel: 14,
+      animationDuration: 1000,
+    });
   };
 
   const ActionBtn = ({icon, onPress}: any) => (
@@ -617,20 +621,22 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const onPressExploreTrail = () => {
-    if (isIOS()) {
-      dispatch(setSelectedTrail(trailInfo));
+    dispatch(setSelectedTrail(trailInfo));
 
-      setTimeout(() => {
-        navigation.navigate(Routes.TurnByTurnNav, {
-          originCoords: [location?.longitude, location?.latitude],
-          entranceCoords: trailInfo?.geometry?.coordinates[0],
-          entranceName: 'Unknown Trail',
-          isTrail: true,
-        });
-      }, 300);
-    } else {
-      navigation.navigate('TrailDetails', {trailInfo});
-    }
+    const routeName = isIOS()
+      ? Routes.TurnByTurnNav
+      : Routes.TurnByTurnNavAndroid;
+    const originCoords = [location?.longitude, location?.latitude];
+    const entranceCoords = trailInfo?.geometry?.coordinates[0];
+
+    setTimeout(() => {
+      navigation.navigate(routeName, {
+        originCoords,
+        entranceCoords,
+        entranceName: 'Unknown Trail',
+        isTrail: true,
+      });
+    }, 300);
   };
 
   return (
@@ -914,7 +920,8 @@ const HikingScreen = ({route, navigation}: any) => {
                 entranceName: placeName,
               });
             } else {
-              navigation.navigate(Routes.ViewWellPathNavigation, {
+              navigation.navigate(Routes.TurnByTurnNavAndroid, {
+                originCoords: [location.longitude, location.latitude],
                 entranceCoords: pinLocationMarker,
                 entranceName: placeName,
               });

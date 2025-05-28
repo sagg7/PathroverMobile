@@ -17,7 +17,7 @@ const FAQs = () => {
       {loading && <AppLoader />}
       <WebView
         source={{uri: FAQ_LIST_LINK}}
-        style={{top: isIOS() ? -100 : -70}}
+        style={{top: isIOS() ? -100 : 0}}
       />
     </MainWrapper>
   );

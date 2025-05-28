@@ -545,7 +545,12 @@ const SearchTrailLatLng = () => {
                 entranceName: 'location',
               });
             } else {
-              onPressStartBtn();
+              navigation.navigate(Routes.TurnByTurnNavAndroid, {
+                originCoords: currentLocation,
+                entranceCoords: endingPoint,
+                entranceName: 'location',
+              });
+              // onPressStartBtn();
             }
           }}
           show
