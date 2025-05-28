@@ -474,7 +474,11 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const moveToCurrentLocation = () => {
-    cameraRef.current.flyTo(userLocation, 100);
+    cameraRef.current?.setCamera({
+      centerCoordinate: userLocation,
+      zoomLevel: 14,
+      animationDuration: 1000,
+    });
   };
 
   const ActionBtn = ({icon, onPress}: any) => (

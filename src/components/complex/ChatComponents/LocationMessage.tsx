@@ -31,8 +31,8 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
 
   const handleClick = () => {
     if (type === 'Chosen Trail') {
+      dispatch(setSelectedTrail(data));
       if (isIOS()) {
-        dispatch(setSelectedTrail(data));
         navigation.navigate(Routes.TurnByTurnNav, {
           originCoords: [location.longitude, location.latitude],
           entranceCoords: startingPoint,
@@ -103,8 +103,8 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         type === 'trail' ||
         type === 'hiking_trail_route'
       ) {
+        dispatch(setSelectedTrail(trailData));
         if (isIOS()) {
-          dispatch(setSelectedTrail(trailData));
           setTimeout(() => {
             navigation.navigate(Routes.TurnByTurnNav, {
               originCoords: [location?.longitude, location?.latitude],

@@ -77,10 +77,12 @@ import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import java.util.Locale
 import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.mapbox.core.constants.Constants.PRECISION_6
 import com.pathrover.R
 import com.pathrover.databinding.NavigationViewBinding
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
@@ -96,6 +98,8 @@ import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -116,7 +120,7 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
     private var showsEndOfRouteFeedback = false
     private var mapStyleKey = "default"
     private var hasTrail = false
-    private var drawDashedLine = false
+    private var hasDashedLine = false
     private var originName = ""
     private var destinationName = ""
 
@@ -323,6 +327,27 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             val enhancedLocation = locationMatcherResult.enhancedLocation
+
+            val route = mapboxNavigation.getRoutes().firstOrNull()
+            if (route != null) {
+                val routeLinePoints = PolylineUtils.decode(route.geometry() ?: "", PRECISION_6)
+
+                val nearest = nearestPointOnLine(Point.fromLngLat(enhancedLocation.longitude,enhancedLocation.latitude), routeLinePoints)
+
+                val distance = TurfMeasurement.distance(
+                    nearest,
+                    Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),
+                    TurfConstants.UNIT_METERS
+                )
+
+                if (distance > 20) { // You can tweak this threshold
+                    // User is off route
+                    findRoute(
+                        Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),
+                        destination!!
+                    )
+                }
+            }
             // update location puck's position on the map
             navigationLocationProvider.changePosition(
                 location = enhancedLocation,
@@ -341,6 +366,50 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                 .receiveEvent(id, "onLocationChange", event)
         }
     }
+
+    fun nearestPointOnLine(point: Point, line: List<Point>): Point {
+        var minDistance = Double.MAX_VALUE
+        var nearestPoint = line.first()
+
+        for (i in 0 until line.size - 1) {
+            val segmentStart = line[i]
+            val segmentEnd = line[i + 1]
+
+            val candidate = closestPointOnSegment(point, segmentStart, segmentEnd)
+            val distance = TurfMeasurement.distance(point, candidate, TurfConstants.UNIT_METERS)
+
+            if (distance < minDistance) {
+                minDistance = distance
+                nearestPoint = candidate
+            }
+        }
+
+        return nearestPoint
+    }
+
+    fun closestPointOnSegment(p: Point, a: Point, b: Point): Point {
+        val ax = a.longitude()
+        val ay = a.latitude()
+        val bx = b.longitude()
+        val by = b.latitude()
+        val px = p.longitude()
+        val py = p.latitude()
+
+        val dx = bx - ax
+        val dy = by - ay
+
+        val d = dx * dx + dy * dy
+        if (d == 0.0) return a // Segment is a point
+
+        val t = ((px - ax) * dx + (py - ay) * dy) / d
+        val clampedT = maxOf(0.0, minOf(1.0, t))
+
+        val closestX = ax + clampedT * dx
+        val closestY = ay + clampedT * dy
+
+        return Point.fromLngLat(closestX, closestY)
+    }
+
 
     /**
      * Gets notified with progress along the currently active route.
@@ -416,7 +485,6 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-                // reRouteToDestination(currentLocation, this.destination!!)
             }
         }
     }
@@ -441,13 +509,13 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
             routeLineApi.setNavigationRoutes(
                 routeUpdateResult.navigationRoutes
             ) { value ->
-                if (value.isValue){
+                if (value.isValue) {
                     mapboxMap.getStyle()?.let { style ->
                         Log.e("MapboxCrash", "Error rendering route: ${value.toString()}")
 
-                        // routeLineView.renderRouteDrawData(style, value)
+                        //   routeLineView.renderRouteDrawData(style, value)
                     }
-                }else{
+                } else {
                     Log.e("MapboxCrash", "Error rendering route:  ${value.toString()}")
                 }
             }
@@ -487,7 +555,7 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             val event = Arguments.createMap()
             event.putBoolean("hasTrail", hasTrail)
-            event.putBoolean("drawDashedLine", drawDashedLine)
+            event.putBoolean("hasDashedLine", hasDashedLine)
             event.putString("onArrive", "")
             context
                 .getJSModule(RCTEventEmitter::class.java)
@@ -506,8 +574,10 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
     }
 
     private val measureAndLayout = Runnable {
-        measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
+        measure(
+            MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        )
         layout(left, top, right, bottom)
     }
 
@@ -708,6 +778,9 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
 
     fun drawDashedLine(mapView: MapView, route: NavigationRoute) {
         val geometry = route.directionsRoute.geometry()
+
+        //  Log.d("firstPoint", "Geometry is null or empty, skipping drawDashedLine 1."+route.directionsRoute.stepsGeometryToPoints().get(0).get(0).get(0))
+
         if (geometry.isNullOrBlank()) {
             Log.e("MapboxDrawRoute", "Geometry is null or empty, skipping drawDashedLine 1.")
             return
@@ -770,20 +843,22 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         // register event listeners
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
-        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+        // mapboxNavigation.registerOffRouteObserver(offRouteObserver)
         // mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
 
-        this.origin?.let { this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }}
+        this.origin?.let {
+            this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }
+        }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+        // mapboxNavigation.registerOffRouteObserver(offRouteObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
@@ -835,6 +910,24 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                             routes: List<NavigationRoute>,
                             routerOrigin: RouterOrigin
                         ) {
+                            val route = routes.first().directionsRoute
+                            val geometry = route.geometry()
+                            if (!geometry.isNullOrEmpty()) {
+                                val decodedPoints = PolylineUtils.decode(geometry, PRECISION_6)
+
+                                // Navigation's starting point on the road
+                                val routeEndPoint = decodedPoints.lastOrNull()
+
+                                if (routeEndPoint != null) {
+                                    val distance = TurfMeasurement.distance(destination, routeEndPoint, TurfConstants.UNIT_METERS)
+                                    if(distance > 10){
+                                        hasDashedLine = true
+                                        drawDottedLineWithLayer(destination, routeEndPoint)
+                                    } else {
+                                        hasDashedLine = false
+                                    }
+                                }
+                            }
                             setRouteAndStartNavigation(routes)
                             addCustomMarker(context, binding.mapView, destination)
                             viewScope.cancel()
@@ -844,6 +937,30 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                 )
             } catch (ex: Exception) {
                 sendErrorToReact("Find Route Error !!")
+            }
+        }
+    }
+
+    private fun drawDottedLineWithLayer(from: Point, to: Point) {
+        val lineFeature = Feature.fromGeometry(LineString.fromLngLats(listOf(from, to)))
+        val geoJsonSource = geoJsonSource("dotted-line-source") {
+            feature(lineFeature)
+        }
+
+        val lineLayer = lineLayer("dotted-line-layer", "dotted-line-source") {
+            lineColor("#ff0000")
+            lineWidth(3.0)
+            lineDasharray(listOf(2.0, 2.0)) // Dotted effect
+            lineCap(LineCap.ROUND)
+            lineJoin(LineJoin.ROUND)
+        }
+
+        binding.mapView.getMapboxMap().getStyle { style ->
+            if (!style.styleSourceExists("dotted-line-source")) {
+                style.addSource(geoJsonSource)
+            }
+            if (!style.styleLayerExists("dotted-line-layer")) {
+                style.addLayer(lineLayer)
             }
         }
     }
@@ -936,10 +1053,6 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
 
     fun setHasTrail(trailKey: Boolean) {
         this.hasTrail = trailKey
-    }
-
-    fun setDrawDashedLine(dashedLine: Boolean) {
-        this.drawDashedLine = dashedLine
     }
 
     fun setOriginName(origin: String) {

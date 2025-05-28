@@ -237,6 +237,7 @@ const TrailRouteView = ({
       navigation.navigate('Hiking');
     }, 100);
   };
+  console.log('destinationCords', destinationCords);
 
   return (
     <GestureHandlerRootView style={styles.gestureView}>

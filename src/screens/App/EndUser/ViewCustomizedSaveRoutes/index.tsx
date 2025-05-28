@@ -281,6 +281,7 @@ const ViewCustomizedSaveRoutes = ({route}: any) => {
             centerCoordinate={liveLocation}
             animationMode="flyTo"
             animationDuration={1000}
+            followUserLocation={isIOS() ? true : false}
           />
         )}
         <MapboxGL.UserLocation

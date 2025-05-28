@@ -122,8 +122,8 @@ const EndUserSavedLibraryType = ({route, navigation}: any) => {
           },
         },
       };
+      dispatch(setSelectedTrail(geoJsonFeature));
       if (isIOS()) {
-        dispatch(setSelectedTrail(geoJsonFeature));
         setTimeout(() => {
           navigation.navigate(Routes.TurnByTurnNav, {
             originCoords: [location?.longitude, location?.latitude],

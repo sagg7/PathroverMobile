@@ -99,11 +99,6 @@ class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleVie
         view.setHasTrail(trailKey)
     }
 
-    @ReactProp(name = "drawDashedLine")
-    fun setDrawDashedLine(view: MapBoxView, dashedLine: Boolean) {
-        view.setDrawDashedLine(dashedLine)
-    }
-
     @ReactProp(name = "originName")
     fun setOriginName(view: MapBoxView, originName: String?) {
         if (!originName.isNullOrEmpty()) {

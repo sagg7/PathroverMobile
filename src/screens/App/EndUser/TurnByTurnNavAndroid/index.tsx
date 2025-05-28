@@ -1,10 +1,11 @@
 import {useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {Alert, requireNativeComponent} from 'react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {AppLoader, MapTypes} from '../../../../shared/exporter';
 import ViewCustomizedSaveRoutes from '../ViewCustomizedSaveRoutes';
 import TrailRouteView from '../TrailRouteView';
+import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 
 const MapBoxView = requireNativeComponent('MapBoxView');
 
@@ -16,6 +17,7 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
   const [isTurnByTurnNavigation, setisTurnByTurnNavigation] = useState(true);
   const {selectedTrail} = useSelector(state => state?.endUser?.trailRoute);
   const isLibrary = routeParams?.isLibrary;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (mapLayerStyle) {
@@ -59,19 +61,47 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
     }
   };
 
-  const handleUserArrival = (event: any) => {
-    const {hasTrail, drawDashedLine} = event.nativeEvent;
+  const _handleUserArrival = (event: any) => {
+    const {hasTrail, hasDashedLine} = event.nativeEvent;
     console.log('Has Trail => ', hasTrail);
-    console.log('Has Dashed Line => ', drawDashedLine);
+    console.log('Has Dashed Line => ', hasDashedLine);
+
     Alert.alert(
       'Arrived',
-      hasTrail || drawDashedLine
+      hasTrail || hasDashedLine
         ? 'Off-road navigation begins here. Follow the dashed line to your destination.'
         : 'You have reached your destination.',
       [
         {
           text: 'OK',
-          onPress: () => setisTurnByTurnNavigation(false),
+          onPress: () =>
+            hasTrail || hasDashedLine
+              ? setisTurnByTurnNavigation(false)
+              : navigation.goBack(),
+        },
+      ],
+    );
+  };
+
+  const handleUserArrival = (event: any) => {
+    const {hasTrail, hasDashedLine} = event.nativeEvent;
+    const isOffRoad = hasTrail || hasDashedLine;
+
+    Alert.alert(
+      'Arrived',
+      isOffRoad
+        ? 'Off-road navigation begins here. Follow the dashed line to your destination.'
+        : 'You have reached your destination.',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            if (isOffRoad || isLibrary) {
+              setisTurnByTurnNavigation(false);
+            } else {
+              navigation.goBack();
+            }
+          },
         },
       ],
     );
@@ -86,7 +116,6 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
           style={{flex: 1}}
           showsEndOfRouteFeedback={true}
           mapStyle={selectedMapStyle} // or 'terrain', 'default'
-          // shouldSimulateRoute={true}
           origin={[
             routeParams?.originCoords?.[0],
             routeParams?.originCoords?.[1],
@@ -106,8 +135,12 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
           originName="Origin"
           destinationName={routeParams?.entranceName}
           hasTrail={routeParams?.isTrail ? true : false}
-          drawDashedLine={false}
-          onCancelNavigation={(event: any) => navigation.goBack()}
+          onCancelNavigation={(event: any) => {
+            if (routeParams?.isTrail) {
+              dispatch(setSelectedTrail(null));
+            }
+            navigation.goBack();
+          }}
         />
       ) : isLibrary ? (
         <ViewCustomizedSaveRoutes route={routeParams?.routeInfo} />
