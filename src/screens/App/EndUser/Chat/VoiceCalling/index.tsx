@@ -1,16 +1,18 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {BackHandler, PermissionsAndroid, Platform} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { BackHandler, PermissionsAndroid, Platform } from 'react-native';
 import uuid from 'react-native-uuid';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import {
+  AudioAinsMode,
   ChannelProfileType,
   ClientRoleType,
   createAgoraRtcEngine,
+  EarMonitoringFilterType,
   IRtcEngine,
   IRtcEngineEventHandler,
   RtcConnection,
 } from 'react-native-agora';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   useCreateCallMutation,
   useLazyGetAgoraTokenQuery,
@@ -21,23 +23,23 @@ import {
   AGORA_KEY,
   REQ_LIST_SOCKET_URL,
 } from '../../../../../shared/utils/constant';
-import {formatTime} from '../../../../../helpers/getFormatTime';
-import proximity, {SubscriptionRef} from 'rn-proximity-sensor';
-import {useActionCable} from '../../../../../hooks/socket/useActionCable';
-import {useChannel} from '../../../../../hooks/socket/useChannel';
-import {clearAllCallNotifications} from '../../../../../hooks/NotificationHook';
+import { formatTime } from '../../../../../helpers/getFormatTime';
+import proximity, { SubscriptionRef } from 'rn-proximity-sensor';
+import { useActionCable } from '../../../../../hooks/socket/useActionCable';
+import { useChannel } from '../../../../../hooks/socket/useChannel';
+import { clearAllCallNotifications } from '../../../../../hooks/NotificationHook';
 
 const appId = AGORA_KEY;
 
 const VoiceCalling = () => {
-  const {params} = useRoute();
+  const { params } = useRoute();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
-  const {loginUser, accessToken} = useSelector(state => state.auth);
+  const { loginUser, accessToken } = useSelector(state => state.auth);
   const token = accessToken?.replace('Bearer ', '');
-  const {actionCable} = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const {subscribe, unsubscribe} = useChannel(actionCable);
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
 
   const agoraEngineRef = useRef<IRtcEngine>(); // IRtcEngine instance
   const eventHandler = useRef<IRtcEngineEventHandler>();
@@ -59,15 +61,15 @@ const VoiceCalling = () => {
 
   // APIs
   const [fetchAgoraToken] = useLazyGetAgoraTokenQuery(undefined);
-  const [createCall, {data, isLoading}] = useCreateCallMutation();
-  const [updateCall, {error}] = useUpdateCallMutation();
+  const [createCall, { data, isLoading }] = useCreateCallMutation();
+  const [updateCall, { error }] = useUpdateCallMutation();
 
   // Function to start the timer
   const startTimer = () => {
     startTimeRef.current = Date.now(); // Record the start time
     timerIntervalRef.current = setInterval(() => {
       const now = Date.now();
-      setControls(prev => ({...prev, elapsedTime: now - startTimeRef.current}));
+      setControls(prev => ({ ...prev, elapsedTime: now - startTimeRef.current }));
     }, 1000); // Update every second
   };
 
@@ -90,15 +92,14 @@ const VoiceCalling = () => {
                 ? params?.id
                 : controls.call_data?.call_log?.id,
               // channel_key: controls.call_data?.call_log?.id,
-              channel_key: `call_channel_${
-                params?.channel ? params?.id : controls.call_data?.call_log?.id
-              }`,
+              channel_key: `call_channel_${params?.channel ? params?.id : controls.call_data?.call_log?.id
+                }`,
             },
             {
               received: res => {
                 // console.log('res----CallChannel------->>>>>>>>>>>>>>', res);
 
-                setControls(prev => ({...prev, status: res?.status}));
+                setControls(prev => ({ ...prev, status: res?.status }));
                 checkCallStatus(res);
               },
               connected: () => {
@@ -135,16 +136,16 @@ const VoiceCalling = () => {
     const init = async () => {
       await setupVoiceSDKEngine();
       setupEventHandler();
-      join();
+      await join();
     };
     if (isFocused) {
-      setControls(prev => ({...prev, elapsedTime: 0}));
+      setControls(prev => ({ ...prev, elapsedTime: 0 }));
       init();
     }
     return () => {
       cleanupAgoraEngine(); // Ensure this is synchronous
     };
-  }, [isFocused]); // Empty dependency array ensures it runs only once
+  }, []); // Empty dependency array ensures it runs only once
 
   useEffect(() => {
     const backAction = () => {
@@ -173,9 +174,9 @@ const VoiceCalling = () => {
   useEffect(() => {
     sensorSubscriptionRef.current = proximity.subscribe(values => {
       if (values.distance > 4) {
-        setControls(prev => ({...prev, isNear: false}));
+        setControls(prev => ({ ...prev, isNear: false }));
       } else {
-        setControls(prev => ({...prev, isNear: true}));
+        setControls(prev => ({ ...prev, isNear: true }));
       }
     });
 
@@ -191,14 +192,14 @@ const VoiceCalling = () => {
     eventHandler.current = {
       onJoinChannelSuccess: () => {
         // console.log('onJoinChannelSuccess----------->>>>>>>>>>>>>>');
-        setControls(prev => ({...prev, isJoined: true}));
+        setControls(prev => ({ ...prev, isJoined: true }));
       },
       onUserJoined: (_connection: RtcConnection, uid: number) => {
-        setControls(prev => ({...prev, remoteUid: uid}));
+        setControls(prev => ({ ...prev, remoteUid: uid }));
         startTimer();
       },
       onUserOffline: (_connection: RtcConnection, uid: number) => {
-        setControls(prev => ({...prev, remoteUid: uid}));
+        setControls(prev => ({ ...prev, remoteUid: uid }));
         stopTimer();
         setTimeout(() => {
           leave();
@@ -213,26 +214,65 @@ const VoiceCalling = () => {
           stopTimer();
         }
       },
+      onAudioRoutingChanged: (routing) => {
+        console.log('----------------------------------------');
+        console.log('onAudioRoutingChanged--->>>>>>>>>>>>>>', routing);
+        console.log('----------------------------------------');
+        if (routing === 3) {
+          // setControls(prev => ({ ...prev, isSpeakerOn: true }));
+        } else {
+          // setControls(prev => ({ ...prev, isSpeakerOn: false }));
+        }
+      },
+      onLocalAudioStats: (connection, stats) => {
+        console.log('----------------------------------------');
+        console.log('onLocalAudioStats----------->', stats)
+        console.log('----------------------------------------');
+      },
+      onRemoteAudioStats: (connection, stats) => {
+        console.log('----------------------------------------');
+        console.log('onRemoteAudioStats----------->', stats)
+        console.log('----------------------------------------');
+      },
+      onLocalAudioStateChanged: (connection, state, reason) => {
+        console.log('----------------------------------------');
+        console.log('onLocalAudioStateChanged----------->', state, reason);
+        console.log('----------------------------------------');
+      },
+      onRemoteAudioStateChanged: (connection, remoteUid, state, reason) => {
+        console.log('----------------------------------------');
+        console.log('onRemoteAudioStateChanged----------->', state, reason);
+        console.log('----------------------------------------');
+      },
     };
     agoraEngineRef.current?.registerEventHandler(eventHandler.current);
   };
 
   const setupVoiceSDKEngine = async () => {
     try {
+      console.log('in setupVoiceSDKEngine====>>>>>>>');
+
       if (Platform.OS === 'android') {
         await getPermission();
       }
       agoraEngineRef.current = createAgoraRtcEngine();
       const agoraEngine = agoraEngineRef.current;
-      agoraEngine.initialize({appId: appId});
+
+      console.log('agoraEngine', agoraEngine);
+
+      agoraEngine.initialize({ appId: appId });
       agoraEngine.setChannelProfile(
         ChannelProfileType.ChannelProfileCommunication,
       );
-      agoraEngine.setClientRole(
-        params?.channel
-          ? ClientRoleType.ClientRoleAudience
-          : ClientRoleType.ClientRoleBroadcaster,
-      );
+      // agoraEngine.setClientRole(
+      //   params?.channel
+      //     ? ClientRoleType.ClientRoleAudience
+      //     : ClientRoleType.ClientRoleBroadcaster,
+      // );
+
+      agoraEngine.enableAudio();
+      agoraEngine.enableAudioVolumeIndication(200, 3, true);
+      agoraEngine.setAINSMode(true, AudioAinsMode.AinsModeBalanced);
     } catch (e) {
       //
     }
@@ -249,7 +289,7 @@ const VoiceCalling = () => {
       // leave();
       agoraEngineRef.current?.leaveChannel();
 
-      setControls(prev => ({...prev, remoteUid: 0, isJoined: false}));
+      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
       navigation.pop();
       // navigation.goBack();
       clearAllCallNotifications();
@@ -280,7 +320,7 @@ const VoiceCalling = () => {
 
       // console.log('call res----------->>>>>>>>>>>>>>', data);
     } catch (error) {
-      setControls(prev => ({...prev, call_data: {}}));
+      setControls(prev => ({ ...prev, call_data: {} }));
       // console.log('call error----------->>>>>>>>>>>>>>', error);
     }
   };
@@ -318,7 +358,7 @@ const VoiceCalling = () => {
       ? params?.channel
       : `call_${loginUser?.id}_${uuid.v4()}`;
 
-    setControls(prev => ({...prev, channel: channelName}));
+    setControls(prev => ({ ...prev, channel: channelName }));
     if (!params?.channel) {
       callInitiated(channelName);
     }
@@ -331,14 +371,23 @@ const VoiceCalling = () => {
         // Set channel profile to live broadcast
         channelProfile: ChannelProfileType.ChannelProfileCommunication,
         // Set user role to broadcaster
-        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+        clientRoleType: params?.channel
+          ? ClientRoleType.ClientRoleAudience
+          : ClientRoleType.ClientRoleBroadcaster,
         // Publish audio collected by the microphone
         publishMicrophoneTrack: true,
         // Automatically subscribe to all audio streams
         autoSubscribeAudio: true,
       });
-      setControls(prev => ({...prev, isJoined: true}));
+      // agoraEngineRef?.current?.setClientRole(
+      //   params?.channel
+      //     ? ClientRoleType.ClientRoleAudience
+      //     : ClientRoleType.ClientRoleBroadcaster,
+      // );
+      setControls(prev => ({ ...prev, isJoined: true }));
       agoraEngineRef.current?.enableLocalAudio(true);
+      agoraEngineRef.current?.muteLocalAudioStream(false);
+      agoraEngineRef.current?.enableInEarMonitoring(true, EarMonitoringFilterType.EarMonitoringFilterNone);
     } catch (e) {
       //
       // console.log('error----------->>>>>>>>>>>>>>', e);
@@ -348,8 +397,10 @@ const VoiceCalling = () => {
   const leave = () => {
     try {
       updateCallStatus('ended');
+
       agoraEngineRef.current?.leaveChannel();
-      setControls(prev => ({...prev, remoteUid: 0, isJoined: false}));
+      cleanupAgoraEngine();
+      setControls(prev => ({ ...prev, remoteUid: 0, isJoined: false }));
 
       navigation.pop();
       // navigation.goBack();
@@ -382,7 +433,7 @@ const VoiceCalling = () => {
   // Toggle publishing the local audio stream
   const mute = () => {
     const hasMuted = !controls.isMuted;
-    setControls(prev => ({...prev, isMuted: hasMuted}));
+    setControls(prev => ({ ...prev, isMuted: hasMuted }));
     agoraEngineRef.current?.muteLocalAudioStream(hasMuted);
   };
 
@@ -390,7 +441,7 @@ const VoiceCalling = () => {
   const toggleSpeaker = () => {
     const newSpeakerState = !controls.isSpeakerOn;
     agoraEngineRef.current?.setEnableSpeakerphone(newSpeakerState);
-    setControls(prev => ({...prev, isSpeakerOn: newSpeakerState}));
+    setControls(prev => ({ ...prev, isSpeakerOn: newSpeakerState }));
   };
 
   return (
