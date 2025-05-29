@@ -12,7 +12,7 @@ import com.mapbox.maps.ResourceOptionsManager
 import com.mapbox.maps.TileStoreUsageMode
 import javax.annotation.Nonnull
 
-class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleViewManager<MapBoxView>() {
+class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleViewManager<MapBoxViewAndroid>() {
     private var accessToken: String? = null
 
     init {
@@ -32,14 +32,14 @@ class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleVie
     }
 
     override fun getName(): String {
-        return "MapBoxView"
+        return "MapBoxViewAndroid"
     }
 
-    public override fun createViewInstance(@Nonnull reactContext: ThemedReactContext): MapBoxView {
-        return MapBoxView(reactContext, this.accessToken)
+    public override fun createViewInstance(@Nonnull reactContext: ThemedReactContext): MapBoxViewAndroid {
+        return MapBoxViewAndroid(reactContext, this.accessToken)
     }
 
-    override fun onDropViewInstance(view: MapBoxView) {
+    override fun onDropViewInstance(view: MapBoxViewAndroid) {
         view.onDropViewInstance()
         super.onDropViewInstance(view)
     }
@@ -55,7 +55,7 @@ class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleVie
     }
 
     @ReactProp(name = "origin")
-    fun setOrigin(view: MapBoxView, sources: ReadableArray?) {
+    fun setOrigin(view: MapBoxViewAndroid, sources: ReadableArray?) {
         if (sources == null) {
             view.setOrigin(null)
             return
@@ -64,7 +64,7 @@ class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleVie
     }
 
     @ReactProp(name = "destination")
-    fun setDestination(view: MapBoxView, sources: ReadableArray?) {
+    fun setDestination(view: MapBoxViewAndroid, sources: ReadableArray?) {
         if (sources == null) {
             view.setDestination(null)
             return
@@ -73,41 +73,41 @@ class MapBoxViewManager(var mCallerContext: ReactApplicationContext) : SimpleVie
     }
 
     @ReactProp(name = "shouldSimulateRoute")
-    fun setShouldSimulateRoute(view: MapBoxView, shouldSimulateRoute: Boolean) {
+    fun setShouldSimulateRoute(view: MapBoxViewAndroid, shouldSimulateRoute: Boolean) {
         view.setShouldSimulateRoute(shouldSimulateRoute)
     }
 
     @ReactProp(name = "showsEndOfRouteFeedback")
-    fun setShowsEndOfRouteFeedback(view: MapBoxView, showsEndOfRouteFeedback: Boolean) {
+    fun setShowsEndOfRouteFeedback(view: MapBoxViewAndroid, showsEndOfRouteFeedback: Boolean) {
         view.setShowsEndOfRouteFeedback(showsEndOfRouteFeedback)
     }
 
     @ReactProp(name = "mute")
-    fun setMute(view: MapBoxView, mute: Boolean) {
+    fun setMute(view: MapBoxViewAndroid, mute: Boolean) {
         view.setMute(mute)
     }
 
     @ReactProp(name = "mapStyle")
-    fun setMapStyle(view: MapBoxView, styleKey: String?) {
+    fun setMapStyle(view: MapBoxViewAndroid, styleKey: String?) {
         if (!styleKey.isNullOrEmpty()) {
             view.setMapStyle(styleKey)
         }
     }
 
     @ReactProp(name = "hasTrail")
-    fun setHasTrail(view: MapBoxView, trailKey: Boolean) {
+    fun setHasTrail(view: MapBoxViewAndroid, trailKey: Boolean) {
         view.setHasTrail(trailKey)
     }
 
     @ReactProp(name = "originName")
-    fun setOriginName(view: MapBoxView, originName: String?) {
+    fun setOriginName(view: MapBoxViewAndroid, originName: String?) {
         if (!originName.isNullOrEmpty()) {
             view.setOriginName(originName)
         }
     }
 
     @ReactProp(name = "destinationName")
-    fun setDestinationName(view: MapBoxView, destinationName: String?) {
+    fun setDestinationName(view: MapBoxViewAndroid, destinationName: String?) {
         if (!destinationName.isNullOrEmpty()) {
             view.setDestinationName(destinationName)
         }

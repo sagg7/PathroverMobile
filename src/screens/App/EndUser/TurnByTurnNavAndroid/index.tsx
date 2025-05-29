@@ -7,7 +7,7 @@ import ViewCustomizedSaveRoutes from '../ViewCustomizedSaveRoutes';
 import TrailRouteView from '../TrailRouteView';
 import {setSelectedTrail} from '../../../../redux/endUser/endUserSlice';
 
-const MapBoxView = requireNativeComponent('MapBoxView');
+const MapBoxView = requireNativeComponent('MapBoxViewAndroid');
 
 const TurnByTurnNavAndroid = ({navigation, route}: any) => {
   const routeParams = route?.params;
@@ -61,28 +61,6 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
     }
   };
 
-  const _handleUserArrival = (event: any) => {
-    const {hasTrail, hasDashedLine} = event.nativeEvent;
-    console.log('Has Trail => ', hasTrail);
-    console.log('Has Dashed Line => ', hasDashedLine);
-
-    Alert.alert(
-      'Arrived',
-      hasTrail || hasDashedLine
-        ? 'Off-road navigation begins here. Follow the dashed line to your destination.'
-        : 'You have reached your destination.',
-      [
-        {
-          text: 'OK',
-          onPress: () =>
-            hasTrail || hasDashedLine
-              ? setisTurnByTurnNavigation(false)
-              : navigation.goBack(),
-        },
-      ],
-    );
-  };
-
   const handleUserArrival = (event: any) => {
     const {hasTrail, hasDashedLine} = event.nativeEvent;
     const isOffRoad = hasTrail || hasDashedLine;
@@ -114,6 +92,7 @@ const TurnByTurnNavAndroid = ({navigation, route}: any) => {
       ) : isTurnByTurnNavigation ? (
         <MapBoxView
           style={{flex: 1}}
+          // shouldSimulateRoute={true}
           showsEndOfRouteFeedback={true}
           mapStyle={selectedMapStyle} // or 'terrain', 'default'
           origin={[

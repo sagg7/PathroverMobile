@@ -59,7 +59,7 @@ import PrivacyPolicy from '../screens/App/PrivacyPolicy';
 import TermsAndConditions from '../screens/App/TermsAndConditions';
 import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
 import Splash from '../screens/Splash';
-import {Routes} from '../shared/exporter';
+import {isIOS, Routes} from '../shared/exporter';
 import {AppStack} from './BottomTabs';
 import AuthStack from './stacks/authStack';
 import DownloadOfflineMap from '../screens/App/EndUser/DownloadOflineMap';
@@ -242,15 +242,19 @@ const AppNavigation = () => {
           name={Routes.TurnByTurnCustomRoute}
           component={TurnByTurnCustomRoute}
         /> */}
-        {/* <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} /> */}
+
         <Stack.Screen
           name={Routes.ViewCustomizedSaveRoutes}
           component={ViewCustomizedSaveRoutes}
         />
-        <Stack.Screen
-          name={Routes.TurnByTurnNavAndroid}
-          component={TurnByTurnNavAndroid}
-        />
+        {isIOS() ? (
+          <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
+        ) : (
+          <Stack.Screen
+            name={Routes.TurnByTurnNavAndroid}
+            component={TurnByTurnNavAndroid}
+          />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

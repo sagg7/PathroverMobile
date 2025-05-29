@@ -105,9 +105,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MapBoxView(private val context: ThemedReactContext, private val accessToken: String?) :
+class MapBoxViewAndroid(private val context: ThemedReactContext, private val accessToken: String?) :
     FrameLayout(context.baseContext) {
 
     private companion object {
@@ -144,6 +145,8 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
     /**
      * Bindings to the example layout.
      */
+    private var currentRoute: DirectionsRoute? = null
+
     private var binding: NavigationViewBinding =
         NavigationViewBinding.inflate(LayoutInflater.from(context), this, true)
 
@@ -328,26 +331,23 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             val enhancedLocation = locationMatcherResult.enhancedLocation
 
-            val route = mapboxNavigation.getRoutes().firstOrNull()
-            if (route != null) {
-                val routeLinePoints = PolylineUtils.decode(route.geometry() ?: "", PRECISION_6)
+            /* if (currentRoute != null) {
+                 val routeLinePoints = PolylineUtils.decode(currentRoute?.geometry() ?: "", PRECISION_6)
 
-                val nearest = nearestPointOnLine(Point.fromLngLat(enhancedLocation.longitude,enhancedLocation.latitude), routeLinePoints)
+                 val nearest = nearestPointOnLine(Point.fromLngLat(enhancedLocation.longitude,enhancedLocation.latitude), routeLinePoints)
 
-                val distance = TurfMeasurement.distance(
-                    nearest,
-                    Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),
-                    TurfConstants.UNIT_METERS
-                )
+                 val distance = TurfMeasurement.distance(
+                     nearest,
+                     Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),
+                     TurfConstants.UNIT_METERS
+                 )
 
-                if (distance > 20) { // You can tweak this threshold
-                    // User is off route
-                    findRoute(
-                        Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),
-                        destination!!
-                    )
-                }
-            }
+                 if (distance > 20) { // You can tweak this threshold
+                     // User is off route
+                     Toast.makeText(context,"off route ", Toast.LENGTH_SHORT).show()
+                     findRoute(Point.fromLngLat(enhancedLocation.longitude, enhancedLocation.latitude),destination!!)
+                 }
+             }*/
             // update location puck's position on the map
             navigationLocationProvider.changePosition(
                 location = enhancedLocation,
@@ -476,7 +476,7 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                     Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
                 if (originPoint.longitude() != 0.0) {
                     originPoint?.let {
-                        this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }
+                        this.destination?.let { it1 -> this@MapBoxViewAndroid.findRoute(it, it1) }
                     }
                 } else {
                     Toast.makeText(
@@ -495,8 +495,9 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
                 routeLineApi.getRouteDrawData { expectedResult ->
                     if (expectedResult.isValue) {
                         routeLineView.renderRouteDrawData(style, expectedResult)
+                        // currentRoute = routeUpdateResult.navigationRoutes.firstOrNull()?.directionsRoute
 
-                        // drawDashedLine(binding.mapView, routes.first())
+                        // drawDashedLine(binding.mapView, latestRoute)
                     } else {
                         Log.e("MapboxRouteDraw", "Error drawing route: ${expectedResult.error}")
                     }
@@ -767,12 +768,12 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
             else -> "mapbox://styles/mapbox/streets-v12"
         }
 
-        Log.d("MapBoxView", "Loading map style: $styleUrl")
+        Log.d("MapBoxViewAndroid", "Loading map style: $styleUrl")
 
         if (::mapboxMap.isInitialized) {
             mapboxMap.loadStyleUri(styleUrl)
         } else {
-            Log.e("MapBoxView", "MapboxMap is not initialized yet.")
+            Log.e("MapBoxViewAndroid", "MapboxMap is not initialized yet.")
         }
     }
 
@@ -843,14 +844,14 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         // register event listeners
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
-        // mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
         // mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
 
         this.origin?.let {
-            this.destination?.let { it1 -> this@MapBoxView.findRoute(it, it1) }
+            this.destination?.let { it1 -> this@MapBoxViewAndroid.findRoute(it, it1) }
         }
     }
 
@@ -858,7 +859,7 @@ class MapBoxView(private val context: ThemedReactContext, private val accessToke
         super.onDetachedFromWindow()
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        // mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver)
