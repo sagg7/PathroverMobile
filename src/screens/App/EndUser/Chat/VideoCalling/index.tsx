@@ -11,8 +11,12 @@ import {
   View,
 } from 'react-native';
 import {
+  AudioAinsMode,
+  ChannelProfileType,
   ClientRoleType,
   createAgoraRtcEngine,
+  EarMonitoringFilterType,
+  IRtcEngine,
   IRtcEngineEventHandler,
   RtcSurfaceView,
   RtcTextureView,
@@ -47,9 +51,112 @@ const VideoCalling = () => {
   const startTimeRef = useRef(null); // Ref to store the start time
   const timerIntervalRef = useRef(null); // Ref to store the interval IDstatus
   const sensorSubscriptionRef = useRef<SubscriptionRef | null>(null);
+  const agoraEngineRef = useRef<IRtcEngine>(); // IRtcEngine instance
+  const eventHandler = useRef<IRtcEngineEventHandler>();
+
+  const { loginUser, accessToken } = useSelector(state => state.auth);
+  const token = accessToken?.replace('Bearer ', '');
+  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
+  const { subscribe, unsubscribe } = useChannel(actionCable);
+
+  const setupSDKEngine = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+      }
+
+      agoraEngineRef.current = createAgoraRtcEngine();
+      const agoraEngine = agoraEngineRef.current;
+
+      agoraEngine.initialize({ appId: APP_ID });
+
+      agoraEngine.enableAudio()
+      agoraEngine.enableAudioVolumeIndication(200, 3, true);
+      agoraEngine.setAINSMode(true, AudioAinsMode.AinsModeBalanced);
+
+      agoraEngine.enableVideo();
+    } catch (error) {
+      //
+    }
+  }
+
+  const setupEventHandler = () => {
+    eventHandler.current = {
+      onJoinChannelSuccess: () => {
+        setControls(prev => ({ ...prev, joinChannelSuccess: true, isJoined: true }));
+      },
+      onUserJoined: (_connection: RtcConnection, remoteUid: number) => {
+        setControls(prev => ({
+          ...prev,
+          remoteUsers: [...prev.remoteUsers, remoteUid],
+        }));
+        startTimer();
+      },
+      onUserOffline: (_connection: RtcConnection, remoteUid: number) => {
+        stopTimer();
+        setControls(prev => ({
+          ...prev,
+          remoteUsers: prev.remoteUsers.filter(uid => uid !== remoteUid),
+        }));
+
+        if (controls.remoteUsers.length === 0) {
+          setTimeout(() => {
+            onPressLeave();
+          }, 1500)
+        }
+      },
+      onConnectionStateChanged: (
+        _connection: RtcConnection,
+        state,
+        _reason,
+      ) => {
+        if (state === 1 || state === 5) {
+          stopTimer();
+        }
+      },
+      onUserMuteVideo: (connection, remoteUser, muted) => {
+        setControls(prev => ({ ...prev, remoteUserCamera: muted }));
+      },
+      onAudioRoutingChanged: (routing) => {
+        //
+      },
+      onLocalAudioStats: (connection, stats) => {
+        // 
+      },
+      onRemoteAudioStats: (connection, stats) => {
+        // 
+      },
+      onLocalAudioStateChanged: (connection, state, reason) => {
+        //
+      },
+      onRemoteAudioStateChanged: (connection, remoteUid, state, reason) => {
+        // 
+      },
+      onError: (err, msg) => {
+        // ;
+        console.log('Agora Error:', err, msg);
+
+      },
+    };
+    agoraEngineRef.current?.registerEventHandler(eventHandler.current);
+  };
+
+  const cleanupAgoraEngine = () => {
+    return () => {
+      agoraEngineRef?.current?.unregisterEventHandler(eventHandler.current!);
+      agoraEngineRef?.current?.release();
+      if(agoraEngineRef) {
+        agoraEngineRef.current = null;
+      }
+    };
+  };
+
 
   const [controls, setControls] = useState({
-    engine: null,
+    // engine: null,
     call_data: {},
     isMute: false,
     isNear: false,
@@ -57,6 +164,7 @@ const VideoCalling = () => {
     elapsedTime: 0,
     remoteUsers: [],
     isSpeakerOn: false,
+    isJoined: false,
     remoteUserCamera: false,
     renderByTextureView: true,
     joinChannelSuccess: false,
@@ -67,55 +175,26 @@ const VideoCalling = () => {
   const [createCall, { data, isLoading }] = useCreateCallMutation();
   const [updateCall] = useUpdateCallMutation();
 
-  const { loginUser, accessToken } = useSelector(state => state.auth);
-  const token = accessToken?.replace('Bearer ', '');
-  const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
-  const { subscribe, unsubscribe } = useChannel(actionCable);
 
   useEffect(() => {
     const initRtcEngine = async () => {
-      const agoraEngine = createAgoraRtcEngine();
-      agoraEngine.initialize({ appId: APP_ID });
-      agoraEngine.registerEventHandler(eventHandler);
-      agoraEngine.enableVideo();
-
-      setControls(prev => ({ ...prev, renderByTextureView: true }));
-      agoraEngine.enableLocalVideo(true);
-      agoraEngine.muteLocalVideoStream(false);
-
-      if (Platform.OS === 'android') {
-        await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        ]);
-      }
-
-      agoraEngine.startPreview();
-      setControls(prev => ({ ...prev, engine: agoraEngine }));
-      // joinChannel();
+      await setupSDKEngine();
+      setupEventHandler();
+      await joinChannel();
     };
 
-    initRtcEngine();
+    if (isFocused) {
+      setControls(prev => ({ ...prev, renderByTextureView: true, elapsedTime: 0 }));
+      cleanupAgoraEngine()
+      initRtcEngine();
+    }
 
     return () => {
-      if (controls.engine) {
-        cleanupAgoraEngine();
-      }
+      cleanupAgoraEngine();
+      clearInterval(timerIntervalRef.current);
     };
   }, []);
 
-  useEffect(() => {
-    if (isFocused) {
-      // setElapsedTime(0);
-      setControls(prev => ({ ...prev, elapsedTime: 0 }));
-    }
-    if (isFocused && controls.engine) {
-      joinChannel();
-    } else {
-      // onPressLeave();
-      cleanupAgoraEngine();
-    }
-  }, [isFocused, controls.engine]);
 
   useEffect(() => {
     const backAction = () => {
@@ -188,45 +267,24 @@ const VideoCalling = () => {
     };
   }, [controls.call_data]); // Added checkCallStatus to dependencies
 
+  useEffect(() => {
+    // console.log('onJoinChannel---setTimeout-------->>>>>>>>>>>>>>', 'controls.joinChannelSuccess', controls.joinChannelSuccess);
+    if (controls.status === 'ringing' && isFocused) {
 
-  const eventHandler: IRtcEngineEventHandler = {
-    onJoinChannelSuccess: () => {
-      setControls(prev => ({ ...prev, joinChannelSuccess: true }));
-    },
-    onUserJoined: (connection, remoteUid) => {
-      setControls(prev => ({
-        ...prev,
-        remoteUsers: [...prev.remoteUsers, remoteUid],
-      }));
-      startTimer();
-    },
-    onUserOffline: (connection, remoteUid) => {
-      stopTimer();
-      setControls(prev => ({
-        ...prev,
-        remoteUsers: prev.remoteUsers.filter(uid => uid !== remoteUid),
-      }));
+      const timeoutId = setTimeout(() => {
+        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
+        if (controls.remoteUsers?.length === 0 && controls.call_data) {
+          console.error("No one joined in 3 mins, ending call...");
+          updateCallStatus('not_attended');
+        }
+        // }, 85000);
+      }, 60000);
+      // }, 60000);
 
-      if (controls.remoteUsers.length === 0) {
-        onPressLeave();
-      }
-    },
-    onUserMuteVideo: (connection, remoteUser, muted) => {
-      setControls(prev => ({ ...prev, remoteUserCamera: muted }));
-    },
-    onConnectionStateChanged: (connection, state) => {
-      if (state === 1 || state === 5) {
-        stopTimer();
-      }
-    },
-  };
+      return () => clearTimeout(timeoutId);
+    }
 
-  const cleanupAgoraEngine = () => {
-    return () => {
-      controls.engine.unregisterEventHandler(eventHandler);
-      controls.engine.release();
-    };
-  };
+  }, [controls.status]);
 
   // Function to start the timer
   const startTimer = () => {
@@ -252,31 +310,14 @@ const VideoCalling = () => {
     }
   };
 
-  useEffect(() => {
-    // console.log('onJoinChannel---setTimeout-------->>>>>>>>>>>>>>', 'controls.joinChannelSuccess', controls.joinChannelSuccess);
-    if (controls.status === 'ringing' && isFocused) {
 
-      const timeoutId = setTimeout(() => {
-        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
-        if (controls.remoteUsers?.length === 0 && controls.call_data) {
-          console.error("No one joined in 3 mins, ending call...");
-          updateCallStatus('not_attended');
-        }
-        // }, 85000);
-      }, 60000);
-      // }, 60000);
-
-      return () => clearTimeout(timeoutId);
-    }
-
-  }, [controls.status]);
 
   const joinChannel = async () => {
-    const CHANNEL_NAME = params?.channel ? params?.channel : `video_call_${loginUser?.id}_${uuid.v4()}`;
-
-    if (!controls.engine) {
+    if (controls.isJoined) {
       return;
     }
+
+    const CHANNEL_NAME = params?.channel ? params?.channel : `video_call_${loginUser?.id}_${uuid.v4()}`;
 
     if (!params?.channel) {
       callInitiated(CHANNEL_NAME);
@@ -284,68 +325,64 @@ const VideoCalling = () => {
 
     const token = await fetchToken(CHANNEL_NAME);
 
-    controls.engine.joinChannel(token, CHANNEL_NAME, 0, {
+    // agoraEngineRef?.current?.startPreview();
+
+    agoraEngineRef?.current?.joinChannel(token, CHANNEL_NAME, 0, {
+      // clientRoleType: params?.channel
+      //   ? ClientRoleType.ClientRoleAudience
+      //   : ClientRoleType.ClientRoleBroadcaster,
       clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+      channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
+      // channelProfile: ChannelProfileType.ChannelProfileCommunication,
+      publishCameraTrack: true,
+      publishMicrophoneTrack: true,
+      autoSubscribeAudio: true,
+      autoSubscribeVideo: true,
     });
     // engine.joinChannel(TOKEN, CHANNEL_NAME, 0, {
     //   clientRoleType: ClientRoleType.ClientRoleBroadcaster,
     // });
-    controls.engine.enableInstantMediaRendering();
+    setControls(prev => ({ ...prev, isJoined: true }));
+
+    agoraEngineRef.current?.enableLocalAudio(true);
+    agoraEngineRef.current?.enableLocalVideo(true);
+    agoraEngineRef.current?.muteLocalAudioStream(false);
+    agoraEngineRef.current?.muteLocalVideoStream(false);
+    agoraEngineRef.current?.enableInEarMonitoring(true, EarMonitoringFilterType.EarMonitoringFilterNone);
+    agoraEngineRef?.current?.enableInstantMediaRendering();
+
   };
 
   const onPressFlip = () => {
-    if (!controls.engine) {
-      return;
-    }
-    controls.engine.switchCamera();
+    // if (!agoraEngineRef?.current) {
+    //   return;
+    // }
+    agoraEngineRef?.current?.switchCamera();
   };
 
   const onPressCamera = () => {
-    if (!controls.engine) {
-      return;
-    }
+    // if (!agoraEngineRef?.current) {
+    //   return;
+    // }
     const hasPreview = !controls.renderByTextureView;
     setControls(prev => ({ ...prev, renderByTextureView: hasPreview }));
-    controls.engine.enableLocalVideo(hasPreview);
-    controls.engine.muteLocalVideoStream(!hasPreview);
+    agoraEngineRef?.current?.enableLocalVideo(hasPreview);
+    agoraEngineRef?.current?.muteLocalVideoStream(!hasPreview);
   };
 
   const onPressMute = () => {
-    if (!controls.engine) {
-      return;
-    }
+    // if (!agoraEngineRef?.current) {
+    //   return;
+    // }
     const hasMuted = !controls.isMute;
     setControls(prev => ({ ...prev, isMute: hasMuted }));
-    controls.engine?.muteLocalAudioStream(hasMuted);
+    agoraEngineRef?.current?.muteLocalAudioStream(hasMuted);
   };
 
   const onPressSpeaker = () => {
     const newSpeakerState = !controls.isSpeakerOn;
     setControls(prev => ({ ...prev, isSpeakerOn: newSpeakerState }));
-    controls.engine?.setEnableSpeakerphone(newSpeakerState);
-  };
-
-  const onPressLeave = () => {
-    try {
-      setControls(prev => ({
-        ...prev,
-        joinChannelSuccess: false,
-        remoteUsers: [],
-      }));
-
-      if (controls.engine) {
-        controls.engine.leaveChannel();
-      }
-      setControls(prev => ({ ...prev, engine: null }));
-      updateCallStatus();
-
-      setTimeout(() => {
-        navigation.pop();
-        // navigation.goBack();
-      }, 500);
-    } catch (error) {
-      //
-    }
+    agoraEngineRef?.current?.setEnableSpeakerphone(newSpeakerState);
   };
 
   const callInitiated = async (channelName: string) => {
@@ -392,10 +429,11 @@ const VideoCalling = () => {
   const checkCallStatus = async (item) => {
     try {
       if (item?.status === 'declined' || item?.status === 'ended' || item?.status === 'not_attended' || item?.status === 'missed_call') {
-        controls.engine.leaveChannel();
+        cleanupAgoraEngine();
+        agoraEngineRef?.current?.leaveChannel();
 
         setControls(prev => ({
-          ...prev, engine: null, joinChannelSuccess: false,
+          ...prev, joinChannelSuccess: false,
           remoteUsers: [],
         }));
         navigation.pop();
@@ -406,6 +444,23 @@ const VideoCalling = () => {
       // console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);
     }
   }
+
+  const onPressLeave = () => {
+    try {
+      updateCallStatus('ended');
+      // if (agoraEngineRef?.current) {
+      cleanupAgoraEngine()
+      agoraEngineRef?.current?.leaveChannel();
+      // }
+      setControls(prev => ({
+        ...prev, isJoined: false, joinChannelSuccess: false,
+        remoteUsers: []
+      }));
+      navigation.pop();
+    } catch (error) {
+      //
+    }
+  };
 
   const iconsView = () => {
     return (
