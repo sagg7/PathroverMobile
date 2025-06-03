@@ -59,6 +59,26 @@ const VideoCalling = () => {
   const { actionCable } = useActionCable(REQ_LIST_SOCKET_URL, token);
   const { subscribe, unsubscribe } = useChannel(actionCable);
 
+  const [controls, setControls] = useState({
+    // engine: null,
+    call_data: {},
+    isMute: false,
+    isNear: false,
+    status: null,
+    elapsedTime: 0,
+    remoteUsers: [],
+    isSpeakerOn: false,
+    isJoined: false,
+    remoteUserCamera: false,
+    renderByTextureView: true,
+    joinChannelSuccess: false,
+    setupMode: VideoViewSetupMode.VideoViewSetupReplace,
+  });
+
+  const [fetchAgoraToken] = useLazyGetAgoraTokenQuery(undefined);
+  const [createCall, { data, isLoading }] = useCreateCallMutation();
+  const [updateCall] = useUpdateCallMutation();
+
   const setupSDKEngine = async () => {
     try {
       if (Platform.OS === 'android') {
@@ -67,17 +87,16 @@ const VideoCalling = () => {
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
         ]);
       }
-
       agoraEngineRef.current = createAgoraRtcEngine();
       const agoraEngine = agoraEngineRef.current;
 
       agoraEngine.initialize({ appId: APP_ID });
 
-      agoraEngine.enableAudio()
+      agoraEngine.enableAudio();
+      agoraEngine.enableVideo();
+      // agoraEngine.muteLocalVideoStream(false);
       agoraEngine.enableAudioVolumeIndication(200, 3, true);
       agoraEngine.setAINSMode(true, AudioAinsMode.AinsModeBalanced);
-
-      agoraEngine.enableVideo();
     } catch (error) {
       //
     }
@@ -121,23 +140,24 @@ const VideoCalling = () => {
         setControls(prev => ({ ...prev, remoteUserCamera: muted }));
       },
       onAudioRoutingChanged: (routing) => {
-        //
       },
       onLocalAudioStats: (connection, stats) => {
-        // 
       },
       onRemoteAudioStats: (connection, stats) => {
-        // 
       },
       onLocalAudioStateChanged: (connection, state, reason) => {
-        //
+        if (state === 3) {
+          agoraEngineRef.current?.enableLocalAudio(true);
+          agoraEngineRef.current?.muteLocalAudioStream(false);
+        }
       },
       onRemoteAudioStateChanged: (connection, remoteUid, state, reason) => {
-        // 
+        if (state === 4) {
+          agoraEngineRef.current?.enableAudio();
+        }
       },
       onError: (err, msg) => {
         // ;
-        console.log('Agora Error:', err, msg);
 
       },
     };
@@ -148,39 +168,17 @@ const VideoCalling = () => {
     return () => {
       agoraEngineRef?.current?.unregisterEventHandler(eventHandler.current!);
       agoraEngineRef?.current?.release();
-      if(agoraEngineRef) {
-        agoraEngineRef.current = null;
-      }
     };
   };
-
-
-  const [controls, setControls] = useState({
-    // engine: null,
-    call_data: {},
-    isMute: false,
-    isNear: false,
-    status: null,
-    elapsedTime: 0,
-    remoteUsers: [],
-    isSpeakerOn: false,
-    isJoined: false,
-    remoteUserCamera: false,
-    renderByTextureView: true,
-    joinChannelSuccess: false,
-    setupMode: VideoViewSetupMode.VideoViewSetupReplace,
-  });
-
-  const [fetchAgoraToken] = useLazyGetAgoraTokenQuery(undefined);
-  const [createCall, { data, isLoading }] = useCreateCallMutation();
-  const [updateCall] = useUpdateCallMutation();
-
 
   useEffect(() => {
     const initRtcEngine = async () => {
       await setupSDKEngine();
       setupEventHandler();
-      await joinChannel();
+      setTimeout(() => {
+        joinChannel();
+      }
+        , 1000);
     };
 
     if (isFocused) {
@@ -194,7 +192,6 @@ const VideoCalling = () => {
       clearInterval(timerIntervalRef.current);
     };
   }, []);
-
 
   useEffect(() => {
     const backAction = () => {
@@ -226,64 +223,48 @@ const VideoCalling = () => {
     const handleSubscribe = async () => {
       try {
         if (controls.call_data?.call_log?.id) {
-          // console.log('data----------->>>>>>>>>>>>>>', controls.call_data);
-          // console.log('params----------->>>>>>>>>>>>>>',params);
           subscribe(
             {
               channel: 'CallChannel',
               user_call_id: params?.channel ? params?.id : controls.call_data?.call_log?.id,
-              // channel_key: controls.call_data?.call_log?.id,
               channel_key: `call_channel_${params?.channel ? params?.id : controls.call_data?.call_log?.id}`,
             },
             {
               received: res => {
-                // console.log('res--------subscribe--->>>>>>>>>>>>>>', res);
                 setControls(prev => ({ ...prev, status: res?.status }));
                 checkCallStatus(res);
               },
               connected: () => {
-                // console.log('connected-------call---->>>>>>>>>>>>>>', controls.call_data?.call_log?.id);
                 // setIsConnected(true);
               },
             },
           );
         }
       } catch (err) {
-        // console.log('err--------subscribe--->>>>>>>>>>>>>>', err);
+        //
       }
     };
 
     handleSubscribe();
 
     return () => {
-      // try {
-      //   if (subscription) {
-      unsubscribe(); // Make sure unsubscribe is available in scope
-      // unsubscribe(subscription); // Make sure unsubscribe is available in scope
-      // }
-      // } catch (err) {
-      //   console.log('err--------unsubscribe--->>>>>>>>>>>>>>', err);
-      // }
+      unsubscribe();
     };
   }, [controls.call_data]); // Added checkCallStatus to dependencies
 
   useEffect(() => {
-    // console.log('onJoinChannel---setTimeout-------->>>>>>>>>>>>>>', 'controls.joinChannelSuccess', controls.joinChannelSuccess);
     if (controls.status === 'ringing' && isFocused) {
 
       const timeoutId = setTimeout(() => {
-        // console.log('onJoinChannelSuccess---setTimeout-------->>>>>>>>>>>>>>');
         if (controls.remoteUsers?.length === 0 && controls.call_data) {
           console.error("No one joined in 3 mins, ending call...");
           updateCallStatus('not_attended');
         }
         // }, 85000);
       }, 60000);
-      // }, 60000);
 
       return () => clearTimeout(timeoutId);
     }
-
   }, [controls.status]);
 
   // Function to start the timer
@@ -310,8 +291,6 @@ const VideoCalling = () => {
     }
   };
 
-
-
   const joinChannel = async () => {
     if (controls.isJoined) {
       return;
@@ -325,7 +304,7 @@ const VideoCalling = () => {
 
     const token = await fetchToken(CHANNEL_NAME);
 
-    // agoraEngineRef?.current?.startPreview();
+    agoraEngineRef?.current?.startPreview();
 
     agoraEngineRef?.current?.joinChannel(token, CHANNEL_NAME, 0, {
       // clientRoleType: params?.channel
@@ -344,11 +323,12 @@ const VideoCalling = () => {
     // });
     setControls(prev => ({ ...prev, isJoined: true }));
 
+    agoraEngineRef.current?.enableAudio();
     agoraEngineRef.current?.enableLocalAudio(true);
     agoraEngineRef.current?.enableLocalVideo(true);
     agoraEngineRef.current?.muteLocalAudioStream(false);
     agoraEngineRef.current?.muteLocalVideoStream(false);
-    agoraEngineRef.current?.enableInEarMonitoring(true, EarMonitoringFilterType.EarMonitoringFilterNone);
+    // agoraEngineRef.current?.enableInEarMonitoring(true, EarMonitoringFilterType.EarMonitoringFilterNone);
     agoraEngineRef?.current?.enableInstantMediaRendering();
 
   };
@@ -416,9 +396,6 @@ const VideoCalling = () => {
           receiver_id: params?.user?.id,
         };
 
-        // console.log('updateCallStatus--video calling------->>>>>>>>>>>>>>', obj);
-
-
         await updateCall(obj);
       }
     } catch (error) {
@@ -441,17 +418,19 @@ const VideoCalling = () => {
         clearAllCallNotifications()
       }
     } catch (error) {
-      // console.log('checkCallStatus error--------->>>>>>>>>>>>>>', error);
+      //
     }
   }
 
   const onPressLeave = () => {
     try {
       updateCallStatus('ended');
-      // if (agoraEngineRef?.current) {
+
+      agoraEngineRef.current?.stopPreview();
       cleanupAgoraEngine()
       agoraEngineRef?.current?.leaveChannel();
-      // }
+      agoraEngineRef.current = null;
+
       setControls(prev => ({
         ...prev, isJoined: false, joinChannelSuccess: false,
         remoteUsers: []
@@ -505,12 +484,12 @@ const VideoCalling = () => {
           <Text style={styles.iconTextStyle}>Camera</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconDetails} disabled={params?.channel ? false : isLoading} onPress={() => {
-          if (!params?.channel) {
-            !isLoading && onPressLeave()
-          } else {
-            onPressLeave()
-          }
-
+          onPressLeave()
+          // if (!params?.channel) {
+          //   !isLoading && onPressLeave()
+          // } else {
+          //   onPressLeave()
+          // }
         }
         }>
           <View style={styles.iconBackGroundRed}>

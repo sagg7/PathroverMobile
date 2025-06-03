@@ -116,9 +116,6 @@ const VoiceCalling = () => {
     return () => {
       agoraEngineRef.current?.unregisterEventHandler(eventHandler.current!);
       agoraEngineRef.current?.release();
-      if(agoraEngineRef){
-        agoraEngineRef.current = null;
-      }
     };
   };
 
@@ -362,7 +359,6 @@ const VoiceCalling = () => {
     }
   };
 
-
   // const increaseVolume = () => {
   //   if (volume !== 100) {
   //     setVolume(volume + 5);
@@ -394,11 +390,12 @@ const VoiceCalling = () => {
   return (
     <CallScreen
       onPressLeave={() => {
-        if (!params?.channel) {
-          !isLoading && leave();
-        } else {
-          leave();
-        }
+        leave();
+        // if (!params?.channel) {
+        //   !isLoading && leave();
+        // } else {
+        //   leave();
+        // }
       }}
       isMute={controls.isMuted}
       isSpeakerOn={controls.isSpeakerOn}
