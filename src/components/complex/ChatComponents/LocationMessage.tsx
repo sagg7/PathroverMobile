@@ -30,6 +30,7 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
+    const formatedData = JSON.parse(content)?.messageContainsLocation;
     if (type === 'Chosen Trail') {
       dispatch(setSelectedTrail(data));
       if (isIOS()) {
@@ -73,7 +74,6 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
       if (data) {
         dispatch(setRouteData(data));
       }
-      const formatedData = JSON.parse(content)?.messageContainsLocation;
 
       if (
         formatedData?.route_type === 'waypoint_route' ||
@@ -134,11 +134,10 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             ];
             navigation.navigate(Routes.TurnByTurnNav, {
               originCoords: [location?.longitude, location?.latitude],
-              entranceCoords: lngLat,
+              entranceCoords: formatedData?.startingPoint,
               entranceName: formatedData?.name,
-              isTrail: false,
+              isTrail: true,
               routeInfo: formatedData,
-              isLibrary: true,
             });
           }, 300);
         } else {
@@ -151,11 +150,10 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             ];
             navigation.navigate(Routes.TurnByTurnNavAndroid, {
               originCoords: [location?.longitude, location?.latitude],
-              entranceCoords: lngLat,
+              entranceCoords: formatedData?.startingPoint,
               entranceName: formatedData?.name,
-              isTrail: false,
+              isTrail: true,
               routeInfo: formatedData,
-              isLibrary: true,
             });
           }, 300);
         }

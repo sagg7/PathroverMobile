@@ -95,6 +95,9 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -678,15 +681,18 @@ class MapBoxViewAndroid(private val context: ThemedReactContext, private val acc
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
 
         // initialize maneuver api that feeds the data to the top banner maneuver view
+        val distanceFormatterOption = DistanceFormatterOptions.Builder(context)
+            .unitType(UnitType.IMPERIAL) // 👈 Important
+            .build()
         maneuverApi = MapboxManeuverApi(
-            MapboxDistanceFormatter(distanceFormatterOptions)
+            MapboxDistanceFormatter(distanceFormatterOption)
         )
 
         // initialize bottom progress view
         tripProgressApi = MapboxTripProgressApi(
             TripProgressUpdateFormatter.Builder(context)
                 .distanceRemainingFormatter(
-                    DistanceRemainingFormatter(distanceFormatterOptions)
+                    DistanceRemainingFormatter(distanceFormatterOption)
                 )
                 .timeRemainingFormatter(
                     TimeRemainingFormatter(context)
