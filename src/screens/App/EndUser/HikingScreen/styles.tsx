@@ -136,5 +136,12 @@ const styles = StyleSheet.create({
   filterContainer: {
     // padding:20
   },
+  bottomSheet: {
+    margin: 0,
+    justifyContent: 'flex-end',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+  },
 });
 export default styles;

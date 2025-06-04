@@ -1,4 +1,4 @@
-import { apiSlice } from '../api/apiSlice';
+import {apiSlice} from '../api/apiSlice';
 
 export const enduserApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
@@ -40,17 +40,17 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
           allWells = [...allWells, ...data.wells];
           totalPages = data.total_pages;
           // }
-          return { data: allWells }; // Return combined data
+          return {data: allWells}; // Return combined data
         } catch (error) {
           console.error('Error fetching wells:', error.message);
-          return { error: error.message || 'Unknown error' };
+          return {error: error.message || 'Unknown error'};
         }
       },
     }),
 
     getAllSaveRoutes: builder.query({
-      query: ({ type, ...params }) => {
-        const queryParams = new URLSearchParams({ ...params }).toString();
+      query: ({type, ...params}) => {
+        const queryParams = new URLSearchParams({...params}).toString();
         return {
           url: `user_routes?${queryParams}`,
           method: 'GET',
@@ -94,11 +94,11 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
     }),
     editRoute: builder.mutation({
       query: data => {
-        const { id, ...user_route } = data;
+        const {id, ...user_route} = data;
         return {
           url: `user_routes/${id}`,
           method: 'put',
-          body: { user_route },
+          body: {user_route},
         };
       },
     }),
@@ -173,6 +173,31 @@ export const enduserApiSlice = apiSlice.injectEndpoints({
       },
       transformResponse: (res: any) => res?.user,
     }),
+    getAllCustomTrails: builder.query({
+      query: () => {
+        return {
+          url: `custom_trails`,
+          method: 'GET',
+        };
+      },
+    }),
+    getIdBasedCustomTrail: builder.mutation({
+      query: id => {
+        return {
+          url: `custom_trails/${id}`,
+          method: 'GET',
+        };
+      },
+    }),
+    createTrailComment: builder.mutation({
+      query: data => {
+        return {
+          url: `trails_comments`,
+          method: 'post',
+          body: data,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -192,4 +217,7 @@ export const {
   useGetSubscriptionQuery,
   useUpdateSubscriptionMutation,
   useGetCurrentUserProfileQuery,
+  useGetAllCustomTrailsQuery,
+  useGetIdBasedCustomTrailMutation,
+  useCreateTrailCommentMutation,
 } = enduserApiSlice;

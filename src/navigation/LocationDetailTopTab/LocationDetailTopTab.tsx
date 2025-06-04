@@ -1,9 +1,10 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import React from 'react';
 import LocationDetailTabBar from '../../components/complex/LocationDetailTabBar';
 import Overview from '../../screens/App/EndUser/LocationDetail/Overview';
 import Photos from '../../screens/App/EndUser/LocationDetail/Photos';
 import Reviews from '../../screens/App/EndUser/LocationDetail/Reviews';
+import Video from '../../screens/App/EndUser/LocationDetail/Video';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -23,7 +24,12 @@ const LocationDetailTab = () => {
         component={Photos}
       />
       <Tab.Screen
-        options={{tabBarLabel: 'Reviews'}}
+        options={{tabBarLabel: 'Videos'}}
+        name="Videos"
+        component={Video}
+      />
+      <Tab.Screen
+        options={{tabBarLabel: 'Comments'}}
         name="Reviews"
         component={Reviews}
       />

@@ -10,6 +10,8 @@ import {LogBox, PermissionsAndroid, Platform, Linking} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import {createNavigationContainerRef} from '@react-navigation/native';
 import {AudioPlayerProvider} from './src/shared/utils/AudioPlayerContext';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+
 const navigationRef = createNavigationContainerRef();
 
 const navigate = (name: string, params?: object) => {
@@ -128,12 +130,14 @@ const App = () => {
   }, []);
 
   return (
-    <Provider store={store}>
-      {/* Directly render AppNavigation, since it already contains NavigationContainer */}
-      <AudioPlayerProvider>
-        <AppNavigation />
-      </AudioPlayerProvider>
-    </Provider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <Provider store={store}>
+        {/* Directly render AppNavigation, since it already contains NavigationContainer */}
+        <AudioPlayerProvider>
+          <AppNavigation />
+        </AudioPlayerProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 };
 
