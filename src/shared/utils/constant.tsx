@@ -10,20 +10,23 @@ export function showAlert(type: string, des: string, onPress?: () => void) {
   ]);
 }
 
-export const isProduction = false;
-// export const REQ_LIST_SOCKET_URL = 'ws://bedbug-trusting-starling.ngrok-free.app/cable?';
-export const REQ_LIST_SOCKET_URL = 'wss://staging.path-rover.com/cable?';
-// export const REQ_LIST_SOCKET_URL = 'wss://staging.pathfinder-app.com/cable?';
-// export const REQ_LIST_SOCKET_URL =
-//   'wss://nice-mink-thankfully.ngrok-free.app/cable?';
-export const UNEXPECTED_ERROR = 'something went wrong, Please try later.';
+export const isProduction = true;
+
+export const REQ_LIST_SOCKET_URL = isProduction
+  ? 'wss://path-rover.com/cable?'
+  : 'wss://staging.path-rover.com/cable?';
+export const UNEXPECTED_ERROR = 'Something went wrong, Please try later.';
 export const INVALID_COORDINATE_ERROR =
   'Not valid coordinates, Please try with correct coordinates.';
-export const BASE_URL = 'https://staging.path-rover.com/api/v1/';
-// 'https://bedbug-trusting-starling.ngrok-free.app/api/v1/';
-// export const BASE_URL = 'https://nice-mink-thankfully.ngrok-free.app/api/v1/';
-export const FAQ_LIST_LINK = 'https://staging.path-rover.com/faq_list';
-export const DOMAIN_BASE_URL = 'https://staging.path-rover.com/';
+export const BASE_URL = isProduction
+  ? 'https://path-rover.com/api/v1/'
+  : 'https://staging.path-rover.com/api/v1/';
+export const FAQ_LIST_LINK = isProduction
+  ? 'https://path-rover.com/faq_list'
+  : 'https://staging.path-rover.com/faq_list';
+export const DOMAIN_BASE_URL = isProduction
+  ? 'https://path-rover.com/'
+  : 'https://staging.path-rover.com/';
 export const mapBoxToken =
   'sk.eyJ1IjoibWF0YW9zbWFuIiwiYSI6ImNtMHhsejduczBkOGEycXBnbmh2NG5oaDcifQ.pPM1yQbjLKE-C0Mjg8mi0Q';
 export const WEATHER_API_KEY = 'deaad5f174ef065c55f06d98b520e02c';
@@ -654,7 +657,6 @@ export const EndUserProfileMenu = [
     title: 'Delete',
     icon: appIcons.logout,
   },
-  
 ];
 
 export const ManageProfileArr = [

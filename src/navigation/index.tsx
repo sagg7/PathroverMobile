@@ -84,6 +84,7 @@ import {isReadyRef, navigationRef} from './navigationRef';
 import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
 import ViewCustomizedSaveRoutes from '../screens/App/EndUser/ViewCustomizedSaveRoutes';
 import TurnByTurnNavAndroid from '../screens/App/EndUser/TurnByTurnNavAndroid';
+import VideoPlayer from '../screens/App/EndUser/LocationDetail/Video/VideoPlayer';
 const Stack = createNativeStackNavigator();
 
 const AppNavigation = () => {
@@ -247,6 +248,7 @@ const AppNavigation = () => {
           name={Routes.ViewCustomizedSaveRoutes}
           component={ViewCustomizedSaveRoutes}
         />
+        <Stack.Screen name={'VideoPlayer'} component={VideoPlayer} />
         {isIOS() ? (
           <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
         ) : (

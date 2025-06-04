@@ -8,19 +8,18 @@ import {
 } from 'react-native';
 import styles from './styles';
 
-export default function LocationDetailTabBar({ state, descriptors, navigation }) {
-
+export default function LocationDetailTabBar({state, descriptors, navigation}) {
   return (
     <>
       <View style={styles.mainContainer}>
         {state?.routes?.map((route, index) => {
-          const { options } = descriptors[route.key];
+          const {options} = descriptors[route.key];
           const label =
             options?.tabBarLabel !== undefined
               ? options.tabBarLabel
               : options?.title !== undefined
-                ? options.title
-                : route.name;
+              ? options.title
+              : route.name;
 
           const isFocused = state.index === index;
 
@@ -48,7 +47,7 @@ export default function LocationDetailTabBar({ state, descriptors, navigation })
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityState={
-                  isFocused ? ({ selected: true } as AccessibilityState) : {}
+                  isFocused ? ({selected: true} as AccessibilityState) : {}
                 }
                 accessibilityLabel={options.tabBarAccessibilityLabel}
                 testID={options.tabBarTestID}
@@ -61,7 +60,6 @@ export default function LocationDetailTabBar({ state, descriptors, navigation })
             </SafeAreaView>
           );
         })}
-
       </View>
       <View style={styles.bottomLineStyle} />
     </>

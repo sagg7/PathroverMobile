@@ -22,10 +22,12 @@ const styles = StyleSheet.create({
     width: width / 4.5,
     paddingVertical: scale(8),
   },
-  titleStyle:(isFocused: boolean)=> ({
+  titleStyle: (isFocused: boolean) => ({
     color: isFocused ? PFColors.Blue.Dark : PFColors.Standard.Black,
     fontSize: PFFontSize.FONT_SIZE_14,
-    fontFamily: isFocused ? PFFonts.Foundation.SemiBold : PFFonts.Foundation.Medium,
+    fontFamily: isFocused
+      ? PFFonts.Foundation.SemiBold
+      : PFFonts.Foundation.Medium,
   }),
   countViewStyle: {
     backgroundColor: PFColors.Blue.Dark,

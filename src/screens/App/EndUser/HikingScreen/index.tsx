@@ -5,8 +5,8 @@ import {
   Alert,
   Image,
   FlatList,
-  TextInput,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import Geolocation from 'react-native-geolocation-service';
@@ -14,8 +14,6 @@ import {
   PFColors,
   MainWrapper,
   TrailInfoSheet,
-  fetchSuggestions,
-  AppHeader,
   WeatherSheet,
   appIcons,
   MapLayerSheet,
@@ -42,6 +40,7 @@ import GeneralModal from '../../../../components/complex/GeneralModal';
 import {setMapLayerStyle} from '../../../../redux/manager/managerSlice';
 import {
   resetTrailRoute,
+  setCustomTrail,
   setSelectedTrail,
 } from '../../../../redux/endUser/endUserSlice';
 import useLocation from '../../../../hooks/getLocation';
@@ -50,10 +49,15 @@ import {RouteToWellSheet} from '../../../../components/complex/RouteToWellSheet'
 import usePlaceName from '../../../../hooks/getPlaceName';
 import {getTimeAndDistance, isIOS} from '../../../../shared/utils/helpers';
 import SharedSheet from '../../../../components/complex/SharedSheet';
-import {useCreateShareLinkRouteMutation} from '../../../../redux/endUser/endUserApiSlice';
+import {
+  useCreateShareLinkRouteMutation,
+  useGetAllCustomTrailsQuery,
+  useGetIdBasedCustomTrailMutation,
+} from '../../../../redux/endUser/endUserApiSlice';
 import Share from 'react-native-share';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import usePremiumAlert from '../../../../hooks/usePremiumAlert';
+import LocationDetail from '../LocationDetail';
 
 const MY_DATA_MODAL_CONTENT = [
   {
@@ -111,7 +115,8 @@ const HikingScreen = ({route, navigation}: any) => {
   const [showShareSheet, setShowShareSheet] = useState<boolean>(false);
   const [showTrailShareSheet, setShowTrailShareSheet] =
     useState<boolean>(false);
-
+  const [showCustomTrailSheet, setShowCustomTrailSheet] =
+    useState<boolean>(false);
   const {loginUser} = useSelector(state => state.auth);
   const [createRoute, {isLoading}] = useCreateRouteMutation();
   const [actionBtn, setActionBtn] = useState<any>({
@@ -119,11 +124,19 @@ const HikingScreen = ({route, navigation}: any) => {
     start: false,
   });
   const [offRoadSegment, setOffRoadSegment] = useState<any>([]);
+  const {data: customTrails} = useGetAllCustomTrailsQuery(null);
+  const [getIdBasedCustomTrail, {isSuccess}] =
+    useGetIdBasedCustomTrailMutation(undefined);
+  const [selectedCustomtrail, setSelectedCustomTrail] = useState<any>(null);
+  const deviceHeight = Dimensions.get('window').height;
 
   const pinLocationSheet = useRef<any>(null);
 
-  const [createShareLinkRoute, {isLoading: linkRouteLoading}] =
-    useCreateShareLinkRouteMutation();
+  const [showCustomTrailShareSheet, setShowCustomTrailShareSheet] =
+    useState<boolean>(false);
+  const sheetRef = useRef<any>();
+
+  const [createShareLinkRoute] = useCreateShareLinkRouteMutation();
   // Get user location
   useEffect(() => {
     const fetchWeatherData = async () => {
@@ -371,8 +384,6 @@ const HikingScreen = ({route, navigation}: any) => {
       const {geometry} = event;
       if (geometry && Array.isArray(geometry.coordinates)) {
         const coords = geometry.coordinates;
-        console.log('COORDS', coords);
-        // return;
         setPinLocationMarker(coords);
         setPinLocationDetails({
           latitude: coords[1],
@@ -639,6 +650,182 @@ const HikingScreen = ({route, navigation}: any) => {
     }, 300);
   };
 
+  const handleTrailPress = async (e: any) => {
+    const feature = e.features[0];
+    const trailId = feature.properties?.id;
+    cameraRef.current?.setCamera({
+      followUserLocation: false,
+      animationDuration: 0,
+    });
+    try {
+      const resp = await getIdBasedCustomTrail(trailId);
+      if (resp?.data?.name) {
+        console.log('resp?.data?.name', resp?.data?.name),
+          setSelectedCustomTrail(resp?.data);
+        dispatch(setCustomTrail(resp?.data));
+        setTimeout(() => {
+          sheetRef.current?.open();
+        }, 300); // add slight delay to avoid animation clash
+      }
+    } catch (e) {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const generateGeoJsonFeature = (routeData: any) => {
+    if (!routeData) return null;
+
+    const coordinates = routeData?.coordinates.map((point: any) => [
+      parseFloat(point.lng),
+      parseFloat(point.lat),
+    ]);
+
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: coordinates,
+      },
+      properties: {
+        tags: {
+          highway: 'path',
+        },
+      },
+    };
+  };
+
+  const onPressTrailExpllore = trailInfo => {
+    const formatData = generateGeoJsonFeature(selectedCustomtrail);
+    dispatch(setSelectedTrail(formatData));
+
+    const routeName = isIOS()
+      ? Routes.TurnByTurnNav
+      : Routes.TurnByTurnNavAndroid;
+    const originCoords = [location?.longitude, location?.latitude];
+    const entranceCoords = [
+      trailInfo?.coordinates[0]?.lng,
+      trailInfo?.coordinates[0]?.lat,
+    ];
+
+    setTimeout(() => {
+      navigation.navigate(routeName, {
+        originCoords,
+        entranceCoords,
+        entranceName: 'Destintion',
+        isTrail: true,
+      });
+    }, 300);
+  };
+
+  const onPressCustomtrailPin = async (routeData: any) => {
+    const trailInfo = selectedCustomtrail;
+    const trailPath = trailInfo?.coordinates;
+
+    const locationsAttributes =
+      trailPath?.length > 0
+        ? [
+            ...trailPath.map((item, index) => ({
+              latitude: item?.lat,
+              longitude: item?.lng,
+              name: `Point ${index + 1}`,
+            })),
+          ]
+        : [];
+
+    const routeObj = {
+      user_route: {
+        name: trailInfo?.name || '',
+        notes: '',
+        route_type: 'hiking_trail_route',
+        is_chosen_trail: false,
+        color: PFColors.Blue.Dark,
+        weight: 4,
+        locations_attributes: locationsAttributes,
+      },
+    };
+
+    const resp = await createRoute(routeObj);
+
+    if (resp?.data) {
+      showAlert('Alert', 'Your trail has been saved.');
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
+  const onPressCutomTrailInAppShare = () => {
+    const formatArr = selectedCustomtrail?.coordinates?.map(item => [
+      item?.lng,
+      item?.lat,
+    ]);
+
+    const geoJson = {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: formatArr,
+      },
+      properties: {
+        color: PFColors.Blue.Dark,
+        name: selectedCustomtrail?.name || 'UNKNOWN TRIAL',
+        id: selectedCustomtrail?.id,
+        tags: {
+          name: selectedCustomtrail?.name,
+        },
+      },
+    };
+
+    setTimeout(() => {
+      navigation.navigate(Routes.ChatUsers, {
+        shareTrail: {
+          startingPoint: formatArr[0],
+          endingPoint: formatArr?.at(-1),
+          type: 'Chosen Trail',
+          data: geoJson,
+        },
+      });
+    }, 300);
+  };
+
+  const saveCutomShareRouteLink = async () => {
+    let routeData = {};
+    const formatArr = selectedCustomtrail?.coordinates?.map(item => [
+      item?.lng,
+      item?.lat,
+    ]);
+    const trailInfoName = selectedCustomtrail?.name || 'UNKNOWN TRAIL';
+
+    const locationsAttributes =
+      formatArr?.length > 0
+        ? [
+            ...formatArr?.map(([longitude, latitude], index) => ({
+              latitude: latitude.toString(),
+              longitude: longitude.toString(),
+              name: `Point ${index + 1}`,
+            })),
+          ]
+        : [];
+
+    routeData = {
+      user_route: {
+        name: trailInfoName || 'UNKNOWN TRAIL/PATH',
+        notes: '',
+        route_type: 'hiking_trail_route',
+        is_chosen_trail: false,
+        color: PFColors.Blue.Dark,
+        weight: '4',
+        locations_attributes: locationsAttributes,
+      },
+    };
+
+    const resp = await createShareLinkRoute(routeData);
+    if (resp?.data) {
+      shareContent(resp?.data?.user_route);
+    } else {
+      showAlert('Error', UNEXPECTED_ERROR);
+    }
+  };
+
   return (
     <MainWrapper style={styles.container}>
       <HeaderView
@@ -684,8 +871,8 @@ const HikingScreen = ({route, navigation}: any) => {
         {trailsData?.length > 0 &&
           trailsData?.map((trail: any, index: any) => (
             <MapboxGL.ShapeSource
-              key={index}
-              id={`trail-${index}`}
+              key={`predefined-trail-source-${index}`}
+              id={`predefined-trail-${index}`}
               shape={trail}
               onPress={e => handleCalloutPress(e, trail)}>
               <MapboxGL.LineLayer
@@ -697,6 +884,47 @@ const HikingScreen = ({route, navigation}: any) => {
               />
             </MapboxGL.ShapeSource>
           ))}
+
+        {subscription &&
+          customTrails?.map(trail => {
+            if (!trail?.coordinates?.length) return null;
+
+            const lineCoordinates = trail.coordinates
+              .filter(coord => coord?.lng != null && coord?.lat != null)
+              .map(coord => [coord.lng, coord.lat]);
+
+            if (lineCoordinates.length < 2) return null;
+
+            const geoJson = {
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: lineCoordinates,
+              },
+              properties: {
+                color: PFColors.Blue.Dark,
+                name: trail.name,
+                id: trail.id,
+              },
+            };
+
+            return (
+              <MapboxGL.ShapeSource
+                key={`custom-trail-source-${trail.id}`}
+                id={`custom-trail-source-${trail.id}`}
+                onPress={i => handleTrailPress(i)}
+                hitbox={{width: 40, height: 40}}
+                shape={geoJson}>
+                <MapboxGL.LineLayer
+                  id={`custom-trail-line-${trail.id}`}
+                  style={{
+                    lineColor: PFColors.Blue.Dark,
+                    lineWidth: 8,
+                  }}
+                />
+              </MapboxGL.ShapeSource>
+            );
+          })}
 
         {routes?.length > 1 && (
           <MapboxGL.ShapeSource shape={routeGeoJSON} id="routeSource-unique">
@@ -747,51 +975,80 @@ const HikingScreen = ({route, navigation}: any) => {
           {svgIcon.MapLayer}
         </TouchableOpacity>
       )}
-      <TouchableOpacity
-        style={styles.hikeIconStyle}
-        onPress={() => {
-          subscription
-            ? navigation.navigate(Routes.CreateHikeRoute)
-            : showPremiumAlert({});
+
+      <RBSheet
+        ref={sheetRef}
+        closeOnDragDown={false}
+        closeOnPressMask={false}
+        height={deviceHeight * 0.95}
+        customStyles={{
+          wrapper: {backgroundColor: 'rgba(0,0,0,0.4)'},
+          container: styles.bottomSheet,
+          draggableIcon: {display: 'none'},
         }}>
-        {svgIcon.HikeRoute}
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.searcRoute}
-        onPress={() => {
-          if (subscription) {
-            dispatch(resetTrailRoute());
-            navigation.navigate(Routes.SearchTrailLatLng);
-          } else {
-            showPremiumAlert({});
-          }
-        }}>
-        {svgIcon.SearchRoute}
-      </TouchableOpacity>
-      <View style={styles.actionBtnView}>
-        <ActionBtn
-          icon={appIcons.recordTrack}
-          onPress={() => {
-            subscription
-              ? navigation.navigate(Routes.RecordHikingRoute)
-              : showPremiumAlert({});
+        <LocationDetail
+          onPressCross={() => {
+            setShowCustomTrailSheet(false), sheetRef.current.close();
           }}
+          trailInfo={selectedCustomtrail}
+          onPressNavigation={onPressTrailExpllore}
+          onPressPin={onPressCustomtrailPin}
+          onPressShare={() => setShowCustomTrailShareSheet(true)}
         />
-        <ActionBtn
-          icon={appIcons.offlineMap}
-          onPress={() => {
-            subscription
-              ? navigation.navigate(Routes.DownloadedMapList)
-              : showPremiumAlert({});
-          }}
-        />
-        <ActionBtn
-          icon={appIcons.myData}
-          onPress={() => {
-            setIsMyDataVisible(true);
-          }}
-        />
-      </View>
+      </RBSheet>
+
+      {!showCustomTrailSheet && (
+        <>
+          <TouchableOpacity
+            style={styles.hikeIconStyle}
+            onPress={() => {
+              subscription
+                ? navigation.navigate(Routes.CreateHikeRoute)
+                : showPremiumAlert({});
+            }}>
+            {svgIcon.HikeRoute}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.searcRoute}
+            onPress={() => {
+              if (subscription) {
+                dispatch(resetTrailRoute());
+                navigation.navigate(Routes.SearchTrailLatLng);
+              } else {
+                showPremiumAlert({});
+              }
+            }}>
+            {svgIcon.SearchRoute}
+          </TouchableOpacity>
+        </>
+      )}
+      {!showCustomTrailSheet && (
+        <View style={styles.actionBtnView}>
+          <ActionBtn
+            icon={appIcons.recordTrack}
+            onPress={() => {
+              subscription
+                ? navigation.navigate(Routes.RecordHikingRoute)
+                : showPremiumAlert({});
+            }}
+          />
+          <ActionBtn
+            icon={appIcons.offlineMap}
+            onPress={() => {
+              subscription
+                ? navigation.navigate(Routes.DownloadedMapList)
+                : showPremiumAlert({});
+            }}
+          />
+          <ActionBtn
+            icon={appIcons.myData}
+            onPress={() => {
+              setIsMyDataVisible(true);
+            }}
+          />
+        </View>
+      )}
+
       {weather?.city && (
         <WeatherSheet
           modalVisible={showWeatherSheet}
@@ -824,7 +1081,7 @@ const HikingScreen = ({route, navigation}: any) => {
           setShowTrailInfoSheet(false);
         }}
       />
-      {/* My Data Modal */}
+
       <GeneralModal
         visible={isMyDataVisible}
         title={'My data'}
@@ -838,7 +1095,9 @@ const HikingScreen = ({route, navigation}: any) => {
                 style={styles.tagView}
                 onPress={() => {
                   setIsMyDataVisible(false),
-                    navigation.navigate(Routes.EndUserSavedLibraryType, {item});
+                    navigation.navigate(Routes.EndUserSavedLibraryType, {
+                      item,
+                    });
                 }}>
                 <View style={styles.tagRow}>
                   {item?.icon}
@@ -953,6 +1212,13 @@ const HikingScreen = ({route, navigation}: any) => {
         onPressOther={() => saveShareRouteLink('trail_route')}
         onPressShare={() => onPressShare()}
         setModalVisible={() => setShowTrailShareSheet(false)}
+      />
+
+      <SharedSheet
+        modalVisible={showCustomTrailShareSheet}
+        onPressOther={() => saveCutomShareRouteLink()}
+        onPressShare={() => onPressCutomTrailInAppShare()}
+        setModalVisible={() => setShowCustomTrailShareSheet(false)}
       />
 
       {isLoading && <AppLoader />}

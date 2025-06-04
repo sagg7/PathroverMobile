@@ -9,6 +9,7 @@ const initialState = {
     routeData: {},
     routeType: null,
     selectedTrail: null,
+    selectedCustomTrail: null,
   },
 };
 
@@ -50,6 +51,9 @@ const endUserSlice = createSlice({
     setSelectedTrail: (state, action) => {
       state.trailRoute.selectedTrail = action.payload;
     },
+    setCustomTrail: (state, action) => {
+      state.trailRoute.selectedCustomTrail = action.payload;
+    },
   },
 });
 
@@ -64,6 +68,7 @@ export const {
   setdownloadMapEmpty,
   setRouteType,
   setSelectedTrail,
+  setCustomTrail,
 } = endUserSlice.actions;
 
 export default endUserSlice.reducer;
