@@ -126,7 +126,7 @@ const Reviews = () => {
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
-        keyboardShouldPersistTaps
+        keyboardShouldPersistTaps="always"
         enableOnAndroid
         showsVerticalScrollIndicator={false}
         scrollToOverflowEnabled={false}>

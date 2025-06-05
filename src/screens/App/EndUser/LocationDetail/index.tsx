@@ -27,7 +27,6 @@ interface LocationDetailModalProps {
   onPressNavigation?: (info: any) => void;
   onPressPin: (trailInfo: any) => void;
   trailInfo: any;
-  sheetRef: any;
 }
 interface BubbleViewProps {
   children: React.ReactNode;
@@ -147,7 +146,11 @@ const LocationDetail = ({
   return (
     <View style={styles.main}>
       <View style={styles.contentView}>
-        <View style={{flexDirection: 'row', paddingVertical: 10}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingTop: 15,
+          }}>
           <Text style={styles.trailNameStyle}>{trailInfo?.name}</Text>
           <TouchableOpacity onPress={onPressCross} style={{right: 0}}>
             {svgIcon.CancelIcon}
@@ -174,7 +177,7 @@ const LocationDetail = ({
           </BubbleView>
         </View>
         <BubbleView elevation={trailInfo?.difficulty_level}>
-          Accessibly by:{trailInfo?.accessible_by}
+          Accessibly by: {trailInfo?.accessible_by}
         </BubbleView>
 
         <View style={styles.barStyle} />

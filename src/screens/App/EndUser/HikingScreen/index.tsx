@@ -706,7 +706,7 @@ const HikingScreen = ({route, navigation}: any) => {
       trailInfo?.coordinates[0]?.lng,
       trailInfo?.coordinates[0]?.lat,
     ];
-
+    sheetRef.current.close();
     setTimeout(() => {
       navigation.navigate(routeName, {
         originCoords,
@@ -754,6 +754,8 @@ const HikingScreen = ({route, navigation}: any) => {
   };
 
   const onPressCutomTrailInAppShare = () => {
+    setShowCustomTrailShareSheet(false);
+
     const formatArr = selectedCustomtrail?.coordinates?.map(item => [
       item?.lng,
       item?.lat,
@@ -774,7 +776,6 @@ const HikingScreen = ({route, navigation}: any) => {
         },
       },
     };
-
     setTimeout(() => {
       navigation.navigate(Routes.ChatUsers, {
         shareTrail: {
@@ -993,7 +994,12 @@ const HikingScreen = ({route, navigation}: any) => {
           trailInfo={selectedCustomtrail}
           onPressNavigation={onPressTrailExpllore}
           onPressPin={onPressCustomtrailPin}
-          onPressShare={() => setShowCustomTrailShareSheet(true)}
+          onPressShare={() => {
+            sheetRef.current.close();
+            setTimeout(() => {
+              setShowCustomTrailShareSheet(true);
+            }, 500);
+          }}
         />
       </RBSheet>
 
@@ -1218,7 +1224,13 @@ const HikingScreen = ({route, navigation}: any) => {
         modalVisible={showCustomTrailShareSheet}
         onPressOther={() => saveCutomShareRouteLink()}
         onPressShare={() => onPressCutomTrailInAppShare()}
-        setModalVisible={() => setShowCustomTrailShareSheet(false)}
+        // setModalVisible={() => setShowCustomTrailShareSheet(false)}
+        onPressCross={() => {
+          setShowCustomTrailShareSheet(false);
+          setTimeout(() => {
+            sheetRef.current.open();
+          }, 1000);
+        }}
       />
 
       {isLoading && <AppLoader />}

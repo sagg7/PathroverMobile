@@ -10,7 +10,7 @@ export function showAlert(type: string, des: string, onPress?: () => void) {
   ]);
 }
 
-export const isProduction = true;
+export const isProduction = false;
 
 export const REQ_LIST_SOCKET_URL = isProduction
   ? 'wss://path-rover.com/cable?'
