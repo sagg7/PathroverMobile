@@ -165,6 +165,8 @@ import CheckboxBlank from './checkbox_blank.svg';
 import SearchIcon from './search_icon.svg';
 import RecenterIcon from './recenterIcon.svg';
 import PauseIcon from './pauseIcon.svg';
+import SendComment from './sendComment.svg';
+import CommentGallery from './commentGllery.svg';
 
 export const svgIcon = {
   Forward: <Forward />,
@@ -333,4 +335,6 @@ export const svgIcon = {
   SearchIcon: <SearchIcon />,
   RecenterIcon: <RecenterIcon />,
   PauseIcon: <PauseIcon />,
+  SendComment: <SendComment />,
+  CommentGallery: <CommentGallery />,
 };

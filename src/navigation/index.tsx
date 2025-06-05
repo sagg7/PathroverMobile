@@ -59,7 +59,7 @@ import PrivacyPolicy from '../screens/App/PrivacyPolicy';
 import TermsAndConditions from '../screens/App/TermsAndConditions';
 import DocumentCreationSuccess from '../screens/Auth/DriverDocumentSuccess';
 import Splash from '../screens/Splash';
-import {Routes} from '../shared/exporter';
+import {isIOS, Routes} from '../shared/exporter';
 import {AppStack} from './BottomTabs';
 import AuthStack from './stacks/authStack';
 import DownloadOfflineMap from '../screens/App/EndUser/DownloadOflineMap';
@@ -82,10 +82,10 @@ import NewsBlogDetail from '../screens/App/EndUser/Home/NewsBlogDetail';
 import {isReadyRef, navigationRef} from './navigationRef';
 
 import TurnByTurnNav from '../screens/App/EndUser/TurnByTurnNav';
-import TurnByTurnCustomRoute from '../screens/App/EndUser/TurnByTurnCustomRoute';
 import ViewCustomizedSaveRoutes from '../screens/App/EndUser/ViewCustomizedSaveRoutes';
+import TurnByTurnNavAndroid from '../screens/App/EndUser/TurnByTurnNavAndroid';
+import VideoPlayer from '../screens/App/EndUser/LocationDetail/Video/VideoPlayer';
 const Stack = createNativeStackNavigator();
-// const navigationRef = createNavigationContainerRef();
 
 const AppNavigation = () => {
   return (
@@ -243,11 +243,20 @@ const AppNavigation = () => {
           name={Routes.TurnByTurnCustomRoute}
           component={TurnByTurnCustomRoute}
         /> */}
-        <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
+
         <Stack.Screen
           name={Routes.ViewCustomizedSaveRoutes}
           component={ViewCustomizedSaveRoutes}
         />
+        <Stack.Screen name={'VideoPlayer'} component={VideoPlayer} />
+        {isIOS() ? (
+          <Stack.Screen name={Routes.TurnByTurnNav} component={TurnByTurnNav} />
+        ) : (
+          <Stack.Screen
+            name={Routes.TurnByTurnNavAndroid}
+            component={TurnByTurnNavAndroid}
+          />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

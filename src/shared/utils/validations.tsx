@@ -90,11 +90,11 @@ export const createValidationSchema = (isEmail: boolean) => {
       .required('Email Required')
       .email('Please provide a valid email address');
   } else {
-    baseSchema.phone =yup
+    baseSchema.phone = yup
       .string()
       .required('Phone number is required')
       .test('valid-phone', 'Invalid phone number', function (value) {
-        const { callingCode, countryCode } = this.parent;
+        const {callingCode, countryCode} = this.parent;
 
         // Early return if missing required fields
         if (!value || !callingCode || !countryCode) return false;
@@ -126,7 +126,7 @@ export const EditProfileValidation = (id: number) => {
       .string()
       .required('Phone number is required')
       .test('valid-phone', 'Invalid phone number', function (value) {
-        const { callingCode, countryCode } = this.parent;
+        const {callingCode, countryCode} = this.parent;
 
         // Early return if missing required fields
         if (!value || !callingCode || !countryCode) return false;
@@ -165,15 +165,16 @@ export const EditProfileValidation = (id: number) => {
 export const validatePhoneNumber = (
   phoneNumber: string,
   callingCode: string,
-  countryCode: string
+  countryCode: string,
 ): boolean => {
   if (!phoneNumber || !callingCode || !countryCode) return false;
 
   try {
     const fullNumber = `+${callingCode}${phoneNumber.replace(/\D/g, '')}`;
-    console.log('fullNumber', fullNumber);
-
-    const parsedNumber = parsePhoneNumberFromString(fullNumber, countryCode as any);
+    const parsedNumber = parsePhoneNumberFromString(
+      fullNumber,
+      countryCode as any,
+    );
     return parsedNumber?.isValid() ?? false;
   } catch (error) {
     return false;
@@ -185,7 +186,7 @@ export const AddNumberValidation = yup.object().shape({
     .string()
     .required('Phone number is required')
     .test('valid-phone', 'Invalid phone number', function (value) {
-      const { callingCode, countryCode } = this.parent;
+      const {callingCode, countryCode} = this.parent;
 
       // Early return if missing required fields
       if (!value || !callingCode || !countryCode) return false;
@@ -210,11 +211,11 @@ export const loginValidation = (isEmail: boolean) => {
       .required('Email Required')
       .email('Please provide a valid email address');
   } else {
-    loginScheme.phone =yup
+    loginScheme.phone = yup
       .string()
       .required('Phone number is required')
       .test('valid-phone', 'Invalid phone number', function (value) {
-        const { callingCode, countryCode } = this.parent;
+        const {callingCode, countryCode} = this.parent;
 
         // Early return if missing required fields
         if (!value || !callingCode || !countryCode) return false;
@@ -236,7 +237,7 @@ export const forgotPassValidation = (isEmail: boolean) => {
       .string()
       .required('Phone number is required')
       .test('valid-phone', 'Invalid phone number', function (value) {
-        const { callingCode, countryCode } = this.parent;
+        const {callingCode, countryCode} = this.parent;
 
         // Early return if missing required fields
         if (!value || !callingCode || !countryCode) return false;

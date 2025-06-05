@@ -109,24 +109,45 @@ const AppStack = () => {
       if (routeData?.route_type === 'hiking_trail_route') {
         formatedHikeData = generateGeoJsonFeature(routeData);
         dispatch(setSelectedTrail(formatedHikeData));
-
-        navigation.navigate(Routes.TurnByTurnNav, {
-          entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
-          entranceName: routeData?.name,
-          originCoords: [location?.longitude, location?.latitude],
-          isTrail: true,
-        });
+        if (isIOS()) {
+          navigation.navigate(Routes.TurnByTurnNav, {
+            entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+            entranceName: routeData?.name,
+            originCoords: [location?.longitude, location?.latitude],
+            isTrail: true,
+          });
+        } else {
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            entranceCoords: geoJsonFeature?.geometry?.coordinates[0],
+            entranceName: routeData?.name,
+            originCoords: [location?.longitude, location?.latitude],
+            isTrail: true,
+          });
+        }
       } else {
-        navigation.navigate(Routes.TurnByTurnNav, {
-          entranceCoords: [
-            Number(routeData?.dropoff_location?.longitude),
-            Number(routeData?.dropoff_location?.latitude),
-          ],
-          entranceName: routeData?.name,
-          originCoords: [location?.longitude, location?.latitude],
-          isTrail: false,
-          routeInfo: routeData,
-        });
+        if (isIOS()) {
+          navigation.navigate(Routes.TurnByTurnNav, {
+            entranceCoords: [
+              Number(routeData?.dropoff_location?.longitude),
+              Number(routeData?.dropoff_location?.latitude),
+            ],
+            entranceName: routeData?.name,
+            originCoords: [location?.longitude, location?.latitude],
+            isTrail: false,
+            routeInfo: routeData,
+          });
+        } else {
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            entranceCoords: [
+              Number(routeData?.dropoff_location?.longitude),
+              Number(routeData?.dropoff_location?.latitude),
+            ],
+            entranceName: routeData?.name,
+            originCoords: [location?.longitude, location?.latitude],
+            isTrail: false,
+            routeInfo: routeData,
+          });
+        }
       }
 
       // navigation.navigate(Routes.TurnByTurnNav, {

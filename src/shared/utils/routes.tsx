@@ -89,6 +89,8 @@ export const Routes = {
   ViewSharedRoutes: 'ViewSharedRoutes',
   NewsBlogDetail: 'NewsBlogDetail',
   TurnByTurnNav: 'TurnByTurnNav',
+  TurnByTurnNavAndroid: 'TurnByTurnNavAndroid',
+
   TrailRouteView: 'TrailRouteView',
   TurnByTurnCustomRoute: 'TurnByTurnCustomRoute',
   ViewCustomizedSaveRoutes: 'ViewCustomizedSaveRoutes',

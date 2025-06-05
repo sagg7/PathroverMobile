@@ -30,16 +30,18 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
     JSON.parse(content)?.messageContainsLocation;
 
   const handleClick = () => {
+    const formatedData = JSON.parse(content)?.messageContainsLocation;
     if (type === 'Chosen Trail') {
+      dispatch(setSelectedTrail(data));
       if (isIOS()) {
-        dispatch(setSelectedTrail(data));
         navigation.navigate(Routes.TurnByTurnNav, {
           originCoords: [location.longitude, location.latitude],
           entranceCoords: startingPoint,
           entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
         });
       } else {
-        navigation.navigate(Routes.ViewWellPathNavigation, {
+        navigation.navigate(Routes.TurnByTurnNavAndroid, {
+          originCoords: [location.longitude, location.latitude],
           entranceCoords: startingPoint,
           entranceName: data?.properties?.tags?.name || 'UNKNOWN TRIAL',
         });
@@ -72,7 +74,6 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
       if (data) {
         dispatch(setRouteData(data));
       }
-      const formatedData = JSON.parse(content)?.messageContainsLocation;
 
       if (
         formatedData?.route_type === 'waypoint_route' ||
@@ -91,9 +92,10 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             entranceName: 'Destination',
           });
         } else {
-          navigation.navigate(Routes.ViewWellPathNavigation, {
+          navigation.navigate(Routes.TurnByTurnNavAndroid, {
+            originCoords: [location.longitude, location.latitude],
             entranceCoords: formatedData?.endingPoint,
-            entranceName: formatedData?.name,
+            entranceName: 'Destination',
           });
         }
       } else if (
@@ -101,8 +103,8 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
         type === 'trail' ||
         type === 'hiking_trail_route'
       ) {
+        dispatch(setSelectedTrail(trailData));
         if (isIOS()) {
-          dispatch(setSelectedTrail(trailData));
           setTimeout(() => {
             navigation.navigate(Routes.TurnByTurnNav, {
               originCoords: [location?.longitude, location?.latitude],
@@ -112,7 +114,14 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             });
           }, 300);
         } else {
-          navigation.navigate('TrailDetails', {trailData});
+          setTimeout(() => {
+            navigation.navigate(Routes.TurnByTurnNavAndroid, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: trailData?.geometry?.coordinates[0],
+              entranceName: 'Unknown Trail',
+              isTrail: true,
+            });
+          }, 300);
         }
       } else {
         if (isIOS()) {
@@ -125,17 +134,28 @@ const LocationMessage = ({content, isLeft, showTime, created_at}) => {
             ];
             navigation.navigate(Routes.TurnByTurnNav, {
               originCoords: [location?.longitude, location?.latitude],
-              entranceCoords: lngLat,
+              entranceCoords: formatedData?.startingPoint,
               entranceName: formatedData?.name,
-              isTrail: false,
+              isTrail: true,
               routeInfo: formatedData,
-              isLibrary: true,
             });
           }, 300);
         } else {
-          navigation.navigate(Routes.ViewSaveRoutes, {
-            item: formatedData,
-          });
+          setTimeout(() => {
+            const coords = formatedData?.pickup_location;
+
+            const lngLat = [
+              Number(coords?.longitude),
+              Number(coords?.latitude),
+            ];
+            navigation.navigate(Routes.TurnByTurnNavAndroid, {
+              originCoords: [location?.longitude, location?.latitude],
+              entranceCoords: formatedData?.startingPoint,
+              entranceName: formatedData?.name,
+              isTrail: true,
+              routeInfo: formatedData,
+            });
+          }, 300);
         }
       }
     }

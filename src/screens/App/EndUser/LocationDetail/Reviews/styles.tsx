@@ -1,147 +1,209 @@
-import { StyleSheet } from "react-native";
-import { PFColors, PFFonts, PFFontSize, scale } from "../../../../../shared/exporter";
+import {StyleSheet} from 'react-native';
+import {
+  PFColors,
+  PFFonts,
+  PFFontSize,
+  scale,
+  WP,
+} from '../../../../../shared/exporter';
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    ratingContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-        borderBottomWidth: 1,
-        borderColor: PFColors.Gray.borderGray,
-        paddingBottom: scale(8),
-    },
-    ratingLeftView: {
-        width: '38%',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    ratingText: {
-        color: PFColors.Standard.Black,
-        fontFamily: PFFonts.Foundation.SemiBold,
-        fontSize: PFFontSize.FONT_SIZE_24,
-    },
-    ratingCountText: {
-        color: PFColors.Standard.Black,
-        fontFamily: PFFonts.Foundation.SemiBold,
-        fontSize: PFFontSize.FONT_SIZE_12,
-    },
-    ratingRightView: {
-        width: '60%',
-        paddingVertical: scale(12),
-    },
-    lineContainer: {
-        height: 5,
-        width: '100%',
-        backgroundColor: PFColors.Gray.borderGray,
-        borderRadius: 2,
-        marginVertical: scale(4),
-    },
-    lineStyle: {
-        height: '100%',
-        backgroundColor: PFColors.Yellow.Light,
-        borderRadius: 2,
-    },
-    ratingStarStyles: {
-        height: scale(18),
-        width: scale(18),
-        marginHorizontal: 4,
-        marginTop: scale(12),
-        marginBottom: scale(12),
-    },
-    rateStarStyles: {
-        height: 27,
-        width: 27,
-        marginHorizontal: 4,
-        marginTop: 0,
-        marginLeft: scale(4),
-    },
-    smallStarsStyle: {
-        height: 12,
-        width: 12,
-        marginHorizontal: 2,
-        marginTop: 0,
-    },
-    userImageStyle: {
-        height: 32,
-        width: 32,
-        borderRadius: 32,
-        backgroundColor: PFColors.Gray.LightMist,
-    },
-    rateView: {
-        flexDirection: 'column',
-        borderBottomWidth: 1,
-        borderColor: PFColors.Gray.borderGray,
-        paddingVertical: scale(12),
-        justifyContent: 'center'
-    },
-    rateSubView: {
-        flexDirection: 'row',
-         marginTop: scale(12),
-    },
-    rateHeaderText: {
-         color: PFColors.Standard.Black,
-        fontFamily: PFFonts.Foundation.SemiBold,
-        fontSize: PFFontSize.FONT_SIZE_16,
-    },
-     imageStyle: {
-        height: 240,
-        width: 195,
-        borderRadius: 14.75,
-        backgroundColor: PFColors.Gray.LightMist,
-    },
-    columnWrapperStyle: {
-        justifyContent: 'space-between',
-        marginVertical: scale(6),
-    },
-    contentContainerStyle: {
-        // paddingBottom: scale(50),
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingVertical: scale(6),
-    },
-    rightView: {
-        flexDirection: 'row',
-        width: '48%',
-        alignItems: 'center'
-    },
-    leftView: {
-        flexDirection: 'row',
-        width: '48%',
-        alignItems: 'center',
-         justifyContent: 'flex-end',
-    },
-    rateCardContainer: {
-        paddingVertical: scale(6),
-        borderBottomWidth: 1,
-        borderColor: PFColors.Gray.borderGray,
-    },
-    nameText: {
-         color: PFColors.Standard.Black,
-        fontFamily: PFFonts.Foundation.SemiBold,
-        fontSize: PFFontSize.FONT_SIZE_12,
-        marginLeft: scale(4),
-    },
-    timeText: {
-         color: PFColors.Standard.Black,
-        fontFamily: PFFonts.Foundation.Medium,
-        fontSize: PFFontSize.FONT_SIZE_10,
-        marginRight: scale(2),
-    },
-    detailsText: {
-         color: PFColors.Gray.DarkGray,
-        fontFamily: PFFonts.Foundation.Regular,
-        fontSize: PFFontSize.FONT_SIZE_12,
-        marginVertical: scale(4),
-    },
+  container: {
+    flex: 1,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: PFColors.Gray.borderGray,
+    paddingBottom: scale(8),
+  },
+  ratingLeftView: {
+    width: '38%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ratingText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_24,
+  },
+  ratingCountText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_12,
+  },
+  ratingRightView: {
+    width: '60%',
+    paddingVertical: scale(12),
+  },
+  lineContainer: {
+    height: 5,
+    width: '100%',
+    backgroundColor: PFColors.Gray.borderGray,
+    borderRadius: 2,
+    marginVertical: scale(4),
+  },
+  lineStyle: {
+    height: '100%',
+    backgroundColor: PFColors.Yellow.Light,
+    borderRadius: 2,
+  },
+  ratingStarStyles: {
+    height: scale(18),
+    width: scale(18),
+    marginHorizontal: 4,
+    marginTop: scale(12),
+    marginBottom: scale(12),
+  },
+  rateStarStyles: {
+    height: 27,
+    width: 27,
+    marginHorizontal: 4,
+    marginTop: 0,
+    marginLeft: scale(4),
+  },
+  smallStarsStyle: {
+    height: 12,
+    width: 12,
+    marginHorizontal: 2,
+    marginTop: 0,
+  },
+  userImageStyle: {
+    height: 32,
+    width: 32,
+    borderRadius: 32,
+    backgroundColor: PFColors.Gray.LightMist,
+  },
+  rateView: {
+    flexDirection: 'column',
+    borderBottomWidth: 1,
+    borderColor: PFColors.Gray.borderGray,
+    paddingVertical: scale(12),
+    justifyContent: 'center',
+  },
+  rateSubView: {
+    flexDirection: 'row',
+    marginTop: scale(12),
+  },
+  rateHeaderText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_16,
+  },
+  imageStyle: {
+    height: WP('30'),
+    width: WP('38'),
+    borderRadius: 20,
+    backgroundColor: PFColors.Gray.LightMist,
+    marginVertical: WP('3'),
+  },
+  columnWrapperStyle: {
+    justifyContent: 'space-between',
+    marginVertical: scale(6),
+  },
+  contentContainerStyle: {},
+  cardHeader: {
+    paddingVertical: scale(6),
+  },
+  rightView: {
+    flexDirection: 'row',
+    width: '48%',
+    alignItems: 'center',
+  },
+  leftView: {
+    flexDirection: 'row',
+    width: '48%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  rateCardContainer: {
+    paddingVertical: scale(6),
+    borderBottomWidth: 1,
+    borderColor: PFColors.Gray.borderGray,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: WP('96'),
+    // backgroundColor: 'pink',
+    alignSelf: 'center',
+  },
+  nameText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.SemiBold,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    marginLeft: scale(4),
+  },
+  timeText: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_10,
+    marginRight: scale(2),
+  },
+  detailsText: {
+    color: PFColors.Gray.DarkGray,
+    fontFamily: PFFonts.Foundation.Regular,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    lineHeight: 20,
+    paddingTop: 10,
+  },
+  commentSectionView: {
+    backgroundColor: '#f7f8f9',
+    borderRadius: 20,
+    width: WP('80'),
+    paddingVertical: WP('3'),
+    paddingHorizontal: WP('3'),
+  },
+  dateText: {
+    color: '#64748B',
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_10,
+    paddingLeft: WP('13'),
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  inputStyles: {
+    height: WP('15'),
+    color: PFColors.Standard.Black,
+    width: '70%',
+    fontSize: PFFontSize.FONT_SIZE_16,
+    fontFamily: PFFonts.Foundation.Regular,
+    marginLeft: 10,
+    alignSelf: 'stretch',
+    paddingTop: 15,
+    paddingBottom: 10,
+    textAlignVertical: 'top',
+  },
+  commentInner: {
+    backgroundColor: '#f7f8f9',
+    flexDirection: 'row',
+    width: WP('78'),
+    height: WP('15'),
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+  noFound: {
+    color: PFColors.Standard.Black,
+    fontFamily: PFFonts.Foundation.Medium,
+    fontSize: PFFontSize.FONT_SIZE_16,
+    textAlign: 'center',
+    paddingVertical: 40,
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  loader: {
+    height: 50,
+    justifyContent: 'center',
+    width: 50,
+  },
 });
 
 export default styles;
