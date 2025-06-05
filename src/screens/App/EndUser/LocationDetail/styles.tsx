@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {
+  isIOS,
   PFColors,
   PFFonts,
   PFFontSize,
@@ -141,10 +142,11 @@ const styles = StyleSheet.create({
     height: 20,
   },
   barStyle: {
-    width: WP('90'),
+    width: WP('94'),
     height: 1,
     backgroundColor: PFColors.Gray.FrostedGray,
     marginVertical: 10,
+    alignSelf: 'center',
   },
   container: {
     backgroundColor: PFColors.Standard.SoftWhite,
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
   shareIcon: {
     position: 'absolute',
     right: 5,
-    top: 5,
+    top: isIOS() ? 8 : 5,
   },
   buttonContainer: {
     flexDirection: 'row',

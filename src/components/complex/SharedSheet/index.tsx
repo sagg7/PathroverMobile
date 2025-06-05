@@ -9,6 +9,7 @@ interface SharedSheetProps {
   setModalVisible?: () => void;
   onPressShare?: () => void;
   onPressOther?: () => void;
+  onPressCross?: () => void;
 }
 
 const SharedSheet = ({
@@ -16,6 +17,7 @@ const SharedSheet = ({
   setModalVisible,
   onPressShare,
   onPressOther,
+  onPressCross,
 }: SharedSheetProps) => {
   return (
     <Modal
@@ -31,7 +33,7 @@ const SharedSheet = ({
             marginVertical: 10,
           }}>
           <Text style={styles.titleText}>Share Options</Text>
-          <TouchableOpacity onPress={setModalVisible}>
+          <TouchableOpacity onPress={onPressCross}>
             {svgIcon.CancelIcon}
           </TouchableOpacity>
         </View>

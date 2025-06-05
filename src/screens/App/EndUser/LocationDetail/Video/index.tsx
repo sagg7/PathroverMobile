@@ -23,7 +23,7 @@ const VideoScreen = () => {
           // fullscreen
         />
       ) : (
-        <Text style={styles.noFound}>No Viddeo Found</Text>
+        <Text style={styles.noFound}>No Video Found</Text>
       )}
     </View>
   );
