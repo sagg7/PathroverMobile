@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Alert,
+  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -303,6 +304,32 @@ const Subscription = () => {
                 buttonStyle={styles.button}
                 textStyle={styles.buttonText}
               />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignSelf: 'center',
+                  marginTop: 15,
+                }}>
+                <TouchableOpacity
+                  hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                  onPress={() =>
+                    Linking.openURL(
+                      'https://path-rover.com/privacy_policy_list',
+                    )
+                  }>
+                  <Text style={styles.linkText}>Privacy Policy </Text>
+                </TouchableOpacity>
+                <Text style={styles.linkText}>and </Text>
+                <TouchableOpacity
+                  hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                  onPress={() =>
+                    Linking.openURL(
+                      'https://path-rover.com/terms_and_conditions_list',
+                    )
+                  }>
+                  <Text style={styles.linkText}>Terms & Condition</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ))}
@@ -423,6 +450,12 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     backgroundColor: PFColors.Blue.Dark,
+  },
+  linkText: {
+    fontFamily: PFFonts.Foundation.Bold,
+    fontSize: PFFontSize.FONT_SIZE_12,
+    color: PFColors.Gray.CharcoalGray,
+    paddingHorizontal: 2,
   },
 });
 
