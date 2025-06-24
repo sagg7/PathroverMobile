@@ -16,7 +16,7 @@ import {
 } from '../../../../components';
 import RenderMessageImage from '../../../../components/complex/ChatComponents/RenderMessageImage';
 import {addBotMessage, addUserMessage} from '../../../../redux/chat/chatSlice';
-import {OPEN_AI_KEY, OPEN_AI_URL} from '../../../../shared/utils/constant';
+import {OPEN_AI_KEY, OPEN_URL} from '../../../../shared/utils/constant';
 import styles from './styles';
 import {useUploadImagesMutation} from '../../../../redux/chat/chatApiSlice';
 
@@ -75,7 +75,7 @@ const AiChat = () => {
 
       const config = {
         method: 'post',
-        url: OPEN_AI_URL + 'chat/completions',
+        url: OPEN_URL + 'chat/completions',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${OPEN_AI_KEY}`,
