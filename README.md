@@ -4,6 +4,12 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
+## Compilation Fixes
+
+If you encounter compilation errors, especially related to `char_traits<unsigned char>`, refer to:
+- **Documentation**: `FIX_COMPILATION_ERRORS.md`
+- **Auto-fix script**: Run `./scripts/fix-rct-folly.sh` after `pod install`
+
 ## Step 1: Start the Metro Server
 
 First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.

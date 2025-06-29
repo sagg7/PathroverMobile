@@ -42,6 +42,14 @@ if linkage != nil
   use_frameworks! :linkage => :static
 end
 
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+
+pod 'Firebase', :modular_headers => true
+pod 'FirebaseCoreInternal', :modular_headers => true
+pod 'GoogleUtilities', :modular_headers => true
+pod 'FirebaseCore', :modular_headers => true
+
 target 'PathFinder' do
   config = use_native_modules!
  
@@ -75,28 +83,74 @@ target 'PathFinder' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        # Fix para errores de compilación con std::char_traits<unsigned char> (RCT-Folly + C++20)
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '-std=c++20'
+        
+        # Configuraciones específicas para resolver problemas de Folly
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_NO_CONFIG'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_MOBILE=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_USE_LIBCPP=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
+        
+        # Fix para React Native Reanimated - definir REANIMATED_VERSION
+        if target.name == 'RNReanimated'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'REANIMATED_VERSION=3.16.7'
+          existing_flags = config.build_settings['OTHER_CPLUSPLUSFLAGS'] || ''
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] = existing_flags + ' -DREANIMATED_VERSION=3.16.7'
+          puts "✅ Aplicando fix REANIMATED_VERSION para #{target.name}"
+        end
       end
     end
 
-bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
-   def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-     framework_path = File.join(Dir.pwd, framework_relative_path)
-     command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
-     puts "Stripping bitcode: #{command}"
-     system(command)
-   end
+    bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
+    def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+      framework_path = File.join(Dir.pwd, framework_relative_path)
+      command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+      puts "Stripping bitcode: #{command}"
+      system(command)
+    end
 
-   framework_paths = [
-     "Pods/LogRocket/LogRocket.xcframework/ios-arm64/LogRocket.framework/LogRocket",
-     "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/hermes",
-     "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/Versions/Current/hermes",
-     "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64/hermes.framework/hermes",
-     "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-maccatalyst/hermes.framework/hermes"
-   ]
+    framework_paths = [
+      "Pods/LogRocket/LogRocket.xcframework/ios-arm64/LogRocket.framework/LogRocket",
+      "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/Versions/Current/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64/hermes.framework/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-maccatalyst/hermes.framework/hermes"
+    ]
 
-   framework_paths.each do |framework_relative_path|
-     strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-   end
+    framework_paths.each do |framework_relative_path|
+      strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    end
+
+    # Fix directo para REANIMATED_VERSION en archivos .xcconfig
+    puts "🔧 Aplicando fix de REANIMATED_VERSION a archivos .xcconfig..."
+    
+    reanimated_configs = [
+      'Pods/Target Support Files/RNReanimated/RNReanimated.debug.xcconfig',
+      'Pods/Target Support Files/RNReanimated/RNReanimated.release.xcconfig'
+    ]
+    
+    reanimated_configs.each do |config_file|
+      if File.exist?(config_file)
+        content = File.read(config_file)
+        
+        # Solo agregar si no está ya presente
+        if !content.include?('OTHER_CPLUSPLUSFLAGS.*-DREANIMATED_VERSION')
+          # Reemplazar la línea OTHER_CPLUSPLUSFLAGS
+          content = content.gsub(
+            /(OTHER_CPLUSPLUSFLAGS = .* -Wno-shorten-64-to-32)$/,
+            '\1 -DREANIMATED_VERSION=3.16.7'
+          )
+          
+          File.write(config_file, content)
+          puts "✅ Fix aplicado a #{config_file}"
+        else
+          puts "✅ Fix ya presente en #{config_file}"
+        end
+      end
+    end
 
   end
 end
